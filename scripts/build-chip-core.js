@@ -342,6 +342,14 @@ const runtimeMethods = [
   'ccall',
   'getValue',
   'setValue',
+  'HEAP8',
+  'HEAPU8',
+  'HEAP16',
+  'HEAPU16',
+  'HEAP32',
+  'HEAPU32',
+  'HEAPF32',
+  'HEAPF64',
 ];
 const exportedFns = [
   '_malloc',
@@ -369,8 +377,7 @@ const flags = [
   '-s', 'EXPORT_NAME=CHIP_CORE',
   '-s', 'ENVIRONMENT=web',
   '-s', 'USE_ZLIB=1',
-  '-s', 'EXPORT_ES6=1',
-  '-s', 'USE_ES6_IMPORT_META=0',
+  // '-s', 'EXPORT_ES6=1',   // Disabled - webpack not configured for ES6 modules
   '-s', 'WASM_BIGINT',       // support passing 64 bit integers to/from JS
   '-lidbfs.js',
   '-Os',                     // set to O0 for fast compile during development
