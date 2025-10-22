@@ -6,7 +6,6 @@ import { API_BASE, CATALOG_PREFIX } from '../config';
 import promisify from '../promisify-xhr';
 import { pathJoin } from '../util';
 import DirectoryLink from './DirectoryLink';
-import FavoriteButton from './FavoriteButton';
 import autoBindReact from 'auto-bind/react';
 import VirtualizedList from './VirtualizedList';
 
@@ -189,7 +188,6 @@ export default class Search extends PureComponent {
     } else {
       return (
         <>
-          <FavoriteButton href={item.href}/>
           <a onClick={onPlay} href={item.href} tabIndex="-1">{item.name}</a>
         </>
       );

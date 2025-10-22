@@ -4,7 +4,6 @@ import VirtualizedList from './VirtualizedList';
 import DirectoryLink from './DirectoryLink';
 import bytes from 'bytes';
 import { CATALOG_PREFIX } from '../config';
-import FavoriteButton from './FavoriteButton';
 import trimEnd from 'lodash/trimEnd';
 import queryString from 'querystring';
 import { pathJoin } from '../util';
@@ -85,7 +84,6 @@ export default class Browse extends React.PureComponent {
         return (
           <>
             <div className="BrowseList-colName">
-              <FavoriteButton href={href}/>
               <a onClick={onPlay}
                  href={href}
                  tabIndex="-1">
