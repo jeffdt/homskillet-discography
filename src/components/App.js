@@ -139,7 +139,7 @@ class App extends React.Component {
   async initChipCore(audioCtx, playerNode, bufferSize) {
     // Load the chip-core Emscripten runtime
     try {
-      this.chipCore = await new ChipCore({
+      this.chipCore = await ChipCore({
         // Look for .wasm file in web root, not the same location as the app bundle (static/js).
         locateFile: (path, prefix) => {
           if (path.endsWith('.wasm') || path.endsWith('.wast'))
