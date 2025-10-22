@@ -30,7 +30,7 @@ const PUBLIC_CATALOG_URL = process.env.DEV ?
   'http://localhost:8000/catalog' :
   'https://gifx.co/music';
 const LOCAL_CATALOG_ROOT = process.env.DEV ?
-  '/Users/montag/Music/Chip Archive' :
+  path.resolve(__dirname, '../catalog') :
   '/var/www/gifx.co/public_html/music';
 
 const sf2Regex = /SF2=(.+?)\.sf2/;

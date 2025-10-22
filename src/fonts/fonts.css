@@ -5,6 +5,7 @@
 
 :root { --fontPxPlusChipPlayer: 24px/19px PxPlusChipPlayer; }
 
+/* Caveras fonts commented out - missing from repository
 @font-face {
     src: url(caveras/Arcology.woff) format('woff');
     font-family: Arcology;
@@ -53,27 +54,15 @@
 }
 
 :root { --fontReactor7: 16px Reactor7; }
+*/
 
+/* int10h and pentacom fonts commented out - missing from repository
 @font-face {
     src: url(int10h/WebPlus_ToshibaSat_9x14.woff) format('woff');
     font-family: Stingray;
 }
 
 :root { --fontStingray: 14px/16px Stingray; }
-
-@font-face {
-    src: url(mm-tahoma-8px.ttf) format('truetype');
-    font-family: TahomaPixel;
-}
-
-:root { --fontTahomaPixel: 16px/16px TahomaPixel, Tahoma; }
-
-@font-face {
-    src: url(Tahoma.woff) format('woff');
-    font-family: Tahoma;
-}
-
-:root { --fontTahoma: 11px/16px Tahoma, Arial, sans-serif; }
 
 @font-face {
     src: url(pentacom/DeckardsRegular.ttf) format('truetype');
@@ -102,3 +91,18 @@
 }
 
 :root { --fontRobotoBitmap: 16px RobotoBitmap; }
+*/
+
+@font-face {
+    src: url(mm-tahoma-8px.ttf) format('truetype');
+    font-family: TahomaPixel;
+}
+
+:root { --fontTahomaPixel: 16px/16px TahomaPixel, Tahoma; }
+
+@font-face {
+    src: url(Tahoma.woff) format('woff');
+    font-family: Tahoma;
+}
+
+:root { --fontTahoma: 11px/16px Tahoma, Arial, sans-serif; }
