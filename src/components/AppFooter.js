@@ -1,10 +1,8 @@
-import React, { memo, useCallback, useContext } from 'react';
+import React, { memo, useCallback } from 'react';
 import TimeSlider from './TimeSlider';
 import VolumeSlider from './VolumeSlider';
-import FavoriteButton from './FavoriteButton';
 import { pathToLinks } from '../util';
 import { REPEAT_LABELS, SHUFFLE_LABELS } from '../Sequencer';
-import { UserContext } from './UserProvider';
 
 export default memo(AppFooter);
 function AppFooter(props) {
@@ -40,11 +38,6 @@ function AppFooter(props) {
     toggleInfo,
     togglePause,
   } = props;
-
-  const {
-    faves,
-    handleToggleFavorite,
-  } = useContext(UserContext);
 
   const pathLinks = pathToLinks(songUrl);
   const subtuneText = `Tune ${currentSongSubtune + 1} of ${currentSongNumSubtunes}`;
@@ -153,10 +146,6 @@ function AppFooter(props) {
         </div>
         {!ejected &&
           <div className="SongDetails">
-            {faves && songUrl &&
-              <FavoriteButton isFavorite={faves.includes(songUrl)}
-                                toggleFavorite={handleToggleFavorite}
-                                href={songUrl}/>}
             <div className="SongDetails-title">
               {songUrl ?
                 <>

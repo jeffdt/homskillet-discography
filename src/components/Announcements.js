@@ -41,7 +41,7 @@ export default function Announcements() {
       </p>
       <h3>2025-04-01</h3>
       <p>
-        Added Theme to Global Settings, persisted in Firebase.<br/>
+        Added Theme to Global Settings.<br/>
         Switched to upstream FluidLite - I'm now contributing to the project.
         For example, <a href="https://github.com/divideconcept/FluidLite/pull/59">stereo chorus</a>.
       </p>

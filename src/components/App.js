@@ -41,7 +41,6 @@ import AppFooter from './AppFooter';
 import AppHeader from './AppHeader';
 import Browse from './Browse';
 import DropMessage from './DropMessage';
-import Favorites from './Favorites';
 import Search from './Search';
 import Visualizer from './Visualizer';
 import Toast, { ToastLevels } from './Toast';
@@ -561,9 +560,7 @@ class App extends React.Component {
   }
 
   handleShufflePlay(path) {
-    if (path === 'favorites') {
-      this.sequencer.playContext(shuffle(this.props.userContext.favesContext));
-    } else if (path === 'local') {
+    if (path === 'local') {
       this.sequencer.playContext(shuffle(this.playContexts['local']));
     } else {
       // This is more like a synthetic recursive shuffle.
@@ -799,8 +796,6 @@ class App extends React.Component {
                 <NavLink className="tab" activeClassName="tab-selected"
                          to={{ pathname: "/browse", ...search }}>Browse</NavLink>
                 <NavLink className="tab" activeClassName="tab-selected"
-                         to={{ pathname: "/favorites", ...search }}>Favorites</NavLink>
-                <NavLink className="tab" activeClassName="tab-selected"
                          to={{ pathname: "/local", ...search }}>Local</NavLink>
                 {/* this.sequencer?.players?.map((p, i) => `p${i}:${p.stopped?'off':'on'}`).join(' ') */}
                 <button className={`tab tab-settings ${showPlayerSettings ? 'tab-selected' : ''}`}
@@ -810,15 +805,6 @@ class App extends React.Component {
               <div className="App-main-content-area"
                    ref={this.contentAreaRef}>
                 <Switch>
-                  <Route path="/favorites" render={() => (
-                    <Favorites
-                      scrollContainerRef={this.contentAreaRef}
-                      handleShufflePlay={this.handleShufflePlay}
-                      onSongClick={this.handleSongClick}
-                      currContext={currContext}
-                      currIdx={currIdx}
-                      listRef={this.listRef}/>
-                  )}/>
                   <Route path="/browse/:browsePath*" render={({ history, match, location }) => {
                     // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
                     const browsePath = match.params?.browsePath?.replace('%25', '%') || '';
