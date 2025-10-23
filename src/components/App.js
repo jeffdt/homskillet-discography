@@ -5,8 +5,7 @@ import clamp from 'lodash/clamp';
 import shuffle from 'lodash/shuffle';
 import path from 'path';
 import queryString from 'querystring';
-import { NavLink, Route, Switch, withRouter } from 'react-router-dom';
-import Dropzone from 'react-dropzone';
+import { Route, Switch, withRouter } from 'react-router-dom';
 
 import ChipCore from '../chip-core';
 import {
@@ -14,19 +13,15 @@ import {
   CATALOG_PREFIX,
   MAX_VOICES,
   REPLACE_STATE_ON_SEEK,
-  SOUNDFONT_MOUNTPOINT,
   MAX_SAMPLE_RATE,
-  FORMATS,
 } from '../config';
 import {
-  ensureEmscFileWithData,
   getMetadataUrlForCatalogUrl,
   pathJoin,
   titlesFromMetadata,
   unlockAudioContext
 } from '../util';
 import requestCache from '../RequestCache';
-import LocalFilesManager from '../LocalFilesManager';
 import Sequencer, { NUM_REPEAT_MODES, NUM_SHUFFLE_MODES, REPEAT_OFF, SHUFFLE_OFF } from '../Sequencer';
 
 import GMEPlayer from '../players/GMEPlayer';
@@ -40,16 +35,12 @@ import VGMPlayer from '../players/VGMPlayer';
 import AppFooter from './AppFooter';
 import AppHeader from './AppHeader';
 import Browse from './Browse';
-import DropMessage from './DropMessage';
-import Search from './Search';
 import Visualizer from './Visualizer';
 import Toast, { ToastLevels } from './Toast';
 import MessageBox from './MessageBox';
 import Settings from './Settings';
-import LocalFiles from './LocalFiles';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
-import Announcements from './Announcements';
 
 const BASE_URL = process.env.PUBLIC_URL || document.location.origin;
 
@@ -104,7 +95,6 @@ class App extends React.Component {
 
     this.state = {
       loading: true,
-      loadingLocalFiles: true,
       paused: true,
       ejected: true,
       currentSongMetadata: {},
@@ -128,8 +118,6 @@ class App extends React.Component {
       hasPlayer: false,
       paramDefs: [],
       paramValues: {},
-      // Special playable contexts
-      localFiles: [],
     };
 
     this.initChipCore(audioCtx, playerNode, bufferSize);
@@ -184,20 +172,15 @@ class App extends React.Component {
       }
     }
 
-    // Create localFilesManager before performing the syncfs.
-    this.localFilesManager = new LocalFilesManager(this.chipCore.FS, 'local');
-
     // Populate all mounted IDBFS file systems from IndexedDB.
     this.chipCore.FS.syncfs(true, (err) => {
       if (err) {
         console.log('Error populating FS from indexeddb.', err);
       }
       players.forEach(player => player.handleFileSystemReady());
-      this.updateLocalFiles();
-      this.setState({ loadingLocalFiles: false });
     });
 
-    this.sequencer = new Sequencer(players, this.localFilesManager, () => this.props.userContext.settings);
+    this.sequencer = new Sequencer(players, null, () => this.props.userContext.settings);
     this.sequencer.on('sequencerStateUpdate', this.handleSequencerStateUpdate);
     this.sequencer.on('playerError', (message) => this.props.toastContext.enqueueToast(message, ToastLevels.ERROR));
 
@@ -217,7 +200,7 @@ class App extends React.Component {
       // Navigate to song's containing folder. History comes from withRouter().
       const dirname = path.dirname(playPath);
       this.fetchDirectory(dirname).then(() => {
-        this.props.history.replace(`${pathJoin('/browse', dirname)}${search}`);
+        this.props.history.replace(`${pathJoin('/', dirname)}${search}`);
         // Convert play path to href (context contains full hrefs)
         const playHref = pathJoin(CATALOG_PREFIX, playPath);
         const index = this.playContexts[dirname].indexOf(playHref);
@@ -560,16 +543,12 @@ class App extends React.Component {
   }
 
   handleShufflePlay(path) {
-    if (path === 'local') {
-      this.sequencer.playContext(shuffle(this.playContexts['local']));
-    } else {
-      // This is more like a synthetic recursive shuffle.
-      // Response of this API is an array of *paths*.
-      fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
-        .then(response => response.json())
-        .then(json => json.items.map(this.pathToHref))
-        .then(items => this.sequencer.playContext(items));
-    }
+    // Synthetic recursive shuffle.
+    // Response of this API is an array of *paths*.
+    fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
+      .then(response => response.json())
+      .then(json => json.items.map(this.pathToHref))
+      .then(items => this.sequencer.playContext(items));
   }
 
   handleCycleShuffle() {
@@ -633,7 +612,7 @@ class App extends React.Component {
           if (item.type === 'file')
             item.href = pathJoin(CATALOG_PREFIX, item.path);
           else
-            item.href = pathJoin('/browse', item.path);
+            item.href = pathJoin('/', item.path);
         });
 
         if (path !== '') { // No '..' at top level browse path.
@@ -642,7 +621,7 @@ class App extends React.Component {
           items.unshift({
             type: 'directory',
             path: parentPath,
-            href: pathJoin('/browse', parentPath),
+            href: pathJoin('/', parentPath),
             name: '..',
           });
         }
@@ -669,94 +648,6 @@ class App extends React.Component {
     return link;
   }
 
-  updateLocalFiles() {
-    const localFiles = this.localFilesManager.readAll();
-    // Convert timestamp 1704067200 to ISO date 2024-01-01
-    localFiles.forEach(item => item.mtime = new Date(item.mtime * 1000).toISOString().split('T')[0]);
-    this.playContexts['local'] = localFiles.map(item => item.path);
-    this.setState({ localFiles });
-  }
-
-  handleFiles = (files) => {
-    const promises = files.map(file => {
-      return new Promise((resolve, reject) => {
-        // TODO: refactor, avoid creating new reader/handlers for every dropped file.
-        const reader = new FileReader();
-        reader.onerror = (event) => reject(event.target.error);
-        reader.onload = async () => {
-          const ext = path.extname(file.name).toLowerCase().substring(1);
-          if (ext === 'sf2') {
-            // Handle dropped Soundfont
-            if (!this.midiPlayer) {
-              reject('MIDIPlayer has not been created - unable to load SoundFont.');
-            } else if (files.length !== 1) {
-              reject('Soundfonts must be added one at a time, separate from other files.');
-            } else {
-              const sf2Path = `user/${file.name}`;
-              await ensureEmscFileWithData(this.chipCore, `${SOUNDFONT_MOUNTPOINT}/${sf2Path}`, new Uint8Array(reader.result), /*forceWrite=*/true);
-              this.midiPlayer.updateSoundfontParamDefs();
-              this.midiPlayer.setParameter('soundfont', sf2Path, /*isTransient=*/false);
-              // TODO: emit "paramDefsChanged" from player.
-              // See https://reactjs.org/docs/integrating-with-other-libraries.html#integrating-with-model-layers
-              this.forceUpdate();
-              resolve(0);
-            }
-          } else if (FORMATS.includes(ext)) {
-            // Handle dropped song file
-            const songData = reader.result;
-            this.localFilesManager.write(path.join('local', file.name), songData);
-            resolve(1);
-          } else {
-            reject(`The file format ".${ext}" was not recognized.`);
-          }
-        };
-        reader.readAsArrayBuffer(file);
-      });
-    });
-
-    Promise.allSettled(promises).then(results => {
-      const numSongsAdded = results
-        .filter(result => result.status === 'fulfilled')
-        .reduce((acc, result) => acc + result.value, 0);
-      if (numSongsAdded > 0) {
-        const currContextIsLocalFiles = this.sequencer?.getCurrContext() === this.playContexts['local'];
-        this.updateLocalFiles();
-        this.props.history.push('/local');
-        if (currContextIsLocalFiles) this.sequencer.context = this.playContexts['local'];
-        this.forceUpdate();
-      }
-      // Display all rejection reasons with duplicate reasons removed.
-      results.filter(result => result.status === 'rejected')
-        .reduce((acc, result) => acc.includes(result.reason) ? acc : [ ...acc, result.reason ], [])
-        .forEach((reason, i) => setTimeout(() => this.props.toastContext.enqueueToast(reason, ToastLevels.ERROR), i * 1500));
-    });
-  }
-
-  onDrop = (droppedFiles) => {
-    this.handleFiles(droppedFiles);
-  };
-
-  handleLocalFileDelete = (filePaths) => {
-    if (!Array.isArray(filePaths)) filePaths = [filePaths];
-    const currContextIsLocalFiles = this.sequencer?.getCurrContext() === this.playContexts['local'];
-    let currIndexWasDeleted = false;
-    filePaths.forEach(filePath => {
-      const deleted = this.localFilesManager.delete(filePath);
-
-      if (deleted && currContextIsLocalFiles) {
-        const index = this.playContexts['local'].indexOf(filePath);
-        if (index === this.sequencer.currIdx) currIndexWasDeleted = true;
-        if (index <= this.sequencer.currIdx) {
-          this.sequencer.currIdx--;
-        }
-      }
-    });
-
-    this.updateLocalFiles();
-    if (currContextIsLocalFiles) this.sequencer.context = this.playContexts['local'];
-    if (currIndexWasDeleted)     this.sequencer.nextSong();
-  }
-
   handleCopyLink = (url) => {
     navigator.clipboard.writeText(url);
     this.props.toastContext.enqueueToast('Copied song link to clipboard.', ToastLevels.INFO);
@@ -777,12 +668,7 @@ class App extends React.Component {
     const showPlayerSettings = settings?.showPlayerSettings;
 
     return (
-      <Dropzone
-        disableClick
-        style={{}} // Required to clear Dropzone styles
-        onDrop={this.onDrop}>{dropzoneProps => (
         <div className="App">
-          <DropMessage dropzoneProps={dropzoneProps}/>
           <MessageBox showInfo={this.state.showInfo}
                       infoTexts={this.state.infoTexts}
                       toggleInfo={this.toggleInfo}/>
@@ -791,13 +677,6 @@ class App extends React.Component {
           <div className="App-main">
             <div className="App-main-inner">
               <div className="tab-container">
-                <NavLink className="tab" activeClassName="tab-selected" to={{ pathname: "/", ...search }}
-                         exact>Search</NavLink>
-                <NavLink className="tab" activeClassName="tab-selected"
-                         to={{ pathname: "/browse", ...search }}>Browse</NavLink>
-                <NavLink className="tab" activeClassName="tab-selected"
-                         to={{ pathname: "/local", ...search }}>Local</NavLink>
-                {/* this.sequencer?.players?.map((p, i) => `p${i}:${p.stopped?'off':'on'}`).join(' ') */}
                 <button className={`tab tab-settings ${showPlayerSettings ? 'tab-selected' : ''}`}
                         onClick={this.handleToggleSettings}>Settings</button>
               </div>
@@ -805,7 +684,7 @@ class App extends React.Component {
               <div className="App-main-content-area"
                    ref={this.contentAreaRef}>
                 <Switch>
-                  <Route path="/browse/:browsePath*" render={({ history, match, location }) => {
+                  <Route path="/:browsePath*" render={({ history, match, location }) => {
                     // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
                     const browsePath = match.params?.browsePath?.replace('%25', '%') || '';
                     return (
@@ -825,33 +704,6 @@ class App extends React.Component {
                       />
                     );
                   }}/>
-                  <Route path="/local" render={() => (
-                    <LocalFiles
-                      loading={this.state.loadingLocalFiles}
-                      onAddFiles={this.handleFiles}
-                      handleShufflePlay={this.handleShufflePlay}
-                      onSongClick={this.handleSongClick}
-                      onDelete={this.handleLocalFileDelete}
-                      playContext={this.playContexts['local']}
-                      currContext={currContext}
-                      currIdx={currIdx}
-                      listing={this.state.localFiles}/>
-                  )}/>
-                  {/* Catch-all route */}
-                  <Route render={({history}) => (
-                    this.contentAreaRef.current &&
-                    <Search
-                      history={history}
-                      currContext={currContext}
-                      currIdx={currIdx}
-                      onSongClick={this.handleSongClick}
-                      scrollContainerRef={this.contentAreaRef}
-                      listRef={this.listRef}
-                    >
-                      {this.state.loading && <p>Loading player engine...</p>}
-                      <Announcements/>
-                    </Search>
-                  )}/>
                 </Switch>
               </div>
                 { showPlayerSettings &&
@@ -918,7 +770,6 @@ class App extends React.Component {
             volume={this.state.volume}
           />
         </div>
-      )}</Dropzone>
     );
   }
 }

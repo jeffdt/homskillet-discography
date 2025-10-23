@@ -140,7 +140,7 @@ export default class Search extends PureComponent {
               currHeading = heading;
               resultsWithHeadings.push({
                 type: 'directory',
-                href: pathJoin('/browse', heading),
+                href: pathJoin('/', heading),
                 name: decodeURIComponent(heading),
               });
             }
