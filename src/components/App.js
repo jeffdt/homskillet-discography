@@ -25,12 +25,6 @@ import requestCache from '../RequestCache';
 import Sequencer, { NUM_REPEAT_MODES, NUM_SHUFFLE_MODES, REPEAT_OFF, SHUFFLE_OFF } from '../Sequencer';
 
 import GMEPlayer from '../players/GMEPlayer';
-import MIDIPlayer from '../players/MIDIPlayer';
-import V2MPlayer from '../players/V2MPlayer';
-import XMPPlayer from '../players/XMPPlayer';
-import N64Player from '../players/N64Player';
-import MDXPlayer from '../players/MDXPlayer';
-import VGMPlayer from '../players/VGMPlayer';
 
 import AppFooter from './AppFooter';
 import AppHeader from './AppHeader';
@@ -53,7 +47,6 @@ class App extends React.Component {
     this.contentAreaRef = React.createRef();
     this.listRef = React.createRef(); // react-virtualized List component ref
     this.playContexts = {};
-    this.midiPlayer = null; // Need a reference to MIDIPlayer to handle SoundFont loading.
     window.ChipPlayer = this;
 
 
@@ -145,20 +138,13 @@ class App extends React.Component {
 
     // Get debug from location.search
     const debug = queryString.parse(window.location.search.substring(1)).debug;
-    // Create all the players. Players will set up IDBFS mount points.
+    // Create GME player only
     const players = [
-      MIDIPlayer,
       GMEPlayer,
-      XMPPlayer,
-      V2MPlayer,
-      N64Player,
-      MDXPlayer,
-      VGMPlayer,
     ].map(P => new P(this.chipCore, audioCtx.sampleRate, bufferSize, debug));
     players.forEach(p => {
       p.audioNode = this.playerNode;
     });
-    this.midiPlayer = players[0];
 
     // Set up the central audio processing callback. This is where the magic happens.
     playerNode.onaudioprocess = (e) => {

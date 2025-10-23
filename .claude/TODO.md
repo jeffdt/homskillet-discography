@@ -1,13 +1,46 @@
-1. ~~(Resume from local init conversation) Update the README with corrected instructions if any of it is now out of date.~~
-2. ~~Remove Firebase from codebase. I don't need favorite or login functionality. Don't just comment it out, delete it and remove any text or icons from the frontend.~~
-3. We only need to play the filetypes supported by game music emu now. We don't need to support libxmp or Fluidlite anymore. Please remove support for all filetypes other than the ones supported by game music emu. This should include js in our app allows us to recognize and play the other file types, as well as the compiled cores that are used to play them, and the source code that we used to compile them. Furthermore, the build chip core script should remove references to them.
-4. ~~Let's remove the winamp theme option. That doesn't fit the vibe I'm going for. Remove the dropdown, kill any code that handles switching and remove any references to the styling.~~
-5. Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
-6. Prerequisite: 5. Let's add some new color palettes. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
-7. Are there any fonts we can use that look more like an NES game fonts?
-8. Is there any reason that we need a separate catalog index server from the file server? Could we collapse them? SHOULD we collapse them? What are the pros and cons?
-9. ~~Let's get rid of the Search and Local main nav tabs. I don't need a tabbed structure at all right now. We just need to browse.~~
-10. Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. **Recommendation:** Use incremental migration (TypeScript + JavaScript coexist). Start with UI components only (10-12 hours), leave players and chip-core.js as JavaScript. Can implement in parallel with or after items #3-5. Primary challenges: Emscripten wrapper typing (can skip), EventEmitter pattern, App.js state management.
-11. (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
-12. Can we add a linter and formatter and make them required, auto-triggered pre-commit steps?
-13. Implement GitHub Pages deployment strategy. See `.claude/deployment-plan.md` for full details. This includes: committing the music/ folder, updating catalog build to use music/ instead of catalog symlink, eliminating API server dependencies by pre-generating all data, and deploying to GitHub Pages.
+# Homskillet Discography - TODO List
+
+## SIMPLIFICATION (stripping down to essentials)
+
+**S4**: Remove non-GME format support (IT, MOD, S3M, XM, MID, VGM, etc.). We only need to play the filetypes supported by game music emu now. We don't need to support libxmp or Fluidlite anymore. Please remove support for all filetypes other than the ones supported by game music emu. This should include js in our app that allows us to recognize and play the other file types, as well as the compiled cores that are used to play them, and the source code that we used to compile them. Furthermore, the build chip core script should remove references to them.
+
+**S5**: Delete unused component files that are no longer imported: `LocalFiles.js`, `DropMessage.js`, `Search.js`, and `Announcements.js`.
+
+**S6**: Remove SoundFont infrastructure - the entire `SOUNDFONTS` array in config, `SOUNDFONT_MOUNTPOINT`, `SOUNDFONT_URL_PATH`, and all SoundFont-related UI/logic since we're GME-only.
+
+**S7**: Remove MessageBox/Info system if it's not needed for the simplified discography viewer.
+
+---
+
+## ENHANCEMENT (new features & styling)
+
+**E1**: Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
+
+**E2**: Add the ability to swap color palettes on the entire UI. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
+
+**E3**: Are there any fonts we can use that look more like NES game fonts?
+
+**E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
+
+**E5**: Remove references to "chip player" and rename window titles to reflect Homskillet branding. Remove feedback or anything else that links it to the old site. However, add a very clear footer or other note explicitly stating where the code was forked from and thanking the original author. Also make sure that I open source this and respect the license before I push this and make it go live.
+
+**E6**: Add ability to store metadata for songs and albums. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
+
+**E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
+---
+
+## MAINTAINABILITY (code quality & tooling)
+
+**M2**: Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. **Recommendation:** Use incremental migration (TypeScript + JavaScript coexist). Start with UI components only (10-12 hours), leave players and chip-core.js as JavaScript. Can implement in parallel with or after S4, E1, E2. Primary challenges: Emscripten wrapper typing (can skip), EventEmitter pattern, App.js state management.
+
+**M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
+
+**M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
+
+---
+
+## DEPLOYMENT (going live)
+
+**D1**: Evaluate catalog/file server consolidation. Is there any reason that we need a separate catalog index server from the file server? Could we collapse them? SHOULD we collapse them? What are the pros and cons?
+
+**D2**: Implement GitHub Pages deployment strategy. See `.claude/deployment-plan.md` for full details. This includes: committing the music/ folder, updating catalog build to use music/ instead of catalog symlink, eliminating API server dependencies by pre-generating all data, and deploying to GitHub Pages.
