@@ -3,7 +3,7 @@
 3. We only need to play the filetypes supported by game music emu now. We don't need to support libxmp or Fluidlite anymore. Please remove support for all filetypes other than the ones supported by game music emu. This should include js in our app allows us to recognize and play the other file types, as well as the compiled cores that are used to play them, and the source code that we used to compile them. Furthermore, the build chip core script should remove references to them.
 4. ~~Let's remove the winamp theme option. That doesn't fit the vibe I'm going for. Remove the dropdown, kill any code that handles switching and remove any references to the styling.~~
 5. Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
-6. Let's add the ability to swap color palettes on the entire UI. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
+6. Prerequisite: 5. Let's add some new color palettes. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
 7. Are there any fonts we can use that look more like an NES game fonts?
 8. Is there any reason that we need a separate catalog index server from the file server? Could we collapse them? Should we?
 9. Let's get rid of the Search and Local main nav tabs. I don't need a tabbed structure at all right now. We just need to browse.
