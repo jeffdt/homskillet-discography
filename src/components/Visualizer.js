@@ -1,5 +1,5 @@
 import pianoKeys from '../images/piano-keys.png';
-import Spectrogram from '../Spectrogram';
+import Spectrogram, { DEFAULT_COLOR_PALETTE } from '../Spectrogram';
 import React, { Fragment, PureComponent } from 'react';
 
 const SPECTROGRAM_MODES = [
@@ -21,6 +21,24 @@ const SPEEDS = [
 const SPEED_LABELS = [
   'Lo', 'Med', 'Hi'
 ];
+const COLOR_PALETTES = [
+  {
+    label: 'Original',
+    colors: DEFAULT_COLOR_PALETTE,
+  },
+  {
+    label: 'Midnight',
+    colors: ['#020024', '#090979', '#0f5a9e', '#0fd7b1', '#f2f2f2'],
+  },
+  {
+    label: 'Sunset',
+    colors: ['#020202', '#35012c', '#731630', '#ee4c2c', '#fde06f', '#fffce8'],
+  },
+  {
+    label: 'Monochrome',
+    colors: ['#050505', '#303030', '#606060', '#a0a0a0', '#f0f0f0'],
+  },
+];
 const VIS_WIDTH = 448;
 
 export default class Visualizer extends PureComponent {
@@ -33,6 +51,7 @@ export default class Visualizer extends PureComponent {
       fftSize: 2048,
       speed: 2,
       enabled: false,
+      colorPalette: 0,
     };
 
     this.freqCanvasRef = React.createRef();
@@ -52,6 +71,7 @@ export default class Visualizer extends PureComponent {
     this.spectrogram.setMode(this.state.vizMode);
     this.spectrogram.setWeighting(this.state.weightingMode);
     this.spectrogram.setSpeed(this.state.speed);
+    this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
   }
 
   componentDidUpdate(prevProps) {
@@ -85,6 +105,12 @@ export default class Visualizer extends PureComponent {
   handleToggleVisualizer = (e) => {
     const enabled = e.target.value === 'true';
     this.setState({enabled: enabled});
+  };
+
+  handlePaletteClick = (e) => {
+    const paletteIndex = parseInt(e.target.value, 10);
+    this.setState({ colorPalette: paletteIndex });
+    this.spectrogram.setColorPalette(COLOR_PALETTES[paletteIndex].colors);
   };
 
   render() {
@@ -173,6 +199,22 @@ export default class Visualizer extends PureComponent {
                          defaultChecked={this.state.speed === speed}
                          value={speed}/>
                   <label htmlFor={'s_'+i} className='inline'>{SPEED_LABELS[i]}</label>
+                </Fragment>
+              )
+            }
+          </div>
+          <div>
+            <span className='VisualizerParams-label'>Palette:</span>
+            {
+              COLOR_PALETTES.map((palette, i) =>
+                <Fragment key={'p_'+i}>
+                  <input onClick={this.handlePaletteClick}
+                         type='radio'
+                         id={'p_'+i}
+                         name='color-palette'
+                         defaultChecked={this.state.colorPalette === i}
+                         value={i}/>
+                  <label htmlFor={'p_'+i} className='inline'>{palette.label}</label>
                 </Fragment>
               )
             }
