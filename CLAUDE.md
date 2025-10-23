@@ -115,6 +115,12 @@ React Router handles navigation:
 - `/*` - Browse catalog (simplified single-route structure)
 - Query params: `?play=path` to auto-play a file
 
+## Working with TODO.md
+
+- **Always check git history before starting tasks** - Use `git log` to verify if a task from `.claude/TODO.md` has already been completed before beginning work on it.
+- **Remove completed tasks** - When you find that a TODO item has been implemented (check commit messages and git history), remove it from the TODO file.
+- **Check for completion evidence** - Look for related commits, file changes, and PR merges that indicate the work is done.
+
 ## Development Workflow
 
 1. **Modifying JavaScript/React code**: Just `npm start` and work normally
