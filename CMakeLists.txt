@@ -3,11 +3,5 @@ cmake_minimum_required(VERSION 3.10)
 
 project(chip-core)
 
-add_subdirectory(fluidlite)
+# Only GME (Game Music Emu) is used now
 add_subdirectory(game-music-emu)
-add_subdirectory(lazyusf2)
-add_subdirectory(libADLMIDI)
-add_subdirectory(psflib)
-add_subdirectory(mdxmini)
-add_subdirectory(libxmp)
-add_subdirectory(libvgm)

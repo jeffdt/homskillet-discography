@@ -7,24 +7,13 @@ const SOUNDFONT_URL_PATH = 'http://localhost:3000/soundfonts/'; // Webpack dev s
 const MAX_SAMPLE_RATE = 48000;                            // Higher rates are problematic for some players.
 const MAX_VOICES = 64;
 const REPLACE_STATE_ON_SEEK = false;
+// GME (Game Music Emu) supported formats only
 const FORMATS =  [
   'ay',
   'gbs',
-  'it',
-  'mdx',
-  'mid',
-  'midi',
-  'miniusf',
-  'mod',
   'nsf',
   'nsfe',
   'spc',
-  's3m',
-  'smf',
-  'v2m',
-  'vgm',
-  'vgz',
-  'xm',
 ];
 const SOUNDFONT_MOUNTPOINT = '/soundfonts';
 const SOUNDFONTS = [

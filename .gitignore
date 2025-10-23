@@ -8,7 +8,6 @@ cmake-build-debug/
 *.wasm
 *.wasm.map
 lib*.js
-libxmp/libxmp-lite-stagedir/
 public/soundfonts/
 scripts/untracked/
 src/-catalog-tests/
@@ -17,8 +16,6 @@ server/catalog.json
 server/directories.json
 catalog
 public/music
-libxmp/a.out.js
-libxmp/lite/Makefile.in
 *.backup/
 _ignore/
 music/
