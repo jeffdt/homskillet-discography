@@ -5,13 +5,13 @@ import App from './components/App';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { UserProvider } from './components/UserProvider';
 import { ToastProvider } from './components/ToastProvider';
-import ThemeHandler from './components/ThemeHandler';
+import ThemeInitializer from './components/ThemeInitializer';
 
 ReactDOM.render((
   <Router basename={process.env.PUBLIC_URL}>
     <ToastProvider>
       <UserProvider>
-        <ThemeHandler/>
+        <ThemeInitializer/>
         <App/>
       </UserProvider>
     </ToastProvider>
