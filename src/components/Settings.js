@@ -1,17 +1,5 @@
-import React, { memo, useCallback, useContext } from 'react';
+import React, { memo } from 'react';
 import PlayerParams from './PlayerParams';
-import { UserContext } from "./UserProvider";
-
-const themes = [
-  {
-    value: 'msdos',
-    label: 'MS-DOS',
-  },
-  {
-    value: 'winamp',
-    label: 'Winamp',
-  }
-];
 
 function Settings(props) {
   const {
@@ -30,13 +18,6 @@ function Settings(props) {
     persistedSettings,
     sequencer,
   } = props;
-
-  const { settings, updateSettings } = useContext(UserContext);
-  const theme = settings?.theme;
-
-  const handleThemeChange = useCallback((e) => {
-    updateSettings({ theme: e.target.value });
-  }, [updateSettings]);
 
   return (
     <div className='Settings'>
@@ -60,20 +41,6 @@ function Settings(props) {
         />
         :
         <div>(No active player)</div>}
-      <h3>Global Settings</h3>
-      <span className='PlayerParams-param'>
-        <label htmlFor='theme' className="PlayerParams-label">
-          Theme:{' '}
-        </label>
-        <select
-          id='theme'
-          onChange={handleThemeChange}
-          value={theme}>
-          {themes.map(option =>
-            <option key={option.value} value={option.value}>{option.label}</option>
-          )}
-        </select>
-      </span>
     </div>
   );
 }

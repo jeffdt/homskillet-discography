@@ -9,7 +9,6 @@ const UserContext = createContext({
 
 const DEFAULT_SETTINGS = {
   showPlayerSettings: false,
-  theme: 'msdos',
 };
 
 function migrateSettings(settings) {
