@@ -7,7 +7,7 @@ const MODE_CONSTANT_Q = 2;
 
 const WEIGHTING_NONE = 0;
 const WEIGHTING_A = 1;
-const colorMap = new chroma.scale([
+const DEFAULT_COLOR_PALETTE = [
   '#000000',
   '#0000a0',
   '#6000a0',
@@ -16,7 +16,7 @@ const colorMap = new chroma.scale([
   '#f0b000',
   '#ffffa0',
   '#ffffff',
-]).domain([0, 255]);
+];
 const _debug = window.location.search.indexOf('debug=true') !== -1;
 let _aWeightingLUT;
 let _calcTime = 0;
@@ -78,6 +78,7 @@ export default class Spectrogram {
     this.freqCtx = this.freqCanvas.getContext('2d', {alpha: false});
     this.specCtx = this.specCanvas.getContext('2d', {alpha: false});
     this.tempCtx = this.tempCanvas.getContext('2d', {alpha: false});
+    this.setColorPalette(DEFAULT_COLOR_PALETTE);
 
     this.pianoKeysImage = pianoKeysImage;
     this.lastData = [];
@@ -126,6 +127,11 @@ export default class Spectrogram {
     this.specSpeed = speed;
   }
 
+  setColorPalette(colors) {
+    const palette = Array.isArray(colors) && colors.length >= 2 ? colors : DEFAULT_COLOR_PALETTE;
+    this.colorMap = chroma.scale(palette).domain([0, 255]);
+  }
+
   updateFrame() {
     if (this.paused) return;
     requestAnimationFrame(this.updateFrame);
@@ -152,7 +158,7 @@ export default class Spectrogram {
       analyserNode.getByteFrequencyData(data);
       isRepeated = this.isRepeatedFrequencyData(data);
       for (let x = 0; x < bins && x < canvasWidth; ++x) {
-        const style = colorMap(data[x]).hex();
+        const style = this.colorMap(data[x]).hex();
         const h =     data[x] * hCoeff | 0;
         freqCtx.fillStyle = style;
         freqCtx.fillRect(x, fqHeight - h, 1, h);
@@ -167,7 +173,7 @@ export default class Spectrogram {
         const x =        (Math.log(i + 1) / logmax) * canvasWidth | 0;
         const binWidth = (Math.log(i + 2) / logmax) * canvasWidth - x | 0;
         const h =        (data[i] * hCoeff) | 0;
-        const style =    colorMap(data[i] || 0).hex();
+        const style =    this.colorMap(data[i] || 0).hex();
         freqCtx.fillStyle = style;
         freqCtx.fillRect(x, fqHeight - h, binWidth, h);
         tempCtx.fillStyle = style;
@@ -183,7 +189,7 @@ export default class Spectrogram {
           const weighting = this.weighting === WEIGHTING_A ? _aWeightingLUT[x] : 1;
           const val = 255 * weighting * dataHeap[x] | 0; //this.core.getValue(this.cqtOutput + x * 4, 'float') | 0;
           const h = val * hCoeff | 0;
-          const style = colorMap(val).hex();
+          const style = this.colorMap(val).hex();
           freqCtx.fillStyle = style;
           freqCtx.fillRect(x, fqHeight - h, 1, h);
           tempCtx.fillStyle = style;
@@ -243,3 +249,5 @@ if (global.AnalyserNode && !global.AnalyserNode.prototype.getFloatTimeDomainData
     }
   };
 }
+
+export { DEFAULT_COLOR_PALETTE };
