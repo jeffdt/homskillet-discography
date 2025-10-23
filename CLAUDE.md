@@ -4,7 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Chip Player JS is a web-based music player for video game and chiptune music formats. It uses C/C++ audio libraries compiled to WebAssembly with Emscripten, combined with a React frontend. The project is based on the original chip-player-js by mmontag.
+**Homskillet Discography** is an interactive discography website for NSF (NES Sound Format) files created by the musician Homskillet. This is a fork of the general-purpose chip-player-js by mmontag, being customized into a personal music showcase site.
+
+### Project Goals
+
+This project is being developed in three phases:
+
+1. **Strip down to minimum** - Remove all components of the general-purpose player that aren't needed (MIDI, XMP, VGM players, Firebase auth, favorites, search, local file uploads, etc.). Simplify to just NSF playback via game-music-emu.
+
+2. **Add custom features** - Build new features to transform this into a personal discography site with custom branding, theming, and presentation tailored for showcasing Homskillet's musical works.
+
+3. **Deploy to GitHub Pages** - Deploy as a fully static site. (See `.claude/deployment-plan.md` for details - AWS is not needed for this small discography).
+
+### Technical Foundation
+
+The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssembly with Emscripten, combined with a React frontend. Audio playback is handled via Web Audio API.
 
 ## Key Commands
 
@@ -19,6 +33,8 @@ Chip Player JS is a web-based music player for video game and chiptune music for
 ### Deployment
 - `npm run deploy` - Full build and deploy to GitHub Pages
 - `npm run deploy-lite` - Build frontend and deploy (skip chip-core rebuild)
+
+See `.claude/deployment-plan.md` for the complete deployment strategy.
 
 ### Additional Scripts
 - `npm run fixvgm` - Fix VGM files utility
@@ -96,9 +112,7 @@ The catalog system indexes music files:
 
 ### Routing
 React Router handles navigation:
-- `/` - Browse catalog
-- `/favorites` - User favorites (Firebase, being removed)
-- `/local` - Local file playback via drag-and-drop
+- `/*` - Browse catalog (simplified single-route structure)
 - Query params: `?play=path` to auto-play a file
 
 ## Development Workflow
@@ -117,24 +131,23 @@ React Router handles navigation:
 ## Important Notes
 
 - **Emscripten Path**: package.json expects emsdk at `~/src/emsdk`. Update `build-chip-core` script if different.
-- **Catalog**: The `./catalog` folder is gitignored. Symlink your music archive here for catalog building.
-- **SoundFonts**: Place .sf2 files in `public/soundfonts/` (gitignored) for MIDI playback.
-- **Firebase**: User auth/favorites uses Firebase. Config file `src/config/firebaseConfig.js` is untracked. Per TODO.md, Firebase is being removed from the codebase.
+- **Catalog**: The `./catalog` folder is gitignored. Symlink your music archive here for catalog building. For this project, it will contain Homskillet's NSF files organized by album/release.
 - **Sample Rate**: Limited to 48kHz max (MAX_SAMPLE_RATE) due to player compatibility.
-- **GitHub Pages**: Deployment configured for GitHub Pages. Update `homepage` in package.json for different deployment targets.
+- **Deployment**: Configured for GitHub Pages static hosting. See `.claude/deployment-plan.md` for implementation details.
 
-## Current Work (from TODO.md)
+## Current Phase: Stripping Down to Minimum
 
-1. Update README with corrected instructions
-2. Remove Firebase (authentication, favorites, login UI)
-3. Simplify to game-music-emu only - remove libxmp, FluidLite, and all non-GME format support
+See `.claude/TODO.md` for the complete task list. Current focus:
+- ✅ Remove Firebase (authentication, favorites, login UI)
+- ✅ Remove tabbed navigation (Search, Local file uploads)
+- ✅ Remove file drop functionality
+- 🚧 Simplify to game-music-emu only - remove libxmp, FluidLite, and all non-GME format support
+- 🚧 Update branding and styling
 
-## Supported Formats (Current)
+## Target Format Support
 
-Game Music Emu formats: AY, GBS, NSF, NSFE, SPC
-Module formats (XMP): IT, MOD, S3M, XM
-MIDI: MID, MIDI, SMF
-VGM: VGM, VGZ
-Other: V2M, MDX, MINIUSF
+**Primary focus:** NSF and NSFE (NES Sound Format) - the formats used for Homskillet's music
 
-Note: Format support is being simplified to GME-only per TODO.md item #3.
+**Potentially supported via GME:** AY, GBS, SPC (if desired for future expansion)
+
+**Being removed:** All non-GME formats (IT, MOD, S3M, XM, MID, MIDI, VGM, VGZ, V2M, MDX, MINIUSF)

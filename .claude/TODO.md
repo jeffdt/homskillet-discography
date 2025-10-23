@@ -5,8 +5,9 @@
 5. Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
 6. Prerequisite: 5. Let's add some new color palettes. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
 7. Are there any fonts we can use that look more like an NES game fonts?
-8. Is there any reason that we need a separate catalog index server from the file server? Could we collapse them? Should we?
-9. Let's get rid of the Search and Local main nav tabs. I don't need a tabbed structure at all right now. We just need to browse.
-10. Can this be typescript?
+8. Is there any reason that we need a separate catalog index server from the file server? Could we collapse them? SHOULD we collapse them? What are the pros and cons?
+9. ~~Let's get rid of the Search and Local main nav tabs. I don't need a tabbed structure at all right now. We just need to browse.~~
+10. Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. **Recommendation:** Use incremental migration (TypeScript + JavaScript coexist). Start with UI components only (10-12 hours), leave players and chip-core.js as JavaScript. Can implement in parallel with or after items #3-5. Primary challenges: Emscripten wrapper typing (can skip), EventEmitter pattern, App.js state management.
 11. (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
 12. Can we add a linter and formatter and make them required, auto-triggered pre-commit steps?
+13. Implement GitHub Pages deployment strategy. See `.claude/deployment-plan.md` for full details. This includes: committing the music/ folder, updating catalog build to use music/ instead of catalog symlink, eliminating API server dependencies by pre-generating all data, and deploying to GitHub Pages.
