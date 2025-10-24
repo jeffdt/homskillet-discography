@@ -2,7 +2,7 @@
 
 **Date:** 2025-10-23
 **Status:** Recommended Approach
-**Total Effort:** Same 24-32 hours, but spread over time with immediate benefits
+**Total Effort:** 24-32 hours, but spread over time with immediate benefits
 
 ## Executive Summary
 
@@ -601,6 +601,73 @@ The compiled Emscripten code and player implementations are stable, rarely-modif
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-10-23
+## Migration Progress Tracker
+
+**Current Status:** Third pass complete - 13 TypeScript files migrated (~41% of codebase)
+
+**Files Migrated (13 total):**
+
+**Pass 1 - Utilities (5 files):**
+1. ✅ src/promisify-xhr.ts
+2. ✅ src/gm-patch-map.ts
+3. ✅ src/RequestCache.ts
+4. ✅ src/util.ts
+5. ✅ src/config/index.ts
+
+**Pass 2 - Simple Components (4 files):**
+6. ✅ src/components/AppHeader.tsx
+7. ✅ src/components/VolumeSlider.tsx
+8. ✅ src/components/ThemeInitializer.tsx
+9. ✅ src/components/DirectoryLink.tsx
+
+**Pass 3 - Medium Components (4 files):**
+10. ✅ src/components/Slider.tsx
+11. ✅ src/components/TimeSlider.tsx
+12. ✅ src/components/PlayerParams.tsx
+13. ✅ src/components/AppFooter.tsx
+
+**Remaining JavaScript Files (19 files):**
+
+**Components (9 files):**
+- src/components/App.js (805 lines - most complex, save for last)
+- src/components/Browse.js
+- src/components/MessageBox.js
+- src/components/Settings.js
+- src/components/Toast.js
+- src/components/ToastProvider.js
+- src/components/UserProvider.js
+- src/components/Visualizer.js
+- src/components/VirtualizedList.js
+
+**Players (4 files - can stay JS indefinitely):**
+- src/players/Player.js
+- src/players/GMEPlayer.js
+- src/players/ChipWorkletProcessor.js
+- src/players/midi/midi-helpers.js
+
+**Core Infrastructure (3 files):**
+- src/Sequencer.js (266 lines - EventEmitter pattern)
+- src/Spectrogram.js (245 lines - audio math, low priority)
+- src/index.js (entry point)
+
+**Build/Config (2 files - can stay JS):**
+- src/chip-core.js (Emscripten-generated, skip)
+- src/config/firebaseConfig.example.js (example file)
+
+**Effects (1 file):**
+- src/effects/SubBass.js
+
+**Next Recommended Batch:** Remaining simple components (Toast, ToastProvider, MessageBox, VirtualizedList) or complex components (Browse, Settings, Visualizer) or core infrastructure (Sequencer)
+
+**Primary Challenges Ahead:**
+- EventEmitter pattern in Sequencer.js
+- App.js state management (805 lines, complex audio/routing/player logic)
+- Browse.js (routing and catalog browsing)
+- Settings.js (complex settings UI)
+- Visualizer.js (canvas/audio visualization)
+
+---
+
+**Document Version:** 1.2
+**Last Updated:** 2025-10-24 (Pass 3 complete)
 **Related:** See `typescript-migration-assessment.md` for full analysis

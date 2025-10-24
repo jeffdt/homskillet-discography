@@ -25,11 +25,17 @@
 **E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
 
 **E8**: Swap the icon out to something custom from one of our games.
+
+**E9**: Improve UX when songs are loaded via `?play=` link. Currently, when you paste a song link (e.g., `/?play=%2FBazaar%2Ftectonictechniques.nsf`), the song loads but doesn't autoplay due to browser autoplay policies - it waits for user interaction to resume the AudioContext. This is correct behavior, but the UI doesn't indicate that the user needs to click to start audio. Consider:
+- Showing a visual indicator (toast, overlay, or button state) that audio is waiting for interaction
+- Auto-showing the "Click to enable audio" message when a song is queued but AudioContext is suspended
+- Displaying the paused state more prominently when audio is ready but suspended
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
 
-**M2**: Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. Tackle 2-3 files at a time, starting with the simplest files to convert. Do not convert derived/compiled classes such as chip-core.js that would be overwritten next time we do a compile. Analyze the function of the components converted and provide a set of instructions for manual QA after the change is complete. After QA, provide a rough overall percentage status of work left to do. **Status:** Second pass complete - 9 TypeScript files total (~28% of codebase). Files migrated: (1) promisify-xhr, gm-patch-map, RequestCache, util, config/index (utilities), (2) AppHeader, VolumeSlider, ThemeInitializer, DirectoryLink (simple components). Build verified working. **Next:** Medium components (AppFooter, TimeSlider, PlayerParams) or core infrastructure (Sequencer). Remaining: 23 JS files. Primary challenges: EventEmitter pattern (Sequencer), App.js state management (805 lines).
+**M2**: Migrate codebase to TypeScript. See `.claude/typescript-incremental-migration.md` for the full migration strategy and detailed progress tracker. Tackle 2-3 files at a time, starting with the simplest files to convert. Do not convert derived/compiled classes such as chip-core.js that would be overwritten next time we do a compile. Analyze the function of the components converted and provide a set of instructions for manual QA after the change is complete.
 
 **M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
 
