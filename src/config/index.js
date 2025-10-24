@@ -1,9 +1,18 @@
-// const API_BASE = 'https://gifx.co/chip';
-// const CATALOG_PREFIX = 'https://gifx.co/music';
-// const SOUNDFONT_URL_PATH = 'https://gifx.co/soundfonts/';
-const API_BASE = 'http://localhost:8080';                       // npm run server - Node.js server on port 8080
-const CATALOG_PREFIX = 'http://localhost:8000/music';          // python scripts/httpserver.py - Python file server
-const SOUNDFONT_URL_PATH = 'http://localhost:3000/soundfonts/'; // Webpack dev server
+// Development vs Production configuration
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const PUBLIC_URL = process.env.PUBLIC_URL || '';
+
+const API_BASE = IS_PRODUCTION
+  ? '' // No API server in production
+  : 'http://localhost:8080';
+
+const CATALOG_PREFIX = IS_PRODUCTION
+  ? `${PUBLIC_URL}/music` // Static files on GitHub Pages
+  : 'http://localhost:8000/music'; // Python file server in dev
+
+const SOUNDFONT_URL_PATH = IS_PRODUCTION
+  ? `${PUBLIC_URL}/soundfonts/` // Static files on GitHub Pages
+  : 'http://localhost:3000/soundfonts/'; // Webpack dev server
 const MAX_SAMPLE_RATE = 48000;                            // Higher rates are problematic for some players.
 const MAX_VOICES = 64;
 const REPLACE_STATE_ON_SEEK = false;

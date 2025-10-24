@@ -530,11 +530,29 @@ class App extends React.Component {
 
   handleShufflePlay(path) {
     // Synthetic recursive shuffle.
-    // Response of this API is an array of *paths*.
-    fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
-      .then(response => response.json())
-      .then(json => json.items.map(this.pathToHref))
-      .then(items => this.sequencer.playContext(items));
+    // In production, load catalog.json and shuffle client-side
+    // In development, use API server
+    if (process.env.NODE_ENV === 'production') {
+      fetch('/catalog.json')
+        .then(response => response.json())
+        .then(allFiles => {
+          // Filter files that start with the given path
+          const matchingFiles = path
+            ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
+            : allFiles;
+          // Shuffle and limit to 100
+          const shuffled = matchingFiles
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 100);
+          return shuffled.map(this.pathToHref);
+        })
+        .then(items => this.sequencer.playContext(items));
+    } else {
+      fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
+        .then(response => response.json())
+        .then(json => json.items.map(this.pathToHref))
+        .then(items => this.sequencer.playContext(items));
+    }
   }
 
   handleCycleShuffle() {
@@ -584,9 +602,16 @@ class App extends React.Component {
 
   fetchDirectory(path) {
     const slashPath = pathJoin('/', path);
-    return fetch(`${API_BASE}/browse?path=${encodeURIComponent(slashPath)}`)
-      .then(response => response.json())
-      .then(items => {
+    // In production, load from static directories.json
+    // In development, use API server
+    const fetchPromise = process.env.NODE_ENV === 'production'
+      ? fetch('/directories.json')
+          .then(response => response.json())
+          .then(directories => directories[slashPath] || [])
+      : fetch(`${API_BASE}/browse?path=${encodeURIComponent(slashPath)}`)
+          .then(response => response.json());
+
+    return fetchPromise.then(items => {
         this.playContexts[path] = this.directoryListingToContext(items);
         items.forEach(item => {
           // Convert timestamp 1704067200 to ISO date 2024-01-01
