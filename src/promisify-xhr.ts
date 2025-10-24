@@ -1,14 +1,22 @@
-export default function promisify(xhr) {
+interface PromisifiedXHR extends XMLHttpRequest {
+  send(): Promise<XMLHttpRequest>;
+}
+
+interface XHRError {
+  status: number;
+  statusText: string;
+}
+
+export default function promisify(xhr: XMLHttpRequest): PromisifiedXHR {
   const oldSend = xhr.send;
-  xhr.send = function () {
-    const xhrArguments = arguments;
-    return new Promise(function (resolve, reject) {
+  (xhr as any).send = function (...xhrArguments: any[]) {
+    return new Promise<XMLHttpRequest>(function (resolve, reject) {
       xhr.onload = function () {
         if (xhr.status < 200 || xhr.status >= 300) {
           reject({
             status: xhr.status,
             statusText: xhr.statusText,
-          });
+          } as XHRError);
         } else {
           resolve(xhr);
         }
@@ -17,12 +25,12 @@ export default function promisify(xhr) {
         reject({
           status: xhr.status,
           statusText: xhr.statusText,
-        });
+        } as XHRError);
       };
       try {
         oldSend.apply(xhr, xhrArguments);
       } catch (e) {}
     });
   };
-  return xhr;
+  return xhr as PromisifiedXHR;
 }
