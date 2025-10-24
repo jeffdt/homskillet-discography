@@ -1,8 +1,16 @@
 const fs = require('fs');
 const glob = require('glob');
 const directoryTree = require('directory-tree');
-const { FORMATS } = require('../src/config');
 const { toArabic } = require('roman-numerals');
+
+// GME (Game Music Emu) supported formats only
+const FORMATS = [
+  'ay',
+  'gbs',
+  'nsf',
+  'nsfe',
+  'spc',
+];
 
 // Paths are relative to project root.
 //
