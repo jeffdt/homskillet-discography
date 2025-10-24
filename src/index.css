@@ -262,7 +262,7 @@ body,#root {
 
 .AppHeader {
     padding: var(--charH) var(--charW2);
-    margin: 0 var(--charW2neg);
+    margin: 0 var(--charW2neg) var(--charH) var(--charW2neg);
     flex-grow: 0;
 }
 
@@ -336,6 +336,26 @@ body,#root {
     flex-shrink: 0;
     height: 210px;
     display: flex;
+    position: relative;
+}
+
+.AppFooter-attribution {
+    position: absolute;
+    bottom: 0;
+    right: var(--charW2);
+    padding: calc(var(--charH) / 4) var(--charW1);
+    font-size: 0.8em;
+    color: var(--neutral2);
+    background: var(--background);
+    z-index: 1;
+}
+
+.AppFooter-attribution a {
+    color: var(--clickable);
+}
+
+.AppFooter-attribution a:hover {
+    text-decoration: underline;
 }
 
 .AppFooter-art {

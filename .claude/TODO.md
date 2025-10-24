@@ -16,11 +16,12 @@
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
-**E5**: Remove references to "chip player" and rename window titles to reflect Homskillet branding. Remove feedback or anything else that links it to the old site. However, add a very clear footer or other note explicitly stating where the code was forked from and thanking the original author. Also make sure that I open source this and respect the license before I push this and make it go live.
 
 **E6**: Add ability to store metadata for songs and albums. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
 
 **E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
+
+**E8**: Swap the icon out to something custom from one of our games.
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
