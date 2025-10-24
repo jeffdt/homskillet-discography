@@ -33,8 +33,6 @@ const LOCAL_CATALOG_ROOT = process.env.DEV ?
   path.resolve(__dirname, '../music') :
   '/var/www/gifx.co/public_html/music';
 
-const sf2Regex = /SF2=(.+?)\.sf2/;
-
 console.log('Local catalog at %s', LOCAL_CATALOG_ROOT);
 console.log('Found %s entries in %s.', Object.entries(directories).length, DIRECTORIES_PATH);
 
@@ -154,7 +152,6 @@ const routes = {
 
   'metadata': async (params) => {
     let imageUrl = null;
-    let soundfont = null;
     let infoTexts = [];
     let md5 = null;
     if (params.path) {
@@ -166,40 +163,6 @@ const routes = {
         const hash = crypto.createHash('md5');
         hash.update(data);
         md5 = hash.digest('hex');
-      }
-
-      // --- MIDI SoundFonts ---
-      if (['.mid', '.midi'].includes(ext.toLowerCase())) {
-        // 1. Check the file for SF2 meta text in first 1024 bytes (proprietary tag added by N64 MIDI script).
-        const data = await new Promise((resolve, reject) => {
-          const stream = fs.createReadStream(path.join(LOCAL_CATALOG_ROOT, params.path), {
-            encoding: 'UTF-8',
-            start: 0,
-            end: 256,
-          });
-          stream.on('data', data => resolve(data.toString()));
-          stream.on('error', () => resolve(null));
-        });
-        const match = data ? data.match(sf2Regex) : null;
-        if (match && match[1]) {
-          soundfont = `${match[1]}.sf2`;
-        } else {
-          // 2. Check for a filename match.
-          const soundfonts = glob.sync(`${LOCAL_CATALOG_ROOT}/${dir}/${name}.sf2`, { nocase: true });
-          if (soundfonts.length > 0) {
-            soundfont = soundfonts[0];
-          } else {
-            // 3. Check for any .sf2 file in current folder.
-            const soundfonts = glob.sync(`${LOCAL_CATALOG_ROOT}/${dir}/*.sf2`, { nocase: true });
-            if (soundfonts.length > 0) {
-              soundfont = soundfonts[0];
-            }
-          }
-        }
-
-        if (soundfont !== null) {
-          soundfont = `${PUBLIC_CATALOG_URL}/${path.join(dir, path.basename(soundfont))}`;
-        }
       }
 
       // --- Image and Info Text ---
@@ -242,7 +205,6 @@ const routes = {
     return {
       imageUrl: imageUrl,
       infoTexts: infoTexts,
-      soundfont: soundfont,
       md5: md5,
     };
   },
