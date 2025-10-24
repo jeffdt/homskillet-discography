@@ -209,7 +209,10 @@ export default class Sequencer extends EventEmitter {
       this.playSongBuffer(url, buffer, subtune);
     } else {
       // Normalize url - paths are assumed to live under CATALOG_PREFIX
-      url = url.startsWith('http') ? url : pathJoin(CATALOG_PREFIX, url);
+      // Don't add prefix if URL is already absolute (starts with http or /)
+      if (!url.startsWith('http') && !url.startsWith('/')) {
+        url = pathJoin(CATALOG_PREFIX, url);
+      }
 
       // Fetch the song file (cancelable request)
       // Cancel any outstanding request so that playback doesn't happen out of order

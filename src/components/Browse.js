@@ -80,12 +80,11 @@ export default class Browse extends React.PureComponent {
           </>
         );
       } else {
-        const href = pathJoin(CATALOG_PREFIX, item.path);
         return (
           <>
             <div className="BrowseList-colName">
               <a onClick={onPlay}
-                 href={href}
+                 href={item.href}
                  tabIndex="-1">
                 {item.name}
               </a>

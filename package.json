@@ -93,7 +93,7 @@
     "webpack-bundle-analyzer": "^3.3.2",
     "worker-loader": "^2.0.0"
   },
-  "homepage": "https://chiptune.app",
+  "homepage": "https://jeffdt.github.io/homskillet-discography/",
   "scripts": {
     "start": "node scripts/start.js",
     "build": "npm run build-catalog; npm run build-chip-core; node scripts/build.js",
@@ -101,8 +101,8 @@
     "build-chip-core": "source ~/src/emsdk/emsdk_env.sh; node scripts/build-chip-core.js",
     "build-catalog": "node $NODE_DEBUG_OPTION scripts/build-catalog.js",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "deploy-lite": "npm run build-lite; gh-pages -d build",
+    "deploy": "gh-pages -d build --nojekyll",
+    "deploy-lite": "npm run build-lite; gh-pages -d build --nojekyll",
     "prepare": "patch-package",
     "server": "DEV=1 node server/index.js",
     "stop": "bash scripts/kill-servers.sh",

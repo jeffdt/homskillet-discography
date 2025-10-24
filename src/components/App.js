@@ -11,9 +11,11 @@ import ChipCore from '../chip-core';
 import {
   API_BASE,
   CATALOG_PREFIX,
+  IS_PRODUCTION,
   MAX_VOICES,
-  REPLACE_STATE_ON_SEEK,
   MAX_SAMPLE_RATE,
+  PUBLIC_URL,
+  REPLACE_STATE_ON_SEEK,
 } from '../config';
 import {
   getMetadataUrlForCatalogUrl,
@@ -530,11 +532,29 @@ class App extends React.Component {
 
   handleShufflePlay(path) {
     // Synthetic recursive shuffle.
-    // Response of this API is an array of *paths*.
-    fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
-      .then(response => response.json())
-      .then(json => json.items.map(this.pathToHref))
-      .then(items => this.sequencer.playContext(items));
+    // In production, load catalog.json and shuffle client-side
+    // In development, use API server
+    if (PUBLIC_URL) {
+      fetch(`${PUBLIC_URL}/catalog.json`)
+        .then(response => response.json())
+        .then(allFiles => {
+          // Filter files that start with the given path
+          const matchingFiles = path
+            ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
+            : allFiles;
+          // Shuffle and limit to 100
+          const shuffled = matchingFiles
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 100);
+          return shuffled.map(this.pathToHref);
+        })
+        .then(items => this.sequencer.playContext(items));
+    } else {
+      fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
+        .then(response => response.json())
+        .then(json => json.items.map(this.pathToHref))
+        .then(items => this.sequencer.playContext(items));
+    }
   }
 
   handleCycleShuffle() {
@@ -575,19 +595,28 @@ class App extends React.Component {
   directoryListingToContext(items) {
     return items
       .filter(item => item.type === 'file')
-      .map(item => this.pathToHref(item.path));
+      .map(item => item.href); // Use the href that was already built in fetchDirectory
   }
 
   pathToHref(path) {
-    return pathJoin(CATALOG_PREFIX, path.replace('%', '%25').replace('#', '%23'));
+    const prefix = PUBLIC_URL
+      ? `${PUBLIC_URL}/music`
+      : CATALOG_PREFIX;
+    return pathJoin(prefix, path.replace('%', '%25').replace('#', '%23'));
   }
 
   fetchDirectory(path) {
     const slashPath = pathJoin('/', path);
-    return fetch(`${API_BASE}/browse?path=${encodeURIComponent(slashPath)}`)
-      .then(response => response.json())
-      .then(items => {
-        this.playContexts[path] = this.directoryListingToContext(items);
+    // In production, load from static directories.json
+    // In development, use API server
+    const fetchPromise = PUBLIC_URL
+      ? fetch(`${PUBLIC_URL}/directories.json`)
+          .then(response => response.json())
+          .then(directories => directories[slashPath] || [])
+      : fetch(`${API_BASE}/browse?path=${encodeURIComponent(slashPath)}`)
+          .then(response => response.json());
+
+    return fetchPromise.then(items => {
         items.forEach(item => {
           // Convert timestamp 1704067200 to ISO date 2024-01-01
           item.mtime = new Date(item.mtime * 1000).toISOString().split('T')[0];
@@ -595,11 +624,19 @@ class App extends React.Component {
           // XXX: Escape immediately: the escaped URL is considered canonical.
           //      The URL must be decoded for display from here on out.
           item.path.replace('%', '%25').replace('#', '%23');
-          if (item.type === 'file')
-            item.href = pathJoin(CATALOG_PREFIX, item.path);
-          else
+          if (item.type === 'file') {
+            // In production, prepend PUBLIC_URL to the music path
+            const prefix = PUBLIC_URL
+              ? `${PUBLIC_URL}/music`
+              : CATALOG_PREFIX;
+            item.href = pathJoin(prefix, item.path);
+          } else {
             item.href = pathJoin('/', item.path);
+          }
         });
+
+        // Build play context AFTER href is set
+        this.playContexts[path] = this.directoryListingToContext(items);
 
         if (path !== '') { // No '..' at top level browse path.
           // Use substring, not slice, to pass through strings that don't contain any '/'.
