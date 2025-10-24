@@ -2,10 +2,10 @@
 
 /**
  *
- * Chip Player JS
+ * Homskillet Discography
  * ᴍ ɪ ᴄ ʀ ᴏ s ᴇ ʀ ᴠ ᴇ ʀ
  *
- * Matt Montag · March 2019
+ * Forked from Chip Player JS by Matt Montag
  *
  */
 

@@ -62,6 +62,9 @@ function AppFooter(props) {
 
   return (
     <div className="AppFooter">
+      <div className="AppFooter-attribution">
+        Forked from <a href="https://github.com/mmontag/chip-player-js" target="_blank" rel="noopener noreferrer">Chip Player JS</a> by Matt Montag
+      </div>
       <div className="AppFooter-main">
         <div className="AppFooter-top-row">
           <button onClick={prevSong}
