@@ -35,8 +35,8 @@ export interface Config {
   REPLACE_STATE_ON_SEEK: boolean;
 }
 
-// needs to be a CommonJS module - used in node.js server
-module.exports = {
+// Export for ES6 imports
+export {
   API_BASE,
   CATALOG_PREFIX,
   FORMATS,
@@ -47,8 +47,8 @@ module.exports = {
   REPLACE_STATE_ON_SEEK,
 };
 
-// Also export for ES6 imports
-export {
+// Default export for compatibility with CommonJS require()
+export default {
   API_BASE,
   CATALOG_PREFIX,
   FORMATS,
