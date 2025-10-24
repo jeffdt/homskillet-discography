@@ -5,7 +5,8 @@ dist/
 build/
 cmake-build-debug/
 *.a
-*.wasm
+# *.wasm - commented out so gh-pages can deploy chip-core.wasm
+!public/*.wasm
 *.wasm.map
 lib*.js
 public/soundfonts/

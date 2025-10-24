@@ -1,6 +1,8 @@
 // Development vs Production configuration
+// These are replaced at build time by webpack DefinePlugin
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PUBLIC_URL = process.env.PUBLIC_URL || '';
+const IS_DEV = !IS_PRODUCTION;
 
 const API_BASE = IS_PRODUCTION
   ? '' // No API server in production
@@ -98,8 +100,10 @@ module.exports = {
   API_BASE,
   CATALOG_PREFIX,
   FORMATS,
+  IS_PRODUCTION,
   MAX_SAMPLE_RATE,
   MAX_VOICES,
+  PUBLIC_URL,
   REPLACE_STATE_ON_SEEK,
   SOUNDFONT_MOUNTPOINT,
   SOUNDFONT_URL_PATH,
