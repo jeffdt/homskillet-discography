@@ -1,7 +1,24 @@
 import React, { memo } from 'react';
-import PlayerParams from './PlayerParams';
+import PlayerParams, { ParamDef } from './PlayerParams';
 
-function Settings(props) {
+interface SettingsProps {
+  ejected: boolean;
+  tempo: number;
+  numVoices: number;
+  voiceMask: number[];
+  voiceNames: string[];
+  voiceGroups?: number[][];
+  onVoiceMaskChange: (voiceMask: number[]) => void;
+  onTempoChange: (tempo: number) => void;
+  paramDefs: ParamDef[];
+  paramValues: Record<string, number>;
+  onParamChange: (paramKey: string, value: number) => void;
+  onPinParam: (paramKey: string) => void;
+  persistedSettings: Record<string, any>;
+  sequencer: any; // TODO: Type Sequencer when migrated to TS
+}
+
+function Settings(props: SettingsProps) {
   const {
     ejected,
     tempo,
