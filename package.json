@@ -93,7 +93,7 @@
     "webpack-bundle-analyzer": "^3.3.2",
     "worker-loader": "^2.0.0"
   },
-  "homepage": "https://chiptune.app",
+  "homepage": "https://jeffdt.github.io/homskillet-discography/",
   "scripts": {
     "start": "node scripts/start.js",
     "build": "npm run build-catalog; npm run build-chip-core; node scripts/build.js",
