@@ -2,8 +2,6 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S6**: Remove SoundFont infrastructure - the entire `SOUNDFONTS` array in config, `SOUNDFONT_MOUNTPOINT`, `SOUNDFONT_URL_PATH`, and all SoundFont-related UI/logic since we're GME-only.
-
 **S7**: Remove MessageBox/Info system if it's not needed for the simplified discography viewer.
 
 ---
@@ -37,6 +35,4 @@
 
 ## DEPLOYMENT (going live)
 
-**D1**: Evaluate catalog/file server consolidation. Is there any reason that we need a separate catalog index server from the file server? Could we collapse them? SHOULD we collapse them? What are the pros and cons?
-
-**D2**: Implement GitHub Pages deployment strategy. See `.claude/deployment-plan.md` for full details. This includes: committing the music/ folder, updating catalog build to use music/ instead of catalog symlink, eliminating API server dependencies by pre-generating all data, and deploying to GitHub Pages.
+**D1**: Placeholder
