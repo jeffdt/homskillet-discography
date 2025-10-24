@@ -1,5 +1,9 @@
 # Homskillet Discography - TODO List
 
+## BUGS
+
+**B1**: The folder that displays at the bottom when you're playing a song links to the wrong location. i.e. `https://jeffdt.github.io/homskillet-discography/browse/homskillet-discography/music/Bazaar`
+
 ## SIMPLIFICATION (stripping down to essentials)
 
 **S1**: Remove SPC filter/echo options from settings UI since we only need NSF files.
@@ -25,13 +29,15 @@
 
 ## MAINTAINABILITY (code quality & tooling)
 
-**M2**: Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. **Status:** First pass complete - TypeScript infrastructure set up and 3 utility files migrated (promisify-xhr, gm-patch-map, RequestCache). Using incremental migration with Babel. **Next:** Continue with UI components or other utility files. Primary challenges: Emscripten wrapper typing (can skip), EventEmitter pattern, App.js state management.
+**M2**: Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. Tackle 2-3 files at a time, starting with the simplest files to convert. Do not convert derived/compiled classes such as chip-core.js that would be overwritten next time we do a compile. Analyze the function of the components converted and provide a set of instructions for manual QA after the change is complete. After QA, provide a rough overall percentage status of work left to do. **Status:** Second pass complete - 9 TypeScript files total (~28% of codebase). Files migrated: (1) promisify-xhr, gm-patch-map, RequestCache, util, config/index (utilities), (2) AppHeader, VolumeSlider, ThemeInitializer, DirectoryLink (simple components). Build verified working. **Next:** Medium components (AppFooter, TimeSlider, PlayerParams) or core infrastructure (Sequencer). Remaining: 23 JS files. Primary challenges: EventEmitter pattern (Sequencer), App.js state management (805 lines).
 
 **M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
 
 **M5**: You said "the project uses webpack 4, so we need an older version of ts-loader". Should we upgrade webpack?
+
+**M6**:: Is src/gm-patch-map.ts used?
 
 ---
 

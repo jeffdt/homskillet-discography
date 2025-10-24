@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const ThemeInitializer = () => {
+const ThemeInitializer: React.FC = () => {
   useEffect(() => {
     // Set the msdos theme on mount
     document.documentElement.setAttribute("data-theme", "msdos");
