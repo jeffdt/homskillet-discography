@@ -487,13 +487,6 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 }
 .SongDetails-filepath a {color: var(--neutral2);}
 
-.Search-label { display: flex; align-items: center; gap: var(--charW1); }
-.Search-input { width: calc(var(--charW1) * 20); }
-.Search-clearButton { white-space: pre; background: var(--button); box-shadow: none; }
-.Search-clearButton::before { content: ' x'; }
-.Search-clearButton::after  { content: ' '; }
-.Search-resultsLabel { white-space: nowrap; }
-
 button.FavoriteButton:active { color: var(--clickable); }
 button.FavoriteButton.isFavorite { color: var(--clickable); }
 button.FavoriteButton {

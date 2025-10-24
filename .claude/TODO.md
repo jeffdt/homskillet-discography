@@ -2,10 +2,6 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S4**: Remove non-GME format support (IT, MOD, S3M, XM, MID, VGM, etc.). We only need to play the filetypes supported by game music emu now. We don't need to support libxmp or Fluidlite anymore. Please remove support for all filetypes other than the ones supported by game music emu. This should include js in our app that allows us to recognize and play the other file types, as well as the compiled cores that are used to play them, and the source code that we used to compile them. Furthermore, the build chip core script should remove references to them.
-
-**S5**: Delete unused component files that are no longer imported: `LocalFiles.js`, `DropMessage.js`, `Search.js`, and `Announcements.js`.
-
 **S6**: Remove SoundFont infrastructure - the entire `SOUNDFONTS` array in config, `SOUNDFONT_MOUNTPOINT`, `SOUNDFONT_URL_PATH`, and all SoundFont-related UI/logic since we're GME-only.
 
 **S7**: Remove MessageBox/Info system if it's not needed for the simplified discography viewer.
