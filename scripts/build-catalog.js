@@ -7,10 +7,8 @@ const { toArabic } = require('roman-numerals');
 // Paths are relative to project root.
 //
 // Point this to the place where you keep all the music.
-// this location is untracked, so put a symlink here.
-// For example:
-//     chip-player-js $ ln -s ~/Downloads/catalog catalog
-const catalogPath = 'catalog/';
+// Music files are committed to the repo in the music/ folder.
+const catalogPath = 'music/';
 const outputPath = 'server/catalog.json';
 const dirDictOutputPath = 'server/directories.json';
 const formatsRegex = new RegExp(`\\.(${FORMATS.join('|')})$`);
