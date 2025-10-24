@@ -1,8 +1,63 @@
 import React from 'react';
 import autoBindReact from 'auto-bind/react';
 
-export default class PlayerParams extends React.PureComponent {
-  constructor(props) {
+interface VoiceGroup {
+  name: string;
+  icon?: boolean;
+  voices: Array<{
+    idx: number;
+    name: string;
+  }>;
+}
+
+interface ParamOption {
+  label: string;
+  value: string | number;
+}
+
+interface ParamOptionGroup {
+  label: string;
+  items: ParamOption[];
+}
+
+interface ParamDef {
+  id: string;
+  label: string;
+  hint?: string;
+  type: 'enum' | 'number' | 'toggle' | 'button';
+  options?: ParamOptionGroup[];
+  min?: number;
+  max?: number;
+  step?: number;
+  dependsOn?: {
+    param: string;
+    value: any;
+  };
+}
+
+interface PersistedSettings {
+  [key: string]: any;
+}
+
+interface PlayerParamsProps {
+  paramDefs?: ParamDef[];
+  paramValues?: { [key: string]: any };
+  onParamChange?: (paramId: string, value: any) => void;
+  onPinParam?: (key: string, value: any) => void;
+  playerKey: string;
+  tempo: number;
+  onTempoChange: (event: React.FormEvent<HTMLInputElement>) => void;
+  ejected: boolean;
+  voiceGroups: VoiceGroup[];
+  numVoices: number;
+  voiceMask: boolean[];
+  voiceNames: string[];
+  onVoiceMaskChange?: (voiceMask: boolean[]) => void;
+  persistedSettings?: PersistedSettings;
+}
+
+export default class PlayerParams extends React.PureComponent<PlayerParamsProps> {
+  constructor(props: PlayerParamsProps) {
     super(props);
     autoBindReact(this);
   }
@@ -44,13 +99,13 @@ export default class PlayerParams extends React.PureComponent {
   //   clearInterval(this.timer);
   // }
 
-  handleVoiceToggle(e, index) {
+  handleVoiceToggle(e: React.MouseEvent<HTMLInputElement>, index: number): void {
     const { onVoiceMaskChange } = this.props;
     if (!onVoiceMaskChange) return;
 
     const voiceMask = [...this.props.voiceMask];
-    e = e.nativeEvent || {};
-    if (e.altKey || e.shiftKey || e.metaKey) {
+    const nativeEvent = e.nativeEvent;
+    if (nativeEvent.altKey || nativeEvent.shiftKey || nativeEvent.metaKey) {
       if (voiceMask.every((enabled, i) => (i === index) === enabled)) {
         voiceMask.fill(true);
       } else {
@@ -63,11 +118,11 @@ export default class PlayerParams extends React.PureComponent {
     onVoiceMaskChange(voiceMask);
   }
 
-  isPinned(persistedKey) {
-    return this.props.persistedSettings?.hasOwnProperty(persistedKey);
+  isPinned(persistedKey: string): boolean {
+    return this.props.persistedSettings?.hasOwnProperty(persistedKey) ?? false;
   }
 
-  render() {
+  render(): React.ReactNode {
     const {
       paramDefs,
       paramValues,
@@ -91,7 +146,7 @@ export default class PlayerParams extends React.PureComponent {
           <button
             className="IconButton"
             title={isPinned('tempo') ? 'Un-pin this parameter' : 'Pin this parameter (retains value between songs)'}
-            onClick={() => onPinParam('tempo', tempo)}>
+            onClick={() => onPinParam?.('tempo', tempo)}>
             <span className={`inline-icon ${isPinned('tempo') ? 'icon-pin-down' : 'icon-pin-up'}`}/>
           </button>
           <label htmlFor='tempo' className="PlayerParams-label">
@@ -166,7 +221,7 @@ export default class PlayerParams extends React.PureComponent {
             <button
               className="IconButton"
               title={isPinned(persistedKey) ? 'Un-pin this parameter' : 'Pin this parameter (retains value between songs)'}
-              onClick={() => onPinParam(persistedKey, value)}>
+              onClick={() => onPinParam?.(persistedKey, value)}>
               <span className={`inline-icon ${isPinned(persistedKey) ? 'icon-pin-down' : 'icon-pin-up'}`}/>
             </button>
           );
@@ -185,10 +240,10 @@ export default class PlayerParams extends React.PureComponent {
                       // TODO: make this explicit in the param def
                       const intVal = Number(e.target.value);
                       const value = isNaN(intVal) ? e.target.value : intVal;
-                      onParamChange(param.id, value)
+                      onParamChange?.(param.id, value)
                     }}
                     value={value}>
-                    {param.options.map(optgroup =>
+                    {param.options?.map(optgroup =>
                       <optgroup key={optgroup.label} label={optgroup.label}>
                         {optgroup.items.map(option =>
                           <option key={option.value} value={option.value}>{option.label}</option>
@@ -209,10 +264,10 @@ export default class PlayerParams extends React.PureComponent {
                          type='range'
                          title={param.hint}
                          min={param.min} max={param.max} step={param.step}
-                         onChange={(e) => onParamChange(param.id, parseFloat(e.target.value))}
+                         onChange={(e) => onParamChange?.(param.id, parseFloat(e.target.value))}
                          value={value}>
                   </input>{' '}
-                  {value !== undefined && param.step >= 1 ? value : value.toFixed(2)}
+                  {value !== undefined && (param.step ?? 0) >= 1 ? value : value.toFixed(2)}
                 </span>
               );
             case 'toggle':
@@ -221,7 +276,7 @@ export default class PlayerParams extends React.PureComponent {
                   {pinButton}
                   <input type='checkbox'
                          id={param.id}
-                         onChange={(e) => onParamChange(param.id, e.target.checked)}
+                         onChange={(e) => onParamChange?.(param.id, e.target.checked)}
                          checked={value}/>
                   <label htmlFor={param.id} title={param.hint}>
                     {param.label}
@@ -230,7 +285,7 @@ export default class PlayerParams extends React.PureComponent {
               );
             case 'button':
               return (
-                <button key={param.id} title={param.hint} className="box-button" onClick={() => onParamChange(param.id, true)}>
+                <button key={param.id} title={param.hint} className="box-button" onClick={() => onParamChange?.(param.id, true)}>
                   {param.label}
                 </button>
               );

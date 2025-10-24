@@ -4,8 +4,40 @@ import VolumeSlider from './VolumeSlider';
 import { pathToLinks } from '../util';
 import { REPEAT_LABELS, SHUFFLE_LABELS } from '../Sequencer';
 
-export default memo(AppFooter);
-function AppFooter(props) {
+interface AppFooterProps {
+  // State props
+  currentSongDurationMs: number;
+  currentSongNumSubtunes: number;
+  currentSongSubtune: number;
+  ejected: boolean;
+  imageUrl: string | null;
+  infoTexts: string[];
+  md5: string | null;
+  paused: boolean;
+  repeat: number;
+  shuffle: number;
+  songUrl: string | null;
+  subtitle: string;
+  title: string;
+  volume: number;
+
+  // Method props
+  getCurrentSongLink: (withSubtune?: boolean) => string;
+  handleCopyLink: (link: string) => void;
+  handleCycleRepeat: () => void;
+  handleCycleShuffle: () => void;
+  handleTimeSliderChange: (position: number) => void;
+  handleVolumeChange: (volume: number) => void;
+  nextSong: () => void;
+  nextSubtune: () => void;
+  prevSong: () => void;
+  prevSubtune: () => void;
+  sequencer: any; // TODO: Type Sequencer properly when migrating
+  toggleInfo: () => void;
+  togglePause: () => void;
+}
+
+function AppFooter(props: AppFooterProps): React.ReactElement {
   const {
     // this.state.
     currentSongDurationMs,
@@ -42,17 +74,17 @@ function AppFooter(props) {
   const pathLinks = pathToLinks(songUrl);
   const subtuneText = `Tune ${currentSongSubtune + 1} of ${currentSongNumSubtunes}`;
 
-  const handleToggleInfo = useCallback((e) => {
+  const handleToggleInfo = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     toggleInfo();
   }, [toggleInfo]);
 
-  const handleCopySongLink = useCallback((e) => {
+  const handleCopySongLink = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     handleCopyLink(getCurrentSongLink());
   }, [getCurrentSongLink, handleCopyLink]);
 
-  const handleCopySubtuneLink = useCallback((e) => {
+  const handleCopySubtuneLink = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     handleCopyLink(getCurrentSongLink(/*withSubtune=*/true));
   }, [getCurrentSongLink, handleCopyLink]);
@@ -173,7 +205,7 @@ function AppFooter(props) {
               }
               {md5 &&
                 <a href={`https://modsamplemaster.thegang.nu/module.php?md5=${md5}`}
-                   title="Look up this song on Mod Sample Master" target="_blank">
+                   title="Look up this song on Mod Sample Master" target="_blank" rel="noopener noreferrer">
                   msm
                 </a>
               }
@@ -186,3 +218,5 @@ function AppFooter(props) {
     </div>
   );
 }
+
+export default memo(AppFooter);
