@@ -2,7 +2,6 @@
 // These are replaced at build time by webpack DefinePlugin
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PUBLIC_URL = process.env.PUBLIC_URL || '';
-const IS_DEV = !IS_PRODUCTION;
 
 const API_BASE = IS_PRODUCTION
   ? '' // No API server in production

@@ -3,10 +3,8 @@ import autoBindReact from 'auto-bind/react';
 import VirtualizedList from './VirtualizedList';
 import DirectoryLink from './DirectoryLink';
 import bytes from 'bytes';
-import { CATALOG_PREFIX } from '../config';
 import trimEnd from 'lodash/trimEnd';
 import queryString from 'querystring';
-import { pathJoin } from '../util';
 
 
 export default class Browse extends React.PureComponent {
