@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import autoBindReact from 'auto-bind/react';
 import isMobile from 'ismobilejs';
 import clamp from 'lodash/clamp';
-import shuffle from 'lodash/shuffle';
 import path from 'path';
 import queryString from 'querystring';
 import { Route, Switch, withRouter } from 'react-router-dom';
@@ -11,7 +10,6 @@ import ChipCore from '../chip-core';
 import {
   API_BASE,
   CATALOG_PREFIX,
-  IS_PRODUCTION,
   MAX_VOICES,
   MAX_SAMPLE_RATE,
   PUBLIC_URL,
@@ -686,7 +684,6 @@ class App extends React.Component {
     const { title, subtitle } = titlesFromMetadata(this.state.currentSongMetadata);
     const currContext = this.sequencer?.getCurrContext();
     const currIdx = this.sequencer?.getCurrIdx();
-    const search = { search: window.location.search };
     const { settings } = this.props.userContext;
     const showPlayerSettings = settings?.showPlayerSettings;
 

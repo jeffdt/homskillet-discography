@@ -2,7 +2,7 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S7**: Remove MessageBox/Info system if it's not needed for the simplified discography viewer.
+(All simplification tasks complete)
 
 ---
 
@@ -15,7 +15,6 @@
 **E3**: Are there any fonts we can use that look more like NES game fonts?
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
-
 
 **E6**: Add ability to store metadata for songs and albums. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
 
@@ -36,4 +35,4 @@
 
 ## DEPLOYMENT (going live)
 
-**D1**: Placeholder
+**D1**: Put on custom domain (jeffdt.com, purchased through namesilo)
