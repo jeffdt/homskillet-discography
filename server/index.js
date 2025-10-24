@@ -27,10 +27,10 @@ const DIRECTORIES_PATH = './directories.json';
 const directories = require(DIRECTORIES_PATH);
 
 const PUBLIC_CATALOG_URL = process.env.DEV ?
-  'http://localhost:8000/catalog' :
+  'http://localhost:8000/music' :
   'https://gifx.co/music';
 const LOCAL_CATALOG_ROOT = process.env.DEV ?
-  path.resolve(__dirname, '../catalog') :
+  path.resolve(__dirname, '../music') :
   '/var/www/gifx.co/public_html/music';
 
 const sf2Regex = /SF2=(.+?)\.sf2/;
@@ -130,7 +130,8 @@ const routes = {
       ]
     */
     if (process.env.DEV) {
-      const files = fs.readdirSync(path.join(LOCAL_CATALOG_ROOT, params.path), { withFileTypes: true });
+      const browsePath = params.path || '';
+      const files = fs.readdirSync(path.join(LOCAL_CATALOG_ROOT, browsePath), { withFileTypes: true });
       return files
         .filter(file => {
           // Get lowercase file extension, without the dot
@@ -139,7 +140,7 @@ const routes = {
         })
         .map((file, i) => {
           return {
-            path: path.join(params.path, file.name),
+            path: path.join(browsePath, file.name),
             size: 999,
             mtime: 1665174068,
             type: file.isDirectory() ? 'directory' : 'file',
