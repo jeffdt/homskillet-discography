@@ -1,14 +1,21 @@
 import promisify from './promisify-xhr';
 import autoBind from 'auto-bind';
 
+interface PromisifiedXHR extends XMLHttpRequest {
+  send(): Promise<XMLHttpRequest>;
+}
+
 class RequestCache {
+  private data: Record<string, any>;
+  private request: PromisifiedXHR | null;
+
   constructor() {
     autoBind(this);
     this.data = {};
     this.request = null;
   }
 
-  fetchCached(url) {
+  fetchCached(url: string): Promise<any> {
     if (this.data[url]) return Promise.resolve(this.data[url]);
 
     if (this.request) this.request.abort();

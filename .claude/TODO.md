@@ -2,7 +2,7 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-(All simplification tasks complete)
+**S1**: Remove SPC filter/echo options from settings UI since we only need NSF files.
 
 ---
 
@@ -25,11 +25,13 @@
 
 ## MAINTAINABILITY (code quality & tooling)
 
-**M2**: Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. **Recommendation:** Use incremental migration (TypeScript + JavaScript coexist). Start with UI components only (10-12 hours), leave players and chip-core.js as JavaScript. Can implement in parallel with or after S4, E1, E2. Primary challenges: Emscripten wrapper typing (can skip), EventEmitter pattern, App.js state management.
+**M2**: Migrate codebase to TypeScript. See `.claude/typescript-migration-assessment.md` for full analysis and `.claude/typescript-incremental-migration.md` for UI-first chunked approach. **Status:** First pass complete - TypeScript infrastructure set up and 3 utility files migrated (promisify-xhr, gm-patch-map, RequestCache). Using incremental migration with Babel. **Next:** Continue with UI components or other utility files. Primary challenges: Emscripten wrapper typing (can skip), EventEmitter pattern, App.js state management.
 
 **M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
+
+**M5**: You said "the project uses webpack 4, so we need an older version of ts-loader". Should we upgrade webpack?
 
 ---
 

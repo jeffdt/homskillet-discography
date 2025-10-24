@@ -1,4 +1,4 @@
-export const GM_INSTRUMENTS = [
+export const GM_INSTRUMENTS: readonly string[] = [
   'Piano         ',
   'Bright Piano  ',
   'Electric Piano',
@@ -127,9 +127,9 @@ export const GM_INSTRUMENTS = [
   'Helicopter    ',
   'Applause      ',
   'Gunshot       ',
-];
+] as const;
 
-export const GM_DRUM_KITS = {
+export const GM_DRUM_KITS: Readonly<Record<number, string>> = {
   0:  'Std Drumkit   ',
   8:  'Room Drumkit  ',
   16: 'Power Drumkit ',
@@ -137,4 +137,4 @@ export const GM_DRUM_KITS = {
   25: 'TR808 Drumkit ',
   32: 'Jazz Drumkit  ',
   40: 'Brush Drumkit ',
-};
+} as const;
