@@ -35,7 +35,7 @@
 
 ## MAINTAINABILITY (code quality & tooling)
 
-**M2**: Migrate codebase to TypeScript. See `.claude/typescript-incremental-migration.md` for the full migration strategy and detailed progress tracker. Tackle 2-3 files at a time, starting with the simplest files to convert. Do not convert derived/compiled classes such as chip-core.js that would be overwritten next time we do a compile. Analyze the function of the components converted and provide a set of instructions for manual QA after the change is complete.
+**M2**: Migrate codebase to TypeScript. See `.claude/typescript-incremental-migration.md` for the full migration strategy and detailed progress tracker. Tackle 2-3 files at a time, starting with the simplest files to convert. Do not convert derived/compiled classes such as chip-core.js that would be overwritten next time we do a compile. You can commit, push and open a PR, but do not merge. Once this is done, analyze the function of the components converted and provide a set of instructions for manual QA after the change is complete.
 
 **M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
 

@@ -1,7 +1,9 @@
 import { CalcCascades, IirFilter } from 'fili';
 
 export default class SubBass {
-  constructor(sampleRate) {
+  private process: (sample: number) => number;
+
+  constructor(sampleRate: number) {
     const iirCalculator = new CalcCascades();
     const lowpass1Coeffs = iirCalculator.lowpass({
       order: 5,
@@ -42,18 +44,18 @@ export default class SubBass {
     let envAvg = 0;
     let envWeight = Math.exp(-1 / (sampleRate * envResponseTime));
 
-    function removeDcStep(sample) {
+    function removeDcStep(sample: number): number {
       dcAvg = dcWeight * dcAvg + (1 - dcWeight) * sample;
       return sample - dcAvg;
     }
 
-    function envelopeStep(sample) {
+    function envelopeStep(sample: number): number {
       sample = removeDcStep(sample);
       envAvg = envWeight * envAvg + (1 - envWeight) * Math.abs(sample);
       return envAvg * 1.414; // invert sine RMS
     }
 
-    this.process = (sample) => {
+    this.process = (sample: number): number => {
       const sBass = lowpass1.singleStep(sample);
       const env = envelopeStep(sBass);
 
