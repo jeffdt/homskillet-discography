@@ -4,13 +4,17 @@
 
 **B1**: The folder that displays at the bottom when you're playing a song links to the wrong location. i.e. `https://jeffdt.github.io/homskillet-discography/browse/homskillet-discography/music/Bazaar`
 
+---
+
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S1**: Remove SPC filter/echo options from settings UI since we only need NSF files.
+All simplifications are complete!
 
 ---
 
 ## ENHANCEMENT (new features & styling)
+
+**E0**: Turn visualizer on by default.
 
 **E1**: Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
 
