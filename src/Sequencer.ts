@@ -4,20 +4,46 @@ import shuffle from 'lodash/shuffle';
 import EventEmitter from 'events';
 import autoBind from 'auto-bind';
 import { pathJoin } from './util';
+import { IPlayer } from './types/player';
+import {
+  REPEAT_OFF,
+  REPEAT_ALL,
+  REPEAT_ONE,
+  SHUFFLE_OFF,
+  SHUFFLE_ON,
+  RepeatMode,
+  ShuffleMode,
+  SequencerState,
+  LocalFilesManager,
+} from './types/sequencer';
 
-export const REPEAT_OFF = 0;
-export const REPEAT_ALL = 1;
-export const REPEAT_ONE = 2;
-export const NUM_REPEAT_MODES = 3;
-export const REPEAT_LABELS = ['Off', 'All', 'One'];
-
-export const SHUFFLE_OFF = 0;
-export const SHUFFLE_ON = 1;
-export const NUM_SHUFFLE_MODES = 2;
-export const SHUFFLE_LABELS = ['Off', 'On '];
+// Re-export constants for backward compatibility
+export {
+  REPEAT_OFF,
+  REPEAT_ALL,
+  REPEAT_ONE,
+  NUM_REPEAT_MODES,
+  REPEAT_LABELS,
+  SHUFFLE_OFF,
+  SHUFFLE_ON,
+  NUM_SHUFFLE_MODES,
+  SHUFFLE_LABELS,
+} from './types/sequencer';
 
 export default class Sequencer extends EventEmitter {
-  constructor(players, localFilesManager, getSettings) {
+  private player: IPlayer | null = null;
+  private players: IPlayer[];
+  private localFilesManager: LocalFilesManager;
+  private getSettings: () => any;
+  private currIdx: number = 0;
+  private context: string[] | null = null;
+  private currUrl: string | null = null;
+  private shuffle: ShuffleMode = SHUFFLE_OFF;
+  private shuffleOrder: number[] = [];
+  private songRequest: XMLHttpRequest | null = null;
+  private repeat: RepeatMode = REPEAT_OFF;
+
+  constructor(players: IPlayer[], localFilesManager: LocalFilesManager, getSettings: () => any) {
     super();
     autoBind(this);
 
@@ -25,8 +51,6 @@ export default class Sequencer extends EventEmitter {
     this.players = players;
     this.localFilesManager = localFilesManager;
     this.getSettings = getSettings;
-    // this.onSequencerStateUpdate = onSequencerStateUpdate;
-    // this.onPlayerError = onError;
 
     this.currIdx = 0;
     this.context = null;
@@ -42,7 +66,7 @@ export default class Sequencer extends EventEmitter {
     });
   }
 
-  handlePlayerError(e) {
+  private handlePlayerError(e: Error | string): void {
     this.emit('playerError', e);
     if (this.context) {
       this.nextSong();
@@ -51,7 +75,7 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  handlePlayerStateUpdate(playerState) {
+  private handlePlayerStateUpdate(playerState: SequencerState): void {
     const { isStopped } = playerState;
     console.debug('Sequencer.handlePlayerStateUpdate(isStopped=%s)', isStopped);
 
@@ -71,7 +95,7 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  playContext(context, index = 0, subtune = 0) {
+  playContext(context: string[], index: number = 0, subtune: number = 0): void {
     this.currIdx = index;
     this.context = context;
     if (this.shuffle === SHUFFLE_ON) {
@@ -80,24 +104,24 @@ export default class Sequencer extends EventEmitter {
     this.playCurrentSong(subtune);
   }
 
-  playCurrentSong(subtune = 0) {
+  private playCurrentSong(subtune: number = 0): void {
     let idx = this.currIdx;
     if (this.shuffle === SHUFFLE_ON) {
       idx = this.shuffleOrder[idx];
       console.log('Shuffle (%s): %s', this.currIdx, idx);
     }
-    this.playSong(this.context[idx], subtune);
+    this.playSong(this.context![idx], subtune);
   }
 
-  playSonglist(urls) {
+  playSonglist(urls: string[]): void {
     this.playContext(urls, 0);
   }
 
-  toggleShuffle() {
-    this.setShuffle(!this.shuffle);
+  toggleShuffle(): void {
+    this.setShuffle(!this.shuffle as ShuffleMode);
   }
 
-  setShuffle(shuff) {
+  setShuffle(shuff: ShuffleMode): void {
     this.shuffle = shuff;
     if (this.shuffle === SHUFFLE_ON && this.context) {
       // Generate a new shuffle order.
@@ -112,11 +136,11 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  setRepeat(repeat) {
+  setRepeat(repeat: RepeatMode): void {
     this.repeat = repeat;
   }
 
-  advanceSong(direction) {
+  private advanceSong(direction: number): void {
     if (this.context == null) return;
 
     if (this.repeat !== REPEAT_ONE) {
@@ -132,7 +156,7 @@ export default class Sequencer extends EventEmitter {
           direction, this.currIdx, this.context.length);
         this.currIdx = 0;
         this.context = null;
-        this.player.stop();
+        this.player!.stop();
         this.player = null;
         this.emit('sequencerStateUpdate', { isEjected: true });
       }
@@ -141,57 +165,57 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  nextSong() {
+  nextSong(): void {
     this.advanceSong(1);
   }
 
-  prevSong() {
+  prevSong(): void {
     this.advanceSong(-1);
   }
 
-  playSubtune(subtune) {
-    this.player.playSubtune(subtune);
+  playSubtune(subtune: number): void {
+    this.player!.playSubtune(subtune);
   }
 
-  prevSubtune() {
-    const subtune = this.player.getSubtune() - 1;
+  prevSubtune(): void {
+    const subtune = this.player!.getSubtune() - 1;
     if (subtune < 0) return;
     this.playSubtune(subtune);
   }
 
-  nextSubtune() {
-    const subtune = this.player.getSubtune() + 1;
-    if (subtune >= this.player.getNumSubtunes()) return;
+  nextSubtune(): void {
+    const subtune = this.player!.getSubtune() + 1;
+    if (subtune >= this.player!.getNumSubtunes()) return;
     this.playSubtune(subtune);
   }
 
-  getPlayer() {
+  getPlayer(): IPlayer | null {
     return this.player;
   }
 
-  getCurrContext() {
+  getCurrContext(): string[] | null {
     return this.context;
   }
 
-  getCurrIdx() {
+  getCurrIdx(): number {
     return this.shuffle ? this.shuffleOrder[this.currIdx] : this.currIdx;
   }
 
-  getCurrUrl() {
+  getCurrUrl(): string | null {
     return this.currUrl;
   }
 
-  getSubtune() {
-    return this.player.getSubtune();
+  getSubtune(): number {
+    return this.player!.getSubtune();
   }
 
-  playSong(url, subtune = 0) {
+  playSong(url: string, subtune: number = 0): void {
     if (this.player !== null) {
       this.player.suspend();
     }
 
     // Find a player that can play this filetype
-    const ext = url.split('.').pop().toLowerCase();
+    const ext = url.split('.').pop()!.toLowerCase();
     for (let i = 0; i < this.players.length; i++) {
       if (this.players[i].canPlay(ext)) {
         this.player = this.players[i];
@@ -227,18 +251,18 @@ export default class Sequencer extends EventEmitter {
           const filepath = url.replace(CATALOG_PREFIX, '');
           this.playSongBuffer(filepath, buffer, subtune)
         })
-        .catch(e => {
+        .catch((e: any) => {
           this.handlePlayerError(e.message || `HTTP ${e.status} ${e.statusText} ${url}`);
         });
     }
   }
 
-  playSongFile(filepath, songData) {
+  playSongFile(filepath: string, songData: ArrayBuffer): void {
     if (this.player !== null) {
       this.player.suspend();
     }
 
-    const ext = filepath.split('.').pop().toLowerCase();
+    const ext = filepath.split('.').pop()!.toLowerCase();
 
     // Find a player that can play this filetype
     const player = this.players.find(player => player.canPlay(ext));
@@ -254,16 +278,16 @@ export default class Sequencer extends EventEmitter {
     this.playSongBuffer(filepath, songData);
   }
 
-  async playSongBuffer(filepath, buffer, subtune = 0) {
-    let uint8Array;
+  private async playSongBuffer(filepath: string, buffer: ArrayBuffer, subtune: number = 0): Promise<void> {
+    let uint8Array: Uint8Array;
     uint8Array = new Uint8Array(buffer);
     const persistedSettings = this.getSettings();
     try {
-      await this.player.loadData(uint8Array, filepath, persistedSettings, subtune);
-    } catch (e) {
+      await this.player!.loadData(uint8Array, filepath, persistedSettings, subtune);
+    } catch (e: any) {
       this.handlePlayerError(`Unable to play ${filepath} (${e.message}).`);
     }
-    const numVoices = this.player.getNumVoices();
-    this.player.setVoiceMask([...Array(numVoices)].fill(true));
+    const numVoices = this.player!.getNumVoices();
+    this.player!.setVoiceMask([...Array(numVoices)].fill(true));
   }
 }
