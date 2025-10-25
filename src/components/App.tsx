@@ -34,9 +34,11 @@ import Visualizer from './Visualizer';
 import Toast, { ToastLevels } from './Toast';
 import MessageBox from './MessageBox';
 import Settings from './Settings';
+import TabBar from './TabBar';
+import SongDisplay from './SongDisplay';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
-import { AppProps, AppState } from '../types/app';
+import { AppProps, AppState, TabType } from '../types/app';
 import { SequencerState } from '../types/sequencer';
 import { PlayContext } from '../types/catalog';
 
@@ -125,6 +127,7 @@ class App extends React.Component<AppProps, AppState> {
       hasPlayer: false,
       paramDefs: [],
       paramValues: {},
+      activeTab: 'browser' as TabType,
     };
 
     this.initChipCore(audioCtx, playerNode, bufferSize);
@@ -688,6 +691,10 @@ class App extends React.Component<AppProps, AppState> {
     this.props.toastContext.enqueueToast('Copied song link to clipboard.', ToastLevels.INFO);
   }
 
+  handleTabChange = (tab: TabType) => {
+    this.setState({ activeTab: tab });
+  }
+
 
   render() {
     const { title, subtitle } = titlesFromMetadata(this.state.currentSongMetadata);
@@ -701,11 +708,11 @@ class App extends React.Component<AppProps, AppState> {
                       toggleInfo={this.toggleInfo}/>
           <Toast/>
           <AppHeader/>
+          <TabBar activeTab={this.state.activeTab} onTabChange={this.handleTabChange} />
           <div className="App-main">
             <div className="App-main-inner">
-              <div className="tab-container"></div>
               <div className="App-main-content-and-settings">
-              <div className="App-main-content-area"
+              <div className={`App-main-content-area mobile-tab-content ${this.state.activeTab === 'browser' ? 'mobile-tab-active' : ''}`}
                    ref={this.contentAreaRef}>
                 <Switch>
                   <Route path="/:browsePath*" render={({ history, match, location }) => {
@@ -730,7 +737,7 @@ class App extends React.Component<AppProps, AppState> {
                   }}/>
                 </Switch>
               </div>
-                <div className="App-main-content-area settings">
+                <div className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}>
                   <Settings
                     ejected={this.state.ejected}
                     tempo={this.state.tempo}
@@ -751,28 +758,26 @@ class App extends React.Component<AppProps, AppState> {
               </div>
             </div>
             {!this.state.loading &&
-              <Visualizer audioCtx={this.audioCtx}
-                          sourceNode={this.playerNode}
-                          chipCore={this.chipCore}
-                          paused={this.state.ejected || this.state.paused}/>}
+              <div className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}>
+                <Visualizer audioCtx={this.audioCtx}
+                            sourceNode={this.playerNode}
+                            chipCore={this.chipCore}
+                            paused={this.state.ejected || this.state.paused}/>
+              </div>}
           </div>
+          <SongDisplay songUrl={this.state.songUrl} ejected={this.state.ejected} />
           <AppFooter
             currentSongDurationMs={this.state.currentSongDurationMs}
             currentSongNumSubtunes={this.state.currentSongNumSubtunes}
-            currentSongNumVoices={this.state.currentSongNumVoices}
             currentSongSubtune={this.state.currentSongSubtune}
             ejected={this.state.ejected}
             getCurrentSongLink={this.getCurrentSongLink}
             handleCopyLink={this.handleCopyLink}
             handleCycleRepeat={this.handleCycleRepeat}
             handleCycleShuffle={this.handleCycleShuffle}
-            handleSetVoiceMask={this.handleSetVoiceMask}
-            handleTempoChange={this.handleTempoChange}
             handleTimeSliderChange={this.handleTimeSliderChange}
             handleVolumeChange={this.handleVolumeChange}
             imageUrl={this.state.imageUrl}
-            infoTexts={this.state.infoTexts}
-            md5={(this.state as any).md5}
             nextSong={this.nextSong}
             nextSubtune={this.nextSubtune}
             paused={this.state.paused}
@@ -782,13 +787,7 @@ class App extends React.Component<AppProps, AppState> {
             shuffle={this.state.shuffle}
             sequencer={this.sequencer}
             songUrl={this.state.songUrl}
-            subtitle={subtitle}
-            tempo={this.state.tempo}
-            title={title}
-            toggleInfo={this.toggleInfo}
             togglePause={this.togglePause}
-            voiceNames={this.state.voiceNames}
-            voiceMask={this.state.voiceMask}
             volume={this.state.volume}
           />
         </div>
