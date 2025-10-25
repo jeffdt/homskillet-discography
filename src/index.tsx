@@ -8,7 +8,7 @@ import { ToastProvider } from './components/ToastProvider';
 import ThemeInitializer from './components/ThemeInitializer';
 
 ReactDOM.render((
-  <Router basename={process.env.PUBLIC_URL}>
+  <Router basename="/">
     <ToastProvider>
       <UserProvider>
         <ThemeInitializer/>
