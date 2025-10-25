@@ -10,6 +10,7 @@ import ChipCore from '../chip-core';
 import {
   API_BASE,
   CATALOG_PREFIX,
+  IS_PRODUCTION,
   MAX_VOICES,
   MAX_SAMPLE_RATE,
   PUBLIC_URL,
@@ -610,7 +611,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   pathToHref(path: string): string {
-    const prefix = PUBLIC_URL
+    const prefix = IS_PRODUCTION
       ? `${PUBLIC_URL}/music`
       : CATALOG_PREFIX;
     return pathJoin(prefix, path.replace('%', '%25').replace('#', '%23'));
@@ -620,7 +621,7 @@ class App extends React.Component<AppProps, AppState> {
     const slashPath = pathJoin('/', path);
     // In production, load from static directories.json
     // In development, use API server
-    const fetchPromise = PUBLIC_URL
+    const fetchPromise = IS_PRODUCTION
       ? fetch(`${PUBLIC_URL}/directories.json`)
           .then(response => response.json())
           .then((directories: any) => directories[slashPath] || [])
@@ -637,7 +638,7 @@ class App extends React.Component<AppProps, AppState> {
           item.path.replace('%', '%25').replace('#', '%23');
           if (item.type === 'file') {
             // In production, prepend PUBLIC_URL to the music path
-            const prefix = PUBLIC_URL
+            const prefix = IS_PRODUCTION
               ? `${PUBLIC_URL}/music`
               : CATALOG_PREFIX;
             item.href = pathJoin(prefix, item.path);
