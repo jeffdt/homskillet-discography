@@ -1,7 +1,12 @@
 import React, { memo, useContext, useEffect, useRef } from 'react';
 import { ToastContext } from './ToastProvider';
 
-export const ToastLevels = {
+export interface ToastLevel {
+  label: string;
+  className: string;
+}
+
+export const ToastLevels: Record<string, ToastLevel> = {
   INFO: {
     label: 'Info',
     className: 'toast-info',
@@ -14,15 +19,15 @@ export const ToastLevels = {
 
 // Naive implementation. For advanced implementation, see
 // https://www.developerway.com/posts/implementing-advanced-use-previous-hook
-function usePrevious(value) {
-  const ref = useRef();
+function usePrevious<T>(value: T): T | undefined {
+  const ref = useRef<T>();
   useEffect(() => {
     ref.current = value;
   });
   return ref.current;
 }
 
-const Toast = () => {
+const Toast: React.FC = () => {
   const { clearCurrentToast, currentToast, toastCount } = useContext(ToastContext);
   const previousToast = usePrevious(currentToast);
 

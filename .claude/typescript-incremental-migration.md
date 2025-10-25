@@ -603,9 +603,9 @@ The compiled Emscripten code and player implementations are stable, rarely-modif
 
 ## Migration Progress Tracker
 
-**Current Status:** Third pass complete - 13 TypeScript files migrated (~41% of codebase)
+**Current Status:** Fourth pass complete - 18 TypeScript files migrated (~56% of codebase)
 
-**Files Migrated (13 total):**
+**Files Migrated (18 total):**
 
 **Pass 1 - Utilities (5 files):**
 1. ✅ src/promisify-xhr.ts
@@ -626,18 +626,20 @@ The compiled Emscripten code and player implementations are stable, rarely-modif
 12. ✅ src/components/PlayerParams.tsx
 13. ✅ src/components/AppFooter.tsx
 
-**Remaining JavaScript Files (19 files):**
+**Pass 4 - Provider & UI Components (5 files):**
+14. ✅ src/components/Toast.tsx
+15. ✅ src/components/ToastProvider.tsx
+16. ✅ src/components/MessageBox.tsx
+17. ✅ src/components/Settings.tsx
+18. ✅ src/components/UserProvider.tsx
 
-**Components (9 files):**
+**Remaining JavaScript Files (14 files):**
+
+**Components (4 files):**
 - src/components/App.js (805 lines - most complex, save for last)
-- src/components/Browse.js
-- src/components/MessageBox.js
-- src/components/Settings.js
-- src/components/Toast.js
-- src/components/ToastProvider.js
-- src/components/UserProvider.js
-- src/components/Visualizer.js
-- src/components/VirtualizedList.js
+- src/components/Browse.js (125 lines)
+- src/components/Visualizer.js (238 lines)
+- src/components/VirtualizedList.js (237 lines)
 
 **Players (4 files - can stay JS indefinitely):**
 - src/players/Player.js
@@ -657,17 +659,17 @@ The compiled Emscripten code and player implementations are stable, rarely-modif
 **Effects (1 file):**
 - src/effects/SubBass.js
 
-**Next Recommended Batch:** Remaining simple components (Toast, ToastProvider, MessageBox, VirtualizedList) or complex components (Browse, Settings, Visualizer) or core infrastructure (Sequencer)
+**Next Recommended Batch:** Complex components (Browse, Visualizer, VirtualizedList) or core infrastructure (Sequencer, index.js)
 
 **Primary Challenges Ahead:**
 - EventEmitter pattern in Sequencer.js
 - App.js state management (805 lines, complex audio/routing/player logic)
 - Browse.js (routing and catalog browsing)
-- Settings.js (complex settings UI)
 - Visualizer.js (canvas/audio visualization)
+- VirtualizedList.js (performance-critical virtualization)
 
 ---
 
-**Document Version:** 1.2
-**Last Updated:** 2025-10-24 (Pass 3 complete)
+**Document Version:** 1.3
+**Last Updated:** 2025-10-24 (Pass 4 complete)
 **Related:** See `typescript-migration-assessment.md` for full analysis

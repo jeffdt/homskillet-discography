@@ -1,14 +1,19 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
-export default memo(MessageBox);
-function MessageBox(props) {
+interface MessageBoxProps {
+  infoTexts?: string[];
+  showInfo: boolean;
+  toggleInfo: () => void;
+}
+
+const MessageBox: React.FC<MessageBoxProps> = (props) => {
   const {
     infoTexts = [],
     showInfo,
     toggleInfo
   } = props;
 
-  const [currTextIdx, setCurrTextIdx] = useState(0);
+  const [currTextIdx, setCurrTextIdx] = useState<number>(0);
   const infoText = (infoTexts[currTextIdx] || '').trim() || 'No information available.';
   const numLines = Math.min(40, infoText.split('\n').length + 6);
 
@@ -47,3 +52,5 @@ function MessageBox(props) {
     </div>
   </div>);
 }
+
+export default memo(MessageBox);
