@@ -262,10 +262,31 @@ body,#root {
     left: 0;
 }
 
+@media (orientation: portrait), (max-width: 768px) {
+    .App {
+        padding: 0 var(--charW1);
+    }
+
+    /* Adjust negative margins to match reduced padding */
+    .AppHeader,
+    .App-main,
+    .AppFooter {
+        margin-left: calc(var(--charW1) * -1);
+        margin-right: calc(var(--charW1) * -1);
+    }
+}
+
 .AppHeader {
     padding: var(--charH) var(--charW2);
     margin: 0 var(--charW2neg) var(--charH) var(--charW2neg);
     flex-grow: 0;
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .AppHeader {
+        padding: calc(var(--charH) / 2) var(--charW2);
+        margin-bottom: calc(var(--charH) / 2);
+    }
 }
 
 .AppHeader-subtitle {
@@ -291,6 +312,14 @@ body,#root {
     margin-top: -1px; /* shrink by 1px for top border of tabs */
 }
 
+@media (orientation: portrait), (max-width: 768px) {
+    .App-main {
+        flex-direction: column;
+        height: auto; /* Remove fixed height */
+        overflow: visible; /* Allow content to flow */
+    }
+}
+
 .App-main-inner {
     flex-grow: 1;
     display: flex;
@@ -304,6 +333,12 @@ body,#root {
     flex-direction: row;
     overflow: hidden;
     flex-grow: 1;
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .App-main-content-and-settings {
+        flex-direction: column;
+    }
 }
 
 .App-main-content-area {
@@ -333,6 +368,27 @@ body,#root {
     padding: var(--charH) var(--charW2);
 }
 
+@media (orientation: portrait), (max-width: 768px) {
+    .App-main-content-area.settings {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+        border-top: 1px solid var(--clickable);
+        max-height: none; /* Remove height limit - let it show all controls */
+        flex-shrink: 0; /* Don't shrink settings */
+        overflow: visible; /* Ensure settings content is visible */
+        height: auto; /* Natural height based on content */
+    }
+
+    .App-main-content-area:not(.settings) {
+        border-right: none;
+        flex-shrink: 0; /* Don't shrink browse area */
+        min-height: 200px; /* Minimum height for browsing */
+        max-height: 40vh; /* Limit browse area height */
+        overflow-y: auto; /* Scroll if needed */
+    }
+}
+
 .AppFooter {
     border-top: 1px solid var(--clickable);
     margin: 0 var(--charW2neg);
@@ -340,6 +396,13 @@ body,#root {
     height: 210px;
     display: flex;
     position: relative;
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .AppFooter {
+        height: auto;
+        min-height: 150px;
+    }
 }
 
 .AppFooter-attribution {
@@ -534,7 +597,40 @@ button.IconButton {
     background: initial;
 }
 
-.Visualizer { position: relative; display: flex; flex-direction: column; align-items: flex-end }
+.Visualizer { position: relative; display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+
+@media (orientation: portrait), (max-width: 768px) {
+    .App-main-inner {
+        order: 1;
+        flex-shrink: 0;
+    }
+
+    .Visualizer {
+        order: 2; /* Place after main-inner (Browse/Settings) */
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--clickable);
+        margin: 0 calc(var(--charW1) * -1);
+        align-items: stretch; /* Full width on mobile */
+        max-height: 200px; /* Limit height */
+        min-height: 200px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .Visualizer-analyzer,
+    .Visualizer-spectrogram {
+        width: 100% !important;
+        margin-left: 0;
+        min-height: 0 !important; /* Override the 800px min-height */
+        max-height: 150px; /* Very compact */
+    }
+
+    .Visualizer-options {
+        text-align: center;
+        padding: calc(var(--charH) / 2) var(--charW2) 0;
+    }
+}
 .Visualizer-overlay { position: absolute; top: calc(4 * var(--charH)); }
 .Visualizer-options { padding: var(--charH) var(--charW2) 0; text-align: right; position: relative; z-index: 2; background-color: rgba(0, 0, 0, 0.65); }
 .Visualizer-toggle { position: fixed; top: var(--charH); right: var(--charW2); z-index: 3; }
