@@ -486,8 +486,9 @@ body,#root {
     .App-main {
         -ms-flex-direction: column;
             flex-direction: column;
-        height: auto; /* Remove fixed height */
-        overflow: visible; /* Allow content to flow */
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Take remaining space */
+        overflow: hidden; /* Contain tab content */
     }
 }
 
@@ -513,9 +514,18 @@ body,#root {
 }
 
 @media (orientation: portrait), (max-width: 768px) {
+    .App-main-inner {
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Fill available space */
+        overflow: hidden; /* Contain scrollable content */
+    }
+
     .App-main-content-and-settings {
         -ms-flex-direction: column;
             flex-direction: column;
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Fill available space */
+        overflow: hidden; /* Contain scrollable content */
     }
 }
 
@@ -554,22 +564,28 @@ body,#root {
         width: 100%;
         min-width: 0;
         border-right: none;
-        border-top: 1px solid var(--clickable);
         max-height: none; /* Remove height limit - let it show all controls */
-        -ms-flex-negative: 0;
-            flex-shrink: 0; /* Don't shrink settings */
-        overflow: visible; /* Ensure settings content is visible */
-        height: auto; /* Natural height based on content */
+        overflow-y: auto; /* Scroll if content overflows */
+        height: 100%; /* Fill available space */
     }
 
     .App-main-content-area:not(.settings) {
         border-right: none;
-        -ms-flex-negative: 0;
-            flex-shrink: 0; /* Don't shrink browse area */
-        min-height: 200px; /* Minimum height for browsing */
-        max-height: 40vh; /* Limit browse area height */
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Fill available space */
         overflow-y: auto; /* Scroll if needed */
+        height: 100%; /* Fill available space */
     }
+}
+
+.SongDisplay {
+    padding: var(--charH) var(--charW2);
+    color: var(--neutral4);
+    font: var(--font-accent) !important;
+    border-top: 1px solid var(--clickable);
+    margin: 0 var(--charW2neg);
+    -ms-flex-negative: 0;
+        flex-shrink: 0;
 }
 
 .AppFooter {
@@ -635,7 +651,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .AppFooter-main {
     -ms-flex-positive: 1;
         flex-grow: 1;
-    overflow: auto;
+    overflow: hidden;
     padding: var(--charH) var(--charW2);
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
@@ -656,13 +672,37 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     overflow-x: hidden;
 }
 
-.AppFooter-top-row {
+.AppFooter-controls-row {
     display: -ms-flexbox;
     display: flex;
     -ms-flex-align: center;
         align-items: center;
+    -ms-flex-pack: center;
+        justify-content: center;
     gap: var(--charW1);
     white-space: nowrap;
+    margin: var(--charH) 0;
+}
+
+.AppFooter-controls-row .box-button {
+    height: calc(var(--charH) * 1.5);
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: center;
+        align-items: center;
+}
+
+.AppFooter-secondary-controls {
+    margin-top: 0;
+}
+
+.AppFooter-secondary-controls .box-button {
+    height: var(--charH);
+}
+
+.AppFooter-play-pause .inline-icon {
+    width: 32px !important;
+    height: calc(var(--charH) * 1.5);
 }
 
 .Slider {
@@ -754,29 +794,6 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .PlayerParams-label { -ms-flex-negative: 0; flex-shrink: 0; width: calc(var(--charW1) * 14); margin-right: var(--charW1); }
 .PlayerParams-group { margin-bottom: var(--charH); }
 
-.SongDetails {
-    display: grid;
-    grid-template-areas:
-        'fav title'
-        '... subtitle'
-        '... path';
-    grid-template-columns: auto 1fr;
-}
-.SongDetails-title { grid-area: title; color: var(--neutral4); display: -ms-flexbox; display: flex; gap: var(--charW1); font: var(--font-accent) !important; }
-.SongDetails-title a { color: var(--neutral4); }
-.SongDetails-subtitle { grid-area: subtitle; }
-.SongDetails-filepath { grid-area: path; }
-.SongDetails-subtitle, .SongDetails-subtitle, .SongDetails-filepath {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-align: center;
-        align-items: center;
-}
-.SongDetails-filepath a {color: var(--neutral2);}
-
 button.FavoriteButton:active { color: var(--clickable); }
 button.FavoriteButton.isFavorite { color: var(--clickable); }
 button.FavoriteButton {
@@ -814,15 +831,13 @@ button.IconButton {
             order: 2; /* Place after main-inner (Browse/Settings) */
         width: 100%;
         border-left: none;
-        border-top: 1px solid var(--clickable);
         margin: 0 calc(var(--charW1) * -1);
         -ms-flex-align: stretch;
             align-items: stretch; /* Full width on mobile */
-        max-height: 200px; /* Limit height */
-        min-height: 200px;
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Fill available space */
+        height: 100%; /* Fill available space */
         overflow: hidden;
-        -ms-flex-negative: 0;
-            flex-shrink: 0;
     }
 
     .Visualizer-analyzer,
@@ -830,7 +845,9 @@ button.IconButton {
         width: 100% !important;
         margin-left: 0;
         min-height: 0 !important; /* Override the 800px min-height */
-        max-height: 150px; /* Very compact */
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Fill available space */
+        height: 100%; /* Fill available space */
     }
 
     .Visualizer-options {
@@ -898,6 +915,42 @@ button.IconButton {
 }
 
 .tab-settings { margin-left: auto; margin-right: 0; }
+
+/* Mobile tab bar - only visible on mobile/portrait */
+.mobile-tab-bar {
+    display: none; /* Hidden by default (desktop) */
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .mobile-tab-bar {
+        display: -ms-flexbox;
+        display: flex;
+        gap: var(--charW1);
+        padding: 0 var(--charW1);
+        border-bottom: 1px solid var(--clickable);
+        background: var(--background);
+        margin: 0 calc(var(--charW1) * -1);
+        -ms-flex-negative: 0;
+            flex-shrink: 0; /* Don't shrink the tab bar */
+    }
+
+    /* Hide all tab content by default on mobile */
+    .mobile-tab-content {
+        display: none !important;
+    }
+
+    /* Show only the active tab on mobile - fill remaining space */
+    .mobile-tab-content.mobile-tab-active {
+        display: -ms-flexbox !important;
+        display: flex !important;
+        -ms-flex-positive: 1;
+            flex-grow: 1; /* Fill available space */
+        -ms-flex-direction: column;
+            flex-direction: column;
+        overflow: hidden; /* Contain scrollable content */
+        min-height: 0; /* Allow flex shrinking */
+    }
+}
 
 .toast-box-outer {
     position: absolute;
@@ -1180,4 +1233,4 @@ button.IconButton {
 
 /*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNvdXJjZS9zdHlsZXMuY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLDZCQUE2Qjs7QUFFN0I7QUFDQTs7QUFFQTtBQUNBOztBQUVBLHVCQUF1Qjs7QUFFdkI7QUFDQTs7QUFFQTtBQUNBOztBQUVBLHdCQUF3Qjs7QUFFeEI7QUFDQTs7QUFFQTtBQUNBOztBQUVBO0VBQ0UsZ0JBQWdCO0VBQ2hCLHlCQUF5QjtFQUN6QixhQUFhO0VBQ2IsbUJBQW1CO0VBQ25CLG1CQUFtQjtBQUNyQjtBQUNBO0VBQ0UsYUFBYTtFQUNiLG1CQUFtQjtFQUNuQixtQkFBbUI7QUFDckI7O0FBRUE7RUFDRSxxQkFBcUI7RUFDckIsZUFBZTtFQUNmLG1CQUFtQjtFQUNuQix1QkFBdUI7RUFDdkIsZ0JBQWdCO0FBQ2xCOztBQUVBOztFQUVFLGtCQUFrQjtFQUNsQixjQUFjO0FBQ2hCO0FBQ0E7RUFDRSx1QkFBdUI7RUFDdkIsbUJBQW1CO0FBQ3JCOztBQUVBOztFQUVFLGlCQUFpQjtBQUNuQjtBQUNBO0VBQ0UsZUFBZTtBQUNqQjs7QUFFQTtFQUNFLGFBQWE7RUFDYixtQkFBbUI7QUFDckI7QUFDQTtFQUNFLGNBQWM7RUFDZCxXQUFXO0VBQ1gsVUFBVTtFQUNWLGtCQUFrQjtBQUNwQjs7QUFFQSx1QkFBdUI7O0FBRXZCO0FBQ0EiLCJmaWxlIjoic3R5bGVzLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIi8qIENvbGxlY3Rpb24gZGVmYXVsdCB0aGVtZSAqL1xuXG4uUmVhY3RWaXJ0dWFsaXplZF9fQ29sbGVjdGlvbiB7XG59XG5cbi5SZWFjdFZpcnR1YWxpemVkX19Db2xsZWN0aW9uX19pbm5lclNjcm9sbENvbnRhaW5lciB7XG59XG5cbi8qIEdyaWQgZGVmYXVsdCB0aGVtZSAqL1xuXG4uUmVhY3RWaXJ0dWFsaXplZF9fR3JpZCB7XG59XG5cbi5SZWFjdFZpcnR1YWxpemVkX19HcmlkX19pbm5lclNjcm9sbENvbnRhaW5lciB7XG59XG5cbi8qIFRhYmxlIGRlZmF1bHQgdGhlbWUgKi9cblxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlIHtcbn1cblxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlX19HcmlkIHtcbn1cblxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlX19oZWFkZXJSb3cge1xuICBmb250LXdlaWdodDogNzAwO1xuICB0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlO1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogcm93O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xufVxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlX19yb3cge1xuICBkaXNwbGF5OiBmbGV4O1xuICBmbGV4LWRpcmVjdGlvbjogcm93O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xufVxuXG4uUmVhY3RWaXJ0dWFsaXplZF9fVGFibGVfX2hlYWRlclRydW5jYXRlZFRleHQge1xuICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG4gIG1heC13aWR0aDogMTAwJTtcbiAgd2hpdGUtc3BhY2U6IG5vd3JhcDtcbiAgdGV4dC1vdmVyZmxvdzogZWxsaXBzaXM7XG4gIG92ZXJmbG93OiBoaWRkZW47XG59XG5cbi5SZWFjdFZpcnR1YWxpemVkX19UYWJsZV9faGVhZGVyQ29sdW1uLFxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlX19yb3dDb2x1bW4ge1xuICBtYXJnaW4tcmlnaHQ6IDEwcHg7XG4gIG1pbi13aWR0aDogMHB4O1xufVxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlX19yb3dDb2x1bW4ge1xuICB0ZXh0LW92ZXJmbG93OiBlbGxpcHNpcztcbiAgd2hpdGUtc3BhY2U6IG5vd3JhcDtcbn1cblxuLlJlYWN0VmlydHVhbGl6ZWRfX1RhYmxlX19oZWFkZXJDb2x1bW46Zmlyc3Qtb2YtdHlwZSxcbi5SZWFjdFZpcnR1YWxpemVkX19UYWJsZV9fcm93Q29sdW1uOmZpcnN0LW9mLXR5cGUge1xuICBtYXJnaW4tbGVmdDogMTBweDtcbn1cbi5SZWFjdFZpcnR1YWxpemVkX19UYWJsZV9fc29ydGFibGVIZWFkZXJDb2x1bW4ge1xuICBjdXJzb3I6IHBvaW50ZXI7XG59XG5cbi5SZWFjdFZpcnR1YWxpemVkX19UYWJsZV9fc29ydGFibGVIZWFkZXJJY29uQ29udGFpbmVyIHtcbiAgZGlzcGxheTogZmxleDtcbiAgYWxpZ24taXRlbXM6IGNlbnRlcjtcbn1cbi5SZWFjdFZpcnR1YWxpemVkX19UYWJsZV9fc29ydGFibGVIZWFkZXJJY29uIHtcbiAgZmxleDogMCAwIDI0cHg7XG4gIGhlaWdodDogMWVtO1xuICB3aWR0aDogMWVtO1xuICBmaWxsOiBjdXJyZW50Q29sb3I7XG59XG5cbi8qIExpc3QgZGVmYXVsdCB0aGVtZSAqL1xuXG4uUmVhY3RWaXJ0dWFsaXplZF9fTGlzdCB7XG59XG4iXX0= */
 
-/*# sourceMappingURL=main.a4344115.css.map*/
+/*# sourceMappingURL=main.fe0b3f29.css.map*/
