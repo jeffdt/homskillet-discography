@@ -315,8 +315,8 @@ body,#root {
 @media (orientation: portrait), (max-width: 768px) {
     .App-main {
         flex-direction: column;
-        height: auto; /* Remove fixed height */
-        overflow: visible; /* Allow content to flow */
+        flex-grow: 1; /* Take remaining space */
+        overflow: hidden; /* Contain tab content */
     }
 }
 
@@ -336,8 +336,15 @@ body,#root {
 }
 
 @media (orientation: portrait), (max-width: 768px) {
+    .App-main-inner {
+        flex-grow: 1; /* Fill available space */
+        overflow: hidden; /* Contain scrollable content */
+    }
+
     .App-main-content-and-settings {
         flex-direction: column;
+        flex-grow: 1; /* Fill available space */
+        overflow: hidden; /* Contain scrollable content */
     }
 }
 
@@ -373,20 +380,26 @@ body,#root {
         width: 100%;
         min-width: 0;
         border-right: none;
-        border-top: 1px solid var(--clickable);
         max-height: none; /* Remove height limit - let it show all controls */
-        flex-shrink: 0; /* Don't shrink settings */
-        overflow: visible; /* Ensure settings content is visible */
-        height: auto; /* Natural height based on content */
+        overflow-y: auto; /* Scroll if content overflows */
+        height: 100%; /* Fill available space */
     }
 
     .App-main-content-area:not(.settings) {
         border-right: none;
-        flex-shrink: 0; /* Don't shrink browse area */
-        min-height: 200px; /* Minimum height for browsing */
-        max-height: 40vh; /* Limit browse area height */
+        flex-grow: 1; /* Fill available space */
         overflow-y: auto; /* Scroll if needed */
+        height: 100%; /* Fill available space */
     }
+}
+
+.SongDisplay {
+    padding: var(--charH) var(--charW2);
+    color: var(--neutral4);
+    font: var(--font-accent) !important;
+    border-top: 1px solid var(--clickable);
+    margin: 0 var(--charW2neg);
+    flex-shrink: 0;
 }
 
 .AppFooter {
@@ -467,11 +480,32 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     overflow-x: hidden;
 }
 
-.AppFooter-top-row {
+.AppFooter-controls-row {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--charW1);
     white-space: nowrap;
+    margin: var(--charH) 0;
+}
+
+.AppFooter-controls-row .box-button {
+    height: calc(var(--charH) * 1.5);
+    display: flex;
+    align-items: center;
+}
+
+.AppFooter-secondary-controls {
+    margin-top: 0;
+}
+
+.AppFooter-secondary-controls .box-button {
+    height: var(--charH);
+}
+
+.AppFooter-play-pause .inline-icon {
+    width: 32px !important;
+    height: calc(var(--charH) * 1.5);
 }
 
 .Slider {
@@ -609,13 +643,11 @@ button.IconButton {
         order: 2; /* Place after main-inner (Browse/Settings) */
         width: 100%;
         border-left: none;
-        border-top: 1px solid var(--clickable);
         margin: 0 calc(var(--charW1) * -1);
         align-items: stretch; /* Full width on mobile */
-        max-height: 200px; /* Limit height */
-        min-height: 200px;
+        flex-grow: 1; /* Fill available space */
+        height: 100%; /* Fill available space */
         overflow: hidden;
-        flex-shrink: 0;
     }
 
     .Visualizer-analyzer,
@@ -623,7 +655,8 @@ button.IconButton {
         width: 100% !important;
         margin-left: 0;
         min-height: 0 !important; /* Override the 800px min-height */
-        max-height: 150px; /* Very compact */
+        flex-grow: 1; /* Fill available space */
+        height: 100%; /* Fill available space */
     }
 
     .Visualizer-options {
@@ -687,6 +720,37 @@ button.IconButton {
 }
 
 .tab-settings { margin-left: auto; margin-right: 0; }
+
+/* Mobile tab bar - only visible on mobile/portrait */
+.mobile-tab-bar {
+    display: none; /* Hidden by default (desktop) */
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .mobile-tab-bar {
+        display: flex;
+        gap: var(--charW1);
+        padding: 0 var(--charW1);
+        border-bottom: 1px solid var(--clickable);
+        background: var(--background);
+        margin: 0 calc(var(--charW1) * -1);
+        flex-shrink: 0; /* Don't shrink the tab bar */
+    }
+
+    /* Hide all tab content by default on mobile */
+    .mobile-tab-content {
+        display: none !important;
+    }
+
+    /* Show only the active tab on mobile - fill remaining space */
+    .mobile-tab-content.mobile-tab-active {
+        display: flex !important;
+        flex-grow: 1; /* Fill available space */
+        flex-direction: column;
+        overflow: hidden; /* Contain scrollable content */
+        min-height: 0; /* Allow flex shrinking */
+    }
+}
 
 .toast-box-outer {
     position: absolute;

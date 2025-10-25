@@ -183,3 +183,30 @@ export function remap(
 export function remap01(number: number, toLeft: number, toRight: number): number {
   return remap(number, 0, 1, toLeft, toRight);
 }
+
+export function formatSongDisplayName(songUrl: string | null): string {
+  if (!songUrl) return '';
+
+  // Remove catalog prefix and decode URI
+  const cleanedPath = decodeURIComponent(songUrl.replace(CATALOG_PREFIX_REGEX, '/'));
+
+  // Split path into parts
+  const parts = cleanedPath.split('/').filter(p => p);
+
+  if (parts.length < 2) {
+    // If there's only a filename, just return it without extension
+    const filename = parts[0] || '';
+    return filename.replace(/\.(nsf|nsfe)$/i, '');
+  }
+
+  // Get folder (second to last part) and filename (last part)
+  const folder = parts[parts.length - 2];
+  const filename = parts[parts.length - 1];
+
+  // Strip .nsf or .nsfe extension and replace underscores with spaces
+  const filenameWithoutExt = filename
+    .replace(/\.(nsf|nsfe)$/i, '')
+    .replace(/_/g, ' ');
+
+  return `${folder} - ${filenameWithoutExt}`;
+}

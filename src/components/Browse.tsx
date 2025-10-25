@@ -115,9 +115,9 @@ export default class Browse extends React.PureComponent<BrowseProps> {
           /{browsePath}{' '}
           <button
             className="box-button"
-            title="Shuffle this directory (and all subdirectories)"
+            title="Play a random song from this album"
             onClick={this.handleShufflePlay}>
-            Shuffle Play
+            Randomize
           </button>
         </h3>
       </VirtualizedList>

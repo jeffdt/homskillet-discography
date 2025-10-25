@@ -27,6 +27,8 @@ export interface AppProps extends RouteComponentProps {
   toastContext: ToastContextValue;
 }
 
+export type TabType = 'browser' | 'settings' | 'visualizer';
+
 export interface AppState {
   loading: boolean;
   paused: boolean;
@@ -52,6 +54,7 @@ export interface AppState {
   hasPlayer: boolean;
   paramDefs: PlayerParamDef[];
   paramValues: Record<string, any>;
+  activeTab: TabType;
 }
 
 export interface BrowseProps {
