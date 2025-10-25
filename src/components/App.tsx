@@ -750,7 +750,7 @@ class App extends React.Component<AppProps, AppState> {
                 </div>
               </div>
             </div>
-            {!isMobile.phone && !this.state.loading &&
+            {!this.state.loading &&
               <Visualizer audioCtx={this.audioCtx}
                           sourceNode={this.playerNode}
                           chipCore={this.chipCore}
