@@ -1,11 +1,12 @@
 import pianoKeys from '../images/piano-keys.png';
 import Spectrogram, { DEFAULT_COLOR_PALETTE } from '../Spectrogram';
 import React, { Fragment, PureComponent } from 'react';
+import { ColorPalette, WeightingMode, VisualizerState, VisualizerProps } from '../types/visualizer';
 
 const SPECTROGRAM_MODES = [
   'Linear FFT', 'Log FFT', 'Constant Q'
 ];
-const WEIGHTING_MODES = [
+const WEIGHTING_MODES: WeightingMode[] = [
   {label: 'None', description: 'No attenuation'},
   {label: 'A-Weighting', description: 'Darkens low and high frequencies to approximate sensitivity of human hearing.'}
 ];
@@ -21,7 +22,7 @@ const SPEEDS = [
 const SPEED_LABELS = [
   'Lo', 'Med', 'Hi'
 ];
-const COLOR_PALETTES = [
+const COLOR_PALETTES: ColorPalette[] = [
   {
     label: 'Original',
     colors: DEFAULT_COLOR_PALETTE,
@@ -41,8 +42,13 @@ const COLOR_PALETTES = [
 ];
 const VIS_WIDTH = 448;
 
-export default class Visualizer extends PureComponent {
-  constructor(props) {
+export default class Visualizer extends PureComponent<VisualizerProps, VisualizerState> {
+  private spectrogram!: Spectrogram;
+  private freqCanvasRef: React.RefObject<HTMLCanvasElement>;
+  private specCanvasRef: React.RefObject<HTMLCanvasElement>;
+  private pianoKeysRef: React.RefObject<HTMLImageElement>;
+
+  constructor(props: VisualizerProps) {
     super(props);
 
     this.state = {
@@ -64,9 +70,9 @@ export default class Visualizer extends PureComponent {
       this.props.chipCore,
       this.props.audioCtx,
       this.props.sourceNode,
-      this.freqCanvasRef.current,
-      this.specCanvasRef.current,
-      this.pianoKeysRef.current,
+      this.freqCanvasRef.current!,
+      this.specCanvasRef.current!,
+      this.pianoKeysRef.current!,
     );
     this.spectrogram.setMode(this.state.vizMode);
     this.spectrogram.setWeighting(this.state.weightingMode);
@@ -74,47 +80,47 @@ export default class Visualizer extends PureComponent {
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: VisualizerProps) {
     this.spectrogram.setPaused(this.state.enabled ? this.props.paused : true);
   }
 
-  handleModeClick = (e) => {
-    const mode = parseInt(e.target.value, 10);
+  handleModeClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    const mode = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({vizMode: mode});
     this.spectrogram.setMode(mode);
   };
 
-  handleWeightingModeClick = (e) => {
-    const mode = parseInt(e.target.value, 10);
+  handleWeightingModeClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    const mode = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({weightingMode: mode});
     this.spectrogram.setWeighting(mode);
   };
 
-  handleFFTSizeClick = (e) => {
-    const size = parseInt(e.target.value, 10);
+  handleFFTSizeClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    const size = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({fftSize: size});
     this.spectrogram.setFFTSize(size);
   };
 
-  handleSpeedClick = (e) => {
-    const speed = parseInt(e.target.value, 10);
+  handleSpeedClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    const speed = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({ speed: speed });
     this.spectrogram.setSpeed(speed);
   }
 
-  handleToggleVisualizer = (e) => {
-    const enabled = e.target.value === 'true';
+  handleToggleVisualizer = (e: React.MouseEvent<HTMLInputElement>) => {
+    const enabled = (e.target as HTMLInputElement).value === 'true';
     this.setState({enabled: enabled});
   };
 
-  handlePaletteClick = (e) => {
-    const paletteIndex = parseInt(e.target.value, 10);
+  handlePaletteClick = (e: React.MouseEvent<HTMLInputElement>) => {
+    const paletteIndex = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({ colorPalette: paletteIndex });
     this.spectrogram.setColorPalette(COLOR_PALETTES[paletteIndex].colors);
   };
 
   render() {
-    const enabledStyle = {
+    const enabledStyle: React.CSSProperties = {
       display: this.state.enabled ? 'block' : 'none',
       width: VIS_WIDTH,
       boxSizing: 'border-box',
@@ -126,14 +132,14 @@ export default class Visualizer extends PureComponent {
           <input onClick={this.handleToggleVisualizer}
                  id='vis-on'
                  type='radio'
-                 value={true}
+                 value={'true'}
                  defaultChecked={this.state.enabled === true}
                  name='visualizer-enabled'/>
           <label htmlFor='vis-on' className='inline'>On</label>
           <input onClick={this.handleToggleVisualizer}
                  id='vis-off'
                  type='radio'
-                 value={false}
+                 value={'false'}
                  defaultChecked={this.state.enabled === false}
                  name='visualizer-enabled'/>
           <label htmlFor='vis-off' className='inline'>Off</label>

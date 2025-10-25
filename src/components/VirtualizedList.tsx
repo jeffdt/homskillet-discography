@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowKeyStepper, List, WindowScroller } from 'react-virtualized';
+import { ArrowKeyStepper, List, WindowScroller, Index } from 'react-virtualized';
 import 'react-virtualized/styles.css';
 import { findDOMNode } from 'react-dom';
 import { useHistory } from 'react-router-dom';
+import { VirtualizedListProps } from '../types/app';
 
 export default VirtualizedList;
 
-function VirtualizedList(props) {
+function VirtualizedList(props: VirtualizedListProps) {
   const {
     currContext,
     currIdx,
@@ -19,11 +20,11 @@ function VirtualizedList(props) {
     listRef,
   } = props;
 
-  const arrowKeyStepperRef = useRef();
+  const arrowKeyStepperRef = useRef<ArrowKeyStepper>(null);
   const history = useHistory();
   const [selectedRow, setSelectedRow] = useState(0);
   const [rowHeight, setRowHeight] = useState(20);
-  const updateHistoryRef = useRef();
+  const updateHistoryRef = useRef<(() => void) | undefined>();
 
   useEffect(() => {
     if (!scrollContainerRef.current) return;
@@ -59,13 +60,13 @@ function VirtualizedList(props) {
     return () => unblock();  // Cleanup on unmount
   }, [history, updateHistoryRef]);
 
-  const onActivate = useCallback((index) => {
+  const onActivate = useCallback((index: number) => {
     // Song index may differ from item index if there are directories
     const item = itemList[index];
     const songIndex = item.idx ?? index;
 
     if (item.type === 'directory') {
-      return (e) => {
+      return (e: React.MouseEvent) => {
         // console.log('Directory clicked', index, e);
         e.preventDefault();
         if (item.isBackLink) {
@@ -82,21 +83,26 @@ function VirtualizedList(props) {
   }, [history, itemList, songContext, onSongClick]);
 
   // Callback for ArrowKeyStepper.
-  const selectCell = useCallback(({ scrollToRow }) => {
+  const selectCell = useCallback(({ scrollToRow }: { scrollToRow: number }) => {
     setSelectedRow(scrollToRow);
   }, [setSelectedRow]);
 
   // Reset/restore selected row when itemList changes.
   useEffect(() => {
-    const scrollTop = history.location.state?.scrollTop || 0;
-    const row = history.location.state?.selectedRow || 0;
+    const scrollTop = (history.location.state as any)?.scrollTop || 0;
+    const row = (history.location.state as any)?.selectedRow || 0;
     setSelectedRow(row);
     // Ensure list is focused after a top-level (Browse, Favorites, etc) navigation.
-    if (listRef) findDOMNode(listRef.current).focus({ preventScroll: true });
+    if (listRef && listRef.current) {
+      const node = findDOMNode(listRef.current);
+      if (node instanceof HTMLElement) {
+        node.focus({ preventScroll: true });
+      }
+    }
     // TODO: pass scroll position and selected row from parent, along with itemList.
     // This can't be sync because 'setSelectedRow' is async.
     setTimeout(() => {
-      scrollContainerRef.current.scrollTo(0, scrollTop);
+      scrollContainerRef.current?.scrollTo(0, scrollTop);
     }, 0);
     // We only want to run this scroll-restoration effect when location pathname changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -105,12 +111,14 @@ function VirtualizedList(props) {
   return (
     <div onKeyDown={(e) => {
       // TODO: Possibly remove ArrowKeyStepper and just use this instead.
-      if (e.target.tagName === 'INPUT') return;
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (!e.repeat && (e.key === 'Enter' || e.key === 'Return')) {
-        if (e.target.tagName === 'BUTTON') return;
-        const index = listRef.current.props.scrollToIndex;
-        listRef.current.scrollToRow(index);
-        onActivate(index)(e);
+        if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+        const index = listRef.current?.props.scrollToIndex;
+        if (listRef.current && typeof index === 'number') {
+          listRef.current.scrollToRow(index);
+          onActivate(index)(e as any);
+        }
       } else if (e.key === 'Backspace') {
         history.goBack();
       } else if (e.key === 'Home') {
@@ -129,7 +137,7 @@ function VirtualizedList(props) {
         const char = e.key.toLowerCase();
         let left = 0;
         let right = itemList.length - 1;
-        let mid;
+        let mid = 0;
         while (left <= right) {
           mid = Math.floor((left + right) / 2);
           const name = itemList[mid].name.toLowerCase();
@@ -149,9 +157,14 @@ function VirtualizedList(props) {
       <WindowScroller
         scrollElement={scrollContainerRef.current}
         onScroll={({ scrollTop }) => {
-          listRef.current.scrollToPosition(scrollTop);
-          // Focus problems https://github.com/bvaughn/react-virtualized/issues/776
-          findDOMNode(listRef.current).focus({ preventScroll: true });
+          if (listRef.current) {
+            listRef.current.scrollToPosition(scrollTop);
+            // Focus problems https://github.com/bvaughn/react-virtualized/issues/776
+            const node = findDOMNode(listRef.current);
+            if (node instanceof HTMLElement) {
+              node.focus({ preventScroll: true });
+            }
+          }
         }}
       >
         {({ height, registerChild, onChildScroll, scrollTop }) => (
@@ -189,7 +202,7 @@ function VirtualizedList(props) {
                       // Song index may differ from item index if there are directories
                       // const songIndex = item.idx;
                       // const isPlaying = currContext === songContext && currIdx === songIndex;
-                      const isPlaying = currContext && currContext[currIdx] === item.href;
+                      const isPlaying = currContext && currContext[currIdx!] === item.href;
                       const isSelected = index === scrollToRow;
                       const classNames = ['BrowseList-row'];
                       if (isPlaying) classNames.push('Song-now-playing');
@@ -201,13 +214,13 @@ function VirtualizedList(props) {
                       // It is also impossible to play an item scrolled off screen if relying on <a> focus.
                       // For these reasons we will use a fake focus instead of the browser built-in.
 
-                      const onSelect = (e) => {
+                      const onSelect = (e: React.MouseEvent) => {
                         setSelectedRow(index);
                         // Prevent focus on the anchor element
                         e.preventDefault();
                         // Bubble focus up to the containing List component (it should have a tabIndex)
-                        let el = e.target.parentElement;
-                        while (el?.tabIndex < 0) el = el.parentElement;
+                        let el = (e.target as HTMLElement).parentElement;
+                        while (el && el.tabIndex < 0) el = el.parentElement;
                         el?.focus({
                           preventScroll: true
                         });
