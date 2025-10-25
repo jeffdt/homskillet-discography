@@ -468,7 +468,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .BrowseList-row:has(a:hover) { color: var(--neutral4); }
  }
 .BrowseList-row a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.BrowseList-colName { overflow: hidden; flex-grow: 1; display: flex; align-items: center; }
+.BrowseList-colName { overflow: hidden; flex-grow: 1; display: flex; align-items: center; gap: calc(var(--charW1) / 2); }
 .BrowseList-colName a { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 .BrowseList-colDir, .BrowseList-colSize { flex-shrink : 0; margin-left: calc(var(--charW1) * 2); }
 .BrowseList-colCount { flex-shrink : 0; margin-left: var(--charW1); width: calc(var(--charW1) * 5); text-align: right; }
