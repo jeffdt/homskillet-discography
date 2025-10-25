@@ -99,7 +99,7 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--neutral4);
     margin: var(--charH) 0;
     padding: 0;
-    font: 14px/16px MetallicWingII !important;
+    font: 14px/16px 'mwing II', monospace !important;
 }
 
 p { margin: 0 0 var(--charH) 0; }
@@ -349,7 +349,7 @@ body,#root {
     color: var(--neutral2);
     background: var(--background);
     z-index: 1;
-    font: 11px/16px MetallicWingII !important;
+    font: 11px/16px 'mwing II', monospace !important;
 }
 
 .AppFooter-attribution a {

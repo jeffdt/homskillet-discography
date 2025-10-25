@@ -95,17 +95,21 @@
 
 @font-face {
     src: url(mwing_i.ttf) format('truetype');
-    font-family: MetallicWingI;
+    font-family: 'mwing I';
+    font-weight: normal;
+    font-style: normal;
 }
 
-:root { --fontMetallicWingI: 14px/16px MetallicWingI; }
+:root { --fontMetallicWingI: 14px/16px 'mwing I', monospace; }
 
 @font-face {
     src: url(mwing_ii.ttf) format('truetype');
-    font-family: MetallicWingII;
+    font-family: 'mwing II';
+    font-weight: normal;
+    font-style: normal;
 }
 
-:root { --fontMetallicWingII: 14px/16px MetallicWingII; }
+:root { --fontMetallicWingII: 14px/16px 'mwing II', monospace; }
 
 @font-face {
     src: url(mm-tahoma-8px.ttf) format('truetype');
