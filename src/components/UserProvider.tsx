@@ -14,14 +14,14 @@ export interface UserContextValue {
 
 const UserContext = createContext<UserContextValue>({
   settings: {
-    showPlayerSettings: false,
+    showPlayerSettings: true,
   },
   updateSettings: () => {},
   replaceSettings: () => {},
 });
 
 const DEFAULT_SETTINGS: UserSettings = {
-  showPlayerSettings: false,
+  showPlayerSettings: true,
 };
 
 function migrateSettings(settings: Partial<UserSettings>): UserSettings {

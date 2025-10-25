@@ -688,18 +688,11 @@ class App extends React.Component<AppProps, AppState> {
     this.props.toastContext.enqueueToast('Copied song link to clipboard.', ToastLevels.INFO);
   }
 
-  handleToggleSettings = (e: React.MouseEvent) => {
-    const { settings, updateSettings } = this.props.userContext;
-    const showPlayerSettings = settings?.showPlayerSettings;
-    updateSettings({ showPlayerSettings: !showPlayerSettings });
-  }
 
   render() {
     const { title, subtitle } = titlesFromMetadata(this.state.currentSongMetadata);
     const currContext = this.sequencer?.getCurrContext();
     const currIdx = this.sequencer?.getCurrIdx();
-    const { settings } = this.props.userContext;
-    const showPlayerSettings = settings?.showPlayerSettings;
 
     return (
         <div className="App">
@@ -710,10 +703,7 @@ class App extends React.Component<AppProps, AppState> {
           <AppHeader/>
           <div className="App-main">
             <div className="App-main-inner">
-              <div className="tab-container">
-                <button className={`tab tab-settings ${showPlayerSettings ? 'tab-selected' : ''}`}
-                        onClick={this.handleToggleSettings}>Settings</button>
-              </div>
+              <div className="tab-container"></div>
               <div className="App-main-content-and-settings">
               <div className="App-main-content-area"
                    ref={this.contentAreaRef}>
@@ -740,7 +730,6 @@ class App extends React.Component<AppProps, AppState> {
                   }}/>
                 </Switch>
               </div>
-                { showPlayerSettings &&
                 <div className="App-main-content-area settings">
                   <Settings
                     ejected={this.state.ejected}
@@ -755,11 +744,10 @@ class App extends React.Component<AppProps, AppState> {
                     paramValues={this.state.paramValues}
                     onParamChange={this.handleParamChange}
                     onPinParam={this.handlePinParam}
-                    persistedSettings={settings}
+                    persistedSettings={this.props.userContext.settings}
                     sequencer={this.sequencer}
                   />
                 </div>
-                }
               </div>
             </div>
             {!isMobile.phone && !this.state.loading &&
