@@ -39,20 +39,6 @@ export default class GMEPlayer extends Player {
       step: 0.01,
       defaultValue: 1.0,
     },
-    {
-      id: 'disableEcho',
-      label: 'Disable SPC Echo',
-      hint: 'Disable echo effect for Super Nintendo SPC files.',
-      type: 'toggle',
-      defaultValue: false,
-    },
-    {
-      id: 'enableAccuracy',
-      label: 'Accurate SPC Filter',
-      hint: 'Simple low-pass and high-pass filter to better match sound output of the SNES.',
-      type: 'toggle',
-      defaultValue: false,
-    },
   ];
 
   constructor(...args) {
@@ -307,14 +293,6 @@ export default class GMEPlayer extends Player {
       case 'stereoWidth':
         this.params[id] = parseFloat(value);
         if (this.gmeCtx) core._gme_set_stereo_depth(this.gmeCtx, value);
-        break;
-      case 'disableEcho':
-        this.params[id] = !!value;
-        if (this.gmeCtx) core._gme_disable_echo(this.gmeCtx, value ? 1 : 0);
-        break;
-      case 'enableAccuracy':
-        this.params[id] = !!value;
-        if (this.gmeCtx) core._gme_enable_accuracy(this.gmeCtx, value ? 1 : 0);
         break;
       default:
         console.warn('GMEPlayer has no parameter with id "%s".', id);
