@@ -20,3 +20,4 @@ public/music
 *.backup/
 _ignore/
 .claude/screenshots
+.claude/tmp
