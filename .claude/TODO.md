@@ -8,7 +8,7 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**All simplifications are complete!**
+**All simplification tasks complete!**
 
 ---
 
@@ -62,9 +62,4 @@
 
 ## DEPLOYMENT (going live)
 
-**D1**: Put on custom domain (jeffdt.com, purchased through namesilo). Configured in namesilo and github, but currently gets this error when visiting:
-> XHRGET
-> http://jeffdt.com/browse?path=/
-> [HTTP/1.1 404 Not Found 15ms]
-> 
-> Uncaught (in promise) SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data
+**All deployment tasks complete!**
