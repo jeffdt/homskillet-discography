@@ -43,7 +43,7 @@
 }
 
 [data-theme="msdos"] {
-    --font: var(--fontPxPlusChipPlayer);
+    --font: var(--fontMetallicWingI);
 
     --message-box-background: var(--button);
     --message-box-color: var(--clickable);
@@ -100,6 +100,7 @@ h1, h2, h3, h4, h5, h6 {
     margin: var(--charH) 0;
     padding: 0;
     font-weight: normal;
+    font-family: MetallicWingII;
 }
 
 p { margin: 0 0 var(--charH) 0; }
@@ -272,6 +273,7 @@ body,#root {
 
 .AppHeader-title, .AppHeader-title:visited, .AppHeader-title:link {
     color: var(--neutral4);
+    font-family: MetallicWingII;
 }
 
 .AppHeader-byline {
@@ -348,6 +350,7 @@ body,#root {
     color: var(--neutral2);
     background: var(--background);
     z-index: 1;
+    font-family: MetallicWingII;
 }
 
 .AppFooter-attribution a {
@@ -475,7 +478,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .PlayerParams h3 { margin-top: 0; }
 .PlayerParams-param { display: flex; flex-wrap: wrap; align-items: center; }
 .PlayerParams-param input { margin-right: var(--charW1); flex-shrink: 0; }
-.PlayerParams-group-title { width: 100%; }
+.PlayerParams-group-title { width: 100%; font-family: MetallicWingII; }
 .PlayerParams-voiceList {
     display: flex;
     flex-wrap: wrap;
@@ -494,7 +497,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
         '... path';
     grid-template-columns: auto 1fr;
 }
-.SongDetails-title { grid-area: title; color: var(--neutral4); display: flex; gap: var(--charW1); }
+.SongDetails-title { grid-area: title; color: var(--neutral4); display: flex; gap: var(--charW1); font-family: MetallicWingII; }
 .SongDetails-title a { color: var(--neutral4); }
 .SongDetails-subtitle { grid-area: subtitle; }
 .SongDetails-filepath { grid-area: path; }

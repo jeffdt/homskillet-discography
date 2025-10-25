@@ -94,6 +94,20 @@
 */
 
 @font-face {
+    src: url(mwing_i.ttf) format('truetype');
+    font-family: MetallicWingI;
+}
+
+:root { --fontMetallicWingI: 14px/16px MetallicWingI; }
+
+@font-face {
+    src: url(mwing_ii.ttf) format('truetype');
+    font-family: MetallicWingII;
+}
+
+:root { --fontMetallicWingII: 14px/16px MetallicWingII; }
+
+@font-face {
     src: url(mm-tahoma-8px.ttf) format('truetype');
     font-family: TahomaPixel;
 }
