@@ -8,6 +8,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **B1**: The folder that displays at the bottom when you're playing a song links to the wrong location. i.e. `https://jeffdt.github.io/homskillet-discography/browse/homskillet-discography/music/Bazaar`
 
+**B2**: Fonts are not aligned with the directory icons
+
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
@@ -22,11 +24,9 @@ None!
 
 **E2**: Add the ability to swap color palettes on the entire UI. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
 
-**E3**: Are there any fonts we can use that look more like NES game fonts? Can I use the .ttf fonts from Metallic Wing?
-
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
-**E6**: Add ability to store metadata for songs and albums. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
+**E6**: Add ability for me to store metadata for songs and albums. I assume this would be json files that live alongside the songs but i am open to other ideas. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
 
 **E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
 
@@ -36,6 +36,8 @@ None!
 - Showing a visual indicator (toast, overlay, or button state) that audio is waiting for interaction
 - Auto-showing the "Click to enable audio" message when a song is queued but AudioContext is suspended
 - Displaying the paused state more prominently when audio is ready but suspended
+
+**E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
 
 ---
 
