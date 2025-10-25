@@ -5,10 +5,11 @@ import DirectoryLink from './DirectoryLink';
 import bytes from 'bytes';
 import trimEnd from 'lodash/trimEnd';
 import queryString from 'querystring';
+import { BrowseProps } from '../types/app';
 
 
-export default class Browse extends React.PureComponent {
-  constructor(props) {
+export default class Browse extends React.PureComponent<BrowseProps> {
+  constructor(props: BrowseProps) {
     super(props);
     autoBindReact(this);
   }
@@ -17,7 +18,7 @@ export default class Browse extends React.PureComponent {
     this.navigate();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: BrowseProps, prevState: any) {
     this.navigate();
   }
 
@@ -48,11 +49,11 @@ export default class Browse extends React.PureComponent {
     delete urlParams.q;
     const search = queryString.stringify(urlParams);
     // Check if previous page url is the parent directory of current page url.
-    const prevPath = trimEnd(history.location.state?.prevPathname, '/');
+    const prevPath = trimEnd((history.location.state as any)?.prevPathname, '/');
     const currPath = trimEnd(window.location.pathname, '/');
     const prevPageIsParentDir = prevPath === currPath.slice(0, currPath.lastIndexOf('/'));
 
-    const BrowseRow = (props) => {
+    const BrowseRow = (props: { item: any; onPlay: () => void }) => {
       const { item, onPlay } = props;
       item.isBackLink = item.name === '..' && prevPageIsParentDir;
 
@@ -83,7 +84,7 @@ export default class Browse extends React.PureComponent {
             <div className="BrowseList-colName">
               <a onClick={onPlay}
                  href={item.href}
-                 tabIndex="-1">
+                 tabIndex={-1}>
                 {item.name}
               </a>
             </div>

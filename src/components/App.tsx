@@ -35,11 +35,24 @@ import MessageBox from './MessageBox';
 import Settings from './Settings';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
+import { AppProps, AppState } from '../types/app';
+import { SequencerState } from '../types/sequencer';
+import { PlayContext } from '../types/catalog';
 
 const BASE_URL = process.env.PUBLIC_URL || document.location.origin;
 
-class App extends React.Component {
-  constructor(props) {
+class App extends React.Component<AppProps, AppState> {
+  private chipCore: any;
+  private audioCtx: AudioContext;
+  private gainNode: GainNode;
+  private playerNode: ScriptProcessorNode;
+  private sequencer!: Sequencer;
+  private contentAreaRef: React.RefObject<HTMLDivElement>;
+  private listRef: React.RefObject<any>;
+  private playContexts: Record<string, PlayContext>;
+  private mediaSessionAudio?: HTMLAudioElement;
+
+  constructor(props: AppProps) {
     super(props);
     autoBindReact(this);
 
@@ -47,7 +60,7 @@ class App extends React.Component {
     this.contentAreaRef = React.createRef();
     this.listRef = React.createRef(); // react-virtualized List component ref
     this.playContexts = {};
-    window.ChipPlayer = this;
+    (window as any).ChipPlayer = this;
 
 
     // Initialize audio graph
@@ -57,7 +70,7 @@ class App extends React.Component {
 
     // Smaller buffer for mobile devices. 'interactive' yields 128 samples on iOS/Android.
     const latencyHint = isMobile.any ? 'interactive' : 'playback';
-    let audioCtx = this.audioCtx = window.audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+    let audioCtx = this.audioCtx = (window as any).audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)({
       latencyHint,
     });
 
@@ -68,7 +81,7 @@ class App extends React.Component {
       while (targetRate > MAX_SAMPLE_RATE) {
         targetRate /= 2;
       }
-      audioCtx = this.audioCtx = window.audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+      audioCtx = this.audioCtx = (window as any).audioCtx = new ((window as any).AudioContext || (window as any).webkitAudioContext)({
         latencyHint,
         sampleRate: targetRate,
       });
@@ -116,18 +129,18 @@ class App extends React.Component {
     this.initChipCore(audioCtx, playerNode, bufferSize);
   }
 
-  async initChipCore(audioCtx, playerNode, bufferSize) {
+  async initChipCore(audioCtx: AudioContext, playerNode: ScriptProcessorNode, bufferSize: number) {
     // Load the chip-core Emscripten runtime
     try {
       this.chipCore = await ChipCore({
         // Look for .wasm file in web root, not the same location as the app bundle (static/js).
-        locateFile: (path, prefix) => {
+        locateFile: (path: string, prefix: string) => {
           if (path.endsWith('.wasm') || path.endsWith('.wast'))
             return `${BASE_URL}/${path}`;
           return prefix + path;
         },
-        print: (msg) => console.debug('[stdout] ' + msg),
-        printErr: (msg) => console.debug('[stderr] ' + msg),
+        print: (msg: string) => console.debug('[stdout] ' + msg),
+        printErr: (msg: string) => console.debug('[stderr] ' + msg),
       });
     } catch (e) {
       // Browser doesn't support WASM (Safari in iOS Simulator)
@@ -159,7 +172,7 @@ class App extends React.Component {
     }
 
     // Populate all mounted IDBFS file systems from IndexedDB.
-    this.chipCore.FS.syncfs(true, (err) => {
+    this.chipCore.FS.syncfs(true, (err: any) => {
       if (err) {
         console.log('Error populating FS from indexeddb.', err);
       }
@@ -168,10 +181,10 @@ class App extends React.Component {
 
     this.sequencer = new Sequencer(players, null, () => this.props.userContext.settings);
     this.sequencer.on('sequencerStateUpdate', this.handleSequencerStateUpdate);
-    this.sequencer.on('playerError', (message) => this.props.toastContext.enqueueToast(message, ToastLevels.ERROR));
+    this.sequencer.on('playerError', (message: string) => this.props.toastContext.enqueueToast(message, ToastLevels.ERROR));
 
     // TODO: Move to separate processUrlParams method.
-    const urlParams = queryString.parse(window.location.search.substring(1));
+    const urlParams = queryString.parse(window.location.search.substring(1)) as any;
     if (urlParams.play) {
       // Treat play params as "transient command" and strip them after starting playback.
       // See comment in Browse.js for more about why a sticky play param is not a good idea.
@@ -196,7 +209,7 @@ class App extends React.Component {
         if (time) {
           setTimeout(() => {
             if (this.sequencer.getPlayer()) {
-              this.sequencer.getPlayer().seekMs(time);
+              this.sequencer.getPlayer()!.seekMs(time);
             }
           }, 100);
         }
@@ -206,8 +219,8 @@ class App extends React.Component {
     this.setState({ loading: false });
   }
 
-  static mapSequencerStateToAppState(sequencerState) {
-    const map = {
+  static mapSequencerStateToAppState(sequencerState: SequencerState): Partial<AppState> {
+    const map: Record<string, string> = {
       ejected: 'isEjected',
       paused: 'isPaused',
       currentSongSubtune: 'subtune',
@@ -227,11 +240,11 @@ class App extends React.Component {
       paramValues: 'paramValues',
       infoTexts: 'infoTexts',
     };
-    const appState = {};
+    const appState: any = {};
     for (let prop in map) {
       const seqProp = map[prop];
       if (seqProp in sequencerState) {
-        appState[prop] = sequencerState[seqProp];
+        appState[prop] = (sequencerState as any)[seqProp];
       }
     }
     return appState;
@@ -249,12 +262,12 @@ class App extends React.Component {
       this.mediaSessionAudio.loop = true;
       this.mediaSessionAudio.volume = 0;
 
-      navigator.mediaSession.setActionHandler('play', () => this.togglePause());
-      navigator.mediaSession.setActionHandler('pause', () => this.togglePause());
-      navigator.mediaSession.setActionHandler('previoustrack', () => this.prevSong());
-      navigator.mediaSession.setActionHandler('nexttrack', () => this.nextSong());
-      navigator.mediaSession.setActionHandler('seekbackward', () => this.seekRelative(-5000));
-      navigator.mediaSession.setActionHandler('seekforward', () => this.seekRelative(5000));
+      (navigator as any).mediaSession.setActionHandler('play', () => this.togglePause());
+      (navigator as any).mediaSession.setActionHandler('pause', () => this.togglePause());
+      (navigator as any).mediaSession.setActionHandler('previoustrack', () => this.prevSong());
+      (navigator as any).mediaSession.setActionHandler('nexttrack', () => this.nextSong());
+      (navigator as any).mediaSession.setActionHandler('seekbackward', () => this.seekRelative(-5000));
+      (navigator as any).mediaSession.setActionHandler('seekforward', () => this.seekRelative(5000));
     }
 
     document.addEventListener('keydown', (e) => {
@@ -266,12 +279,12 @@ class App extends React.Component {
       switch (e.key) {
         case 'Escape':
           this.setState({ showInfo: false });
-          e.target.blur();
+          (e.target as HTMLElement).blur();
           break;
         default:
       }
 
-      if (e.target.tagName === 'INPUT' && e.target.type === 'text') return; // text input has focus
+      if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLInputElement).type === 'text') return; // text input has focus
 
       switch (e.key) {
         case ' ':
@@ -293,7 +306,7 @@ class App extends React.Component {
         default:
       }
 
-      if (e.target.tagName === 'INPUT' && e.target.type === 'range') return; // a range slider has focus
+      if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLInputElement).type === 'range') return; // a range slider has focus
 
       switch (e.key) {
         case 'ArrowLeft':
@@ -309,7 +322,7 @@ class App extends React.Component {
     });
   }
 
-  playContext(context, index = 0, subtune = 0) {
+  playContext(context: PlayContext, index = 0, subtune = 0) {
     this.sequencer.playContext(context, index, subtune);
   }
 
@@ -329,7 +342,7 @@ class App extends React.Component {
     this.sequencer.nextSubtune();
   }
 
-  handleSequencerStateUpdate(sequencerState) {
+  handleSequencerStateUpdate(sequencerState: SequencerState) {
     const { isEjected } = sequencerState;
     console.debug('App.handleSequencerStateUpdate(isEjected=%s)', isEjected);
 
@@ -349,11 +362,11 @@ class App extends React.Component {
       // updateQueryString({ play: undefined });
 
       if ('mediaSession' in navigator) {
-        this.mediaSessionAudio.pause();
+        this.mediaSessionAudio?.pause();
 
-        navigator.mediaSession.playbackState = 'none';
+        (navigator as any).mediaSession.playbackState = 'none';
         if ('MediaMetadata' in window) {
-          navigator.mediaSession.metadata = new window.MediaMetadata({});
+          (navigator as any).mediaSession.metadata = new (window as any).MediaMetadata({});
         }
       }
     } else {
@@ -371,31 +384,31 @@ class App extends React.Component {
         // const filepath = url.replace(CATALOG_PREFIX, '');
         // updateQueryString({ play: filepath, t: undefined });
         // TODO: move fetch metadata to Player when it becomes event emitter
-        requestCache.fetchCached(metadataUrl).then(response => {
+        requestCache.fetchCached(metadataUrl).then((response: any) => {
           const { imageUrl, infoTexts, md5 } = response;
           const newInfoTexts = [...this.state.infoTexts, ...infoTexts ];
           const newShowInfo = this.state.showInfo && newInfoTexts.length > 0;
-          this.setState({ imageUrl, infoTexts: newInfoTexts, md5, showInfo: newShowInfo });
+          this.setState({ imageUrl, infoTexts: newInfoTexts, md5, showInfo: newShowInfo } as any);
 
           if ('mediaSession' in navigator) {
             // Clear artwork if imageUrl is null.
-            navigator.mediaSession.metadata.artwork = (imageUrl == null) ? [] : [{
+            (navigator as any).mediaSession.metadata.artwork = (imageUrl == null) ? [] : [{
               src: imageUrl,
               sizes: '512x512',
             }];
           }
-        }).catch(e => {
+        }).catch((e: any) => {
           this.setState({ imageUrl: null });
         });
       }
 
-      const metadata = player.getMetadata();
+      const metadata = player!.getMetadata();
 
       if ('mediaSession' in navigator) {
-        this.mediaSessionAudio.play();
+        this.mediaSessionAudio?.play();
 
         if ('MediaMetadata' in window) {
-          navigator.mediaSession.metadata = new window.MediaMetadata({
+          (navigator as any).mediaSession.metadata = new (window as any).MediaMetadata({
             title: metadata.title || metadata.formatted?.title,
             artist: metadata.artist || metadata.formatted?.subtitle,
             album: metadata.game,
@@ -413,18 +426,18 @@ class App extends React.Component {
   togglePause() {
     if (this.state.ejected || !this.sequencer.getPlayer()) return;
 
-    const paused = this.sequencer.getPlayer().togglePause();
+    const paused = this.sequencer.getPlayer()!.togglePause();
     if ('mediaSession' in navigator) {
       if (paused) {
-        this.mediaSessionAudio.pause();
+        this.mediaSessionAudio?.pause();
       } else {
-        this.mediaSessionAudio.play();
+        this.mediaSessionAudio?.play();
       }
     }
     this.setState({ paused: paused });
   }
 
-  handleTimeSliderChange(event) {
+  handleTimeSliderChange(event: any) {
     if (!this.sequencer.getPlayer()) return;
 
     const pos = event.target ? event.target.value : event;
@@ -444,41 +457,41 @@ class App extends React.Component {
     }
   }
 
-  seekRelative(ms) {
+  seekRelative(ms: number) {
     if (!this.sequencer.getPlayer()) return;
 
     const durationMs = this.state.currentSongDurationMs;
-    const seekMs = clamp(this.sequencer.getPlayer().getPositionMs() + ms, 0, durationMs);
+    const seekMs = clamp(this.sequencer.getPlayer()!.getPositionMs() + ms, 0, durationMs);
 
     this.seekRelativeInner(seekMs);
   }
 
-  seekRelativeInner(seekMs) {
-    this.sequencer.getPlayer().seekMs(seekMs);
+  seekRelativeInner(seekMs: number) {
+    this.sequencer.getPlayer()!.seekMs(seekMs);
     this.setState({
       currentSongPositionMs: seekMs, // Smooth
     });
     setTimeout(() => {
-      if (this.sequencer.getPlayer().isPlaying()) {
+      if (this.sequencer.getPlayer()!.isPlaying()) {
         this.setState({
-          currentSongPositionMs: this.sequencer.getPlayer().getPositionMs(), // Accurate
+          currentSongPositionMs: this.sequencer.getPlayer()!.getPositionMs(), // Accurate
         });
       }
     }, 100);
   }
 
-  handleSetVoiceMask(voiceMask) {
+  handleSetVoiceMask(voiceMask: boolean[]) {
     if (!this.sequencer.getPlayer()) return;
 
-    this.sequencer.getPlayer().setVoiceMask(voiceMask);
+    this.sequencer.getPlayer()!.setVoiceMask(voiceMask);
     this.setState({ voiceMask: [...voiceMask] });
   }
 
-  handleTempoChange(event) {
+  handleTempoChange(event: any) {
     if (!this.sequencer.getPlayer()) return;
 
     const value = parseFloat((event.target ? event.target.value : event)) || 1.0;
-    this.sequencer.getPlayer().setTempo(value);
+    this.sequencer.getPlayer()!.setTempo(value);
     this.setState({
       tempo: value
     });
@@ -490,10 +503,10 @@ class App extends React.Component {
     }
   }
 
-  handleParamChange(id, value) {
+  handleParamChange(id: string, value: any) {
     if (!this.sequencer.getPlayer()) return;
-    const player = this.sequencer.getPlayer();
-    player.setParameter(id, value);
+    const player = this.sequencer.getPlayer()!;
+    (player as any).setParameter(id, value);
     this.setState(prevState => ({
       paramValues: { ...prevState.paramValues, [id]: value },
     }));
@@ -505,7 +518,7 @@ class App extends React.Component {
     }
   }
 
-  handlePinParam(persistedKey, currentValue) {
+  handlePinParam(persistedKey: string, currentValue: any) {
     const { settings, replaceSettings } = this.props.userContext;
     const newSettings = { ...settings };
 
@@ -518,24 +531,24 @@ class App extends React.Component {
     replaceSettings(newSettings);
   }
 
-  setSpeedRelative(delta) {
+  setSpeedRelative(delta: number) {
     if (!this.sequencer.getPlayer()) return;
 
     const tempo = clamp(this.state.tempo + delta, 0.1, 2);
-    this.sequencer.getPlayer().setTempo(tempo);
+    this.sequencer.getPlayer()!.setTempo(tempo);
     this.setState({
       tempo: tempo
     });
   }
 
-  handleShufflePlay(path) {
+  handleShufflePlay(path: string) {
     // Synthetic recursive shuffle.
     // In production, load catalog.json and shuffle client-side
     // In development, use API server
     if (PUBLIC_URL) {
       fetch(`${PUBLIC_URL}/catalog.json`)
         .then(response => response.json())
-        .then(allFiles => {
+        .then((allFiles: string[]) => {
           // Filter files that start with the given path
           const matchingFiles = path
             ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
@@ -550,7 +563,7 @@ class App extends React.Component {
     } else {
       fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
         .then(response => response.json())
-        .then(json => json.items.map(this.pathToHref))
+        .then((json: any) => json.items.map(this.pathToHref))
         .then(items => this.sequencer.playContext(items));
     }
   }
@@ -561,18 +574,18 @@ class App extends React.Component {
     this.sequencer.setShuffle(shuffle);
   }
 
-  handleSongClick(url, context, index) {
-    return (e) => {
+  handleSongClick(url: string | null, context?: PlayContext, index?: number) {
+    return (e: React.MouseEvent) => {
       e.preventDefault();
-      if (context) {
+      if (context && index !== undefined) {
         this.playContext(context, index);
-      } else {
+      } else if (url) {
         this.sequencer.playSonglist([url]);
       }
     }
   }
 
-  handleVolumeChange(volume) {
+  handleVolumeChange(volume: number) {
     this.setState({ volume });
     this.gainNode.gain.value = Math.max(0, Math.min(2, volume * 0.01));
   }
@@ -590,31 +603,31 @@ class App extends React.Component {
     });
   }
 
-  directoryListingToContext(items) {
+  directoryListingToContext(items: any[]): PlayContext {
     return items
       .filter(item => item.type === 'file')
       .map(item => item.href); // Use the href that was already built in fetchDirectory
   }
 
-  pathToHref(path) {
+  pathToHref(path: string): string {
     const prefix = PUBLIC_URL
       ? `${PUBLIC_URL}/music`
       : CATALOG_PREFIX;
     return pathJoin(prefix, path.replace('%', '%25').replace('#', '%23'));
   }
 
-  fetchDirectory(path) {
+  fetchDirectory(path: string): Promise<void> {
     const slashPath = pathJoin('/', path);
     // In production, load from static directories.json
     // In development, use API server
     const fetchPromise = PUBLIC_URL
       ? fetch(`${PUBLIC_URL}/directories.json`)
           .then(response => response.json())
-          .then(directories => directories[slashPath] || [])
+          .then((directories: any) => directories[slashPath] || [])
       : fetch(`${API_BASE}/browse?path=${encodeURIComponent(slashPath)}`)
           .then(response => response.json());
 
-    return fetchPromise.then(items => {
+    return fetchPromise.then((items: any[]) => {
         items.forEach(item => {
           // Convert timestamp 1704067200 to ISO date 2024-01-01
           item.mtime = new Date(item.mtime * 1000).toISOString().split('T')[0];
@@ -655,7 +668,7 @@ class App extends React.Component {
       });
   }
 
-  getCurrentSongLink(withSubtune = false) {
+  getCurrentSongLink(withSubtune = false): string | null {
     const url = this.sequencer?.getCurrUrl();
     if (!url) return null;
     let link = BASE_URL + '/?play=' +
@@ -669,12 +682,12 @@ class App extends React.Component {
     return link;
   }
 
-  handleCopyLink = (url) => {
+  handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url);
     this.props.toastContext.enqueueToast('Copied song link to clipboard.', ToastLevels.INFO);
   }
 
-  handleToggleSettings = (e) => {
+  handleToggleSettings = (e: React.MouseEvent) => {
     const { settings, updateSettings } = this.props.userContext;
     const showPlayerSettings = settings?.showPlayerSettings;
     updateSettings({ showPlayerSettings: !showPlayerSettings });
@@ -706,13 +719,13 @@ class App extends React.Component {
                 <Switch>
                   <Route path="/:browsePath*" render={({ history, match, location }) => {
                     // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
-                    const browsePath = match.params?.browsePath?.replace('%25', '%') || '';
+                    const browsePath = (match.params as any)?.browsePath?.replace('%25', '%') || '';
                     return (
                       this.contentAreaRef.current &&
                       <Browse currContext={currContext}
                               currIdx={currIdx}
                               history={history}
-                              locationKey={location.key}
+                              locationKey={(location as any).key}
                               browsePath={browsePath}
                               listing={this.state.directories[browsePath]}
                               playContext={this.playContexts[browsePath]}
@@ -770,7 +783,7 @@ class App extends React.Component {
             handleVolumeChange={this.handleVolumeChange}
             imageUrl={this.state.imageUrl}
             infoTexts={this.state.infoTexts}
-            md5={this.state.md5}
+            md5={(this.state as any).md5}
             nextSong={this.nextSong}
             nextSubtune={this.nextSubtune}
             paused={this.state.paused}
@@ -796,7 +809,7 @@ class App extends React.Component {
 
 // TODO: convert App to a function component and remove this.
 // Inject contexts as props since class components only support a single context.
-const AppWithContext = (props) => {
+const AppWithContext = (props: any) => {
   const userContext = useContext(UserContext);
   const toastContext = useContext(ToastContext);
   return (<App {...props} userContext={userContext} toastContext={toastContext} />);
