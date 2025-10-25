@@ -43,7 +43,9 @@
 }
 
 [data-theme="msdos"] {
-    --font: var(--fontPxPlusChipPlayer);
+    --font: var(--fontMain);
+    --font-accent: var(--fontAccent);
+    --font-title: var(--fontTitle);
 
     --message-box-background: var(--button);
     --message-box-color: var(--clickable);
@@ -99,7 +101,7 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--neutral4);
     margin: var(--charH) 0;
     padding: 0;
-    font-weight: normal;
+    font: var(--font-accent) !important;
 }
 
 p { margin: 0 0 var(--charH) 0; }
@@ -148,7 +150,7 @@ select option                { font-size: 14px; }
   @container (max-width: 800px) { .BrowseList-colMtime { display: none } }
 button:active   { background: var(--active); }
 button:disabled { background: var(--neutral1); color: var(--neutral3); }
-.box-button     { background: var(--button); box-shadow: var(--msdos-box-shadow); white-space: pre; padding: 0 var(--charW2); }
+.box-button     { background: var(--button); box-shadow: var(--msdos-box-shadow); white-space: pre; padding: 0 var(--charW2); display: inline-flex; align-items: center; gap: var(--charW1); }
 .box-button:active { box-shadow: none; }
 
     .tab {
@@ -272,6 +274,7 @@ body,#root {
 
 .AppHeader-title, .AppHeader-title:visited, .AppHeader-title:link {
     color: var(--neutral4);
+    font: var(--font-title) !important;
 }
 
 .AppHeader-byline {
@@ -348,10 +351,12 @@ body,#root {
     color: var(--neutral2);
     background: var(--background);
     z-index: 1;
+    font: var(--font-accent) !important;
 }
 
 .AppFooter-attribution a {
     color: var(--clickable);
+    font: var(--font-title) !important;
 }
 
 .AppFooter-attribution a:hover {
@@ -475,7 +480,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .PlayerParams h3 { margin-top: 0; }
 .PlayerParams-param { display: flex; flex-wrap: wrap; align-items: center; }
 .PlayerParams-param input { margin-right: var(--charW1); flex-shrink: 0; }
-.PlayerParams-group-title { width: 100%; }
+.PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; }
 .PlayerParams-voiceList {
     display: flex;
     flex-wrap: wrap;
@@ -494,7 +499,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
         '... path';
     grid-template-columns: auto 1fr;
 }
-.SongDetails-title { grid-area: title; color: var(--neutral4); display: flex; gap: var(--charW1); }
+.SongDetails-title { grid-area: title; color: var(--neutral4); display: flex; gap: var(--charW1); font: var(--font-accent) !important; }
 .SongDetails-title a { color: var(--neutral4); }
 .SongDetails-subtitle { grid-area: subtitle; }
 .SongDetails-filepath { grid-area: path; }
@@ -552,7 +557,6 @@ button.IconButton {
 }
 
 .inline-icon {
-    vertical-align: bottom;
     display: inline-block;
     background-color: var(--clickable);
     mask-repeat: no-repeat;

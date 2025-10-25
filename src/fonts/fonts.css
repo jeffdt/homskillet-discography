@@ -93,6 +93,51 @@
 :root { --fontRobotoBitmap: 16px RobotoBitmap; }
 */
 
+/* CUSTOM FONTS - Easy to swap by changing these declarations */
+
+/* Main body font - used for most UI elements */
+/* Using Google Fonts Silkscreen (loaded from index.html) */
+:root { --fontMain: 14px/16px 'Silkscreen', monospace; }
+
+/* Accent font - used for section headers, song titles, settings labels */
+/* Using Google Fonts Silkscreen (loaded from index.html) */
+:root { --fontAccent: 14px/16px 'Silkscreen', monospace; }
+
+/* Title font - used for main site header "Homskillet Discography" */
+/* Nixdorf 8810 M15 from The Ultimate Oldschool PC Font Pack by VileR */
+/* Licensed under CC BY-SA 4.0 - See OLDSCHOOL_PC_FONTS_LICENSE.txt */
+/* https://int10h.org/oldschool-pc-fonts/ */
+@font-face {
+    src: url(Web437_Nix8810_M15.woff) format('woff');
+    font-family: 'Nixdorf_M15';
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root { --fontTitle: 20px/24px 'Nixdorf_M15', monospace; }
+
+/* OTHER AVAILABLE FONTS - Uncomment and swap into main/accent above to use:
+
+   IBM XGA-AI 12x20 - Tall, clean IBM font
+   @font-face {
+       src: url(Web437_IBM_XGA-AI_12x20.woff) format('woff');
+       font-family: 'IBM_XGA';
+   }
+   Usage: --fontMain: 14px/16px 'IBM_XGA', monospace;
+
+   Robotron A7100 - Bold retro PC terminal style
+   @font-face {
+       src: url(Web437_Robotron_A7100.woff) format('woff');
+       font-family: 'Robotron';
+   }
+   Usage: --fontMain: 14px/16px 'Robotron', monospace;
+
+   All fonts from The Ultimate Oldschool PC Font Pack by VileR
+   Licensed under CC BY-SA 4.0 - See OLDSCHOOL_PC_FONTS_LICENSE.txt
+   https://int10h.org/oldschool-pc-fonts/
+*/
+
 @font-face {
     src: url(mm-tahoma-8px.ttf) format('truetype');
     font-family: TahomaPixel;
