@@ -1,5 +1,9 @@
 # Homskillet Discography - TODO List
 
+Elements can be referred to by their key, like B1 or E2. When an item is complete, delete it entirely rather than marking it complete.
+
+When all elements in a section are complete, simply replace the list of tasks with "None!"
+
 ## BUGS
 
 **B1**: The folder that displays at the bottom when you're playing a song links to the wrong location. i.e. `https://jeffdt.github.io/homskillet-discography/browse/homskillet-discography/music/Bazaar`
@@ -8,19 +12,17 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**All simplification tasks complete!**
+None!
 
 ---
 
 ## ENHANCEMENT (new features & styling)
 
-**E0**: Open settings pane and visualizer by default. You should not be able to turn the settings off either. Remove the Settings UI tab element and simplify any code related to toggling it. I want settings always visible.
-
 **E1**: Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
 
 **E2**: Add the ability to swap color palettes on the entire UI. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
 
-**E3**: Are there any fonts we can use that look more like NES game fonts?
+**E3**: Are there any fonts we can use that look more like NES game fonts? Can I use the .ttf fonts from Metallic Wing?
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
@@ -62,4 +64,4 @@
 
 ## DEPLOYMENT (going live)
 
-**All deployment tasks complete!**
+None!

@@ -56,7 +56,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       weightingMode: 1,
       fftSize: 2048,
       speed: 2,
-      enabled: false,
+      enabled: true,
       colorPalette: 0,
     };
 
