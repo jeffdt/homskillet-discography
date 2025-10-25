@@ -8,13 +8,13 @@
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-All simplifications are complete!
+**All simplification tasks complete!**
 
 ---
 
 ## ENHANCEMENT (new features & styling)
 
-**E0**: Turn visualizer on by default.
+**E0**: Open settings pane and visualizer by default. You should not be able to turn the settings off either. Remove the Settings UI tab element and simplify any code related to toggling it. I want settings always visible.
 
 **E1**: Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
 
@@ -62,4 +62,4 @@ All simplifications are complete!
 
 ## DEPLOYMENT (going live)
 
-**D1**: Put on custom domain (jeffdt.com, purchased through namesilo)
+**All deployment tasks complete!**
