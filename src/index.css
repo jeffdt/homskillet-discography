@@ -460,7 +460,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 
 .AppFooter-main {
     flex-grow: 1;
-    overflow: auto;
+    overflow: hidden;
     padding: var(--charH) var(--charW2);
     box-sizing: border-box;
     container-type: size;
