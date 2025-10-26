@@ -1,0 +1,16 @@
+# Build context only needs these files:
+# - scripts/build-chip-core.js
+# - config/paths.js
+# - src/showcqtbar.c
+# - package.json
+# - package-lock.json
+
+# Exclude everything else to keep build context small
+*
+
+# But include what we need
+!scripts/build-chip-core.js
+!config/paths.js
+!src/showcqtbar.c
+!package.json
+!package-lock.json

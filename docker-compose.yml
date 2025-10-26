@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  # Build chip-core and copy artifacts to local machine
+  chip-core:
+    build:
+      context: .
+    image: homskillet-chip-core-builder
+    volumes:
+      - ./src:/output/src
+      - ./public:/output/public
+    command: >
+      sh -c "cp /build/src/chip-core.js /output/src/chip-core.js &&
+             cp /build/public/chip-core.wasm /output/public/chip-core.wasm &&
+             echo '✅ chip-core.js copied to src/' &&
+             echo '✅ chip-core.wasm copied to public/' &&
+             echo '' &&
+             echo 'Build complete! You can now run: npm start'"

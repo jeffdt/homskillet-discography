@@ -622,14 +622,10 @@ class App extends React.Component<AppProps, AppState> {
 
   fetchDirectory(path: string): Promise<void> {
     const slashPath = pathJoin('/', path);
-    // In production, load from static directories.json
-    // In development, use API server
-    const fetchPromise = IS_PRODUCTION
-      ? fetch(`${PUBLIC_URL}/directories.json`)
-          .then(response => response.json())
-          .then((directories: any) => directories[slashPath] || [])
-      : fetch(`${API_BASE}/browse?path=${encodeURIComponent(slashPath)}`)
-          .then(response => response.json());
+    // Load from static directories.json (both dev and production)
+    const fetchPromise = fetch(`${PUBLIC_URL}/directories.json`)
+      .then(response => response.json())
+      .then((directories: any) => directories[slashPath] || []);
 
     return fetchPromise.then((items: any[]) => {
         items.forEach(item => {

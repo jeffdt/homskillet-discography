@@ -25,7 +25,8 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 ### Development
 - `npm start` - Start webpack dev server on localhost:3000
 - `npm run server` - Start Node.js API server on port 8080 (DEV mode)
-- `npm run build-chip-core` - Compile C/C++ libraries to WebAssembly (chip-core.wasm)
+- `npm run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
+- `npm run build-chip-core` - Build chip-core locally (requires Emscripten setup)
 - `npm run build-catalog` - Build music catalog index from ./catalog folder
 - `npm run build-lite` - Build frontend only (skip catalog/chip-core)
 - `npm run build` - Full build (catalog + chip-core + frontend)
@@ -139,10 +140,62 @@ React Router handles navigation:
    - Register in App.js constructor
    - Update build-chip-core.js if new C library needed
 
+## Building chip-core WebAssembly Module
+
+The chip-core module (game-music-emu compiled to WebAssembly) is required for audio playback. You have two options:
+
+### Option 1: Docker (Recommended)
+
+Use Docker as a build tool - no Emscripten setup needed:
+
+```bash
+# First time: Build the Docker image (~10 minutes)
+docker compose build chip-core
+
+# Build chip-core (outputs to src/ and public/)
+npm run build-chip-core:docker
+
+# Continue with normal development
+npm start
+```
+
+The Docker container builds chip-core and copies the artifacts to your local machine. You continue using your local tools for everything else.
+
+### Option 2: Local Emscripten Setup
+
+For local building without Docker, install Emscripten at `../emsdk`:
+
+```bash
+cd ..
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+./emsdk install 3.1.39
+./emsdk activate 3.1.39
+cd ../homskillet-discography
+
+# Clone game-music-emu
+cd ..
+git clone https://github.com/mmontag/game-music-emu.git
+cd game-music-emu
+mkdir build && cd build
+source ../../emsdk/emsdk_env.sh
+emcmake cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF ..
+emmake make -j4
+
+# Build chip-core
+cd ../../homskillet-discography
+npm run build-chip-core
+```
+
+**Note**: macOS Sequoia (24.x) has compatibility issues with Emscripten. Docker is recommended for macOS users.
+
 ## Important Notes
 
-- **Emscripten Path**: package.json expects emsdk at `~/src/emsdk`. Update `build-chip-core` script if different.
-- **Catalog**: The `./catalog` folder is gitignored. Symlink your music archive here for catalog building. For this project, it will contain Homskillet's NSF files organized by album/release.
+- **Compiled Artifacts**: `chip-core.js` and `chip-core.wasm` are committed to the repo for convenience. Most contributors won't need to rebuild them.
+- **Music Files**: All music is stored in `public/music/` and committed to the repo. To add new tracks:
+  1. Add NSF files to `public/music/AlbumName/`
+  2. Run `npm run build-catalog` to regenerate catalog indexes
+  3. Commit both music files and updated catalog JSON files
 - **Sample Rate**: Limited to 48kHz max (MAX_SAMPLE_RATE) due to player compatibility.
 - **Deployment**: Configured for GitHub Pages static hosting. See `.claude/deployment-plan.md` for implementation details.
 
