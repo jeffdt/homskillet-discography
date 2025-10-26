@@ -3,13 +3,12 @@
 const IS_PRODUCTION: boolean = process.env.NODE_ENV === 'production';
 const PUBLIC_URL: string = process.env.PUBLIC_URL || '';
 
-const API_BASE: string = IS_PRODUCTION
-  ? '' // No API server in production
-  : 'http://localhost:8080';
+// Use static files for both dev and production (no separate API/file servers needed)
+const API_BASE: string = ''; // Catalog served statically from webpack dev server
 
 const CATALOG_PREFIX: string = IS_PRODUCTION
   ? `${PUBLIC_URL}/music` // Static files on GitHub Pages
-  : 'http://localhost:8000/music'; // Python file server in dev
+  : '/music'; // Static files from webpack dev server
 
 const MAX_SAMPLE_RATE: number = 48000; // Higher rates are problematic for some players.
 const MAX_VOICES: number = 64;
