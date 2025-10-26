@@ -278,7 +278,8 @@ body,#root {
 
 .AppHeader {
     padding: var(--charH) var(--charW2);
-    margin: 0 var(--charW2neg) var(--charH) var(--charW2neg);
+    margin: 0 var(--charW2neg) 0 var(--charW2neg);
+    border-bottom: 1px solid var(--clickable);
     flex-grow: 0;
 }
 
@@ -316,6 +317,8 @@ body,#root {
     .App-main {
         flex-direction: column;
         flex-grow: 1; /* Take remaining space */
+        flex-shrink: 1; /* Allow shrinking to make room for footer */
+        min-height: 0; /* Allow flex shrinking below content size */
         overflow: hidden; /* Contain tab content */
     }
 }
@@ -338,12 +341,16 @@ body,#root {
 @media (orientation: portrait), (max-width: 768px) {
     .App-main-inner {
         flex-grow: 1; /* Fill available space */
+        flex-shrink: 1; /* Allow shrinking */
+        min-height: 0; /* Allow flex shrinking below content size */
         overflow: hidden; /* Contain scrollable content */
     }
 
     .App-main-content-and-settings {
         flex-direction: column;
         flex-grow: 1; /* Fill available space */
+        flex-shrink: 1; /* Allow shrinking */
+        min-height: 0; /* Allow flex shrinking below content size */
         overflow: hidden; /* Contain scrollable content */
     }
 }
@@ -406,31 +413,51 @@ body,#root {
     border-top: 1px solid var(--clickable);
     margin: 0 var(--charW2neg);
     flex-shrink: 0;
-    height: 210px;
+    height: auto; /* Let content determine height */
     display: flex;
+    flex-direction: row; /* Horizontal layout for main content and art */
+    flex-wrap: wrap; /* Allow wrapping to put attribution on its own line */
+    align-content: flex-start; /* Align wrapped content to top */
     position: relative;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter {
         height: auto;
-        min-height: 150px;
+        min-height: 200px; /* Taller to fit everything */
+        flex-direction: column; /* Stack children vertically */
+    }
+
+    .AppFooter-attribution {
+        padding: calc(var(--charH) / 2) var(--charW1);
+        margin-top: var(--charH); /* Space above */
+        font-size: 0.7em;
+    }
+
+    .AppFooter-main {
+        order: 0; /* Controls first */
+        flex-shrink: 0; /* Don't shrink controls */
+    }
+
+    .AppFooter-art {
+        display: none; /* Hide album art on mobile to save space */
     }
 }
 
 .AppFooter-attribution {
-    position: absolute;
-    bottom: 0;
-    right: var(--charW2);
+    width: 100%;
+    text-align: center;
     padding: calc(var(--charH) / 4) var(--charW1);
     font-size: 0.8em;
     color: var(--neutral2);
     background: var(--background);
-    z-index: 1;
     font: var(--font-accent) !important;
+    border-top: 1px solid var(--clickable); /* Divider line */
+    order: 999; /* Always at bottom */
 }
 
 .AppFooter-attribution a {
+    pointer-events: auto; /* Re-enable clicks on links */
     color: var(--clickable);
     font: var(--font-title) !important;
 }
@@ -460,10 +487,19 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 
 .AppFooter-main {
     flex-grow: 1;
+    flex-basis: 0; /* Allow it to shrink/grow from 0 */
+    min-height: 210px; /* Ensure controls have space */
     overflow: hidden;
     padding: var(--charH) var(--charW2);
     box-sizing: border-box;
     container-type: size;
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .AppFooter-main {
+        overflow: visible; /* Allow content to be visible on mobile */
+        padding: calc(var(--charH) / 2) var(--charW1);
+    }
 }
 
 .AppFooter-settings {
@@ -487,6 +523,12 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     gap: var(--charW1);
     white-space: nowrap;
     margin: var(--charH) 0;
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .AppFooter-controls-row {
+        margin: calc(var(--charH) / 2) 0;
+    }
 }
 
 .AppFooter-controls-row .box-button {
@@ -655,6 +697,12 @@ button.IconButton {
 
 .TimeSlider { flex-grow: 1; margin: var(--charH) 0; }
 .TimeSlider-labels, .VolumeSlider-labels { display: flex; justify-content: space-between; gap: var(--charW2); }
+
+@media (orientation: portrait), (max-width: 768px) {
+    .TimeSlider {
+        margin: calc(var(--charH) / 2) 0;
+    }
+}
 
 .VolumeSlider { flex-shrink: 0; margin: var(--charH) 0; }
 

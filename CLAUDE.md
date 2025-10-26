@@ -121,6 +121,11 @@ React Router handles navigation:
 - **Remove completed tasks** - When you find that a TODO item has been implemented (check commit messages and git history), remove it from the TODO file.
 - **Check for completion evidence** - Look for related commits, file changes, and PR merges that indicate the work is done.
 
+## Working with tmp directory
+
+- Occasionally I will place files in `.claude/tmp` to provide context for our conversation.
+- If I mention an image or screenshot, and I do not attach one directly to the prompt and you do not know what I'm talking about, check `./claude/tmp/screenshots` first.
+
 ## Development Workflow
 
 1. **Modifying JavaScript/React code**: Just `npm start` and work normally
