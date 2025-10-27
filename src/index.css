@@ -1,7 +1,6 @@
 @import 'fonts/fonts.css';
 
-/* MSDOS 6.22 CSS Theme */
-[data-theme="msdos"] {
+:root {
     --charH:       19px;
     --charW1:       8px;
     --charW2:      16px;
@@ -42,7 +41,7 @@
     text-decoration: none;
 }
 
-[data-theme="msdos"] {
+:root {
     --font: var(--fontMain);
     --font-accent: var(--fontAccent);
     --font-title: var(--fontTitle);
@@ -52,28 +51,28 @@
     --message-box-info-text-color: var(--clickable);
     --message-box-inner-border: 1px solid var(--clickable);
     --message-box-box-shadow: var(--charW1) var(--charW1) var(--shadow);
-    --msdos-box-shadow: var(--charW1) var(--charW1) var(--shadow);
+    --box-shadow: var(--charW1) var(--charW1) var(--shadow);
     --hide-mtime-column-below-width: 800px;
-
-    /* chunky DOS animation */
-    .message-box { transition: all 250ms steps(5); }
-    .toast-box-outer { transition: all 150ms steps(4); }
-
-    *::selection {
-        background: rgba(170, 170, 170, 0.99);
-        color: var(--background);
-    }
-
-    a:active { background: var(--active); }
 }
 
-[data-theme="msdos"] a:focus,
-[data-theme="msdos"] button:focus,
-[data-theme="msdos"] select:focus,
-[data-theme="msdos"] input:focus,
-[data-theme="msdos"] input[type=checkbox]:focus,
-[data-theme="msdos"] input[type=radio]:focus,
-[data-theme="msdos"] input[type=range]:focus {
+/* chunky DOS animation */
+.message-box { transition: all 250ms steps(5); }
+.toast-box-outer { transition: all 150ms steps(4); }
+
+*::selection {
+    background: rgba(170, 170, 170, 0.99);
+    color: var(--background);
+}
+
+a:active { background: var(--active); }
+
+a:focus,
+button:focus,
+select:focus,
+input:focus,
+input[type=checkbox]:focus,
+input[type=radio]:focus,
+input[type=range]:focus {
     outline: none;
     background-color: var(--focus);
 }
@@ -114,9 +113,7 @@ a {
 
 a:visited { color: var(--clickable); }
 
-[data-theme="msdos"] {
-
-    /* Form elements */
+/* Form elements */
 
 button {
     border: none;
@@ -146,50 +143,49 @@ select {
 }
 select option                { font-size: 14px; }
 .Song-now-playing .FavoriteButton:not(.isFavorite) { color: var(--background); }
-  @media screen and (max-width: 800px) { .BrowseList-colMtime { display: none } }
-  @container (max-width: 800px) { .BrowseList-colMtime { display: none } }
+@media screen and (max-width: 800px) { .BrowseList-colMtime { display: none } }
+@container (max-width: 800px) { .BrowseList-colMtime { display: none } }
 button:active   { background: var(--active); }
 button:disabled { background: var(--neutral1); color: var(--neutral3); }
-.box-button     { background: var(--button); box-shadow: var(--msdos-box-shadow); white-space: pre; padding: 0 var(--charW2); display: inline-flex; align-items: center; gap: var(--charW1); }
+.box-button     { background: var(--button); box-shadow: var(--box-shadow); white-space: pre; padding: 0 var(--charW2); display: inline-flex; align-items: center; gap: var(--charW1); }
 .box-button:active { box-shadow: none; }
 
-    .tab {
-        padding: 0 15px 0 15px;
-        background: transparent;
-        border: 1px solid var(--clickable);
-        border-bottom: none;
-        border-radius: 3px 3px 0 0;
-        box-sizing: border-box;
-        height: var(--charH);
-    }
-
-    .tab-selected {
-        border-bottom: 1px solid var(--background);
-        background: var(--background);
-        margin-bottom: -1px;
-        height: calc(var(--charH) + 1px);
-    }
-    input[type=checkbox],
-    input[type=radio] {
-        appearance: none;
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        margin: 0 var(--charW1) 0 0;
-        color: var(--clickable);
-        white-space: pre;  /* prevent iOS Safari text wrapping */
-    }
-
-    input[type=checkbox]:before         { content: '[ ]'; }
-    input[type=checkbox]:checked:before { content: '[️x]'; }
-
-    input[type=radio]:before            { content: '( )'; }
-    input[type=radio]:checked:before    { content: '(•)'; }
-  input[type=text]::selection                 { background-color: #FFFFFF; }
-  input[type=text]::-webkit-input-placeholder { color: var(--neutral1) }
+.tab {
+    padding: 0 15px 0 15px;
+    background: transparent;
+    border: 1px solid var(--clickable);
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+    box-sizing: border-box;
+    height: var(--charH);
 }
 
-[data-theme="msdos"] input[type=text] {
+.tab-selected {
+    border-bottom: 1px solid var(--background);
+    background: var(--background);
+    margin-bottom: -1px;
+    height: calc(var(--charH) + 1px);
+}
+input[type=checkbox],
+input[type=radio] {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    margin: 0 var(--charW1) 0 0;
+    color: var(--clickable);
+    white-space: pre;  /* prevent iOS Safari text wrapping */
+}
+
+input[type=checkbox]:before         { content: '[ ]'; }
+input[type=checkbox]:checked:before { content: '[️x]'; }
+
+input[type=radio]:before            { content: '( )'; }
+input[type=radio]:checked:before    { content: '(•)'; }
+input[type=text]::selection                 { background-color: #FFFFFF; }
+input[type=text]::-webkit-input-placeholder { color: var(--neutral1) }
+
+input[type=text] {
     border: 0;
     border-radius: 0;
     background-color: var(--neutral2);
@@ -476,10 +472,8 @@ body,#root {
     flex-shrink: 0;
 }
 
-[data-theme="msdos"] {
-    @media screen and (max-width: 600px) {
-        .AppFooter-art, .AppFooter-shuffle, .AppFooter-repeat { display: none; }
-    }
+@media screen and (max-width: 600px) {
+    .AppFooter-art, .AppFooter-shuffle, .AppFooter-repeat { display: none; }
 }
 
 button.box-button.AppFooter-forward,
@@ -598,14 +592,12 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     background-color: var(--button);
     color: var(--neutral3);
 }
-[data-theme="msdos"] {
 /* Selected AND Playing */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
     box-shadow: 0 0 1px 1px inset var(--selected);
     outline: 1px solid var(--selected);
 }
 .BrowseList-row:has(a:hover) { color: var(--neutral4); }
- }
 .BrowseList-row a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .BrowseList-colName { overflow: hidden; flex-grow: 1; display: flex; align-items: center; gap: calc(var(--charW1) / 2); }
 .BrowseList-colName a { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
@@ -706,10 +698,8 @@ button.IconButton {
 
 .VolumeSlider { flex-shrink: 0; margin: var(--charH) 0; }
 
-[data-theme="msdos"] {
-    @media screen and (max-width: 600px) {
-        .VolumeSlider { display: none; }
-    }
+@media screen and (max-width: 600px) {
+    .VolumeSlider { display: none; }
 }
 
 .inline-icon {
@@ -795,7 +785,7 @@ button.IconButton {
 }
 .toast-box {
     padding: var(--charH) var(--charW2);
-    box-shadow: var(--msdos-box-shadow);
+    box-shadow: var(--box-shadow);
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
@@ -913,7 +903,7 @@ button.IconButton {
 }
 
 
-[data-theme="msdos"] .message-box-button {
+.message-box-button {
     background: var(--background);
     padding: 0 var(--charW2);
     box-shadow: none;
@@ -927,16 +917,16 @@ button.IconButton {
 }
 
 /* Scrollbar styling */
-[data-theme="msdos"] ::-webkit-scrollbar {
+::-webkit-scrollbar {
     height: var(--charW1);
     width: var(--charW1);
     background-color: var(--button);
 }
 
-[data-theme="msdos"] ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background-color: var(--clickable);
     -webkit-border-radius: 0;
 }
-[data-theme="msdos"] ::-webkit-scrollbar-corner {
+::-webkit-scrollbar-corner {
     background-color: var(--neutral2);
 }

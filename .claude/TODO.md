@@ -8,7 +8,9 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **B1**: The folder that displays at the bottom when you're playing a song links to the wrong location. i.e. `https://jeffdt.github.io/homskillet-discography/browse/homskillet-discography/music/Bazaar`
 
-**B2**: Fonts are not aligned with the directory icons
+**B2**: Text is not aligned with the directory icons. The text appears slightly lower.
+
+**B3**: When you hit the mobile breakpoint, the volume bar is not vertically aligned with the song time tracker. It's slightly below the time tracker. It's fine in a desktop view though.
 
 ---
 
@@ -20,9 +22,11 @@ None!
 
 ## ENHANCEMENT (new features & styling)
 
-**E1**: Refactor CSS for easy palette swaps. See `.claude/refactor-css-for-palettes.md` for full context and instructions.
+**E1**: This repo used to contain two themes (ms-dos and winamp) which swapped in major visual changes. I have since removed the winamp theme so there is now only one ms-dos theme. Since there is only one theme, and I do not plan to add more, we can simplify this. Remove any definitions of the ms-dos theme or theme pickers anywhere in the code or styling. There must be a single style for the app, with the only deviations being for mobile responsiveness.
 
-**E2**: Add the ability to swap color palettes on the entire UI. Some ideas would be Metallic Wing (monochrome with pops of color), Bazaar (sand colors), superfore (pastels), and some other fun ones you come up with.
+**E2.1**: Swap in a new color theme. It should be mostly monochrome with pops of color for contrast and emphasis. Select all of your colors from the list of colors in `.claude/color-palettes.md`. Limit your selection to the ones in `Grayscales` and `Greens`. One example might be a black background, light gray text text
+
+**E2.2**: Add the ability to swap between multiple color palettes on the entire UI. For the 
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
