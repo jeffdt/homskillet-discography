@@ -24,7 +24,11 @@ const SPEED_LABELS = [
 ];
 const COLOR_PALETTES: ColorPalette[] = [
   {
-    label: 'Original',
+    label: 'MW Green',
+    colors: ['#101010', '#202020', '#66CB01', '#9BFE38', '#FEFEFE'],
+  },
+  {
+    label: 'Game Genie',
     colors: DEFAULT_COLOR_PALETTE,
   },
   {
