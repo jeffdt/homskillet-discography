@@ -6,7 +6,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-**B1**: Fonts by viler is not quite correct. Silkscreen is not by viler. We should specify the font that was his.
+None!
 
 ---
 
@@ -14,14 +14,18 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **S1**: Eliminate "Mode" settings for visualizer, hardcode to constant Q. Eliminate Weighting, hardcode to A-weighting. Eliminate speed, hardcode to medium. The only option should be palette.
 
-**S2**: The time slider should not show decimal precision. It's too much. Just show seconds.
+**S2.1**: The time slider should not show decimal precision. It's too much. Just show seconds.
 
+**S2.2**: The file size doesn't need decimal precision either. Just show KB.
 ---
 
 ## ENHANCEMENT (new features & styling)
 
 **E1**: In the player settings, switch from floats to percentages (speed, bass, stereo width).
-**E2.2**: Add the ability to swap between multiple color palettes on the entire UI.
+
+**E2**: Add the ability to swap between multiple color palettes on the entire UI.
+
+**E3**: Clicking the currently playing song title above the player should also take you directly to that file in the browser. It should open whatever dir it's located in and everything. It shouldn't interrupt the song, just navigate to that dir and make sure the file is visible on screen.
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 

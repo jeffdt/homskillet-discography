@@ -14,10 +14,15 @@
     /* Theme: Metallic Wing Green */
     /* Colors from: Grayscales (#101010, #202020, #7F7F7F, #C3C3C3, #FEFEFE) + Greens (#9BFE38, #66CB01) */
     /* Strategy: Monochrome base with selective green accents for emphasis */
+
+    /* ACCENT COLORS - Change these two values to swap the entire theme's accent colors! */
+    --accent:       #9BFE38; /* Light Green - main accent (playing songs, hover feedback, title) */
+    --accent-dark:  #66CB01; /* Dark Green - darker accent for active/pressed states */
+
     --clickable:  #C3C3C3; /* Light Gray - most interactive elements */
-    --active:     #66CB01; /* Dark Green - active/pressed state (pop of color) */
+    --active:     var(--accent-dark); /* Use dark accent for active/pressed states */
     --button:     #202020; /* Dark Gray - button background */
-    --selected:   #9BFE38; /* Light Green - selected items (pop of color) */
+    --selected:   var(--accent); /* Use accent for selected items */
     --focus:      #202020; /* Dark Gray - subtle focus indication */
     --background: #101010; /* Black - main background */
     --shadow:     #000000; /* Pure black - shadows */
@@ -153,8 +158,8 @@ button:disabled { background: var(--neutral1); color: var(--neutral3); }
 .box-button     { background: var(--button); box-shadow: var(--box-shadow); white-space: pre; padding: 0 var(--charW2); display: inline-flex; align-items: center; gap: var(--charW1); }
 .box-button:hover { background: #FEFEFE; color: #101010; /* White bg, black text - hover guidance */ }
 .box-button:hover .inline-icon { background-color: #101010; /* Black icon on white bg */ }
-.box-button:active { box-shadow: none; background: #9BFE38; color: #101010; /* Green bg, black text - electrify! */ }
-.box-button:active .inline-icon { background-color: #101010; /* Black icon on green bg */ }
+.box-button:active { box-shadow: none; background: var(--accent); color: #101010; /* Accent bg, black text - electrify! */ }
+.box-button:active .inline-icon { background-color: #101010; /* Black icon on accent bg */ }
 
 .tab {
     padding: 0 15px 0 15px;
@@ -183,15 +188,15 @@ input[type=radio] {
     white-space: pre;  /* prevent iOS Safari text wrapping */
 }
 
-input[type=checkbox]:before         { content: '[ ]'; }
+input[type=checkbox]:before         { content: '[\u00A0]'; } /* Non-breaking space for consistent width */
 input[type=checkbox]:checked:before { content: '[x]'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
 input[type=checkbox]:hover:before   { color: #FEFEFE; /* White - hover guidance */ }
-input[type=checkbox]:active:before  { color: #9BFE38; /* Light Green - electrify on click */ }
+input[type=checkbox]:active:before  { color: var(--accent); /* Accent - electrify on click */ }
 
 input[type=radio]:before            { content: '( )'; }
 input[type=radio]:checked:before    { content: '(•)'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
 input[type=radio]:hover:before      { color: #FEFEFE; /* White - hover guidance */ }
-input[type=radio]:active:before     { color: #9BFE38; /* Light Green - electrify on click */ }
+input[type=radio]:active:before     { color: var(--accent); /* Accent - electrify on click */ }
 input[type=text]::selection                 { background-color: #FFFFFF; }
 input[type=text]::-webkit-input-placeholder { color: var(--neutral1) }
 
@@ -243,7 +248,7 @@ input[type=range]:hover::-webkit-slider-thumb {
     background: #FEFEFE; /* White - hover guidance */
 }
 input[type=range]:active::-webkit-slider-thumb {
-    background: #9BFE38; /* Light Green - electrify on click */
+    background: var(--accent); /* Accent - electrify on click */
 }
 input[type=range]::-moz-range-thumb { /* Firefox */
     appearance: none;
@@ -258,7 +263,7 @@ input[type=range]:hover::-moz-range-thumb {
     background: #FEFEFE; /* White - hover guidance */
 }
 input[type=range]:active::-moz-range-thumb {
-    background: #9BFE38; /* Light Green - electrify on click */
+    background: var(--accent); /* Accent - electrify on click */
 }
 
 /* Component overrides */
@@ -313,7 +318,7 @@ body,#root {
 }
 
 .AppHeader-title, .AppHeader-title:visited, .AppHeader-title:link {
-    color: #9BFE38; /* Light Green - bright pop for main title */
+    color: var(--accent); /* Accent - bright pop for main title */
     font: var(--font-title) !important;
 }
 
@@ -420,7 +425,7 @@ body,#root {
 
 .SongDisplay {
     padding: var(--charH) var(--charW2);
-    color: #9BFE38; /* Light Green - pop of color for currently playing song title */
+    color: var(--accent); /* Accent - pop of color for currently playing song title */
     font: var(--font-accent) !important;
     border-top: 1px solid var(--clickable);
     margin: 0 var(--charW2neg);
@@ -476,7 +481,7 @@ body,#root {
 
 .AppFooter-attribution a {
     pointer-events: auto; /* Re-enable clicks on links */
-    color: #9BFE38; /* Light Green - pop of color for attribution links */
+    color: var(--accent); /* Accent - pop of color for attribution links */
     font: var(--font-title) !important;
 }
 
@@ -534,7 +539,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     color: #FEFEFE; /* White - hover guidance for label */
 }
 .App-voice-label:has(input:active) label {
-    color: #9BFE38; /* Light Green - electrify label on click */
+    color: var(--accent); /* Accent - electrify label on click */
 }
 
 .AppFooter-controls-row {
@@ -607,12 +612,19 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     background-color: #FEFEFE; /* White - hover guidance */
 }
 .Slider:active .Slider-knob {
-    background-color: #9BFE38; /* Light Green - electrify on click */
+    background-color: var(--accent); /* Accent - electrify on click */
 }
 
 .Browse-topRow {
     display: flex; justify-content: space-between; margin-bottom: var(--charH); gap: var(--charW2);
     min-height: var(--buttonHeight);
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    z-index: 10;
+    padding-bottom: var(--charH);
+    border-bottom: 1px solid var(--clickable);
+    margin-bottom: 0;
 }
 
 .BrowseList-row { display: flex; align-items: center; height: var(--rowHeight); }
@@ -623,18 +635,21 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 /* Playing */
 .App-main .App-main-content-area .Song-now-playing {
     background-color: var(--button);
-    color: #9BFE38; /* Light Green - pop of color for currently playing */
+    color: var(--accent); /* Accent - pop of color for currently playing */
 }
 .Song-now-playing a {
-    color: #9BFE38; /* Light Green - links inside currently playing song */
+    color: var(--accent); /* Accent - links inside currently playing song */
 }
 /* Selected AND Playing */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
     box-shadow: 0 0 1px 1px inset var(--selected);
     outline: 1px solid var(--selected);
 }
-.BrowseList-row:has(a:hover) { color: var(--neutral4); }
-.BrowseList-row:has(a:hover) a { color: var(--neutral4); } /* Song title highlights on hover */
+.BrowseList-row:hover {
+    color: var(--neutral4);
+    background-color: #202020; /* Dark Gray - subtle background on hover */
+}
+.BrowseList-row:hover a { color: var(--neutral4); } /* Song title highlights on hover */
 .BrowseList-row a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .BrowseList-colName { overflow: hidden; flex-grow: 1; display: flex; align-items: center; gap: calc(var(--charW1) / 2); }
 .BrowseList-colName a { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
@@ -651,7 +666,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     color: #FEFEFE; /* White - hover guidance for label */
 }
 .PlayerParams-param:has(input:active) .PlayerParams-label {
-    color: #9BFE38; /* Light Green - electrify label on click */
+    color: var(--accent); /* Accent - electrify label on click */
 }
 .PlayerParams-param input { margin-right: var(--charW1); flex-shrink: 0; }
 .PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; color: #C3C3C3; /* Light Gray - section headers */ }

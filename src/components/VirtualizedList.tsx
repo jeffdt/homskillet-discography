@@ -214,7 +214,9 @@ function VirtualizedList(props: VirtualizedListProps) {
                       // It is also impossible to play an item scrolled off screen if relying on <a> focus.
                       // For these reasons we will use a fake focus instead of the browser built-in.
 
-                      const onSelect = (e: React.MouseEvent) => {
+                      const onActivateWithIndex = onActivate(index);
+
+                      const onRowClick = (e: React.MouseEvent) => {
                         setSelectedRow(index);
                         // Prevent focus on the anchor element
                         e.preventDefault();
@@ -224,14 +226,13 @@ function VirtualizedList(props: VirtualizedListProps) {
                         el?.focus({
                           preventScroll: true
                         });
+                        // Play the song on click
+                        onActivateWithIndex(e);
                       };
-
-                      const onActivateWithIndex = onActivate(index);
 
                       return <div key={key} style={style}
                                   className={classNames.join(' ')}
-                                  onClick={onSelect}
-                                  onDoubleClick={onActivateWithIndex}>{
+                                  onClick={onRowClick}>{
                         rowRenderer({
                           item,
                           onPlay: onActivateWithIndex,
