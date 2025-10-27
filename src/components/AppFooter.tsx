@@ -75,7 +75,7 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
       <div className="AppFooter-attribution">
         Forked from <a href="https://github.com/mmontag/chip-player-js" target="_blank" rel="noopener noreferrer">Chip Player JS</a> by Matt Montag
         {' • '}
-        Fonts by <a href="https://int10h.org/oldschool-pc-fonts/" target="_blank" rel="noopener noreferrer">VileR</a> (CC BY-SA 4.0)
+        Title font: Nixdorf 8810 M15 by <a href="https://int10h.org/oldschool-pc-fonts/" target="_blank" rel="noopener noreferrer">VileR</a> (CC BY-SA 4.0)
       </div>
       <div className="AppFooter-main">
         <div style={{ display: 'flex', gap: 'var(--charW2)' }}>

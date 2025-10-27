@@ -11,18 +11,26 @@
     --buttonHeight: var(--charH);
     --rowHeight:    var(--charH);
 
-    --clickable:  #ff0;
-    --active:     #800;
-    --button:     #66d;
-    --selected:   #00f;
-    --focus:      #00f;
-    --background: #008;
-    --shadow:     #005;
-    --neutral0:   #000;
-    --neutral1:   #777;
-    --neutral2:   #aaa;
-    --neutral3:   #ccc;
-    --neutral4:   #fff;
+    /* Theme: Metallic Wing Green */
+    /* Colors from: Grayscales (#101010, #202020, #7F7F7F, #C3C3C3, #FEFEFE) + Greens (#9BFE38, #66CB01) */
+    /* Strategy: Monochrome base with selective green accents for emphasis */
+
+    /* ACCENT COLORS - Change these two values to swap the entire theme's accent colors! */
+    --accent:       #9BFE38; /* Light Green - main accent (playing songs, hover feedback, title) */
+    --accent-dark:  #66CB01; /* Dark Green - darker accent for active/pressed states */
+
+    --clickable:  #C3C3C3; /* Light Gray - most interactive elements */
+    --active:     var(--accent-dark); /* Use dark accent for active/pressed states */
+    --button:     #202020; /* Dark Gray - button background */
+    --selected:   var(--accent); /* Use accent for selected items */
+    --focus:      #202020; /* Dark Gray - subtle focus indication */
+    --background: #101010; /* Black - main background */
+    --shadow:     #000000; /* Pure black - shadows */
+    --neutral0:   #101010; /* Black */
+    --neutral1:   #202020; /* Dark Gray */
+    --neutral2:   #7F7F7F; /* Medium Gray - body text */
+    --neutral3:   #C3C3C3; /* Light Gray - emphasized text */
+    --neutral4:   #FEFEFE; /* White - headings, high contrast */
 }
 
 .grid { /* utility class for testing the character grid */
@@ -148,7 +156,10 @@ select option                { font-size: 14px; }
 button:active   { background: var(--active); }
 button:disabled { background: var(--neutral1); color: var(--neutral3); }
 .box-button     { background: var(--button); box-shadow: var(--box-shadow); white-space: pre; padding: 0 var(--charW2); display: inline-flex; align-items: center; gap: var(--charW1); }
-.box-button:active { box-shadow: none; }
+.box-button:hover { background: #FEFEFE; color: #101010; /* White bg, black text - hover guidance */ }
+.box-button:hover .inline-icon { background-color: #101010; /* Black icon on white bg */ }
+.box-button:active { box-shadow: none; background: var(--accent); color: #101010; /* Accent bg, black text - electrify! */ }
+.box-button:active .inline-icon { background-color: #101010; /* Black icon on accent bg */ }
 
 .tab {
     padding: 0 15px 0 15px;
@@ -173,15 +184,19 @@ input[type=radio] {
     border: 0;
     border-radius: 0;
     margin: 0 var(--charW1) 0 0;
-    color: var(--clickable);
+    color: #7F7F7F; /* Medium Gray - darker when unchecked */
     white-space: pre;  /* prevent iOS Safari text wrapping */
 }
 
-input[type=checkbox]:before         { content: '[ ]'; }
-input[type=checkbox]:checked:before { content: '[x]'; }
+input[type=checkbox]:before         { content: '[\u00A0]'; } /* Non-breaking space for consistent width */
+input[type=checkbox]:checked:before { content: '[x]'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
+input[type=checkbox]:hover:before   { color: #FEFEFE; /* White - hover guidance */ }
+input[type=checkbox]:active:before  { color: var(--accent); /* Accent - electrify on click */ }
 
 input[type=radio]:before            { content: '( )'; }
-input[type=radio]:checked:before    { content: '(•)'; }
+input[type=radio]:checked:before    { content: '(•)'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
+input[type=radio]:hover:before      { color: #FEFEFE; /* White - hover guidance */ }
+input[type=radio]:active:before     { color: var(--accent); /* Accent - electrify on click */ }
 input[type=text]::selection                 { background-color: #FFFFFF; }
 input[type=text]::-webkit-input-placeholder { color: var(--neutral1) }
 
@@ -208,12 +223,12 @@ input[type=range] {
 }
 input[type=range]::-webkit-slider-runnable-track {
     height: var(--railH);
-    border: 1px solid var(--clickable);
+    border: 1px solid #7F7F7F; /* Medium Gray - darker rail */
     margin: var(--charW1) 0;
 }
 input[type=range]::-moz-range-track { /* Firefox */
     height: var(--railH);
-    border: 1px solid var(--clickable);
+    border: 1px solid #7F7F7F; /* Medium Gray - darker rail */
     margin: var(--charW1) 0;
     box-sizing: border-box;
 }
@@ -229,6 +244,12 @@ input[type=range]::-webkit-slider-thumb {
     margin-top: calc(var(--knobH) / -2);
     width: var(--knobW);
 }
+input[type=range]:hover::-webkit-slider-thumb {
+    background: #FEFEFE; /* White - hover guidance */
+}
+input[type=range]:active::-webkit-slider-thumb {
+    background: var(--accent); /* Accent - electrify on click */
+}
 input[type=range]::-moz-range-thumb { /* Firefox */
     appearance: none;
     background: var(--clickable);
@@ -237,6 +258,12 @@ input[type=range]::-moz-range-thumb { /* Firefox */
     height: var(--knobH);
     margin-top: calc(var(--knobH) / -2);
     width: var(--knobW);
+}
+input[type=range]:hover::-moz-range-thumb {
+    background: #FEFEFE; /* White - hover guidance */
+}
+input[type=range]:active::-moz-range-thumb {
+    background: var(--accent); /* Accent - electrify on click */
 }
 
 /* Component overrides */
@@ -291,7 +318,7 @@ body,#root {
 }
 
 .AppHeader-title, .AppHeader-title:visited, .AppHeader-title:link {
-    color: var(--neutral4);
+    color: var(--accent); /* Accent - bright pop for main title */
     font: var(--font-title) !important;
 }
 
@@ -398,7 +425,7 @@ body,#root {
 
 .SongDisplay {
     padding: var(--charH) var(--charW2);
-    color: var(--neutral4);
+    color: var(--accent); /* Accent - pop of color for currently playing song title */
     font: var(--font-accent) !important;
     border-top: 1px solid var(--clickable);
     margin: 0 var(--charW2neg);
@@ -454,7 +481,7 @@ body,#root {
 
 .AppFooter-attribution a {
     pointer-events: auto; /* Re-enable clicks on links */
-    color: var(--clickable);
+    color: var(--accent); /* Accent - pop of color for attribution links */
     font: var(--font-title) !important;
 }
 
@@ -508,6 +535,12 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     width: calc(var(--charW1) * 18);
     white-space: nowrap;
 }
+.App-voice-label:hover label {
+    color: #FEFEFE; /* White - hover guidance for label */
+}
+.App-voice-label:has(input:active) label {
+    color: var(--accent); /* Accent - electrify label on click */
+}
 
 .AppFooter-controls-row {
     display: flex;
@@ -560,7 +593,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     position: absolute;
     top: calc((var(--charH) - var(--railH)) / 2);
     box-sizing: border-box;
-    border: 1px solid var(--clickable);
+    border: 1px solid #7F7F7F; /* Medium Gray - darker rail */
 }
 
 .Slider-knob {
@@ -575,28 +608,51 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     box-shadow: none;
     box-sizing: border-box;
 }
+.Slider:hover .Slider-knob {
+    background-color: #FEFEFE; /* White - hover guidance */
+}
+.Slider:active .Slider-knob {
+    background-color: var(--accent); /* Accent - electrify on click */
+}
 
 .Browse-topRow {
     display: flex; justify-content: space-between; margin-bottom: var(--charH); gap: var(--charW2);
     min-height: var(--buttonHeight);
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    z-index: 10;
+    padding-bottom: var(--charH);
+    border-bottom: 1px solid var(--clickable);
+    margin-bottom: 0;
 }
 
 .BrowseList-row { display: flex; align-items: center; height: var(--rowHeight); }
 /* Selected */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected {
-    background-color:  var(--selected);
+    background-color: #202020; /* Dark Gray - subtle selection, no bright green backgrounds */
 }
 /* Playing */
 .App-main .App-main-content-area .Song-now-playing {
-    background-color: var(--button);
-    color: var(--neutral3);
+    box-shadow: 0 0 0 1px var(--accent); /* Green border for playing song - using box-shadow to prevent overlap issues */
+    position: relative; /* Ensure proper stacking */
+    z-index: 1; /* Lift above adjacent rows */
+    color: var(--accent); /* Accent text color for currently playing */
+}
+.Song-now-playing a {
+    color: var(--accent); /* Accent - links inside currently playing song */
 }
 /* Selected AND Playing */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
-    box-shadow: 0 0 1px 1px inset var(--selected);
-    outline: 1px solid var(--selected);
+    background-color: #202020; /* Dark Gray background from selection */
+    box-shadow: 0 0 0 1px var(--accent); /* Green border from playing */
+    z-index: 1; /* Lift above adjacent rows */
 }
-.BrowseList-row:has(a:hover) { color: var(--neutral4); }
+.BrowseList-row:hover {
+    color: var(--neutral4);
+    background-color: #202020; /* Dark Gray - subtle background on hover */
+}
+.BrowseList-row:hover a { color: var(--neutral4); } /* Song title highlights on hover */
 .BrowseList-row a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .BrowseList-colName { overflow: hidden; flex-grow: 1; display: flex; align-items: center; gap: calc(var(--charW1) / 2); }
 .BrowseList-colName a { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
@@ -609,8 +665,14 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 
 .PlayerParams h3 { margin-top: 0; }
 .PlayerParams-param { display: flex; flex-wrap: wrap; align-items: center; }
+.PlayerParams-param:hover .PlayerParams-label {
+    color: #FEFEFE; /* White - hover guidance for label */
+}
+.PlayerParams-param:has(input:active) .PlayerParams-label {
+    color: var(--accent); /* Accent - electrify label on click */
+}
 .PlayerParams-param input { margin-right: var(--charW1); flex-shrink: 0; }
-.PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; }
+.PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; color: #C3C3C3; /* Light Gray - section headers */ }
 .PlayerParams-voiceList {
     display: flex;
     flex-wrap: wrap;
@@ -618,7 +680,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     margin-right: calc(var(--charW1) * -1);
     max-width: calc(var(--charW1) * 60);
 }
-.PlayerParams-label { flex-shrink: 0; width: calc(var(--charW1) * 14); margin-right: var(--charW1); }
+.PlayerParams-label { flex-shrink: 0; width: calc(var(--charW1) * 14); margin-right: var(--charW1); color: #C3C3C3; /* Light Gray - setting labels */ }
 .PlayerParams-group { margin-bottom: var(--charH); }
 
 button.FavoriteButton:active { color: var(--clickable); }
