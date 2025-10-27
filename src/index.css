@@ -178,7 +178,7 @@ input[type=radio] {
 }
 
 input[type=checkbox]:before         { content: '[ ]'; }
-input[type=checkbox]:checked:before { content: '[️x]'; }
+input[type=checkbox]:checked:before { content: '[x]'; }
 
 input[type=radio]:before            { content: '( )'; }
 input[type=radio]:checked:before    { content: '(•)'; }
@@ -505,9 +505,8 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 }
 
 .App-voice-label {
-    width: calc(var(--charW1) * 14);
+    width: calc(var(--charW1) * 18);
     white-space: nowrap;
-    overflow-x: hidden;
 }
 
 .AppFooter-controls-row {

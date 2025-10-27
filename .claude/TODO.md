@@ -6,11 +6,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-**B1.1**: The game music emu setting checkboxes create a weird yellow box to the right of the text. For example, it looks like `[X] NOISE █` where the block is yellow. Every channel shows this whether the box is checked or not.
-
-**B1.2**: The text for the nsf channels cuts off, like "TRIANGL" and "SAW WAV"
-
-**B1.3**: 
+None!
 
 ---
 
