@@ -11,18 +11,21 @@
     --buttonHeight: var(--charH);
     --rowHeight:    var(--charH);
 
-    --clickable:  #ff0;
-    --active:     #800;
-    --button:     #66d;
-    --selected:   #00f;
-    --focus:      #00f;
-    --background: #008;
-    --shadow:     #005;
-    --neutral0:   #000;
-    --neutral1:   #777;
-    --neutral2:   #aaa;
-    --neutral3:   #ccc;
-    --neutral4:   #fff;
+    /* Theme: Metallic Wing Green */
+    /* Colors from: Grayscales (#101010, #202020, #7F7F7F, #C3C3C3, #FEFEFE) + Greens (#9BFE38, #66CB01) */
+    /* Strategy: Monochrome base with selective green accents for emphasis */
+    --clickable:  #C3C3C3; /* Light Gray - most interactive elements */
+    --active:     #66CB01; /* Dark Green - active/pressed state (pop of color) */
+    --button:     #202020; /* Dark Gray - button background */
+    --selected:   #9BFE38; /* Light Green - selected items (pop of color) */
+    --focus:      #202020; /* Dark Gray - subtle focus indication */
+    --background: #101010; /* Black - main background */
+    --shadow:     #000000; /* Pure black - shadows */
+    --neutral0:   #101010; /* Black */
+    --neutral1:   #202020; /* Dark Gray */
+    --neutral2:   #7F7F7F; /* Medium Gray - body text */
+    --neutral3:   #C3C3C3; /* Light Gray - emphasized text */
+    --neutral4:   #FEFEFE; /* White - headings, high contrast */
 }
 
 .grid { /* utility class for testing the character grid */
@@ -173,15 +176,15 @@ input[type=radio] {
     border: 0;
     border-radius: 0;
     margin: 0 var(--charW1) 0 0;
-    color: var(--clickable);
+    color: #7F7F7F; /* Medium Gray - darker when unchecked */
     white-space: pre;  /* prevent iOS Safari text wrapping */
 }
 
 input[type=checkbox]:before         { content: '[ ]'; }
-input[type=checkbox]:checked:before { content: '[x]'; }
+input[type=checkbox]:checked:before { content: '[x]'; color: #FEFEFE; /* White - brighter when checked */ }
 
 input[type=radio]:before            { content: '( )'; }
-input[type=radio]:checked:before    { content: '(•)'; }
+input[type=radio]:checked:before    { content: '(•)'; color: #FEFEFE; /* White - brighter when checked */ }
 input[type=text]::selection                 { background-color: #FFFFFF; }
 input[type=text]::-webkit-input-placeholder { color: var(--neutral1) }
 
@@ -208,12 +211,12 @@ input[type=range] {
 }
 input[type=range]::-webkit-slider-runnable-track {
     height: var(--railH);
-    border: 1px solid var(--clickable);
+    border: 1px solid #7F7F7F; /* Medium Gray - darker rail */
     margin: var(--charW1) 0;
 }
 input[type=range]::-moz-range-track { /* Firefox */
     height: var(--railH);
-    border: 1px solid var(--clickable);
+    border: 1px solid #7F7F7F; /* Medium Gray - darker rail */
     margin: var(--charW1) 0;
     box-sizing: border-box;
 }
@@ -398,7 +401,7 @@ body,#root {
 
 .SongDisplay {
     padding: var(--charH) var(--charW2);
-    color: var(--neutral4);
+    color: #9BFE38; /* Light Green - pop of color for currently playing song title */
     font: var(--font-accent) !important;
     border-top: 1px solid var(--clickable);
     margin: 0 var(--charW2neg);
@@ -454,7 +457,7 @@ body,#root {
 
 .AppFooter-attribution a {
     pointer-events: auto; /* Re-enable clicks on links */
-    color: var(--clickable);
+    color: #9BFE38; /* Light Green - pop of color for attribution links */
     font: var(--font-title) !important;
 }
 
@@ -560,7 +563,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     position: absolute;
     top: calc((var(--charH) - var(--railH)) / 2);
     box-sizing: border-box;
-    border: 1px solid var(--clickable);
+    border: 1px solid #7F7F7F; /* Medium Gray - darker rail */
 }
 
 .Slider-knob {
@@ -589,7 +592,10 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 /* Playing */
 .App-main .App-main-content-area .Song-now-playing {
     background-color: var(--button);
-    color: var(--neutral3);
+    color: #9BFE38; /* Light Green - pop of color for currently playing */
+}
+.Song-now-playing a {
+    color: #9BFE38; /* Light Green - links inside currently playing song */
 }
 /* Selected AND Playing */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
@@ -610,7 +616,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .PlayerParams h3 { margin-top: 0; }
 .PlayerParams-param { display: flex; flex-wrap: wrap; align-items: center; }
 .PlayerParams-param input { margin-right: var(--charW1); flex-shrink: 0; }
-.PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; }
+.PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; color: #C3C3C3; /* Light Gray - section headers */ }
 .PlayerParams-voiceList {
     display: flex;
     flex-wrap: wrap;
@@ -618,7 +624,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     margin-right: calc(var(--charW1) * -1);
     max-width: calc(var(--charW1) * 60);
 }
-.PlayerParams-label { flex-shrink: 0; width: calc(var(--charW1) * 14); margin-right: var(--charW1); }
+.PlayerParams-label { flex-shrink: 0; width: calc(var(--charW1) * 14); margin-right: var(--charW1); color: #C3C3C3; /* Light Gray - setting labels */ }
 .PlayerParams-group { margin-bottom: var(--charH); }
 
 button.FavoriteButton:active { color: var(--clickable); }

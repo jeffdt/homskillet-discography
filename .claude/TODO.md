@@ -6,21 +6,21 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-None!
-
+**B2**:
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-None!
+**S1**: Eliminate "Mode" settings for visualizer, hardcode to constant Q. Eliminate Weighting, hardcode to A-weighting. Eliminate speed, hardcode to medium. The only option should be palette.
+
+**S2**: The time slider should not show decimal precision. It's too much. Just show seconds.
 
 ---
 
 ## ENHANCEMENT (new features & styling)
 
-**E2.1**: Swap in a new color theme. It should be mostly monochrome with pops of color for contrast and emphasis. Select all of your colors from the list of colors in `.claude/color-palettes.md`. Limit your selection to the ones in `Grayscales` and `Greens`. One example might be a black background, light gray text text
-
-**E2.2**: Add the ability to swap between multiple color palettes on the entire UI. For the
+**E1**: In the player settings, switch from floats to percentages (speed, bass, stereo width).
+**E2.2**: Add the ability to swap between multiple color palettes on the entire UI.
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
