@@ -6,7 +6,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-**B2**:
+**B1**: Fonts by viler is not quite correct. Silkscreen is not by viler. We should specify the font that was his.
+
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)

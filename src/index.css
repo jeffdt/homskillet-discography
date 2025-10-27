@@ -151,7 +151,10 @@ select option                { font-size: 14px; }
 button:active   { background: var(--active); }
 button:disabled { background: var(--neutral1); color: var(--neutral3); }
 .box-button     { background: var(--button); box-shadow: var(--box-shadow); white-space: pre; padding: 0 var(--charW2); display: inline-flex; align-items: center; gap: var(--charW1); }
-.box-button:active { box-shadow: none; }
+.box-button:hover { background: #FEFEFE; color: #101010; /* White bg, black text - hover guidance */ }
+.box-button:hover .inline-icon { background-color: #101010; /* Black icon on white bg */ }
+.box-button:active { box-shadow: none; background: #9BFE38; color: #101010; /* Green bg, black text - electrify! */ }
+.box-button:active .inline-icon { background-color: #101010; /* Black icon on green bg */ }
 
 .tab {
     padding: 0 15px 0 15px;
@@ -181,10 +184,14 @@ input[type=radio] {
 }
 
 input[type=checkbox]:before         { content: '[ ]'; }
-input[type=checkbox]:checked:before { content: '[x]'; color: #FEFEFE; /* White - brighter when checked */ }
+input[type=checkbox]:checked:before { content: '[x]'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
+input[type=checkbox]:hover:before   { color: #FEFEFE; /* White - hover guidance */ }
+input[type=checkbox]:active:before  { color: #9BFE38; /* Light Green - electrify on click */ }
 
 input[type=radio]:before            { content: '( )'; }
-input[type=radio]:checked:before    { content: '(•)'; color: #FEFEFE; /* White - brighter when checked */ }
+input[type=radio]:checked:before    { content: '(•)'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
+input[type=radio]:hover:before      { color: #FEFEFE; /* White - hover guidance */ }
+input[type=radio]:active:before     { color: #9BFE38; /* Light Green - electrify on click */ }
 input[type=text]::selection                 { background-color: #FFFFFF; }
 input[type=text]::-webkit-input-placeholder { color: var(--neutral1) }
 
@@ -232,6 +239,12 @@ input[type=range]::-webkit-slider-thumb {
     margin-top: calc(var(--knobH) / -2);
     width: var(--knobW);
 }
+input[type=range]:hover::-webkit-slider-thumb {
+    background: #FEFEFE; /* White - hover guidance */
+}
+input[type=range]:active::-webkit-slider-thumb {
+    background: #9BFE38; /* Light Green - electrify on click */
+}
 input[type=range]::-moz-range-thumb { /* Firefox */
     appearance: none;
     background: var(--clickable);
@@ -240,6 +253,12 @@ input[type=range]::-moz-range-thumb { /* Firefox */
     height: var(--knobH);
     margin-top: calc(var(--knobH) / -2);
     width: var(--knobW);
+}
+input[type=range]:hover::-moz-range-thumb {
+    background: #FEFEFE; /* White - hover guidance */
+}
+input[type=range]:active::-moz-range-thumb {
+    background: #9BFE38; /* Light Green - electrify on click */
 }
 
 /* Component overrides */
@@ -294,7 +313,7 @@ body,#root {
 }
 
 .AppHeader-title, .AppHeader-title:visited, .AppHeader-title:link {
-    color: var(--neutral4);
+    color: #9BFE38; /* Light Green - bright pop for main title */
     font: var(--font-title) !important;
 }
 
@@ -511,6 +530,12 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     width: calc(var(--charW1) * 18);
     white-space: nowrap;
 }
+.App-voice-label:hover label {
+    color: #FEFEFE; /* White - hover guidance for label */
+}
+.App-voice-label:has(input:active) label {
+    color: #9BFE38; /* Light Green - electrify label on click */
+}
 
 .AppFooter-controls-row {
     display: flex;
@@ -578,6 +603,12 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     box-shadow: none;
     box-sizing: border-box;
 }
+.Slider:hover .Slider-knob {
+    background-color: #FEFEFE; /* White - hover guidance */
+}
+.Slider:active .Slider-knob {
+    background-color: #9BFE38; /* Light Green - electrify on click */
+}
 
 .Browse-topRow {
     display: flex; justify-content: space-between; margin-bottom: var(--charH); gap: var(--charW2);
@@ -603,6 +634,7 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
     outline: 1px solid var(--selected);
 }
 .BrowseList-row:has(a:hover) { color: var(--neutral4); }
+.BrowseList-row:has(a:hover) a { color: var(--neutral4); } /* Song title highlights on hover */
 .BrowseList-row a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .BrowseList-colName { overflow: hidden; flex-grow: 1; display: flex; align-items: center; gap: calc(var(--charW1) / 2); }
 .BrowseList-colName a { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
@@ -615,6 +647,12 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 
 .PlayerParams h3 { margin-top: 0; }
 .PlayerParams-param { display: flex; flex-wrap: wrap; align-items: center; }
+.PlayerParams-param:hover .PlayerParams-label {
+    color: #FEFEFE; /* White - hover guidance for label */
+}
+.PlayerParams-param:has(input:active) .PlayerParams-label {
+    color: #9BFE38; /* Light Green - electrify label on click */
+}
 .PlayerParams-param input { margin-right: var(--charW1); flex-shrink: 0; }
 .PlayerParams-group-title { width: 100%; font: var(--font-accent) !important; color: #C3C3C3; /* Light Gray - section headers */ }
 .PlayerParams-voiceList {
