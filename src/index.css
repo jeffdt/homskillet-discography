@@ -630,20 +630,23 @@ button.box-button.AppFooter-back { padding: 0 var(--charW1); }
 .BrowseList-row { display: flex; align-items: center; height: var(--rowHeight); }
 /* Selected */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected {
-    background-color:  var(--selected);
+    background-color: #202020; /* Dark Gray - subtle selection, no bright green backgrounds */
 }
 /* Playing */
 .App-main .App-main-content-area .Song-now-playing {
-    background-color: var(--button);
-    color: var(--accent); /* Accent - pop of color for currently playing */
+    box-shadow: 0 0 0 1px var(--accent); /* Green border for playing song - using box-shadow to prevent overlap issues */
+    position: relative; /* Ensure proper stacking */
+    z-index: 1; /* Lift above adjacent rows */
+    color: var(--accent); /* Accent text color for currently playing */
 }
 .Song-now-playing a {
     color: var(--accent); /* Accent - links inside currently playing song */
 }
 /* Selected AND Playing */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
-    box-shadow: 0 0 1px 1px inset var(--selected);
-    outline: 1px solid var(--selected);
+    background-color: #202020; /* Dark Gray background from selection */
+    box-shadow: 0 0 0 1px var(--accent); /* Green border from playing */
+    z-index: 1; /* Lift above adjacent rows */
 }
 .BrowseList-row:hover {
     color: var(--neutral4);

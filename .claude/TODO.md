@@ -6,7 +6,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-None!
+**B1**: The randomize button is broken. It gets the error: VM564:1 Uncaught (in promise) SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON.
 
 ---
 
@@ -17,6 +17,9 @@ None!
 **S2.1**: The time slider should not show decimal precision. It's too much. Just show seconds.
 
 **S2.2**: The file size doesn't need decimal precision either. Just show KB.
+
+**S3**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
+
 ---
 
 ## ENHANCEMENT (new features & styling)
@@ -28,6 +31,8 @@ None!
 **E3**: Clicking the currently playing song title above the player should also take you directly to that file in the browser. It should open whatever dir it's located in and everything. It shouldn't interrupt the song, just navigate to that dir and make sure the file is visible on screen.
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
+
+**E5**: Let's make the time slider more dynamic. Can it be wavy and ripple down the line?
 
 **E6**: Add ability for me to store metadata for songs and albums. I assume this would be json files that live alongside the songs but i am open to other ideas. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
 
