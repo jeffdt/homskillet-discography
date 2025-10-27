@@ -698,6 +698,12 @@ button.IconButton {
 
 .VolumeSlider { flex-shrink: 0; margin: var(--charH) 0; }
 
+@media (orientation: portrait), (max-width: 768px) {
+    .VolumeSlider {
+        margin: calc(var(--charH) / 2) 0;
+    }
+}
+
 @media screen and (max-width: 600px) {
     .VolumeSlider { display: none; }
 }
@@ -710,6 +716,7 @@ button.IconButton {
     /* the icon PNGs are 19px tall, so the container needs odd height for vertical centering. */
     height: calc(round(up, var(--charH), 2px) - 1px);
     flex-shrink: 0;
+    vertical-align: middle;
 }
 [disabled] .inline-icon { background-color: var(--neutral2); }
 .dim-icon      { background-color: var(--neutral2); }

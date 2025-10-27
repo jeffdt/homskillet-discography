@@ -671,8 +671,9 @@ class App extends React.Component<AppProps, AppState> {
   getCurrentSongLink(withSubtune = false): string | null {
     const url = this.sequencer?.getCurrUrl();
     if (!url) return null;
-    let link = BASE_URL + '/?play=' +
-      encodeURIComponent(pathJoin('/', url.replace(CATALOG_PREFIX, '')));
+    // Remove CATALOG_PREFIX and ensure we don't duplicate path segments
+    const relativeUrl = url.startsWith(CATALOG_PREFIX) ? url.substring(CATALOG_PREFIX.length) : url;
+    let link = BASE_URL + '/?play=' + encodeURIComponent(relativeUrl);
     if (withSubtune) {
       const subtune = this.sequencer?.getSubtune();
       if (subtune !== 0) {
