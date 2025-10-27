@@ -22,8 +22,6 @@ None!
 
 ## ENHANCEMENT (new features & styling)
 
-**E1**: Clicking a song title should copy a link to your clipboard for that track.
-
 **E2.1**: Swap in a new color theme. It should be mostly monochrome with pops of color for contrast and emphasis. Select all of your colors from the list of colors in `.claude/color-palettes.md`. Limit your selection to the ones in `Grayscales` and `Greens`. One example might be a black background, light gray text text
 
 **E2.2**: Add the ability to swap between multiple color palettes on the entire UI. For the

@@ -762,7 +762,12 @@ class App extends React.Component<AppProps, AppState> {
                             paused={this.state.ejected || this.state.paused}/>
               </div>}
           </div>
-          <SongDisplay songUrl={this.state.songUrl} ejected={this.state.ejected} />
+          <SongDisplay
+            songUrl={this.state.songUrl}
+            ejected={this.state.ejected}
+            getCurrentSongLink={this.getCurrentSongLink}
+            handleCopyLink={this.handleCopyLink}
+          />
           <AppFooter
             currentSongDurationMs={this.state.currentSongDurationMs}
             currentSongNumSubtunes={this.state.currentSongNumSubtunes}
