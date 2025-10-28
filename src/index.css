@@ -188,10 +188,33 @@ input[type=radio] {
     white-space: pre;  /* prevent iOS Safari text wrapping */
 }
 
-input[type=checkbox]:before         { content: '[\u00A0]'; } /* Non-breaking space for consistent width */
-input[type=checkbox]:checked:before { content: '[x]'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
-input[type=checkbox]:hover:before   { color: #FEFEFE; /* White - hover guidance */ }
-input[type=checkbox]:active:before  { color: var(--accent); /* Accent - electrify on click */ }
+input[type=checkbox]:before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #7F7F7F; /* Medium Gray - darker when unchecked */
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+input[type=checkbox]:checked:before {
+    background-color: #C3C3C3; /* Light Gray - filled when checked */
+    border-color: #C3C3C3;
+}
+input[type=checkbox]:hover:before {
+    border-color: #FEFEFE; /* White - hover guidance */
+}
+input[type=checkbox]:checked:hover:before {
+    background-color: #FEFEFE;
+    border-color: #FEFEFE;
+}
+input[type=checkbox]:active:before {
+    border-color: var(--accent); /* Accent - electrify on click */
+}
+input[type=checkbox]:checked:active:before {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
 
 input[type=radio]:before            { content: '( )'; }
 input[type=radio]:checked:before    { content: '(•)'; color: #C3C3C3; /* Light Gray - active but not prominent */ }
