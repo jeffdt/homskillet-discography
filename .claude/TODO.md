@@ -47,6 +47,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
 
+**E11**: Mobile fonts/buttons need to be bigger.
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
