@@ -1,67 +1,449 @@
 {
   "/Bazaar": [
     {
-      "path": "/Bazaar/AlwaysBeClosin.nsf",
+      "path": "/Bazaar/Always_Be_Closin.nsf",
       "size": 16559,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 0
     },
     {
-      "path": "/Bazaar/bazaarshop.nsf",
+      "path": "/Bazaar/bazaar_shop.nsf",
       "size": 17805,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 1
     },
     {
-      "path": "/Bazaar/fastjam.nsf",
+      "path": "/Bazaar/fast_jam.nsf",
       "size": 17054,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 2
     },
     {
       "path": "/Bazaar/groove.nsf",
       "size": 17044,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 3
     },
     {
       "path": "/Bazaar/mt.nsf",
       "size": 21372,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 4
     },
     {
-      "path": "/Bazaar/scarabdroppings.nsf",
+      "path": "/Bazaar/scarab_droppings.nsf",
       "size": 19855,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 5
     },
     {
-      "path": "/Bazaar/slowjam2.nsf",
+      "path": "/Bazaar/slow_jam_2.nsf",
       "size": 18819,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 6
     },
     {
-      "path": "/Bazaar/tectonictechniques.nsf",
+      "path": "/Bazaar/tectonic_techniques.nsf",
       "size": 18846,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 7
     },
     {
-      "path": "/Bazaar/turbanyouth.nsf",
+      "path": "/Bazaar/turban_youth.nsf",
       "size": 18353,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 8
+    }
+  ],
+  "/Covers": [
+    {
+      "path": "/Covers/breathe.nsf",
+      "size": 14740,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 0
+    },
+    {
+      "path": "/Covers/chrome_paradise.nsf",
+      "size": 14107,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 1
+    },
+    {
+      "path": "/Covers/cups_and_blunts.nsf",
+      "size": 15427,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 2
+    },
+    {
+      "path": "/Covers/cydelix_nes.nsf",
+      "size": 6962,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 3
+    },
+    {
+      "path": "/Covers/cydelix_vrc6.nsf",
+      "size": 8158,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 4
+    },
+    {
+      "path": "/Covers/d_block_what.nsf",
+      "size": 15220,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 5
+    },
+    {
+      "path": "/Covers/dnb.nsf",
+      "size": 15488,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 6
+    },
+    {
+      "path": "/Covers/duke.nsf",
+      "size": 15388,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 7
+    },
+    {
+      "path": "/Covers/eye_2_eye.nsf",
+      "size": 15344,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 8
+    },
+    {
+      "path": "/Covers/go_straight.nsf",
+      "size": 12976,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 9
+    },
+    {
+      "path": "/Covers/gratitude.nsf",
+      "size": 17756,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 10
+    },
+    {
+      "path": "/Covers/hava_nagila.nsf",
+      "size": 12076,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 11
+    },
+    {
+      "path": "/Covers/hugo_kant.nsf",
+      "size": 15014,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 12
+    },
+    {
+      "path": "/Covers/internet_dream.nsf",
+      "size": 16025,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 13
+    },
+    {
+      "path": "/Covers/iron_galaxy.nsf",
+      "size": 9732,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 14
+    },
+    {
+      "path": "/Covers/launchpad.nsf",
+      "size": 16803,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 15
+    },
+    {
+      "path": "/Covers/lobster.nsf",
+      "size": 8825,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 16
+    },
+    {
+      "path": "/Covers/lost_vikings.nsf",
+      "size": 16617,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 17
+    },
+    {
+      "path": "/Covers/lower_brinstar.nsf",
+      "size": 7703,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 18
+    },
+    {
+      "path": "/Covers/moments_in_love.nsf",
+      "size": 16711,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 19
+    },
+    {
+      "path": "/Covers/morse.nsf",
+      "size": 15081,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 20
+    },
+    {
+      "path": "/Covers/nectar_for_isis.nsf",
+      "size": 14039,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 21
+    },
+    {
+      "path": "/Covers/new_world_order.nsf",
+      "size": 17937,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 22
+    },
+    {
+      "path": "/Covers/police_and_thieves_noswing.nsf",
+      "size": 20921,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 23
+    },
+    {
+      "path": "/Covers/police_and_thieves.nsf",
+      "size": 21356,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 24
+    },
+    {
+      "path": "/Covers/saw_it_off.nsf",
+      "size": 17873,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 25
+    },
+    {
+      "path": "/Covers/seaweed.nsf",
+      "size": 7782,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 26
+    },
+    {
+      "path": "/Covers/sun_temple.nsf",
+      "size": 17222,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 27
+    },
+    {
+      "path": "/Covers/sybins-beans_of_future_past.nsf",
+      "size": 16799,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 28
+    },
+    {
+      "path": "/Covers/the_cars-im_not_the_one.nsf",
+      "size": 18024,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 29
+    },
+    {
+      "path": "/Covers/tunak_tun.nsf",
+      "size": 16489,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 30
+    },
+    {
+      "path": "/Covers/UN_squadron.nsf",
+      "size": 10124,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 31
+    },
+    {
+      "path": "/Covers/youre_not_alone.nsf",
+      "size": 6714,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 32
+    }
+  ],
+  "/LilLoops": [
+    {
+      "path": "/LilLoops/blue_two.nsf",
+      "size": 17386,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 0
+    },
+    {
+      "path": "/LilLoops/blue.nsf",
+      "size": 17473,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 1
+    },
+    {
+      "path": "/LilLoops/bluh_blah.nsf",
+      "size": 16734,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 2
+    },
+    {
+      "path": "/LilLoops/digga.nsf",
+      "size": 16657,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 3
+    },
+    {
+      "path": "/LilLoops/doopter.nsf",
+      "size": 16564,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 4
+    },
+    {
+      "path": "/LilLoops/El_Capitan.nsf",
+      "size": 6727,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 5
+    },
+    {
+      "path": "/LilLoops/gungeon.nsf",
+      "size": 6628,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 6
+    },
+    {
+      "path": "/LilLoops/high_score.nsf",
+      "size": 16588,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 7
+    },
+    {
+      "path": "/LilLoops/Hip_Hop_2.nsf",
+      "size": 13508,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 8
+    },
+    {
+      "path": "/LilLoops/Hip_Hop.nsf",
+      "size": 16906,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 9
+    },
+    {
+      "path": "/LilLoops/jester.nsf",
+      "size": 21013,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 10
+    },
+    {
+      "path": "/LilLoops/L.nsf",
+      "size": 17192,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 11
+    },
+    {
+      "path": "/LilLoops/labess.nsf",
+      "size": 16656,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 12
+    },
+    {
+      "path": "/LilLoops/loop.nsf",
+      "size": 16748,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 13
+    },
+    {
+      "path": "/LilLoops/luke.nsf",
+      "size": 16925,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 14
+    },
+    {
+      "path": "/LilLoops/mushroom.nsf",
+      "size": 16516,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 15
+    },
+    {
+      "path": "/LilLoops/selection.nsf",
+      "size": 16638,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 16
+    },
+    {
+      "path": "/LilLoops/shanty.nsf",
+      "size": 7635,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 17
+    },
+    {
+      "path": "/LilLoops/spokky.nsf",
+      "size": 12812,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 18
+    },
+    {
+      "path": "/LilLoops/turbo_drive.nsf",
+      "size": 16609,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 19
+    },
+    {
+      "path": "/LilLoops/turtles.nsf",
+      "size": 16660,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 20
     }
   ],
   "/MetallicWing": [
@@ -69,225 +451,339 @@
       "path": "/MetallicWing/blast_furnace.nsf",
       "size": 16300,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 0
     },
     {
       "path": "/MetallicWing/briefing_vrc6.nsf",
       "size": 7656,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 1
     },
     {
       "path": "/MetallicWing/briefing.nsf",
       "size": 7328,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 2
     },
     {
       "path": "/MetallicWing/consequences.nsf",
       "size": 19873,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 3
     },
     {
       "path": "/MetallicWing/distress_signals.nsf",
       "size": 17257,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 4
     },
     {
       "path": "/MetallicWing/dread.nsf",
       "size": 12255,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 5
     },
     {
       "path": "/MetallicWing/echo.nsf",
       "size": 6403,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 6
     },
     {
       "path": "/MetallicWing/fear.nsf",
       "size": 8929,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 7
     },
     {
       "path": "/MetallicWing/harmonies.nsf",
       "size": 7892,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 8
     },
     {
       "path": "/MetallicWing/hope.nsf",
       "size": 8058,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 9
     },
     {
       "path": "/MetallicWing/intrigue.nsf",
       "size": 18702,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 10
     },
     {
       "path": "/MetallicWing/intrigueX.nsf",
       "size": 14314,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 11
     },
     {
       "path": "/MetallicWing/peril.nsf",
       "size": 15418,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 12
     },
     {
       "path": "/MetallicWing/peril+intro.nsf",
       "size": 18451,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 13
     },
     {
       "path": "/MetallicWing/predation.nsf",
       "size": 17948,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 14
     },
     {
       "path": "/MetallicWing/relief.nsf",
       "size": 17336,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 15
     },
     {
       "path": "/MetallicWing/remorse.nsf",
       "size": 21052,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 16
     },
     {
       "path": "/MetallicWing/resolve.nsf",
       "size": 8935,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 17
     },
     {
       "path": "/MetallicWing/rust.nsf",
       "size": 16879,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 18
     },
     {
       "path": "/MetallicWing/sad.nsf",
       "size": 7367,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 19
     },
     {
-      "path": "/MetallicWing/shadowvapors.nsf",
+      "path": "/MetallicWing/shadow_vapors.nsf",
       "size": 17865,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 20
     },
     {
       "path": "/MetallicWing/solitude.nsf",
       "size": 7328,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 21
     },
     {
-      "path": "/MetallicWing/starsurfin.nsf",
+      "path": "/MetallicWing/star_surfin.nsf",
       "size": 21461,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 22
     },
     {
       "path": "/MetallicWing/strife_loop.nsf",
       "size": 6548,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 23
     },
     {
       "path": "/MetallicWing/strife.nsf",
       "size": 18732,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 24
     },
     {
       "path": "/MetallicWing/thuglas.nsf",
       "size": 17110,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 25
     },
     {
       "path": "/MetallicWing/titanium.nsf",
       "size": 20169,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 26
     },
     {
       "path": "/MetallicWing/triumph.nsf",
       "size": 7259,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 27
     },
     {
       "path": "/MetallicWing/valor_nes.nsf",
       "size": 15730,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 28
     },
     {
       "path": "/MetallicWing/valor_vrc6.nsf",
       "size": 17973,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 29
     },
     {
       "path": "/MetallicWing/wonder.nsf",
       "size": 9854,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 30
     },
     {
-      "path": "/MetallicWing/wroughtiron.nsf",
+      "path": "/MetallicWing/wrought_iron.nsf",
       "size": 13084,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 31
+    }
+  ],
+  "/RandomJams": [
+    {
+      "path": "/RandomJams/2_medieval.nsf",
+      "size": 17609,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 0
+    },
+    {
+      "path": "/RandomJams/arps_vrc6.nsf",
+      "size": 15355,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 1
+    },
+    {
+      "path": "/RandomJams/arps.nsf",
+      "size": 14957,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 2
+    },
+    {
+      "path": "/RandomJams/Casio_Cruiser.nsf",
+      "size": 17682,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 3
+    },
+    {
+      "path": "/RandomJams/coiled.nsf",
+      "size": 13992,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 4
+    },
+    {
+      "path": "/RandomJams/dill_dealer.nsf",
+      "size": 17444,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 5
+    },
+    {
+      "path": "/RandomJams/fury.nsf",
+      "size": 14686,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 6
+    },
+    {
+      "path": "/RandomJams/jupiter.nsf",
+      "size": 14589,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 7
+    },
+    {
+      "path": "/RandomJams/Loop_Poop.nsf",
+      "size": 15124,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 8
+    },
+    {
+      "path": "/RandomJams/malice.nsf",
+      "size": 10523,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 9
+    },
+    {
+      "path": "/RandomJams/man_cave.nsf",
+      "size": 20683,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 10
+    },
+    {
+      "path": "/RandomJams/paralysis.nsf",
+      "size": 18791,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 11
+    },
+    {
+      "path": "/RandomJams/roasted.nsf",
+      "size": 18894,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 12
+    },
+    {
+      "path": "/RandomJams/sensory_overload.nsf",
+      "size": 16415,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 13
+    },
+    {
+      "path": "/RandomJams/sharked.nsf",
+      "size": 12941,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 14
+    },
+    {
+      "path": "/RandomJams/viper.nsf",
+      "size": 22393,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 15
     }
   ],
   "/SuperFORE!": [
@@ -295,29 +791,73 @@
       "path": "/SuperFORE!/cave.nsf",
       "size": 13575,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 0
     },
     {
       "path": "/SuperFORE!/nimbus.nsf",
       "size": 18446,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 1
     },
     {
       "path": "/SuperFORE!/parkour.nsf",
       "size": 18267,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 2
     },
     {
       "path": "/SuperFORE!/splendor.nsf",
       "size": 19820,
       "type": "file",
-      "mtime": 1761485030,
+      "mtime": 1765145286,
       "idx": 3
+    }
+  ],
+  "/UnfinishedBusiness": [
+    {
+      "path": "/UnfinishedBusiness/aquatics.nsf",
+      "size": 7100,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 0
+    },
+    {
+      "path": "/UnfinishedBusiness/evil.nsf",
+      "size": 16511,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 1
+    },
+    {
+      "path": "/UnfinishedBusiness/fantasy.nsf",
+      "size": 16635,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 2
+    },
+    {
+      "path": "/UnfinishedBusiness/ice.nsf",
+      "size": 16645,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 3
+    },
+    {
+      "path": "/UnfinishedBusiness/rock_n_roll.nsf",
+      "size": 6128,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 4
+    },
+    {
+      "path": "/UnfinishedBusiness/sun_dried_tanuki.nsf",
+      "size": 6645,
+      "type": "file",
+      "mtime": 1765145329,
+      "idx": 5
     }
   ],
   "/": [
@@ -326,21 +866,49 @@
       "size": 165707,
       "type": "directory",
       "numChildren": 9,
-      "mtime": 1761485030
+      "mtime": 1765149848
+    },
+    {
+      "path": "/Covers",
+      "size": 471433,
+      "type": "directory",
+      "numChildren": 33,
+      "mtime": 1765149908
+    },
+    {
+      "path": "/LilLoops",
+      "size": 320575,
+      "type": "directory",
+      "numChildren": 21,
+      "mtime": 1765156644
     },
     {
       "path": "/MetallicWing",
       "size": 441466,
       "type": "directory",
       "numChildren": 32,
-      "mtime": 1761485030
+      "mtime": 1765149940
+    },
+    {
+      "path": "/RandomJams",
+      "size": 262078,
+      "type": "directory",
+      "numChildren": 16,
+      "mtime": 1765149961
     },
     {
       "path": "/SuperFORE!",
       "size": 70108,
       "type": "directory",
       "numChildren": 4,
-      "mtime": 1761485030
+      "mtime": 1765145286
+    },
+    {
+      "path": "/UnfinishedBusiness",
+      "size": 69664,
+      "type": "directory",
+      "numChildren": 6,
+      "mtime": 1765156120
     }
   ]
 }

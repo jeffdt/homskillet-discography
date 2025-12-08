@@ -152,23 +152,5 @@ function copyPublicFolder() {
   });
 
   // Copy music files to build output
-  const musicSrc = path.resolve(__dirname, '../music');
-  const musicDest = path.resolve(paths.appBuild, 'music');
-  if (fs.existsSync(musicSrc)) {
-    fs.copySync(musicSrc, musicDest, {
-      dereference: true,
-    });
-    console.log('Copied music/ folder to build output');
-  }
-
-  // Copy catalog JSON files to build output
-  const serverSrc = path.resolve(__dirname, '../server');
-  const catalogJsonSrc = path.join(serverSrc, 'catalog.json');
-  const dirJsonSrc = path.join(serverSrc, 'directories.json');
-  if (fs.existsSync(catalogJsonSrc)) {
-    fs.copySync(catalogJsonSrc, path.join(paths.appBuild, 'catalog.json'));
-  }
-  if (fs.existsSync(dirJsonSrc)) {
-    fs.copySync(dirJsonSrc, path.join(paths.appBuild, 'directories.json'));
-  }
+  // Music and catalog files are now in public/ and get copied automatically by webpack
 }

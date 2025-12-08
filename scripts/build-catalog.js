@@ -15,10 +15,10 @@ const FORMATS = [
 // Paths are relative to project root.
 //
 // Point this to the place where you keep all the music.
-// Music files are committed to the repo in the music/ folder.
-const catalogPath = 'music/';
-const outputPath = 'server/catalog.json';
-const dirDictOutputPath = 'server/directories.json';
+// Music files are committed to the repo in public/music/.
+const catalogPath = 'public/music/';
+const outputPath = 'public/catalog.json';
+const dirDictOutputPath = 'public/directories.json';
 const formatsRegex = new RegExp(`\\.(${FORMATS.join('|')})$`);
 const romanNumeralNineRegex = /\bix\b/i;
 const romanNumeralRegex = /\b([IVXLC]+|[ivxlc]+)([-.,) ]|$)/; // All upper case or all lower case
