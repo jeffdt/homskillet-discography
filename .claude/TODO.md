@@ -34,7 +34,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **E5**: Let's make the time slider more dynamic. Can it be wavy and ripple down the line?
 
-**E6**: Add ability for me to store metadata for songs and albums. I assume this would be json files that live alongside the songs but i am open to other ideas. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
+**E6**: Add ability for me to store metadata for songs and albums. I assume this would be json files that live alongside the songs but i am open to other ideas. Should include things like my personal comments on the song or album, per-song presets for the player settings (tempo, stereo width), and custom play durations. See `.claude/duration-override-findings.md` for technical details on how duration override works.
 
 **E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
 
