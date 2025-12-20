@@ -108,7 +108,8 @@
     "prepare": "patch-package",
     "server": "DEV=1 node server/index.js",
     "stop": "bash scripts/kill-servers.sh",
-    "fixvgm": "node $NODE_DEBUG_OPTION scripts/fixvgm.js"
+    "fixvgm": "node $NODE_DEBUG_OPTION scripts/fixvgm.js",
+    "test": "jest"
   },
   "eslintConfig": {
     "extends": "react-app",
