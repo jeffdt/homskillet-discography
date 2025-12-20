@@ -23,6 +23,7 @@ import {
   unlockAudioContext
 } from '../util';
 import requestCache from '../RequestCache';
+import { handleShufflePlayLogic } from '../handleShufflePlayLogic';
 import Sequencer, { NUM_REPEAT_MODES, NUM_SHUFFLE_MODES, REPEAT_OFF, SHUFFLE_OFF } from '../Sequencer';
 
 import GMEPlayer from '../players/GMEPlayer';
@@ -546,30 +547,11 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   handleShufflePlay(path: string) {
-    // Synthetic recursive shuffle.
-    // In production, load catalog.json and shuffle client-side
-    // In development, use API server
-    if (PUBLIC_URL) {
-      fetch(`${PUBLIC_URL}/catalog.json`)
-        .then(response => response.json())
-        .then((allFiles: string[]) => {
-          // Filter files that start with the given path
-          const matchingFiles = path
-            ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
-            : allFiles;
-          // Shuffle and limit to 100
-          const shuffled = matchingFiles
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 100);
-          return shuffled.map(this.pathToHref);
-        })
-        .then(items => this.sequencer.playContext(items));
-    } else {
-      fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
-        .then(response => response.json())
-        .then((json: any) => json.items.map(this.pathToHref))
-        .then(items => this.sequencer.playContext(items));
-    }
+    handleShufflePlayLogic(
+      path,
+      this.pathToHref,
+      (items) => this.sequencer.playContext(items)
+    );
   }
 
   handleCycleShuffle() {
