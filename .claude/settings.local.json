@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Skill(frontend-design)",
+      "Bash(npm uninstall:*)",
+      "Bash(brew install:*)",
+      "Bash(brew list:*)"
+    ]
+  }
+}
