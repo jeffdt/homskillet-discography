@@ -71,15 +71,15 @@ describe('handleShufflePlayLogic', () => {
     expect(playContextMock).toHaveBeenCalled();
     const playedSongs = playContextMock.mock.calls[0][0];
 
-    // All songs should be from Album1
-    expect(playedSongs.length).toBeLessThanOrEqual(3);
+    // All 3 Album1 songs should be included
+    expect(playedSongs.length).toBe(3);
     playedSongs.forEach((song: string) => {
       expect(song).toMatch(/^\/music\/Album1\//);
     });
   });
 
-  it('should limit shuffled results to 100 songs max', async () => {
-    // Create a catalog with more than 100 songs
+  it('should include all matching songs (no limit)', async () => {
+    // Create a catalog with many songs
     const mockCatalog = Array.from({ length: 150 }, (_, i) => `Album1/song${i}.nsf`);
 
     global.fetch = jest.fn().mockResolvedValue({
@@ -91,8 +91,8 @@ describe('handleShufflePlayLogic', () => {
 
     await handleShufflePlayLogic('Album1', pathToHrefMock, playContextMock);
 
-    // Verify that no more than 100 songs are played
+    // Verify all songs are included
     const playedSongs = playContextMock.mock.calls[0][0];
-    expect(playedSongs.length).toBeLessThanOrEqual(100);
+    expect(playedSongs.length).toBe(150);
   });
 });

@@ -22,10 +22,8 @@ export async function handleShufflePlayLogic(
     ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
     : allFiles;
 
-  // Shuffle and limit to 100
-  const shuffled = matchingFiles
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 100);
+  // Shuffle all matching files
+  const shuffled = matchingFiles.sort(() => Math.random() - 0.5);
 
   const items = shuffled.map(pathToHref);
   playContext(items);
