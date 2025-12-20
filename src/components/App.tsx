@@ -546,30 +546,23 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   handleShufflePlay(path: string) {
-    // Synthetic recursive shuffle.
-    // In production, load catalog.json and shuffle client-side
-    // In development, use API server
-    if (PUBLIC_URL) {
-      fetch(`${PUBLIC_URL}/catalog.json`)
-        .then(response => response.json())
-        .then((allFiles: string[]) => {
-          // Filter files that start with the given path
-          const matchingFiles = path
-            ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
-            : allFiles;
-          // Shuffle and limit to 100
-          const shuffled = matchingFiles
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 100);
-          return shuffled.map(this.pathToHref);
-        })
-        .then(items => this.sequencer.playContext(items));
-    } else {
-      fetch(`${API_BASE}/shuffle?path=${encodeURI(path)}&limit=100`)
-        .then(response => response.json())
-        .then((json: any) => json.items.map(this.pathToHref))
-        .then(items => this.sequencer.playContext(items));
-    }
+    // Synthetic recursive shuffle using static catalog.json
+    // Works in both development and production
+    const catalogUrl = PUBLIC_URL ? `${PUBLIC_URL}/catalog.json` : '/catalog.json';
+    fetch(catalogUrl)
+      .then(response => response.json())
+      .then((allFiles: string[]) => {
+        // Filter files that start with the given path
+        const matchingFiles = path
+          ? allFiles.filter(file => file.startsWith(path + '/') || file === path)
+          : allFiles;
+        // Shuffle and limit to 100
+        const shuffled = matchingFiles
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 100);
+        return shuffled.map(this.pathToHref);
+      })
+      .then(items => this.sequencer.playContext(items));
   }
 
   handleCycleShuffle() {
