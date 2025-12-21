@@ -53,9 +53,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## MAINTAINABILITY (code quality & tooling)
 
-**M2**: ✅ **COMPLETE** - TypeScript migration of UI layer finished (Pass 6). All React components, utilities, and core infrastructure migrated (~85% of codebase). See `.claude/typescript-incremental-migration.md` for progress tracker.
-
-**M2.1**: (OPTIONAL FUTURE WORK) Complete TypeScript migration of remaining player implementations:
+**M2**: (OPTIONAL FUTURE WORK) Complete TypeScript migration of remaining player implementations:
 - Player.js → Player.ts (base class - state machine logic)
 - GMEPlayer.js → GMEPlayer.ts (main player - audio processing)
 - Spectrogram.js → Spectrogram.ts (visualization math)
@@ -66,11 +64,11 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
 
-**M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
+**M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this.
 
-**M5**: You said "the project uses webpack 4, so we need an older version of ts-loader". Should we upgrade webpack?
+**M5**: Let's switch from Webpack to Vite (and jest to vitest).
 
-**M6**:: Is src/gm-patch-map.ts used?
+**M6**: Is src/gm-patch-map.ts used?
 
 ---
 
