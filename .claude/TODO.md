@@ -6,8 +6,6 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-**B1**: The randomize button is broken. It gets the error: VM564:1 Uncaught (in promise) SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON.
-
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
@@ -18,15 +16,13 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **S2.2**: The file size doesn't need decimal precision either. Just show KB.
 
-**S3**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
-
 ---
 
 ## ENHANCEMENT (new features & styling)
 
 **E1**: In the player settings, switch from floats to percentages (speed, bass, stereo width).
 
-**E2**: Add the ability to swap between multiple color palettes on the entire UI.
+**E2**: Add UI buttons to swap between multiple color palettes across the entire UI.
 
 **E3**: Clicking the currently playing song title above the player should also take you directly to that file in the browser. It should open whatever dir it's located in and everything. It shouldn't interrupt the song, just navigate to that dir and make sure the file is visible on screen.
 
@@ -38,7 +34,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
 
-**E8**: Swap the icon out to something custom from one of our games.
+**E8**: Swap the favicon out to something custom from one of our games.
 
 **E9**: Improve UX when songs are loaded via `?play=` link. Currently, when you paste a song link (e.g., `/?play=%2FBazaar%2Ftectonictechniques.nsf`), the song loads but doesn't autoplay due to browser autoplay policies - it waits for user interaction to resume the AudioContext. This is correct behavior, but the UI doesn't indicate that the user needs to click to start audio. Consider:
 - Showing a visual indicator (toast, overlay, or button state) that audio is waiting for interaction
@@ -48,6 +44,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 **E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
 
 **E11**: Mobile fonts/buttons need to be bigger.
+
+**E12**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
 
 ---
 
@@ -62,7 +60,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 - This would provide 100% TypeScript coverage of hand-written source code
 - Can be done incrementally when touching these files for features
 
-**M3**: Add a linter and formatter and make them required, auto-triggered pre-commit steps.
+**M3**: Add pre-commit hooks for linting, formatting and tests.
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this.
 

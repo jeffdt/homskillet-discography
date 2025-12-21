@@ -1,6 +1,5 @@
 import { Link, useHistory } from "react-router-dom";
 import React, { memo } from "react";
-import queryString from 'querystring';
 
 interface DirectoryLinkProps {
   to: string;
@@ -11,9 +10,9 @@ interface DirectoryLinkProps {
 }
 
 function getSearch(): string {
-  const urlParams = queryString.parse(window.location.search.substring(1));
-  delete urlParams.q;
-  return queryString.stringify(urlParams);
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.delete('q');
+  return urlParams.toString();
 }
 
 const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLink, children }) => {

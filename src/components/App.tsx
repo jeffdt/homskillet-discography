@@ -151,7 +151,7 @@ class App extends React.Component<AppProps, AppState> {
     } catch (e) {
       // Browser doesn't support WASM (Safari in iOS Simulator)
       this.setState({ loading: false });
-      this.props.toastContext.enqueueToast({ message: 'Error loading player engine. Old browser?', level: ToastLevels.ERROR });
+      this.props.toastContext.enqueueToast('Error loading player engine. Old browser?', ToastLevels.ERROR);
       return;
     }
 
