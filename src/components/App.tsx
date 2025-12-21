@@ -6,7 +6,8 @@ import path from 'path';
 import queryString from 'querystring';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
-import ChipCore from '../chip-core';
+import * as ChipCoreModule from '../chip-core';
+const ChipCore = (ChipCoreModule as any).CHIP_CORE || ChipCoreModule;
 import {
   API_BASE,
   CATALOG_PREFIX,
