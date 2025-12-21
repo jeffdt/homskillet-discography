@@ -66,8 +66,6 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this.
 
-**M5**: Let's switch from Webpack to Vite (and jest to vitest).
-
 **M6**: Is src/gm-patch-map.ts used?
 
 ---
