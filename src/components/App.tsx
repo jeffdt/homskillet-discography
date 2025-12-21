@@ -335,22 +335,30 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   playContext(context: PlayContext, index = 0, subtune = 0) {
+    if (!this.sequencer) {
+      console.warn('Sequencer not ready yet, cannot play');
+      return;
+    }
     this.sequencer.playContext(context, index, subtune);
   }
 
   prevSong() {
+    if (!this.sequencer) return;
     this.sequencer.prevSong();
   }
 
   nextSong() {
+    if (!this.sequencer) return;
     this.sequencer.nextSong();
   }
 
   prevSubtune() {
+    if (!this.sequencer) return;
     this.sequencer.prevSubtune();
   }
 
   nextSubtune() {
+    if (!this.sequencer) return;
     this.sequencer.nextSubtune();
   }
 
