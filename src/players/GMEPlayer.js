@@ -1,8 +1,13 @@
 import Player from "./Player.js";
 import SubBass from "../effects/SubBass";
 import { allOrNone, remap01 } from '../util';
-import path from 'path';
 import autoBind from 'auto-bind';
+
+// Browser-compatible path.extname replacement
+function extname(filepath) {
+  const lastDot = filepath.lastIndexOf('.');
+  return lastDot === -1 ? '' : filepath.substring(lastDot);
+}
 
 let core = null;
 
@@ -164,7 +169,7 @@ export default class GMEPlayer extends Player {
     this.fadingOut = false;
     this.seekTargetMs = null;
     this.seekRequestId = null;
-    this.currentFileExt = path.extname(filepath);
+    this.currentFileExt = extname(filepath);
     this.filepathMeta = Player.metadataFromFilepath(filepath);
 
     const dataPtr = this.copyToHeap(data);

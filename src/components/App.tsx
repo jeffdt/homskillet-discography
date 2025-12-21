@@ -2,8 +2,6 @@ import React, { useContext } from 'react';
 import autoBindReact from 'auto-bind/react';
 import isMobile from 'ismobilejs';
 import clamp from 'lodash/clamp';
-import path from 'path';
-import queryString from 'querystring';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
 import * as ChipCoreModule from '../chip-core';
@@ -45,6 +43,12 @@ import { SequencerState } from '../types/sequencer';
 import { PlayContext } from '../types/catalog';
 
 const BASE_URL = process.env.PUBLIC_URL || document.location.origin;
+
+// Browser-compatible path.dirname replacement
+function dirname(filepath: string): string {
+  const lastSlash = filepath.lastIndexOf('/');
+  return lastSlash === -1 ? '.' : filepath.substring(0, lastSlash) || '/';
+}
 
 class App extends React.Component<AppProps, AppState> {
   private chipCore: any;
@@ -156,7 +160,8 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     // Get debug from location.search
-    const debug = queryString.parse(window.location.search.substring(1)).debug;
+    const urlParams = new URLSearchParams(window.location.search);
+    const debug = urlParams.get('debug');
     // Create GME player only
     const players = [
       GMEPlayer,
@@ -190,27 +195,28 @@ class App extends React.Component<AppProps, AppState> {
     this.sequencer.on('playerError', (message: string) => this.props.toastContext.enqueueToast(message, ToastLevels.ERROR));
 
     // TODO: Move to separate processUrlParams method.
-    const urlParams = queryString.parse(window.location.search.substring(1)) as any;
-    if (urlParams.play) {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const playParam = urlSearchParams.get('play');
+    if (playParam) {
       // Treat play params as "transient command" and strip them after starting playback.
       // See comment in Browse.js for more about why a sticky play param is not a good idea.
-      const playPath = urlParams.play;
-      const subtune = urlParams.subtune ? parseInt(urlParams.subtune, 10) : 0;
-      const time = urlParams.t ? parseInt(urlParams.t, 10) : 0;
-      delete urlParams.play;
-      delete urlParams.subtune;
-      delete urlParams.t;
-      const qs = queryString.stringify(urlParams);
+      const playPath = playParam;
+      const subtune = urlSearchParams.get('subtune') ? parseInt(urlSearchParams.get('subtune')!, 10) : 0;
+      const time = urlSearchParams.get('t') ? parseInt(urlSearchParams.get('t')!, 10) : 0;
+      urlSearchParams.delete('play');
+      urlSearchParams.delete('subtune');
+      urlSearchParams.delete('t');
+      const qs = urlSearchParams.toString();
       const search = qs ? `?${qs}` : '';
       // Navigate to song's containing folder. History comes from withRouter().
-      const dirname = path.dirname(playPath);
-      this.fetchDirectory(dirname).then(() => {
-        this.props.history.replace(`${pathJoin('/', dirname)}${search}`);
+      const dirPath = dirname(playPath);
+      this.fetchDirectory(dirPath).then(() => {
+        this.props.history.replace(`${pathJoin('/', dirPath)}${search}`);
         // Convert play path to href (context contains full hrefs)
         const playHref = pathJoin(CATALOG_PREFIX, playPath);
-        const index = this.playContexts[dirname].indexOf(playHref);
+        const index = this.playContexts[dirPath].indexOf(playHref);
 
-        this.playContext(this.playContexts[dirname], index, subtune);
+        this.playContext(this.playContexts[dirPath], index, subtune);
 
         if (time) {
           setTimeout(() => {
@@ -452,11 +458,9 @@ class App extends React.Component<AppProps, AppState> {
     this.seekRelativeInner(seekMs);
 
     if (REPLACE_STATE_ON_SEEK) {
-      const urlParams = {
-        ...queryString.parse(window.location.search.substr(1)),
-        t: seekMs,
-      };
-      const stateUrl = '?' + queryString.stringify(urlParams)
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set('t', seekMs.toString());
+      const stateUrl = '?' + searchParams.toString()
         .replace(/%20/g, '+')
         .replace(/%2F/g, '/');
       window.history.replaceState(null, '', stateUrl);
