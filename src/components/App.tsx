@@ -2,8 +2,6 @@ import React, { useContext } from 'react';
 import autoBindReact from 'auto-bind/react';
 import isMobile from 'ismobilejs';
 import clamp from 'lodash/clamp';
-import path from 'path';
-import queryString from 'querystring';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
 import ChipCore from '../chip-core';
@@ -43,7 +41,14 @@ import { AppProps, AppState, TabType } from '../types/app';
 import { SequencerState } from '../types/sequencer';
 import { PlayContext } from '../types/catalog';
 
-const BASE_URL = process.env.PUBLIC_URL || document.location.origin;
+const publicUrl = import.meta.env.BASE_URL;
+const BASE_URL = (publicUrl && publicUrl !== '/') ? publicUrl : document.location.origin;
+
+// Browser-compatible path.dirname replacement
+function dirname(filepath: string): string {
+  const lastSlash = filepath.lastIndexOf('/');
+  return lastSlash === -1 ? '.' : filepath.substring(0, lastSlash) || '/';
+}
 
 class App extends React.Component<AppProps, AppState> {
   private chipCore: any;
@@ -136,13 +141,15 @@ class App extends React.Component<AppProps, AppState> {
 
   async initChipCore(audioCtx: AudioContext, playerNode: ScriptProcessorNode, bufferSize: number) {
     // Load the chip-core Emscripten runtime
+
     try {
       this.chipCore = await ChipCore({
         // Look for .wasm file in web root, not the same location as the app bundle (static/js).
         locateFile: (path: string, prefix: string) => {
-          if (path.endsWith('.wasm') || path.endsWith('.wast'))
-            return `${BASE_URL}/${path}`;
-          return prefix + path;
+          const url = (path.endsWith('.wasm') || path.endsWith('.wast'))
+            ? `${BASE_URL}/${path}`
+            : prefix + path;
+          return url;
         },
         print: (msg: string) => console.debug('[stdout] ' + msg),
         printErr: (msg: string) => console.debug('[stderr] ' + msg),
@@ -150,12 +157,13 @@ class App extends React.Component<AppProps, AppState> {
     } catch (e) {
       // Browser doesn't support WASM (Safari in iOS Simulator)
       this.setState({ loading: false });
-      this.props.toastContext.enqueueToast({ message: 'Error loading player engine. Old browser?', level: ToastLevels.ERROR });
+      this.props.toastContext.enqueueToast('Error loading player engine. Old browser?', ToastLevels.ERROR);
       return;
     }
 
     // Get debug from location.search
-    const debug = queryString.parse(window.location.search.substring(1)).debug;
+    const urlParams = new URLSearchParams(window.location.search);
+    const debug = urlParams.get('debug');
     // Create GME player only
     const players = [
       GMEPlayer,
@@ -189,27 +197,28 @@ class App extends React.Component<AppProps, AppState> {
     this.sequencer.on('playerError', (message: string) => this.props.toastContext.enqueueToast(message, ToastLevels.ERROR));
 
     // TODO: Move to separate processUrlParams method.
-    const urlParams = queryString.parse(window.location.search.substring(1)) as any;
-    if (urlParams.play) {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const playParam = urlSearchParams.get('play');
+    if (playParam) {
       // Treat play params as "transient command" and strip them after starting playback.
       // See comment in Browse.js for more about why a sticky play param is not a good idea.
-      const playPath = urlParams.play;
-      const subtune = urlParams.subtune ? parseInt(urlParams.subtune, 10) : 0;
-      const time = urlParams.t ? parseInt(urlParams.t, 10) : 0;
-      delete urlParams.play;
-      delete urlParams.subtune;
-      delete urlParams.t;
-      const qs = queryString.stringify(urlParams);
+      const playPath = playParam;
+      const subtune = urlSearchParams.get('subtune') ? parseInt(urlSearchParams.get('subtune')!, 10) : 0;
+      const time = urlSearchParams.get('t') ? parseInt(urlSearchParams.get('t')!, 10) : 0;
+      urlSearchParams.delete('play');
+      urlSearchParams.delete('subtune');
+      urlSearchParams.delete('t');
+      const qs = urlSearchParams.toString();
       const search = qs ? `?${qs}` : '';
       // Navigate to song's containing folder. History comes from withRouter().
-      const dirname = path.dirname(playPath);
-      this.fetchDirectory(dirname).then(() => {
-        this.props.history.replace(`${pathJoin('/', dirname)}${search}`);
+      const dirPath = dirname(playPath);
+      this.fetchDirectory(dirPath).then(() => {
+        this.props.history.replace(`${pathJoin('/', dirPath)}${search}`);
         // Convert play path to href (context contains full hrefs)
         const playHref = pathJoin(CATALOG_PREFIX, playPath);
-        const index = this.playContexts[dirname].indexOf(playHref);
+        const index = this.playContexts[dirPath].indexOf(playHref);
 
-        this.playContext(this.playContexts[dirname], index, subtune);
+        this.playContext(this.playContexts[dirPath], index, subtune);
 
         if (time) {
           setTimeout(() => {
@@ -328,22 +337,30 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   playContext(context: PlayContext, index = 0, subtune = 0) {
+    if (!this.sequencer) {
+      console.warn('Sequencer not ready yet, cannot play');
+      return;
+    }
     this.sequencer.playContext(context, index, subtune);
   }
 
   prevSong() {
+    if (!this.sequencer) return;
     this.sequencer.prevSong();
   }
 
   nextSong() {
+    if (!this.sequencer) return;
     this.sequencer.nextSong();
   }
 
   prevSubtune() {
+    if (!this.sequencer) return;
     this.sequencer.prevSubtune();
   }
 
   nextSubtune() {
+    if (!this.sequencer) return;
     this.sequencer.nextSubtune();
   }
 
@@ -391,7 +408,7 @@ class App extends React.Component<AppProps, AppState> {
         // TODO: move fetch metadata to Player when it becomes event emitter
         requestCache.fetchCached(metadataUrl).then((response: any) => {
           const { imageUrl, infoTexts, md5 } = response;
-          const newInfoTexts = [...this.state.infoTexts, ...infoTexts ];
+          const newInfoTexts = [...this.state.infoTexts, ...infoTexts];
           const newShowInfo = this.state.showInfo && newInfoTexts.length > 0;
           this.setState({ imageUrl, infoTexts: newInfoTexts, md5, showInfo: newShowInfo } as any);
 
@@ -451,11 +468,9 @@ class App extends React.Component<AppProps, AppState> {
     this.seekRelativeInner(seekMs);
 
     if (REPLACE_STATE_ON_SEEK) {
-      const urlParams = {
-        ...queryString.parse(window.location.search.substr(1)),
-        t: seekMs,
-      };
-      const stateUrl = '?' + queryString.stringify(urlParams)
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set('t', seekMs.toString());
+      const stateUrl = '?' + searchParams.toString()
         .replace(/%20/g, '+')
         .replace(/%2F/g, '/');
       window.history.replaceState(null, '', stateUrl);
@@ -610,44 +625,44 @@ class App extends React.Component<AppProps, AppState> {
       .then((directories: any) => directories[slashPath] || []);
 
     return fetchPromise.then((items: any[]) => {
-        items.forEach(item => {
-          // Convert timestamp 1704067200 to ISO date 2024-01-01
-          item.mtime = new Date(item.mtime * 1000).toISOString().split('T')[0];
-          item.name = item.path.split('/').pop();
-          // XXX: Escape immediately: the escaped URL is considered canonical.
-          //      The URL must be decoded for display from here on out.
-          item.path.replace('%', '%25').replace('#', '%23');
-          if (item.type === 'file') {
-            // In production, prepend PUBLIC_URL to the music path
-            const prefix = IS_PRODUCTION
-              ? `${PUBLIC_URL}/music`
-              : CATALOG_PREFIX;
-            item.href = pathJoin(prefix, item.path);
-          } else {
-            item.href = pathJoin('/', item.path);
-          }
-        });
-
-        // Build play context AFTER href is set
-        this.playContexts[path] = this.directoryListingToContext(items);
-
-        if (path !== '') { // No '..' at top level browse path.
-          // Use substring, not slice, to pass through strings that don't contain any '/'.
-          const parentPath = path.substring(0, path.lastIndexOf('/'));
-          items.unshift({
-            type: 'directory',
-            path: parentPath,
-            href: pathJoin('/', parentPath),
-            name: '..',
-          });
+      items.forEach(item => {
+        // Convert timestamp 1704067200 to ISO date 2024-01-01
+        item.mtime = new Date(item.mtime * 1000).toISOString().split('T')[0];
+        item.name = item.path.split('/').pop();
+        // XXX: Escape immediately: the escaped URL is considered canonical.
+        //      The URL must be decoded for display from here on out.
+        item.path.replace('%', '%25').replace('#', '%23');
+        if (item.type === 'file') {
+          // In production, prepend PUBLIC_URL to the music path
+          const prefix = IS_PRODUCTION
+            ? `${PUBLIC_URL}/music`
+            : CATALOG_PREFIX;
+          item.href = pathJoin(prefix, item.path);
+        } else {
+          item.href = pathJoin('/', item.path);
         }
-
-        const directories = {
-          ...this.state.directories,
-          [path]: items,
-        };
-        this.setState({ directories });
       });
+
+      // Build play context AFTER href is set
+      this.playContexts[path] = this.directoryListingToContext(items);
+
+      if (path !== '') { // No '..' at top level browse path.
+        // Use substring, not slice, to pass through strings that don't contain any '/'.
+        const parentPath = path.substring(0, path.lastIndexOf('/'));
+        items.unshift({
+          type: 'directory',
+          path: parentPath,
+          href: pathJoin('/', parentPath),
+          name: '..',
+        });
+      }
+
+      const directories = {
+        ...this.state.directories,
+        [path]: items,
+      };
+      this.setState({ directories });
+    });
   }
 
   getCurrentSongLink(withSubtune = false): string | null {
@@ -681,18 +696,18 @@ class App extends React.Component<AppProps, AppState> {
     const currIdx = this.sequencer?.getCurrIdx();
 
     return (
-        <div className="App">
-          <MessageBox showInfo={this.state.showInfo}
-                      infoTexts={this.state.infoTexts}
-                      toggleInfo={this.toggleInfo}/>
-          <Toast/>
-          <AppHeader/>
-          <TabBar activeTab={this.state.activeTab} onTabChange={this.handleTabChange} />
-          <div className="App-main">
-            <div className="App-main-inner">
-              <div className="App-main-content-and-settings">
+      <div className="App">
+        <MessageBox showInfo={this.state.showInfo}
+          infoTexts={this.state.infoTexts}
+          toggleInfo={this.toggleInfo} />
+        <Toast />
+        <AppHeader />
+        <TabBar activeTab={this.state.activeTab} onTabChange={this.handleTabChange} />
+        <div className="App-main">
+          <div className="App-main-inner">
+            <div className="App-main-content-and-settings">
               <div className={`App-main-content-area mobile-tab-content ${this.state.activeTab === 'browser' ? 'mobile-tab-active' : ''}`}
-                   ref={this.contentAreaRef}>
+                ref={this.contentAreaRef}>
                 <Switch>
                   <Route path="/:browsePath*" render={({ history, match, location }) => {
                     // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
@@ -700,81 +715,81 @@ class App extends React.Component<AppProps, AppState> {
                     return (
                       this.contentAreaRef.current &&
                       <Browse currContext={currContext}
-                              currIdx={currIdx}
-                              history={history}
-                              locationKey={(location as any).key}
-                              browsePath={browsePath}
-                              listing={this.state.directories[browsePath]}
-                              playContext={this.playContexts[browsePath]}
-                              fetchDirectory={this.fetchDirectory}
-                              onSongClick={this.handleSongClick}
-                              handleShufflePlay={this.handleShufflePlay}
-                              scrollContainerRef={this.contentAreaRef}
-                              listRef={this.listRef}
+                        currIdx={currIdx}
+                        history={history}
+                        locationKey={(location as any).key}
+                        browsePath={browsePath}
+                        listing={this.state.directories[browsePath]}
+                        playContext={this.playContexts[browsePath]}
+                        fetchDirectory={this.fetchDirectory}
+                        onSongClick={this.handleSongClick}
+                        handleShufflePlay={this.handleShufflePlay}
+                        scrollContainerRef={this.contentAreaRef}
+                        listRef={this.listRef}
                       />
                     );
-                  }}/>
+                  }} />
                 </Switch>
               </div>
-                <div className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}>
-                  <Settings
-                    ejected={this.state.ejected}
-                    tempo={this.state.tempo}
-                    numVoices={this.state.currentSongNumVoices}
-                    voiceMask={this.state.voiceMask}
-                    voiceNames={this.state.voiceNames}
-                    voiceGroups={this.state.voiceGroups}
-                    onVoiceMaskChange={this.handleSetVoiceMask}
-                    onTempoChange={this.handleTempoChange}
-                    paramDefs={this.state.paramDefs}
-                    paramValues={this.state.paramValues}
-                    onParamChange={this.handleParamChange}
-                    onPinParam={this.handlePinParam}
-                    persistedSettings={this.props.userContext.settings}
-                    sequencer={this.sequencer}
-                  />
-                </div>
+              <div className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}>
+                <Settings
+                  ejected={this.state.ejected}
+                  tempo={this.state.tempo}
+                  numVoices={this.state.currentSongNumVoices}
+                  voiceMask={this.state.voiceMask}
+                  voiceNames={this.state.voiceNames}
+                  voiceGroups={this.state.voiceGroups}
+                  onVoiceMaskChange={this.handleSetVoiceMask}
+                  onTempoChange={this.handleTempoChange}
+                  paramDefs={this.state.paramDefs}
+                  paramValues={this.state.paramValues}
+                  onParamChange={this.handleParamChange}
+                  onPinParam={this.handlePinParam}
+                  persistedSettings={this.props.userContext.settings}
+                  sequencer={this.sequencer}
+                />
               </div>
             </div>
-            {!this.state.loading &&
-              <div className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}>
-                <Visualizer audioCtx={this.audioCtx}
-                            sourceNode={this.playerNode}
-                            chipCore={this.chipCore}
-                            paused={this.state.ejected || this.state.paused}/>
-              </div>}
           </div>
-          <SongDisplay
-            songUrl={this.state.songUrl}
-            ejected={this.state.ejected}
-            getCurrentSongLink={this.getCurrentSongLink}
-            handleCopyLink={this.handleCopyLink}
-          />
-          <AppFooter
-            currentSongDurationMs={this.state.currentSongDurationMs}
-            currentSongNumSubtunes={this.state.currentSongNumSubtunes}
-            currentSongSubtune={this.state.currentSongSubtune}
-            ejected={this.state.ejected}
-            getCurrentSongLink={this.getCurrentSongLink}
-            handleCopyLink={this.handleCopyLink}
-            handleCycleRepeat={this.handleCycleRepeat}
-            handleCycleShuffle={this.handleCycleShuffle}
-            handleTimeSliderChange={this.handleTimeSliderChange}
-            handleVolumeChange={this.handleVolumeChange}
-            imageUrl={this.state.imageUrl}
-            nextSong={this.nextSong}
-            nextSubtune={this.nextSubtune}
-            paused={this.state.paused}
-            prevSong={this.prevSong}
-            prevSubtune={this.prevSubtune}
-            repeat={this.state.repeat}
-            shuffle={this.state.shuffle}
-            sequencer={this.sequencer}
-            songUrl={this.state.songUrl}
-            togglePause={this.togglePause}
-            volume={this.state.volume}
-          />
+          {!this.state.loading &&
+            <div className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}>
+              <Visualizer audioCtx={this.audioCtx}
+                sourceNode={this.playerNode}
+                chipCore={this.chipCore}
+                paused={this.state.ejected || this.state.paused} />
+            </div>}
         </div>
+        <SongDisplay
+          songUrl={this.state.songUrl}
+          ejected={this.state.ejected}
+          getCurrentSongLink={this.getCurrentSongLink}
+          handleCopyLink={this.handleCopyLink}
+        />
+        <AppFooter
+          currentSongDurationMs={this.state.currentSongDurationMs}
+          currentSongNumSubtunes={this.state.currentSongNumSubtunes}
+          currentSongSubtune={this.state.currentSongSubtune}
+          ejected={this.state.ejected}
+          getCurrentSongLink={this.getCurrentSongLink}
+          handleCopyLink={this.handleCopyLink}
+          handleCycleRepeat={this.handleCycleRepeat}
+          handleCycleShuffle={this.handleCycleShuffle}
+          handleTimeSliderChange={this.handleTimeSliderChange}
+          handleVolumeChange={this.handleVolumeChange}
+          imageUrl={this.state.imageUrl}
+          nextSong={this.nextSong}
+          nextSubtune={this.nextSubtune}
+          paused={this.state.paused}
+          prevSong={this.prevSong}
+          prevSubtune={this.prevSubtune}
+          repeat={this.state.repeat}
+          shuffle={this.state.shuffle}
+          sequencer={this.sequencer}
+          songUrl={this.state.songUrl}
+          togglePause={this.togglePause}
+          volume={this.state.volume}
+        />
+      </div>
     );
   }
 }

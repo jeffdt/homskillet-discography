@@ -39,3 +39,4 @@ _ignore/
 # - public/catalog.json
 # - public/directories.json
 # These allow the app to run without rebuilding chip-core or catalog
+.claude/journal/

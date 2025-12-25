@@ -1,6 +1,4 @@
-import queryString from 'querystring';
 import React from 'react';
-import path from 'path';
 
 import DirectoryLink from './components/DirectoryLink';
 import { API_BASE, CATALOG_PREFIX } from './config';
@@ -13,13 +11,15 @@ interface QueryParams {
 
 export function updateQueryString(newParams: QueryParams): void {
   // Merge new params with current query string
-  const params: QueryParams = {
-    ...queryString.parse(window.location.search.substr(1)) as QueryParams,
-    ...newParams,
-  };
+  const urlParams = new URLSearchParams(window.location.search);
+  const params: QueryParams = Object.fromEntries(urlParams.entries());
+  Object.assign(params, newParams);
+
   // Delete undefined properties
   Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
-  const stateUrl = '?' + queryString.stringify(params).replace(/%20/g, '+');
+
+  const searchParams = new URLSearchParams(params as Record<string, string>);
+  const stateUrl = '?' + searchParams.toString().replace(/%20/g, '+');
   // Update address bar URL
   window.history.replaceState(null, '', stateUrl);
 }
@@ -142,6 +142,12 @@ export function ensureEmscFileWithUrl(
   }
 }
 
+// Browser-compatible path.dirname replacement
+function dirname(filepath: string): string {
+  const lastSlash = filepath.lastIndexOf('/');
+  return lastSlash === -1 ? '.' : filepath.substring(0, lastSlash) || '/';
+}
+
 export function ensureEmscFileWithData(
   emscRuntime: EmscriptenRuntime,
   filename: string,
@@ -153,7 +159,7 @@ export function ensureEmscFileWithData(
     return Promise.resolve(filename);
   } else {
     console.debug(`Writing ${filename} to Emscripten file system...`);
-    const dir = path.dirname(filename);
+    const dir = dirname(filename);
     emscRuntime.FS.mkdirTree(dir);
     emscRuntime.FS.writeFile(filename, uint8Array);
     return new Promise((resolve, reject) => {

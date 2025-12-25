@@ -6,8 +6,10 @@
  * because it tried to fetch from an API endpoint instead of catalog.json.
  */
 
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
 // Mock the PUBLIC_URL config before importing
-jest.mock('../config', () => ({
+vi.mock('../config', () => ({
   PUBLIC_URL: '',
   API_BASE: '',
   CATALOG_PREFIX: '/music',
@@ -35,13 +37,13 @@ describe('handleShufflePlayLogic', () => {
     // This test ensures we don't regress to the bug where it tried to
     // fetch from ${API_BASE}/shuffle (which returned HTML instead of JSON)
 
-    const fetchMock = jest.fn().mockResolvedValue({
+    const fetchMock = vi.fn().mockResolvedValue({
       json: async () => ['Album1/song1.nsf', 'Album1/song2.nsf'],
     });
     global.fetch = fetchMock;
 
-    const pathToHrefMock = jest.fn((path) => `/music/${path}`);
-    const playContextMock = jest.fn();
+    const pathToHrefMock = vi.fn((path) => `/music/${path}`);
+    const playContextMock = vi.fn();
 
     await handleShufflePlayLogic('Album1', pathToHrefMock, playContextMock);
 
@@ -58,12 +60,12 @@ describe('handleShufflePlayLogic', () => {
       'Album2/song4.nsf',
     ];
 
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       json: async () => mockCatalog,
     });
 
-    const pathToHrefMock = jest.fn((path) => `/music/${path}`);
-    const playContextMock = jest.fn();
+    const pathToHrefMock = vi.fn((path) => `/music/${path}`);
+    const playContextMock = vi.fn();
 
     await handleShufflePlayLogic('Album1', pathToHrefMock, playContextMock);
 
@@ -82,12 +84,12 @@ describe('handleShufflePlayLogic', () => {
     // Create a catalog with many songs
     const mockCatalog = Array.from({ length: 150 }, (_, i) => `Album1/song${i}.nsf`);
 
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       json: async () => mockCatalog,
     });
 
-    const pathToHrefMock = jest.fn((path) => `/music/${path}`);
-    const playContextMock = jest.fn();
+    const pathToHrefMock = vi.fn((path) => `/music/${path}`);
+    const playContextMock = vi.fn();
 
     await handleShufflePlayLogic('Album1', pathToHrefMock, playContextMock);
 
