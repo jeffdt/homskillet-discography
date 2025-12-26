@@ -13,7 +13,7 @@ The application uses C/C++ audio libraries ([game-music-emu](https://github.com/
 ## Development
 
 ### Prerequisites
-- Node.js and npm
+- Node.js and Bun
 - CMake
 - [Emscripten SDK (emsdk)](https://github.com/emscripten-core/emsdk)
 
@@ -21,10 +21,10 @@ The application uses C/C++ audio libraries ([game-music-emu](https://github.com/
 
 ```sh
 # Install dependencies
-npm install
+bun install
 
 # Start development server
-npm start
+bun start
 ```
 
 The application will be available at `http://localhost:3000`.
@@ -35,7 +35,7 @@ The project uses game-music-emu compiled to WebAssembly for NSF playback. To reb
 
 ```sh
 # Build chip-core.wasm
-npm run build-chip-core
+bun run build-chip-core
 ```
 
 Note: The build script expects emsdk at `~/src/emsdk`. Update the `build-chip-core` script in `package.json` if your emsdk is in a different location.
@@ -44,20 +44,20 @@ Note: The build script expects emsdk at `~/src/emsdk`. Update the `build-chip-co
 
 ```sh
 # Full build (catalog + chip-core + frontend)
-npm run build
+bun run build
 
 # Frontend-only build (faster, skips catalog and chip-core rebuild)
-npm run build-lite
+bun run build-lite
 ```
 
 ### Deployment
 
 ```sh
 # Deploy to GitHub Pages (full build)
-npm run deploy
+bun run deploy
 
 # Deploy to GitHub Pages (frontend only)
-npm run deploy-lite
+bun run deploy-lite
 ```
 
 ## Project Structure

@@ -19,7 +19,7 @@ docker compose build chip-core
 
 ```bash
 # Build chip-core and copy artifacts locally
-npm run build-chip-core:docker
+bun run build-chip-core:docker
 
 # Or use docker compose directly:
 docker compose run --rm chip-core
@@ -33,7 +33,7 @@ This outputs:
 
 ```bash
 # Start local dev server (no Docker involved)
-npm start
+bun start
 ```
 
 Visit http://localhost:3000 - your local tools work normally!
@@ -51,7 +51,7 @@ You only need to rebuild chip-core if you:
 
 1. **Docker builds** game-music-emu and chip-core inside a container
 2. **Outputs** compiled artifacts to your local filesystem
-3. **You continue** using your local npm, IDE, git, etc.
+3. **You continue** using your local Bun, IDE, git, etc.
 
 Docker is only used as a compiler - not as a dev environment.
 
@@ -87,7 +87,7 @@ echo "YOUR_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdi
 docker pull ghcr.io/YOUR_USERNAME/homskillet-chip-core-builder:latest
 
 # Build chip-core locally
-npm run build-chip-core:docker
+bun run build-chip-core:docker
 ```
 
 ## Troubleshooting
@@ -119,4 +119,4 @@ ls -la /build/game-music-emu/
 
 ## Alternative: Skip Docker Entirely
 
-The compiled artifacts (`chip-core.js` and `chip-core.wasm`) are committed to the repo. If you're not modifying C++ code, you don't need Docker at all - just `npm start` and go!
+The compiled artifacts (`chip-core.js` and `chip-core.wasm`) are committed to the repo. If you're not modifying C++ code, you don't need Docker at all - just `bun start` and go!
