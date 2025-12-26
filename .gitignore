@@ -31,6 +31,9 @@ _ignore/
 # Claude temporary files
 .claude/tmp
 
+# Claude journals
+.claude/journals
+
 # NOTE: The following are now COMMITTED (no longer ignored):
 # - src/chip-core.js
 # - public/chip-core.wasm
