@@ -81,12 +81,12 @@ export function useAudioAnalysis(options: AudioAnalysisOptions): AudioAnalysisRe
       // Get frequency data
       analyserNode.getByteFrequencyData(frequencyData);
 
-      // Extract broad frequency range including bass, leads, and snares
+      // Extract mid-to-high frequencies for leads, snares, and hi-hats
       // For 512 FFT size: bin_frequency = (bin_index * sampleRate) / fftSize
       // At 48kHz: each bin ≈ 93.75 Hz
-      // Targeting ~100 Hz - 4 kHz to capture bass, pulse leads, and percussion
-      // bin 1 ≈ 94 Hz (bass), bin 43 ≈ 4031 Hz (snares/leads)
-      const startBin = 1;
+      // Targeting ~500 Hz - 4 kHz to capture lead melodies and snare hits
+      // bin 6 ≈ 562 Hz, bin 43 ≈ 4031 Hz
+      const startBin = 6;
       const endBin = 43;
       const targetBins = frequencyData.slice(startBin, endBin);
 
@@ -97,11 +97,11 @@ export function useAudioAnalysis(options: AudioAnalysisOptions): AudioAnalysisRe
       // Normalize to 0-1 range (255 is max Uint8 value)
       let normalized = rms / 255;
 
-      // Apply moderate gain boost (2.0x) to reach higher intensities
-      normalized = Math.min(normalized * 2.0, 1.0);
+      // Apply gain boost for more sensitivity (2.5x amplification)
+      normalized = Math.min(normalized * 2.5, 1.0);
 
-      // Apply squared curve to create dynamic range
-      // Less aggressive than cubic, allows intense sounds to reach 1.0
+      // Apply power curve to make loud sounds MUCH more dramatic
+      // Square the value to create exponential response
       normalized = normalized * normalized;
 
       // Apply exponential smoothing for fluid animation

@@ -845,16 +845,6 @@ button.box-button.AppFooter-back {
     border-left: 4px solid var(--accent); /* Bright Green - carving edge */
     box-sizing: border-box;
     z-index: 2;
-    /* Audio-reactive glow */
-    filter: brightness(calc(1.0 + var(--chisel-intensity, 0) * 1.5))
-            drop-shadow(0 0 calc(var(--chisel-intensity, 0) * 4px) var(--accent));
-    transition: filter 50ms ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .Slider-chisel {
-        filter: none;
-    }
 }
 
 .Slider-knob {
@@ -894,7 +884,6 @@ button.box-button.AppFooter-back {
     filter: hue-rotate(calc(var(--particle-hue) * 1deg));
     animation: particle-fly 600ms steps(20) forwards;
     pointer-events: none;
-    box-shadow: 0 0 2px rgba(155, 254, 56, 0.8);
 }
 
 @keyframes particle-fly {
@@ -1070,62 +1059,6 @@ button.box-button.AppFooter-back {
     font-size: 0.9em;
     color: var(--neutral3);
     font-style: italic;
-}
-
-.Settings-subsection {
-    margin-top: var(--charH);
-    padding-left: calc(var(--charW1) * 2);
-}
-
-.Settings-expand-button {
-    background: none;
-    border: none;
-    color: var(--clickable);
-    cursor: pointer;
-    padding: 0;
-    font-size: 1em;
-    font-family: inherit;
-    margin-bottom: calc(var(--charH) / 2);
-}
-
-.Settings-expand-button:hover {
-    color: #fefefe;
-}
-
-.Settings-expand-button:active {
-    color: var(--accent);
-}
-
-.Settings-particle-tuning {
-    margin-top: var(--charH);
-}
-
-.Settings-particle-tuning label {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--charH) / 4);
-    margin-bottom: var(--charH);
-}
-
-.Settings-particle-tuning label span {
-    color: var(--neutral3);
-    font-size: 0.9em;
-}
-
-.Settings-particle-tuning input[type="range"] {
-    width: 100%;
-    cursor: pointer;
-    accent-color: var(--accent);
-}
-
-.Settings-dual-slider {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--charH) / 4);
-}
-
-.Settings-dual-slider input[type="range"] {
-    width: 100%;
 }
 
 .PlayerParams h3 {

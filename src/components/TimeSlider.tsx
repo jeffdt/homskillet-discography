@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import React from 'react';
 import Slider from "./Slider";
+import autoBindReact from 'auto-bind/react';
 import { useAudioPulse } from '../contexts/AudioPulseContext';
-import { UserContext } from './UserProvider';
 
 //  46 ms = 2048/44100 sec or 21.7 fps
 // 400 ms = 2.5 fps
@@ -15,86 +15,95 @@ interface TimeSliderProps {
   onChange: (event: number) => void;
 }
 
-export default function TimeSlider(props: TimeSliderProps): React.ReactElement {
-  const { paused, currentSongDurationMs, getCurrentPositionMs, onChange } = props;
-  const [draggedSongPositionMs, setDraggedSongPositionMs] = useState(-1);
-  const [currentSongPositionMs, setCurrentSongPositionMs] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+interface TimeSliderState {
+  draggedSongPositionMs: number;
+  currentSongPositionMs: number;
+}
 
-  const { amplitude } = useAudioPulse();
-  const userContext = useContext(UserContext);
+export default class TimeSlider extends React.Component<TimeSliderProps, TimeSliderState> {
+  private timer: NodeJS.Timeout | null = null;
 
-  // Extract particle settings from user context
-  const particleSettings = {
-    intenseInterval: userContext.settings.particleIntenseInterval,
-    quietInterval: userContext.settings.particleQuietInterval,
-    minSpeed: userContext.settings.particleMinSpeed,
-    maxSpeed: userContext.settings.particleMaxSpeed,
-    maxParticles: userContext.settings.particleMaxCount,
-  };
+  constructor(props: TimeSliderProps) {
+    super(props);
+    autoBindReact(this);
 
-  useEffect(() => {
-    if (!paused) {
-      timerRef.current = setInterval(() => {
-        setCurrentSongPositionMs(Math.min(getCurrentPositionMs(), currentSongDurationMs));
+    this.state = {
+      draggedSongPositionMs: -1,
+      currentSongPositionMs: 0,
+    };
+  }
+
+  componentDidUpdate(prevProps: TimeSliderProps): void {
+    if (prevProps.paused === true && this.props.paused === false) {
+      this.timer = setInterval(() => {
+        const {getCurrentPositionMs, currentSongDurationMs} = this.props;
+        this.setState({
+          currentSongPositionMs: Math.min(getCurrentPositionMs(), currentSongDurationMs),
+        });
       }, UPDATE_INTERVAL_MS);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+    } else if (prevProps.paused === false && this.props.paused === true) {
+      if (this.timer) {
+        clearInterval(this.timer);
       }
     }
+  }
 
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [paused, getCurrentPositionMs, currentSongDurationMs]);
+  componentWillUnmount(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
 
-  const getSongPos = useCallback((): number => {
-    return currentSongPositionMs / currentSongDurationMs;
-  }, [currentSongPositionMs, currentSongDurationMs]);
+  getSongPos(): number {
+    return this.state.currentSongPositionMs / this.props.currentSongDurationMs;
+  }
 
-  const getTime = useCallback((ms: number): string => {
+  getTimeLabel(): string {
+    const val = this.state.draggedSongPositionMs >= 0 ?
+      this.state.draggedSongPositionMs :
+      this.state.currentSongPositionMs;
+    return this.getTime(val);
+  }
+
+  getTime(ms: number): string {
     const sign = ms < 0 ? '-' : '';
     ms = Math.abs(ms);
     const min = Math.floor(ms / 60000);
     const sec = Math.floor((ms % 60000) / 1000);
     return `${sign}${min}:${pad(sec)}`;
-  }, []);
+  }
 
-  const getTimeLabel = useCallback((): string => {
-    const val = draggedSongPositionMs >= 0 ? draggedSongPositionMs : currentSongPositionMs;
-    return getTime(val);
-  }, [draggedSongPositionMs, currentSongPositionMs, getTime]);
-
-  const handlePositionDrag = useCallback((event: React.ChangeEvent<HTMLInputElement> | number): void => {
+  handlePositionDrag(event: React.ChangeEvent<HTMLInputElement> | number): void {
     const pos = typeof event === 'number' ? event : (event.target ? parseFloat(event.target.value) : 0);
-    setDraggedSongPositionMs(pos * currentSongDurationMs);
-  }, [currentSongDurationMs]);
+    // Update current time position label
+    this.setState({
+      draggedSongPositionMs: pos * this.props.currentSongDurationMs,
+    });
+  }
 
-  const handlePositionDrop = useCallback((event: React.ChangeEvent<HTMLInputElement> | number): void => {
+  handlePositionDrop(event: React.ChangeEvent<HTMLInputElement> | number): void {
+    this.setState({
+      draggedSongPositionMs: -1,
+      currentSongPositionMs: this.state.draggedSongPositionMs,
+    });
     const pos = typeof event === 'number' ? event : (event.target ? parseFloat(event.target.value) : 0);
-    setDraggedSongPositionMs(-1);
-    setCurrentSongPositionMs(draggedSongPositionMs);
-    onChange(pos);
-  }, [draggedSongPositionMs, onChange]);
+    this.props.onChange(pos);
+  }
 
-  return (
-    <div className='TimeSlider'>
-      <Slider
-        pos={getSongPos()}
-        onDrag={handlePositionDrag}
-        onChange={handlePositionDrop}
-        shouldSpawnParticles={!paused}
-        pulseIntensity={amplitude}
-        particleSettings={particleSettings}
-      />
-      <div className='TimeSlider-labels'>
-        <div>{getTimeLabel()}</div>
-        <div>{getTime(currentSongDurationMs)}</div>
+  render(): React.ReactNode {
+    return (
+      <div className='TimeSlider'>
+        <Slider
+          pos={this.getSongPos()}
+          onDrag={this.handlePositionDrag}
+          onChange={this.handlePositionDrop}
+          shouldSpawnParticles={!this.props.paused}
+        />
+        <div className='TimeSlider-labels'>
+          <div>{this.getTimeLabel()}</div>
+          <div>{this.getTime(this.props.currentSongDurationMs)}</div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }

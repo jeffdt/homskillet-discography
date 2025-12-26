@@ -8,14 +8,6 @@ interface SliderProps {
   onChange: (pos: number) => void;
   shouldSpawnParticles?: boolean; // Whether to spawn particles (during playback)
   pulseIntensity?: number; // Audio-reactive pulse intensity (0-1)
-  // Particle tuning parameters
-  particleSettings?: {
-    intenseInterval?: number;
-    quietInterval?: number;
-    minSpeed?: number;
-    maxSpeed?: number;
-    maxParticles?: number;
-  };
 }
 
 interface SliderState {
@@ -104,10 +96,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
         <div className="Slider-fill" style={{width: pos}}/>
         <div className="Slider-chisel"
              ref={this.chisel}
-             style={{
-               left: pos,
-               '--chisel-intensity': this.props.pulseIntensity ?? 0,
-             } as React.CSSProperties}/>
+             style={{left: pos}}/>
         <div className="Slider-knob"
              ref={this.knob}
              style={{left: pos}}/>
@@ -115,8 +104,6 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           knobX={knobX}
           knobY={knobY}
           shouldSpawn={shouldSpawn}
-          intensity={this.props.pulseIntensity ?? 0}
-          {...this.props.particleSettings}
         />
       </div>
     );
