@@ -22,6 +22,7 @@ const UserContext = createContext<UserContextValue>({
 
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
+  audioReactivePulse: true,
 };
 
 function migrateSettings(settings: Partial<UserSettings>): UserSettings {

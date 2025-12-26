@@ -13,6 +13,7 @@ interface SliderParticlesProps {
   knobX: number; // Knob X position in pixels
   knobY: number; // Knob Y position in pixels
   shouldSpawn: boolean; // Whether to spawn particles (only during playback, not dragging)
+  intensity: number; // Audio intensity (0-1) affects spawn rate, speed, and brightness
 }
 
 interface SliderParticlesState {

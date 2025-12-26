@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import TimeSlider from './TimeSlider';
 import VolumeSlider from './VolumeSlider';
 import { REPEAT_LABELS, SHUFFLE_LABELS } from '../Sequencer';
+import { useAudioPulse } from '../contexts/AudioPulseContext';
 
 interface AppFooterProps {
   // State props
@@ -70,6 +71,9 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
   const playPauseTitle = paused ? 'Play' : 'Pause';
   const playPauseClass = paused ? 'icon-play' : 'icon-pause';
 
+  const { amplitude } = useAudioPulse();
+  const pulseIntensity = (paused || ejected) ? 0 : amplitude;
+
   return (
     <div className="AppFooter">
       <div className="AppFooter-attribution">
@@ -112,7 +116,10 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
           <button onClick={togglePause}
                   title={playPauseTitle}
                   className="box-button AppFooter-play-pause"
-                  disabled={ejected}>
+                  disabled={ejected}
+                  style={{
+                    '--pulse-intensity': pulseIntensity,
+                  } as React.CSSProperties}>
             <span className={`inline-icon ${playPauseClass}`}/>
           </button>
           <button onClick={nextSong}

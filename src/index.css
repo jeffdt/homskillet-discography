@@ -780,9 +780,27 @@ button.box-button.AppFooter-back {
     height: var(--charH);
 }
 
+.AppFooter-play-pause {
+    --pulse-spread: calc(0px + var(--pulse-intensity, 0) * 12px);
+    --pulse-opacity: calc(0.15 + var(--pulse-intensity, 0) * 0.85);
+    box-shadow:
+        0 0 var(--pulse-spread) calc(var(--pulse-spread) * 0.5)
+        rgba(155, 254, 56, var(--pulse-opacity)),
+        var(--box-shadow);
+    transition: box-shadow 50ms ease-out;
+}
+
 .AppFooter-play-pause .inline-icon {
     width: 32px !important;
     height: calc(var(--charH) * 1.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .AppFooter-play-pause {
+        --pulse-spread: 2px;
+        --pulse-opacity: 0.5;
+        transition: none;
+    }
 }
 
 .Slider {
@@ -997,6 +1015,50 @@ button.box-button.AppFooter-back {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.Settings-section {
+    margin-bottom: calc(var(--charH) * 2);
+    padding-bottom: var(--charH);
+    border-bottom: 1px solid var(--neutral3);
+}
+
+.Settings-section h3 {
+    margin-top: 0;
+    margin-bottom: var(--charH);
+}
+
+.Settings-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--charW1);
+    cursor: pointer;
+    margin-bottom: calc(var(--charH) / 2);
+}
+
+.Settings-toggle input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.Settings-toggle span {
+    color: var(--clickable);
+}
+
+.Settings-toggle:hover span {
+    color: #fefefe; /* White on hover */
+}
+
+.Settings-toggle:has(input:active) span {
+    color: var(--accent); /* Green on click */
+}
+
+.Settings-hint {
+    margin: 0;
+    padding-left: calc(var(--charW1) * 2);
+    font-size: 0.9em;
+    color: var(--neutral3);
+    font-style: italic;
 }
 
 .PlayerParams h3 {

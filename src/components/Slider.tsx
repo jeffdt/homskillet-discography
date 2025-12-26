@@ -7,6 +7,7 @@ interface SliderProps {
   onDrag: (pos: number) => void;
   onChange: (pos: number) => void;
   shouldSpawnParticles?: boolean; // Whether to spawn particles (during playback)
+  pulseIntensity?: number; // Audio-reactive pulse intensity (0-1)
 }
 
 interface SliderState {

@@ -1,5 +1,6 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import PlayerParams, { ParamDef } from './PlayerParams';
+import { UserContext } from './UserProvider';
 
 interface SettingsProps {
   ejected: boolean;
@@ -36,8 +37,27 @@ function Settings(props: SettingsProps) {
     sequencer,
   } = props;
 
+  const userContext = useContext(UserContext);
+
   return (
     <div className='Settings'>
+      <div className="Settings-section">
+        <h3>UI Effects</h3>
+        <label className="Settings-toggle">
+          <input
+            type="checkbox"
+            checked={persistedSettings.audioReactivePulse ?? true}
+            onChange={(e) => {
+              userContext.updateSettings({ audioReactivePulse: e.target.checked });
+            }}
+          />
+          <span>Audio-Reactive Pulse</span>
+        </label>
+        <p className="Settings-hint">
+          Pulse borders in sync with music (play/pause button and song row)
+        </p>
+      </div>
+
       <h3>{sequencer?.getPlayer()?.name || 'Player'} Settings</h3>
       {sequencer?.getPlayer() ?
         <PlayerParams

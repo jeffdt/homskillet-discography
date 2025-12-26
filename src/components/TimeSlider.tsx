@@ -1,6 +1,7 @@
 import React from 'react';
 import Slider from "./Slider";
 import autoBindReact from 'auto-bind/react';
+import { useAudioPulse } from '../contexts/AudioPulseContext';
 
 //  46 ms = 2048/44100 sec or 21.7 fps
 // 400 ms = 2.5 fps
