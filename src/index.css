@@ -825,7 +825,6 @@ button.box-button.AppFooter-back {
     border-top: calc(var(--railH) / 2) solid transparent;
     border-bottom: calc(var(--railH) / 2) solid transparent;
     border-left: 4px solid var(--accent); /* Bright Green - carving edge */
-    margin-left: -4px; /* Offset to align with position */
     box-sizing: border-box;
     z-index: 2;
 }
