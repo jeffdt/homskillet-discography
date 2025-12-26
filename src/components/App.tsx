@@ -37,6 +37,7 @@ import TabBar from './TabBar';
 import SongDisplay from './SongDisplay';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
+import { AudioPulseProvider } from '../contexts/AudioPulseContext';
 import { AppProps, AppState, TabType } from '../types/app';
 import { SequencerState } from '../types/sequencer';
 import { PlayContext } from '../types/catalog';
@@ -696,7 +697,14 @@ class App extends React.Component<AppProps, AppState> {
     const currIdx = this.sequencer?.getCurrIdx();
 
     return (
-      <div className={`App ${!this.state.paused && !this.state.ejected ? 'is-playing' : ''}`}>
+      <AudioPulseProvider
+        audioCtx={this.audioCtx}
+        sourceNode={this.playerNode}
+        paused={this.state.paused}
+        ejected={this.state.ejected}
+        enabled={this.props.userContext.settings.audioReactivePulse ?? true}
+      >
+        <div className={`App ${!this.state.paused && !this.state.ejected ? 'is-playing' : ''}`}>
         {/* SVG filter definition for CRT noise effect */}
         <svg style={{ position: 'absolute', width: 0, height: 0 }}>
           <defs>
@@ -816,7 +824,8 @@ class App extends React.Component<AppProps, AppState> {
           togglePause={this.togglePause}
           volume={this.state.volume}
         />
-      </div>
+        </div>
+      </AudioPulseProvider>
     );
   }
 }

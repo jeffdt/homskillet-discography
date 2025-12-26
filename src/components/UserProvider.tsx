@@ -22,6 +22,13 @@ const UserContext = createContext<UserContextValue>({
 
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
+  audioReactivePulse: true,
+  // Particle tuning parameters
+  particleIntenseInterval: 15,      // Spawn interval at max intensity (ms)
+  particleQuietInterval: 100,       // Spawn interval at min intensity (ms)
+  particleMinSpeed: 0.8,            // Speed multiplier at intensity 0
+  particleMaxSpeed: 1.65,           // Speed multiplier at intensity 1
+  particleMaxCount: 20,             // Maximum particles on screen
 };
 
 function migrateSettings(settings: Partial<UserSettings>): UserSettings {

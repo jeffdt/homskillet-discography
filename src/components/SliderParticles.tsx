@@ -13,17 +13,27 @@ interface SliderParticlesProps {
   knobX: number; // Knob X position in pixels
   knobY: number; // Knob Y position in pixels
   shouldSpawn: boolean; // Whether to spawn particles (only during playback, not dragging)
+  intensity: number; // Audio intensity (0-1) affects spawn rate, speed, and brightness
+  // Tuning parameters (optional, will use defaults if not provided)
+  intenseInterval?: number;  // Spawn interval at max intensity (ms)
+  quietInterval?: number;    // Spawn interval at min intensity (ms)
+  minSpeed?: number;
+  maxSpeed?: number;
+  maxParticles?: number;
 }
 
 interface SliderParticlesState {
   particles: Particle[];
 }
 
-const MAX_PARTICLES = 15;
+// Default values (can be overridden via props)
+const DEFAULT_MAX_PARTICLES = 20;
 const PARTICLE_LIFETIME_MS = 600;
-const MIN_SPAWN_INTERVAL_MS = 40;
-const MAX_SPAWN_INTERVAL_MS = 120;
-const NUM_SPAWNERS = 2; // Multiple independent spawners for randomness
+const DEFAULT_INTENSE_INTERVAL_MS = 15;  // Spawn every 15ms at max intensity
+const DEFAULT_QUIET_INTERVAL_MS = 100;   // Spawn every 100ms at min intensity
+const DEFAULT_MIN_SPEED = 0.8;
+const DEFAULT_MAX_SPEED = 1.65;
+const NUM_SPAWNERS = 2; // Multiple independent spawners for varied timing
 
 export default class SliderParticles extends PureComponent<SliderParticlesProps, SliderParticlesState> {
   private nextId = 0;
@@ -68,29 +78,52 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
   }
 
   scheduleNextSpawn(): void {
-    const randomDelay = MIN_SPAWN_INTERVAL_MS + Math.random() * (MAX_SPAWN_INTERVAL_MS - MIN_SPAWN_INTERVAL_MS);
+    // Modulate spawn rate based on intensity using linear interpolation
+    // intensity 0.0 -> quietInterval (slow spawning)
+    // intensity 1.0 -> intenseInterval (fast spawning)
+    const intensity = this.props.intensity;
+
+    // Use props or defaults
+    const intenseInterval = this.props.intenseInterval ?? DEFAULT_INTENSE_INTERVAL_MS;
+    const quietInterval = this.props.quietInterval ?? DEFAULT_QUIET_INTERVAL_MS;
+    const maxParticles = this.props.maxParticles ?? DEFAULT_MAX_PARTICLES;
+
+    // Interpolate between quiet and intense intervals
+    // Higher intensity = shorter interval (faster spawning)
+    const spawnInterval = quietInterval - (intensity * (quietInterval - intenseInterval));
 
     const timer = setTimeout(() => {
-      if (this.props.shouldSpawn && this.state.particles.length < MAX_PARTICLES) {
+      if (this.props.shouldSpawn && this.state.particles.length < maxParticles) {
         this.spawnParticle();
       }
       // Schedule the next spawn if still active
       if (this.props.shouldSpawn) {
         this.scheduleNextSpawn();
       }
-    }, randomDelay);
+    }, spawnInterval);
 
     this.spawnerTimers.push(timer);
   }
 
   spawnParticle(): void {
-    const { knobX, knobY } = this.props;
+    const { knobX, knobY, intensity } = this.props;
+
+    // Use props or defaults for speed
+    const minSpeed = this.props.minSpeed ?? DEFAULT_MIN_SPEED;
+    const maxSpeed = this.props.maxSpeed ?? DEFAULT_MAX_SPEED;
+
+    // Modulate velocity based on intensity
+    const speedMultiplier = minSpeed + (intensity * (maxSpeed - minSpeed));
 
     // Random velocity: fly LEFT like sparks being carved off with wide fan
     // Very slight upward bias to compensate for gravity pulling particles down
-    const vx = -0.4 - Math.random() * 1.1; // -0.4 to -1.5 (wide speed variation)
-    const vy = (Math.random() - 0.55) * 2.0; // -1.1 to 0.9 (very slight upward bias, gravity brings them to center)
-    const hueOffset = Math.random() * 30; // 0-30 degrees hue shift
+    const baseVx = -0.4 - Math.random() * 1.1; // -0.4 to -1.5
+    const baseVy = (Math.random() - 0.55) * 2.0; // -1.1 to 0.9
+    const vx = baseVx * speedMultiplier;
+    const vy = baseVy * speedMultiplier;
+
+    // Static bright green color (no hue variation based on intensity)
+    const hueOffset = Math.random() * 15; // Slight green variation only
 
     const particle: Particle = {
       id: this.nextId++,
