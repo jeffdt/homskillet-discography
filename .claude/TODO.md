@@ -6,6 +6,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
+**B1**: 
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
@@ -42,6 +43,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 **E11**: Mobile fonts/buttons need to be bigger.
 
 **E12**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
+
+**E13**: Slider sparks are reactive to the music intensity.
 
 ---
 
