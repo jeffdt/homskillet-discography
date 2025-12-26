@@ -13,7 +13,8 @@
       "Skill(gc)",
       "Bash(cat:*)",
       "Skill(frontend-design:frontend-design)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(bun run build-lite:*)"
     ]
   }
 }

@@ -30,7 +30,7 @@
 
 ## ✅ Phase 1: High Impact, Low Effort
 
-### - [x] 1. Scanline Sweep Effect
+### - [x] Scanline Sweep Effect
 *Inspired by CRT monitors and old TVs*
 
 **What**: Animated scanlines that sweep across the entire interface
@@ -90,7 +90,7 @@
 
 ---
 
-### - [x] 2. CRT Noise/Grain Filter
+### - [x] CRT Noise/Grain Filter
 *Film grain and static to simulate analog CRT display*
 
 **What**: Subtle animated noise overlay to simulate CRT phosphor grain and analog static
@@ -173,7 +173,84 @@
 
 ---
 
-### - [ ] 3. Chunky Slide-In Animations
+### - [ ] Static Horizontal Scanlines
+*Permanent horizontal lines simulating CRT raster display*
+
+**What**: Static horizontal lines across the entire display to simulate visible raster scan lines from CRT technology
+**Where**: Background overlay on entire `.App` container
+**When**: Always visible (static effect, not animated)
+**Why**: CRT displays drew images line-by-line using raster scanning. On lower-resolution CRTs and arcade monitors, the gaps between these horizontal lines were visibly darker, creating a striped appearance. This enhances CRT authenticity and pairs beautifully with the scanline sweep (#1) and noise filter (#2).
+
+**Implementation Tasks:**
+- [ ] Create dedicated overlay div or pseudo-element for scanline pattern
+- [ ] Use `repeating-linear-gradient` to create thin horizontal lines
+- [ ] Line spacing: 2px lines with 2px gaps (or 3px/3px for more visible effect)
+- [ ] Color: Very subtle dark lines (e.g., `rgba(0, 0, 0, 0.15)`) over transparent background
+- [ ] Alternative: Light lines (e.g., `rgba(255, 255, 255, 0.03)`) for subtle highlight effect
+- [ ] `position: fixed` with `inset: 0` to cover viewport
+- [ ] `pointer-events: none` to avoid interaction blocking
+- [ ] Appropriate z-index for layering (should be above content but below moving scanlines and noise)
+- [ ] Test with `prefers-reduced-motion` (static effect, so should remain visible)
+- [ ] Test readability at different viewport sizes
+- [ ] Ensure doesn't make text harder to read (adjust opacity if needed)
+
+**Design Considerations:**
+
+**Line Density Options:**
+- **2px lines / 2px gaps**: More visible, stronger CRT effect, may reduce readability
+- **1px lines / 2px gaps**: Subtle, authentic to higher-res CRTs
+- **3px lines / 3px gaps**: Very pronounced, arcade monitor style
+
+**Color Options:**
+- **Dark lines**: `rgba(0, 0, 0, 0.1-0.2)` creates shadow effect between scan lines
+- **Light lines**: `rgba(255, 255, 255, 0.02-0.05)` creates phosphor glow effect
+- **Mixed approach**: Alternate dark and light for maximum authenticity
+
+**Example CSS:**
+```css
+/* Option A: Dark scanlines (gaps between raster lines) */
+.scanlines-overlay {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 3px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Option B: Light scanlines (phosphor glow) */
+.scanlines-overlay {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+```
+
+**Files to modify:**
+- `src/components/App.tsx` - Add scanlines overlay div
+- `src/index.css` - Add `.scanlines-overlay` styles
+
+**Implementation Notes:**
+<!-- Add notes here after implementation -->
+<!-- Document which density and color option was chosen -->
+<!-- Note any readability adjustments made -->
+
+---
+
+### - [ ] Chunky Slide-In Animations
 *DOS-style transitions with character grid snapping*
 
 **What**: UI elements slide in/out snapped to character grid (8px/16px increments)
@@ -693,10 +770,14 @@ The slider was completely redesigned during this implementation to enhance the "
 
 ## 📝 Implementation Progress
 
-**Current Status**: Phase 1 in progress
-**Next Steps**: Continue Phase 1 implementations
+**Current Status**: Phases 1 and 4 in progress
+**Next Steps**: Continue with remaining Phase 1 items or explore Phase 2-4 enhancements
 
-**Completed Items**: 2/15
+**Completed Items**: 3/15
+- Phase 1: Scanline Sweep Effect (#1)
+- Phase 1: CRT Noise/Grain Filter (#2)
+- Phase 4: Slider Knob Pixel Sparks (#15)
+
 **In Progress**: None
 **Blocked**: None
 
