@@ -724,6 +724,8 @@ class App extends React.Component<AppProps, AppState> {
         </svg>
         {/* CRT noise overlay */}
         <div className="crt-noise-overlay" aria-hidden="true" />
+        {/* CRT vignette overlay */}
+        <div className="crt-vignette-overlay" aria-hidden="true" />
         <MessageBox showInfo={this.state.showInfo}
           infoTexts={this.state.infoTexts}
           toggleInfo={this.toggleInfo} />

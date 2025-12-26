@@ -403,6 +403,9 @@ body,
     right: 0;
     bottom: 0;
     left: 0;
+    /* CRT screen curvature */
+    perspective: 1000px;
+    overflow: hidden;
 }
 
 /* CRT Scanline Sweep Effect */
@@ -482,6 +485,41 @@ body,
     .crt-noise-overlay {
         /* Keep static noise but at slightly lower opacity */
         opacity: 0.025;
+    }
+}
+
+/* CRT Convex Screen Filter - Vignette Overlay */
+.crt-vignette-overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        ellipse 100% 100% at center,
+        transparent 30%,
+        rgba(0, 0, 0, 0.15) 75%,
+        rgba(0, 0, 0, 0.5) 100%
+    );
+    pointer-events: none;
+    z-index: 99998; /* Just below the noise overlay */
+}
+
+/* Optional: Subtle border radius for screen edges */
+.crt-vignette-overlay::after {
+    content: '';
+    position: absolute;
+    inset: -2%;
+    border-radius: 3% / 2%;
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .App {
+        /* Remove perspective for users who prefer reduced motion */
+        perspective: none;
+    }
+    .crt-vignette-overlay {
+        /* Reduce vignette intensity for accessibility */
+        opacity: 0.5;
     }
 }
 

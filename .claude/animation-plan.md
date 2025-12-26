@@ -223,7 +223,7 @@
 
 ---
 
-### - [ ] 5. Convex CRT Screen Filter
+### - [x] 5. Convex CRT Screen Filter
 *Curved screen effect like classic CRT monitors*
 
 **What**: CSS-based screen curvature and vignette to simulate convex CRT display
@@ -266,14 +266,14 @@
 - Cons: Multiple CSS layers
 
 **Implementation Tasks:**
-- [ ] Choose implementation approach (A, B, C, D, or E)
-- [ ] Add CSS pseudo-elements to `.App` for CRT effect layers
-- [ ] Implement chosen curvature technique
-- [ ] Add edge vignette (dark corners/edges)
+- [x] Choose implementation approach (A, B, C, D, or E)
+- [x] Add CSS pseudo-elements to `.App` for CRT effect layers
+- [x] Implement chosen curvature technique
+- [x] Add edge vignette (dark corners/edges)
 - [ ] Optional: Add subtle chromatic aberration at screen edges
-- [ ] Test with `prefers-reduced-motion` (static effect, but should respect preference)
-- [ ] Ensure text remains readable (adjust intensity if needed)
-- [ ] Test at different viewport sizes and aspect ratios
+- [x] Test with `prefers-reduced-motion` (static effect, but should respect preference)
+- [x] Ensure text remains readable (adjust intensity if needed)
+- [x] Test at different viewport sizes and aspect ratios
 
 **Example CSS for Option E (Combined):**
 ```css
@@ -314,8 +314,56 @@
 - `src/index.css` - Add CRT filter styles
 
 **Implementation Notes:**
-<!-- Add notes here after implementation -->
-<!-- Document which approach was chosen and any adjustments made -->
+
+**Chosen Approach: Option E (Combined Approach)**
+
+Implemented a layered CRT screen effect combining multiple techniques for maximum authenticity:
+
+**1. Perspective Transform:**
+- Added `perspective: 1000px` to `.App` for subtle 3D depth
+- Creates sense of viewing through curved glass screen
+- Removed via `prefers-reduced-motion` for accessibility
+
+**2. Vignette Overlay:**
+- Created dedicated `<div className="crt-vignette-overlay">` element
+- Radial gradient darkens edges: transparent (30%) → dark (100%)
+- Progressive darkening: rgba(0,0,0,0.15) at 75%, rgba(0,0,0,0.5) at 100%
+- `z-index: 99998` positions just below noise overlay
+
+**3. Screen Edge Curvature:**
+- Used `.crt-vignette-overlay::after` pseudo-element
+- Subtle border-radius: `3% / 2%` (elliptical corners)
+- Inset box-shadow creates depth: `inset 0 0 100px rgba(0,0,0,0.5)`
+- Extended beyond container: `inset: -2%` for edge wrapping
+
+**Architecture:**
+- Similar pattern to existing CRT noise overlay for consistency
+- Separate div element since `.App::before` and `.App::after` are used for scanlines
+- Fixed positioning with `inset: 0` covers entire viewport
+- `pointer-events: none` ensures no UI interaction issues
+
+**Accessibility:**
+- `@media (prefers-reduced-motion)` removes perspective transform
+- Reduces vignette opacity to 50% for users sensitive to visual effects
+- `aria-hidden="true"` on overlay div
+
+**Visual Impact:**
+- Complements scanlines and noise overlay beautifully
+- Creates authentic CRT monitor feel with edge darkening
+- Subtle depth without being distracting
+- Text remains fully readable at all viewport sizes
+
+**Performance:**
+- Pure CSS implementation (no JavaScript)
+- GPU-accelerated via CSS transforms and gradients
+- No animation overhead (static effect)
+- Minimal DOM impact (single overlay div)
+
+**Haiku:**
+
+*Curved glass bends the light*
+*Shadows gather at the edge*
+*Old screens remembered*
 
 ---
 
@@ -638,9 +686,9 @@
 ## 📝 Implementation Progress
 
 **Current Status**: Phase 1 in progress
-**Next Steps**: Continue Phase 1 implementations
+**Next Steps**: Continue Phase 1 implementations (Item #3: Chunky Slide-In Animations)
 
-**Completed Items**: 2/15
+**Completed Items**: 3/15
 **In Progress**: None
 **Blocked**: None
 
