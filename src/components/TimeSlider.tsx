@@ -68,8 +68,8 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
     const sign = ms < 0 ? '-' : '';
     ms = Math.abs(ms);
     const min = Math.floor(ms / 60000);
-    const sec = (Math.floor((ms % 60000) / 100) / 10).toFixed(1);
-    return `${sign}${min}:${pad(parseFloat(sec))}`;
+    const sec = Math.floor((ms % 60000) / 1000);
+    return `${sign}${min}:${pad(sec)}`;
   }
 
   handlePositionDrag(event: React.ChangeEvent<HTMLInputElement> | number): void {

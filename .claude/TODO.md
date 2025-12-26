@@ -12,10 +12,6 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **S1**: Eliminate "Mode" settings for visualizer, hardcode to constant Q. Eliminate Weighting, hardcode to A-weighting. Eliminate speed, hardcode to medium. The only option should be palette.
 
-**S2.1**: The time slider should not show decimal precision. It's too much. Just show seconds.
-
-**S2.2**: The file size doesn't need decimal precision either. Just show KB.
-
 ---
 
 ## ENHANCEMENT (new features & styling)
