@@ -90,7 +90,90 @@
 
 ---
 
-### - [ ] 2. Chunky Slide-In Animations
+### - [x] 2. CRT Noise/Grain Filter
+*Film grain and static to simulate analog CRT display*
+
+**What**: Subtle animated noise overlay to simulate CRT phosphor grain and analog static
+**Where**: Background overlay on entire `.App` container
+**When**: Constantly running at low opacity (15%)
+**Why**: Enhances CRT authenticity, pairs beautifully with scanlines, adds texture and depth
+
+**Implementation Tasks:**
+- [x] Choose implementation approach (Option A: SVG feTurbulence)
+- [x] Create inline SVG filter with `<feTurbulence>` in App component
+- [x] Apply filter to dedicated overlay div via CSS
+- [x] Animate noise seed value for slow drift (8s cycle)
+- [x] Ensure `pointer-events: none` to avoid interaction issues
+- [x] Test with `prefers-reduced-motion` (disable animation, keep static noise)
+- [x] Test at different viewport sizes
+- [x] Verify performance (GPU-accelerated)
+- [x] Fix z-index stacking to cover all elements
+- [x] Remove interfering backgrounds from Browse-topRow and Visualizer
+
+**Files modified:**
+- `src/components/App.tsx` - Added inline SVG filter and noise overlay div
+- `src/index.css` - Added `.crt-noise-overlay` styles
+- `src/components/Browse.tsx` - Restructured to fixed header with scrollable list
+- `src/components/VirtualizedList.tsx` - Removed children rendering
+- `src/index.css` - Cleaned up Browse layout, removed sticky positioning hack
+
+**Implementation Notes:**
+
+**Chosen Approach: SVG feTurbulence (Option A)**
+- Inline SVG with `<feTurbulence>` filter in App.tsx
+- `fractalNoise` type with `baseFrequency="0.9"` and `numOctaves="4"`
+- Animated using SVG `<animate>` element changing seed from 0 to 100 over 8s
+
+**Final Implementation:**
+- Dedicated `<div className="crt-noise-overlay">` with white background
+- CSS filter applies `url(#crt-noise)` to the overlay
+- `position: fixed` with `inset: 0` to cover entire viewport
+- `z-index: 99999` to ensure it sits on top of all content
+- `mix-blend-mode: overlay` for authentic film grain effect
+- **Opacity: 15%** (0.15) - user preference for visible grain
+- `pointer-events: none` to avoid blocking interactions
+
+**Animation:**
+- SVG `<animate>` element cycles `seed` attribute 0→100 over 8 seconds
+- Creates slow drifting noise pattern like analog TV static
+- Smooth continuous loop with `repeatCount="indefinite"`
+
+**Accessibility:**
+- `@media (prefers-reduced-motion)` disables animation via CSS
+- Static noise remains at slightly lower opacity (2.5%)
+- `aria-hidden="true"` on overlay div
+
+**Architecture Improvements:**
+- **Removed sticky positioning hack**: Browse-topRow no longer uses `position: sticky` with opaque background
+- **Proper layout hierarchy**: Browse component now has fixed header (`Browse-topRow`) with scrollable list (`Browse-list-scroll`) underneath
+- **Clean separation**: Only the file list scrolls, header stays static (Windows Explorer pattern)
+- **Removed interfering backgrounds**:
+  - `.Browse-topRow`: Removed `position: sticky`, `z-index`, and `background`
+  - `.Visualizer-options`: Removed `background-color: rgba(0, 0, 0, 0.65)`
+- **Better scrolling control**: `.App-main-content-area` no longer scrolls, Browse manages its own scroll area
+
+**Performance:**
+- Pure CSS/SVG implementation
+- GPU-accelerated via CSS filters and transforms
+- No JavaScript overhead
+- Smooth 60fps animation
+- Minimal DOM impact (single overlay div)
+
+**Visual Impact:**
+- Complements dual scanline effect beautifully
+- Adds texture and depth to flat UI
+- Authentic CRT monitor grain/static feel
+- Works across all elements including visualizer and file browser
+
+**Haiku:**
+
+*White noise drifts and shifts*
+*Through pixels and phosphor glow*
+*Static memory*
+
+---
+
+### - [ ] 3. Chunky Slide-In Animations
 *DOS-style transitions with character grid snapping*
 
 **What**: UI elements slide in/out snapped to character grid (8px/16px increments)
@@ -116,7 +199,7 @@
 
 ---
 
-### - [ ] 3. Pixelated Hover States
+### - [ ] 4. Pixelated Hover States
 *Retro game sprite-style hover effects*
 
 **What**: Items scale up in chunky pixel increments on hover
@@ -140,7 +223,7 @@
 
 ---
 
-### - [ ] 4. Convex CRT Screen Filter
+### - [ ] 5. Convex CRT Screen Filter
 *Curved screen effect like classic CRT monitors*
 
 **What**: CSS-based screen curvature and vignette to simulate convex CRT display
@@ -238,7 +321,7 @@
 
 ## 🎵 Phase 2: Musical Responsiveness
 
-### - [ ] 5. Audio-Reactive Border Pulse
+### - [ ] 6. Audio-Reactive Border Pulse
 *Player controls respond to the music*
 
 **What**: Border/outline pulsing in sync with beat or audio peaks
@@ -266,7 +349,7 @@
 
 ---
 
-### - [ ] 6. Visualizer Spectrum Bars Dance
+### - [ ] 7. Visualizer Spectrum Bars Dance
 *More theatrical spectrum visualization*
 
 **What**: Enhanced visualizer with overshoot/bounce on peaks
@@ -290,7 +373,7 @@
 
 ---
 
-### - [ ] 6. VU Meter Volume Slider
+### - [ ] 8. VU Meter Volume Slider
 *Volume control styled like classic audio equipment*
 
 **What**: Volume slider with animated LED/segment display
@@ -317,7 +400,7 @@
 
 ## ✨ Phase 3: Polish & Delight
 
-### - [ ] 7. Pixel Glitch Transitions
+### - [ ] 9. Pixel Glitch Transitions
 *Like corrupted NES graphics or sprite flickering*
 
 **What**: Brief glitch/flicker effects on state changes
@@ -343,7 +426,7 @@
 
 ---
 
-### - [ ] 8. Typewriter/Terminal Text Reveal
+### - [ ] 10. Typewriter/Terminal Text Reveal
 *Song titles appear like they're being typed in a terminal*
 
 **What**: Character-by-character reveal animation
@@ -368,7 +451,7 @@
 
 ---
 
-### - [ ] 9. Sprite-Sheet Button States
+### - [ ] 11. Sprite-Sheet Button States
 *Buttons change like old game UI sprites*
 
 **What**: Button states (normal, hover, active) swap like sprite frames
@@ -394,7 +477,7 @@
 
 ## 🎨 Phase 4: Optional Enhancements
 
-### - [ ] 10. Loading "Tape Deck" Animation
+### - [ ] 12. Loading "Tape Deck" Animation
 *Like waiting for a cassette to load a game*
 
 **What**: Retro loading indicator mimicking spinning reels or chunky progress bar
@@ -420,7 +503,7 @@
 
 ---
 
-### - [ ] 11. Parallax Depth Layers
+### - [ ] 13. Parallax Depth Layers
 *Subtle depth with layered movement*
 
 **What**: Background elements move at different speeds on scroll
@@ -446,7 +529,7 @@
 
 ---
 
-### - [ ] 12. Cursor Trail Effect
+### - [ ] 14. Cursor Trail Effect
 *Retro cursor with pixel trail*
 
 **What**: Custom cursor with trailing pixels
@@ -466,6 +549,58 @@
 - `src/index.css` - Custom cursor styles
 - Optional: Create `CursorTrail.tsx` component for trail effect
 - `src/components/Settings.tsx` - Add toggle option
+
+**Implementation Notes:**
+<!-- Add notes here after implementation -->
+
+---
+
+### - [ ] 15. Slider Knob Pixel Sparks
+*Chunky pixel particles trailing the time slider knob*
+
+**What**: Small pixel sparks fly off the slider knob as it moves during playback
+**Where**: TimeSlider component's slider knob (`.Slider-knob`)
+**When**: During playback as the knob advances
+**Why**: Adds dynamic energy to playback visualization, makes the passage of time feel more exciting
+
+**Implementation Tasks:**
+- [ ] Create particle system that spawns chunky pixel sparks from slider knob position
+- [ ] Particles should fly outward/upward and fade out
+- [ ] Use canvas overlay or CSS positioned elements for particles
+- [ ] Spawn rate tied to playback state (only during playback, not when dragging)
+- [ ] Keep particle count low for performance (3-5 active particles max)
+- [ ] Particles should be 2x2 or 4x4 pixel blocks (chunky aesthetic)
+- [ ] Use `--accent` color (#9BFE38) with slight hue variation
+- [ ] Stepped/chunky movement using CSS `steps()` or discrete position updates
+- [ ] Test with `prefers-reduced-motion` (disable particles entirely)
+- [ ] Ensure doesn't interfere with slider interaction
+
+**Implementation Approaches:**
+
+**Option A: CSS Pseudo-elements (Simplest)**
+- Use `::after` on `.Slider-knob` with animation
+- Multiple stacked animations with different delays
+- Pros: Pure CSS, performant
+- Cons: Limited to fixed animation patterns
+
+**Option B: JavaScript Canvas Overlay (Most Flexible)**
+- Canvas element positioned over slider
+- Spawn particles in `requestAnimationFrame` loop
+- Pros: Full control, dynamic spawning
+- Cons: More complex, needs cleanup
+
+**Option C: React Particle Component (Recommended)**
+- Component that renders positioned `<div>` particles
+- Spawn new particles when knob position changes during playback
+- Animate with CSS transforms and opacity
+- Pros: Integrates with React lifecycle, easier cleanup
+- Cons: More DOM elements
+
+**Files to modify:**
+- `src/components/TimeSlider.tsx` - Integrate particle system
+- `src/components/Slider.tsx` - Expose knob position/movement state
+- `src/index.css` - Particle styling and animations
+- Optional: Create `SliderParticles.tsx` component
 
 **Implementation Notes:**
 <!-- Add notes here after implementation -->
@@ -502,10 +637,10 @@
 
 ## 📝 Implementation Progress
 
-**Current Status**: Planning phase complete
-**Next Steps**: Begin Phase 1 implementations
+**Current Status**: Phase 1 in progress
+**Next Steps**: Continue Phase 1 implementations
 
-**Completed Items**: 0/12
+**Completed Items**: 2/15
 **In Progress**: None
 **Blocked**: None
 
