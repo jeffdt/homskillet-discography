@@ -467,7 +467,7 @@ body,
     position: fixed; /* Fixed instead of absolute to break out of stacking contexts */
     inset: 0;
     filter: url(#crt-noise);
-    opacity: 0.15;
+    opacity: 0.2;
     pointer-events: none;
     z-index: 99999; /* Maximum z-index to cover everything */
     mix-blend-mode: overlay;
@@ -798,11 +798,36 @@ button.box-button.AppFooter-back {
 .Slider-rail {
     width: calc(100% + var(--knobW));
     height: var(--railH);
-    background: none;
+    background-color: #7f7f7f; /* Medium Gray - unplayed portion */
     position: absolute;
     top: calc((var(--charH) - var(--railH)) / 2);
     box-sizing: border-box;
-    border: 1px solid #7f7f7f; /* Medium Gray - darker rail */
+    border: 1px solid #7f7f7f;
+}
+
+.Slider-fill {
+    height: var(--railH);
+    background-color: var(--accent-dark); /* Dark Green - played portion */
+    position: absolute;
+    top: calc((var(--charH) - var(--railH)) / 2);
+    left: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--accent-dark);
+    z-index: 1;
+}
+
+.Slider-chisel {
+    width: 0;
+    height: 0;
+    top: calc((var(--charH) - var(--railH)) / 2); /* Align with rail */
+    position: absolute;
+    /* Create right-pointing chevron/arrowhead using borders - matches rail height */
+    border-top: calc(var(--railH) / 2) solid transparent;
+    border-bottom: calc(var(--railH) / 2) solid transparent;
+    border-left: 4px solid var(--accent); /* Bright Green - carving edge */
+    margin-left: -4px; /* Offset to align with position */
+    box-sizing: border-box;
+    z-index: 2;
 }
 
 .Slider-knob {
@@ -811,17 +836,62 @@ button.box-button.AppFooter-back {
     top: calc((var(--charH) - var(--knobH)) / 2);
     margin: 0;
     border-radius: 0px;
-    background-color: var(--clickable);
+    background-color: transparent; /* Hidden - only used for interaction */
     position: absolute;
     -webkit-box-shadow: none;
     box-shadow: none;
     box-sizing: border-box;
+    z-index: 3;
 }
 .Slider:hover .Slider-knob {
-    background-color: #fefefe; /* White - hover guidance */
+    background-color: transparent;
 }
 .Slider:active .Slider-knob {
-    background-color: var(--accent); /* Accent - electrify on click */
+    background-color: transparent;
+}
+
+/* Slider Particle System */
+.SliderParticles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    overflow: hidden;
+}
+
+.SliderParticle {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background-color: var(--accent);
+    filter: hue-rotate(calc(var(--particle-hue) * 1deg));
+    animation: particle-fly 600ms steps(20) forwards;
+    pointer-events: none;
+}
+
+@keyframes particle-fly {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(
+            calc(var(--particle-vx) * 40px),
+            calc(var(--particle-vy) * 40px + 10px)
+        );
+    }
+    100% {
+        transform: translate(
+            calc(var(--particle-vx) * 80px),
+            calc(var(--particle-vy) * 80px + 40px)
+        );
+    }
+}
+
+/* Disable particles for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .SliderParticle {
+        display: none;
+    }
 }
 
 /* Browse component layout - fixed header with scrollable list */
