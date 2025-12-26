@@ -25,9 +25,10 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 ### Development
 - `npm start` - Start webpack dev server on localhost:3000
 - `npm run server` - Start Node.js API server on port 8080 (DEV mode)
+- `npm test` - Run Jest unit tests
 - `npm run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
 - `npm run build-chip-core` - Build chip-core locally (requires Emscripten setup)
-- `npm run build-catalog` - Build music catalog index from ./catalog folder
+- `npm run build-catalog` - Build music catalog index from public/music/ folder
 - `npm run build-lite` - Build frontend only (skip catalog/chip-core)
 - `npm run build` - Full build (catalog + chip-core + frontend)
 
@@ -38,8 +39,7 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 See `.claude/deployment-plan.md` for the complete deployment strategy.
 
 ### Additional Scripts
-- `npm run fixvgm` - Fix VGM files utility
-- `python scripts/httpserver.py` - Python file server on port 8000 for catalog
+- `npm run fixvgm` - Fix VGM files utility (legacy, being removed)
 
 ## Architecture
 
@@ -65,51 +65,49 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 ```
 
 ### Component Structure
-- **src/components/App.js** - Main application component, manages audio context, player lifecycle, and routing
-- **src/components/** - React UI components (AppHeader, AppFooter, Visualizer, Settings, etc.)
-- **src/players/** - Player implementations inheriting from Player.js base class
-  - GMEPlayer - Game Music Emu formats (NSF, SPC, GBS, etc.)
-  - MIDIPlayer - MIDI/SoundFont playback with FluidLite
-  - XMPPlayer - Module formats (MOD, S3M, IT, XM) via libxmp
-  - VGMPlayer - VGM/VGZ formats via libvgm
-  - N64Player - N64 USF formats
-  - V2MPlayer - Farbrausch V2M format
-  - MDXPlayer - Sharp X68000 MDX format
-- **src/Sequencer.js** - Playlist management, shuffle/repeat modes
+- **src/components/App.tsx** - Main application component, manages audio context, player lifecycle, and routing
+- **src/components/** - React UI components (mostly TypeScript)
+  - Browse.tsx - Directory browser for music catalog
+  - Visualizer.tsx - Audio visualization canvas
+  - PlayerParams.tsx - Player controls (tempo, stereo width, bass boost)
+  - Settings.tsx - User settings panel
+  - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
+- **src/players/** - Audio player implementations (JavaScript)
+  - Player.js - Base class with state machine logic (stopped/playing/paused)
+  - GMEPlayer.js - Game Music Emu player (NSF, NSFE, SPC, GBS, AY)
+  - ChipWorkletProcessor.js - Web Audio worklet for audio processing
+  - Legacy players (being removed): MIDIPlayer, XMPPlayer, VGMPlayer, etc.
+- **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
 - **src/Spectrogram.js** - Audio visualization using constant-Q transform
-- **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module
+- **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
 
 ### Emscripten Build System
-The C/C++ audio engines are compiled separately to WebAssembly:
+The C/C++ audio engines are compiled to WebAssembly:
 - **scripts/build-chip-core.js** - Main build script that links all static libraries
-- **public/chip-core.wasm** - Output WebAssembly module (gitignored)
+- **public/chip-core.wasm** - Output WebAssembly module (committed to repo)
+- **src/chip-core.js** - Generated JavaScript interface (committed to repo)
 
-External dependencies (must be built separately and placed alongside this repo):
-- **../game-music-emu/** - Core GME library for game console formats
-- **../libxmp/** - Extended module player for tracker formats
-- **../fluidlite/** - SoundFont synthesizer for MIDI
+Primary dependency:
+- **game-music-emu/** - Included as git submodule, provides NSF/NSFE player core
 
-Internal subprojects (included in repo):
-- **libvgm/** - Video game music format player
-- **psflib/** - PlayStation sound format library
-- **lazyusf2/** - N64 USF player
-- **libADLMIDI/** - OPL3 MIDI synthesizer
-- **mdxmini/** - X68000 MDX player
-- **farbrausch-v2m/** - V2M synthesizer
+Legacy dependencies (being removed):
+- libxmp, fluidlite, libvgm, psflib, lazyusf2, libADLMIDI, mdxmini, farbrausch-v2m
 
-Each external library requires Emscripten SDK (emsdk) and must be built with `emcmake cmake ..` followed by `emmake make` to produce static .a libraries that get linked in build-chip-core.js.
+Building requires Emscripten SDK 3.1.39. Use Docker (`npm run build-chip-core:docker`) to avoid local Emscripten setup.
 
 ### Configuration
-- **src/config/index.js** - API endpoints, catalog paths, supported formats, SoundFont list
-  - Local dev: localhost:3000 (webpack), localhost:8080 (API), localhost:8000 (catalog)
-  - Uses untracked firebaseConfig.js for authentication (being removed per TODO.md)
+- **src/config/index.ts** - API endpoints, catalog paths, supported formats
+  - Local dev: localhost:3000 (webpack dev server)
+  - Production: Static files served from build/ directory via GitHub Pages
 
 ### Music Catalog
-The catalog system indexes music files:
-- **scripts/build-catalog.js** generates catalog index
-- Expects `./catalog` folder (symlink to local music archive, gitignored)
-- Outputs to `server/catalog.json` and `server/directories.json`
-- Production uses CATALOG_PREFIX URL for remote catalog access
+The catalog system indexes music files for browsing and playback:
+- **scripts/build-catalog.js** - Scans public/music/ and generates catalog indexes
+- **public/catalog.json** - Flat list of all music file paths (for playlist generation)
+- **public/directories.json** - Nested directory structure with metadata (size, type, index)
+- Music files live in **public/music/** organized by album/project folders (committed to repo)
+- Only GME formats are indexed: NSF, NSFE, AY, GBS, SPC
+- Run `npm run build-catalog` after adding/removing music files to regenerate indexes
 
 ### Routing
 React Router handles navigation:
@@ -129,16 +127,25 @@ React Router handles navigation:
 
 ## Development Workflow
 
-1. **Modifying JavaScript/React code**: Just `npm start` and work normally
-2. **Modifying C/C++ audio engines**:
-   - Rebuild affected library (e.g., `cd ../game-music-emu/build && emmake make`)
-   - Run `npm run build-chip-core` to link new WebAssembly
+1. **Modifying JavaScript/React/TypeScript code**:
+   - Run `npm start` for hot-reloading dev server
+   - TypeScript files compile automatically via webpack
+   - Run `npm test` to verify unit tests still pass
+
+2. **Adding music files**:
+   - Add NSF files to `public/music/AlbumName/`
+   - Run `npm run build-catalog` to regenerate indexes
+   - Refresh browser to see new files in catalog
+
+3. **Modifying C/C++ audio engines** (rare):
+   - Rebuild game-music-emu submodule if needed
+   - Run `npm run build-chip-core:docker` (or `npm run build-chip-core` if emsdk installed)
    - Restart `npm start` to load new chip-core.wasm
-3. **Adding new formats**:
-   - Update FORMATS in src/config/index.js
-   - Add player class in src/players/
-   - Register in App.js constructor
-   - Update build-chip-core.js if new C library needed
+
+4. **Writing tests**:
+   - Create test files in `src/__tests__/` with `.test.ts` or `.test.tsx` extension
+   - Use Jest and React Testing Library
+   - Run `npm test` to execute all tests
 
 ## Building chip-core WebAssembly Module
 
@@ -192,21 +199,32 @@ npm run build-chip-core
 ## Important Notes
 
 - **Compiled Artifacts**: `chip-core.js` and `chip-core.wasm` are committed to the repo for convenience. Most contributors won't need to rebuild them.
+- **TypeScript Migration**: The codebase is ~85% TypeScript. Most React components and utilities are migrated. The player layer (Player.js, GMEPlayer.js, Spectrogram.js) remains JavaScript.
 - **Music Files**: All music is stored in `public/music/` and committed to the repo. To add new tracks:
   1. Add NSF files to `public/music/AlbumName/`
   2. Run `npm run build-catalog` to regenerate catalog indexes
   3. Commit both music files and updated catalog JSON files
 - **Sample Rate**: Limited to 48kHz max (MAX_SAMPLE_RATE) due to player compatibility.
+- **Testing**: Jest configured for TypeScript unit tests. Run `npm test` to execute tests. Test files go in `src/__tests__/`.
 - **Deployment**: Configured for GitHub Pages static hosting. See `.claude/deployment-plan.md` for implementation details.
 
-## Current Phase: Stripping Down to Minimum
+## Project Status
 
-See `.claude/TODO.md` for the complete task list. Current focus:
-- ✅ Remove Firebase (authentication, favorites, login UI)
-- ✅ Remove tabbed navigation (Search, Local file uploads)
-- ✅ Remove file drop functionality
-- 🚧 Simplify to game-music-emu only - remove libxmp, FluidLite, and all non-GME format support
+See `.claude/TODO.md` for the complete task list and active work items.
+
+**Phase 1 (Stripping Down)**: Mostly complete
+- ✅ Removed Firebase authentication, favorites, login UI
+- ✅ Removed tabbed navigation (Search, Local file uploads)
+- ✅ Removed file drop functionality
+- ✅ TypeScript migration (~85% complete)
+- 🚧 Simplify to game-music-emu only (remove libxmp, FluidLite, non-GME formats)
 - 🚧 Update branding and styling
+
+**Phase 2 (Custom Features)**: In progress
+- See TODO.md sections for Simplification and Enhancement tasks
+
+**Phase 3 (Deployment)**: Configured but not deployed yet
+- GitHub Pages deployment scripts ready (`npm run deploy`)
 
 ## Target Format Support
 

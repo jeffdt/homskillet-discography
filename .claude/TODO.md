@@ -68,8 +68,6 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable or have the most critical or brittle functionality. I want maximum bang for my buck. Create a plan for this.
 
-**M5**: You said "the project uses webpack 4, so we need an older version of ts-loader". Should we upgrade webpack?
-
 **M6**:: Is src/gm-patch-map.ts used?
 
 ---

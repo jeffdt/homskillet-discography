@@ -681,7 +681,7 @@ class App extends React.Component<AppProps, AppState> {
     const currIdx = this.sequencer?.getCurrIdx();
 
     return (
-        <div className="App">
+        <div className={`App ${!this.state.paused && !this.state.ejected ? 'is-playing' : ''}`}>
           <MessageBox showInfo={this.state.showInfo}
                       infoTexts={this.state.infoTexts}
                       toggleInfo={this.toggleInfo}/>

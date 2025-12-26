@@ -6,8 +6,12 @@
       "Bash(npm uninstall:*)",
       "Bash(brew install:*)",
       "Bash(brew list:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(npm run build-lite:*)",
+      "Skill(gc)",
+      "Bash(cat:*)",
+      "Skill(frontend-design:frontend-design)"
     ]
   }
 }

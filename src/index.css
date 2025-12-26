@@ -308,6 +308,63 @@ body,#root {
     left: 0;
 }
 
+/* CRT Scanline Sweep Effect */
+.App::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 49.7%,
+        rgba(255, 255, 255, 0.05) 49.85%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.05) 50.15%,
+        transparent 50.3%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+    animation: scanline-sweep 12s linear infinite;
+}
+
+/* Second scanline - faster, less frequent */
+.App::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 49.7%,
+        rgba(255, 255, 255, 0.04) 49.85%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.04) 50.15%,
+        transparent 50.3%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+    animation: scanline-sweep 5s linear infinite;
+}
+
+@keyframes scanline-sweep {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .App::before,
+    .App::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
 @media (orientation: portrait), (max-width: 768px) {
     .App {
         padding: 0 var(--charW1);
