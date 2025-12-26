@@ -23,23 +23,23 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 ## Key Commands
 
 ### Development
-- `npm start` - Start webpack dev server on localhost:3000
-- `npm run server` - Start Node.js API server on port 8080 (DEV mode)
-- `npm test` - Run Jest unit tests
-- `npm run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
-- `npm run build-chip-core` - Build chip-core locally (requires Emscripten setup)
-- `npm run build-catalog` - Build music catalog index from public/music/ folder
-- `npm run build-lite` - Build frontend only (skip catalog/chip-core)
-- `npm run build` - Full build (catalog + chip-core + frontend)
+- `bun start` - Start Vite dev server on localhost:3000
+- `bun run server` - Start Node.js API server on port 8080 (DEV mode)
+- `bun test` - Run Vitest unit tests
+- `bun run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
+- `bun run build-chip-core` - Build chip-core locally (requires Emscripten setup)
+- `bun run build-catalog` - Build music catalog index from public/music/ folder
+- `bun run build-lite` - Build frontend only (skip catalog/chip-core)
+- `bun run build` - Full build (catalog + chip-core + frontend)
 
 ### Deployment
-- `npm run deploy` - Full build and deploy to GitHub Pages
-- `npm run deploy-lite` - Build frontend and deploy (skip chip-core rebuild)
+- `bun run deploy` - Full build and deploy to GitHub Pages
+- `bun run deploy-lite` - Build frontend and deploy (skip chip-core rebuild)
 
 See `.claude/deployment-plan.md` for the complete deployment strategy.
 
 ### Additional Scripts
-- `npm run fixvgm` - Fix VGM files utility (legacy, being removed)
+- `bun run fixvgm` - Fix VGM files utility (legacy, being removed)
 
 ## Architecture
 
@@ -93,7 +93,7 @@ Primary dependency:
 Legacy dependencies (being removed):
 - libxmp, fluidlite, libvgm, psflib, lazyusf2, libADLMIDI, mdxmini, farbrausch-v2m
 
-Building requires Emscripten SDK 3.1.39. Use Docker (`npm run build-chip-core:docker`) to avoid local Emscripten setup.
+Building requires Emscripten SDK 3.1.39. Use Docker (`bun run build-chip-core:docker`) to avoid local Emscripten setup.
 
 ### Configuration
 - **src/config/index.ts** - API endpoints, catalog paths, supported formats
@@ -107,7 +107,7 @@ The catalog system indexes music files for browsing and playback:
 - **public/directories.json** - Nested directory structure with metadata (size, type, index)
 - Music files live in **public/music/** organized by album/project folders (committed to repo)
 - Only GME formats are indexed: NSF, NSFE, AY, GBS, SPC
-- Run `npm run build-catalog` after adding/removing music files to regenerate indexes
+- Run `bun run build-catalog` after adding/removing music files to regenerate indexes
 
 ### Routing
 React Router handles navigation:
@@ -128,24 +128,24 @@ React Router handles navigation:
 ## Development Workflow
 
 1. **Modifying JavaScript/React/TypeScript code**:
-   - Run `npm start` for hot-reloading dev server
-   - TypeScript files compile automatically via webpack
-   - Run `npm test` to verify unit tests still pass
+   - Run `bun start` for hot-reloading dev server
+   - TypeScript files compile automatically via Vite
+   - Run `bun test` to verify unit tests still pass
 
 2. **Adding music files**:
    - Add NSF files to `public/music/AlbumName/`
-   - Run `npm run build-catalog` to regenerate indexes
+   - Run `bun run build-catalog` to regenerate indexes
    - Refresh browser to see new files in catalog
 
 3. **Modifying C/C++ audio engines** (rare):
    - Rebuild game-music-emu submodule if needed
-   - Run `npm run build-chip-core:docker` (or `npm run build-chip-core` if emsdk installed)
-   - Restart `npm start` to load new chip-core.wasm
+   - Run `bun run build-chip-core:docker` (or `bun run build-chip-core` if emsdk installed)
+   - Restart `bun start` to load new chip-core.wasm
 
 4. **Writing tests**:
    - Create test files in `src/__tests__/` with `.test.ts` or `.test.tsx` extension
-   - Use Jest and React Testing Library
-   - Run `npm test` to execute all tests
+   - Use Vitest and React Testing Library
+   - Run `bun test` to execute all tests
 
 ## Building chip-core WebAssembly Module
 
@@ -160,10 +160,10 @@ Use Docker as a build tool - no Emscripten setup needed:
 docker compose build chip-core
 
 # Build chip-core (outputs to src/ and public/)
-npm run build-chip-core:docker
+bun run build-chip-core:docker
 
 # Continue with normal development
-npm start
+bun start
 ```
 
 The Docker container builds chip-core and copies the artifacts to your local machine. You continue using your local tools for everything else.
@@ -191,7 +191,7 @@ emmake make -j4
 
 # Build chip-core
 cd ../../homskillet-discography
-npm run build-chip-core
+bun run build-chip-core
 ```
 
 **Note**: macOS Sequoia (24.x) has compatibility issues with Emscripten. Docker is recommended for macOS users.
@@ -202,10 +202,10 @@ npm run build-chip-core
 - **TypeScript Migration**: The codebase is ~85% TypeScript. Most React components and utilities are migrated. The player layer (Player.js, GMEPlayer.js, Spectrogram.js) remains JavaScript.
 - **Music Files**: All music is stored in `public/music/` and committed to the repo. To add new tracks:
   1. Add NSF files to `public/music/AlbumName/`
-  2. Run `npm run build-catalog` to regenerate catalog indexes
+  2. Run `bun run build-catalog` to regenerate catalog indexes
   3. Commit both music files and updated catalog JSON files
 - **Sample Rate**: Limited to 48kHz max (MAX_SAMPLE_RATE) due to player compatibility.
-- **Testing**: Jest configured for TypeScript unit tests. Run `npm test` to execute tests. Test files go in `src/__tests__/`.
+- **Testing**: Vitest configured for TypeScript unit tests. Run `bun test` to execute tests. Test files go in `src/__tests__/`.
 - **Deployment**: Configured for GitHub Pages static hosting. See `.claude/deployment-plan.md` for implementation details.
 
 ## Project Status
@@ -224,7 +224,7 @@ See `.claude/TODO.md` for the complete task list and active work items.
 - See TODO.md sections for Simplification and Enhancement tasks
 
 **Phase 3 (Deployment)**: Configured but not deployed yet
-- GitHub Pages deployment scripts ready (`npm run deploy`)
+- GitHub Pages deployment scripts ready (`bun run deploy`)
 
 ## Target Format Support
 

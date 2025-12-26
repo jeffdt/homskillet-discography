@@ -12,7 +12,8 @@
       "Bash(npm run build-lite:*)",
       "Skill(gc)",
       "Bash(cat:*)",
-      "Skill(frontend-design:frontend-design)"
+      "Skill(frontend-design:frontend-design)",
+      "Bash(grep:*)"
     ]
   }
 }
