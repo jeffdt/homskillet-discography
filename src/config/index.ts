@@ -1,14 +1,13 @@
 // Development vs Production configuration
-// These are replaced at build time by webpack DefinePlugin
-const IS_PRODUCTION: boolean = process.env.NODE_ENV === 'production';
-const PUBLIC_URL: string = process.env.PUBLIC_URL || '';
+const IS_PRODUCTION: boolean = import.meta.env.MODE === 'production';
+const PUBLIC_URL: string = import.meta.env.VITE_PUBLIC_URL || '';
 
 // Use static files for both dev and production (no separate API/file servers needed)
-const API_BASE: string = ''; // Catalog served statically from webpack dev server
+const API_BASE: string = '';
 
 const CATALOG_PREFIX: string = IS_PRODUCTION
-  ? `${PUBLIC_URL}/music` // Static files on GitHub Pages
-  : '/music'; // Static files from webpack dev server
+  ? `${PUBLIC_URL}/music`
+  : '/music';
 
 const MAX_SAMPLE_RATE: number = 48000; // Higher rates are problematic for some players.
 const MAX_VOICES: number = 64;

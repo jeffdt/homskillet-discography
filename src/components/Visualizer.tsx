@@ -70,6 +70,9 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
   }
 
   componentDidMount() {
+    // Only initialize spectrogram if chipCore is loaded
+    if (!this.props.chipCore) return;
+
     this.spectrogram = new Spectrogram(
       this.props.chipCore,
       this.props.audioCtx,
@@ -85,31 +88,49 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
   }
 
   componentDidUpdate(prevProps: VisualizerProps) {
-    this.spectrogram.setPaused(this.state.enabled ? this.props.paused : true);
+    // Initialize spectrogram if chipCore just became available
+    if (!prevProps.chipCore && this.props.chipCore && !this.spectrogram) {
+      this.spectrogram = new Spectrogram(
+        this.props.chipCore,
+        this.props.audioCtx,
+        this.props.sourceNode,
+        this.freqCanvasRef.current!,
+        this.specCanvasRef.current!,
+        this.pianoKeysRef.current!,
+      );
+      this.spectrogram.setMode(this.state.vizMode);
+      this.spectrogram.setWeighting(this.state.weightingMode);
+      this.spectrogram.setSpeed(this.state.speed);
+      this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
+    }
+
+    if (this.spectrogram) {
+      this.spectrogram.setPaused(this.state.enabled ? this.props.paused : true);
+    }
   }
 
   handleModeClick = (e: React.MouseEvent<HTMLInputElement>) => {
     const mode = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({vizMode: mode});
-    this.spectrogram.setMode(mode);
+    if (this.spectrogram) this.spectrogram.setMode(mode);
   };
 
   handleWeightingModeClick = (e: React.MouseEvent<HTMLInputElement>) => {
     const mode = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({weightingMode: mode});
-    this.spectrogram.setWeighting(mode);
+    if (this.spectrogram) this.spectrogram.setWeighting(mode);
   };
 
   handleFFTSizeClick = (e: React.MouseEvent<HTMLInputElement>) => {
     const size = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({fftSize: size});
-    this.spectrogram.setFFTSize(size);
+    if (this.spectrogram) this.spectrogram.setFFTSize(size);
   };
 
   handleSpeedClick = (e: React.MouseEvent<HTMLInputElement>) => {
     const speed = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({ speed: speed });
-    this.spectrogram.setSpeed(speed);
+    if (this.spectrogram) this.spectrogram.setSpeed(speed);
   }
 
   handleToggleVisualizer = (e: React.MouseEvent<HTMLInputElement>) => {
@@ -120,7 +141,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
   handlePaletteClick = (e: React.MouseEvent<HTMLInputElement>) => {
     const paletteIndex = parseInt((e.target as HTMLInputElement).value, 10);
     this.setState({ colorPalette: paletteIndex });
-    this.spectrogram.setColorPalette(COLOR_PALETTES[paletteIndex].colors);
+    if (this.spectrogram) this.spectrogram.setColorPalette(COLOR_PALETTES[paletteIndex].colors);
   };
 
   render() {
