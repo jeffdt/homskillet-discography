@@ -99,7 +99,7 @@ export default class Browse extends React.PureComponent<BrowseProps> {
     }
 
     return (
-      <>
+      <div className="Browse-container">
         <h3 className="Browse-topRow">
           /{browsePath}{' '}
           <button
@@ -109,18 +109,20 @@ export default class Browse extends React.PureComponent<BrowseProps> {
             Randomize
           </button>
         </h3>
-        <VirtualizedList
-          scrollContainerRef={this.props.scrollContainerRef}
-          currContext={this.props.currContext}
-          currIdx={this.props.currIdx}
-          onSongClick={this.props.onSongClick}
-          itemList={listing || []}
-          songContext={playContext}
-          rowRenderer={BrowseRow}
-          listRef={this.props.listRef}
-          isSorted={true}
-        />
-      </>
+        <div className="Browse-list-scroll">
+          <VirtualizedList
+            scrollContainerRef={this.props.scrollContainerRef}
+            currContext={this.props.currContext}
+            currIdx={this.props.currIdx}
+            onSongClick={this.props.onSongClick}
+            itemList={listing || []}
+            songContext={playContext}
+            rowRenderer={BrowseRow}
+            listRef={this.props.listRef}
+            isSorted={true}
+          />
+        </div>
+      </div>
     );
   }
 }

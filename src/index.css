@@ -582,13 +582,11 @@ body,
 
 .App-main-content-area {
     flex-grow: 1;
-    /*display: flex;*/
+    display: flex;
     flex-direction: column;
     min-width: 0;
     padding: var(--charH) var(--charW2) 0 var(--charW2);
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden; /* No scrolling - Browse component handles its own scrolling */
     border-right: 1px solid var(--clickable);
     container-type: size;
 }
@@ -826,6 +824,14 @@ button.box-button.AppFooter-back {
     background-color: var(--accent); /* Accent - electrify on click */
 }
 
+/* Browse component layout - fixed header with scrollable list */
+.Browse-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* Prevent this container from scrolling */
+}
+
 .Browse-topRow {
     display: flex;
     justify-content: space-between;
@@ -835,6 +841,13 @@ button.box-button.AppFooter-back {
     border-bottom: 1px solid var(--clickable);
     margin-bottom: 0;
     flex-shrink: 0; /* Don't shrink when space is tight */
+}
+
+.Browse-list-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .BrowseList-row {

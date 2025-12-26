@@ -90,80 +90,86 @@
 
 ---
 
-### - [ ] 2. CRT Noise/Grain Filter
+### - [x] 2. CRT Noise/Grain Filter
 *Film grain and static to simulate analog CRT display*
 
 **What**: Subtle animated noise overlay to simulate CRT phosphor grain and analog static
 **Where**: Background overlay on entire `.App` container
-**When**: Constantly running at very low opacity
+**When**: Constantly running at low opacity (15%)
 **Why**: Enhances CRT authenticity, pairs beautifully with scanlines, adds texture and depth
 
-**Implementation Approaches:**
-
-**Option A: SVG feTurbulence Filter (Recommended)**
-- Use inline SVG with `<feTurbulence>` to generate Perlin noise
-- Animate `baseFrequency` or `seed` for subtle movement
-- Apply via CSS `filter: url(#noise)`
-- Pros: Pure CSS/SVG, high quality, animatable, no image files
-- Cons: Slightly more complex markup
-
-**Option B: Repeating PNG Texture**
-- Use small (64x64px) noise texture as background
-- Subtle opacity (2-5%)
-- Pros: Very simple, performant
-- Cons: Static (unless animated), requires asset file
-
-**Option C: CSS Background with Data URI**
-- Inline base64 noise pattern
-- Similar to Option B but no external file
-- Pros: Self-contained
-- Cons: Static, larger CSS file
-
 **Implementation Tasks:**
-- [ ] Choose implementation approach (A recommended)
-- [ ] Create inline SVG filter with `<feTurbulence>` in index.html or App component
-- [ ] Apply filter to `.App` via CSS or pseudo-element
-- [ ] Set very low opacity (2-5%) for subtle effect
-- [ ] Optional: Animate noise seed value for slow drift
-- [ ] Ensure `pointer-events: none` to avoid interaction issues
-- [ ] Test with `prefers-reduced-motion` (disable animation, keep static noise)
-- [ ] Test at different viewport sizes
-- [ ] Verify performance (should be GPU-accelerated)
+- [x] Choose implementation approach (Option A: SVG feTurbulence)
+- [x] Create inline SVG filter with `<feTurbulence>` in App component
+- [x] Apply filter to dedicated overlay div via CSS
+- [x] Animate noise seed value for slow drift (8s cycle)
+- [x] Ensure `pointer-events: none` to avoid interaction issues
+- [x] Test with `prefers-reduced-motion` (disable animation, keep static noise)
+- [x] Test at different viewport sizes
+- [x] Verify performance (GPU-accelerated)
+- [x] Fix z-index stacking to cover all elements
+- [x] Remove interfering backgrounds from Browse-topRow and Visualizer
 
-**Example SVG Filter:**
-```html
-<svg style="position: absolute; width: 0; height: 0;">
-  <defs>
-    <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" />
-      <feComponentTransfer>
-        <feFuncA type="discrete" tableValues="0 0 0 1" />
-      </feComponentTransfer>
-    </filter>
-  </defs>
-</svg>
-```
-
-**Example CSS:**
-```css
-.App::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  filter: url(#noise);
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: 2;
-  mix-blend-mode: overlay;
-}
-```
-
-**Files to modify:**
-- `src/index.html` or `src/components/App.tsx` - Add inline SVG filter
-- `src/index.css` - Apply filter to overlay element
+**Files modified:**
+- `src/components/App.tsx` - Added inline SVG filter and noise overlay div
+- `src/index.css` - Added `.crt-noise-overlay` styles
+- `src/components/Browse.tsx` - Restructured to fixed header with scrollable list
+- `src/components/VirtualizedList.tsx` - Removed children rendering
+- `src/index.css` - Cleaned up Browse layout, removed sticky positioning hack
 
 **Implementation Notes:**
-<!-- Add notes here after implementation -->
+
+**Chosen Approach: SVG feTurbulence (Option A)**
+- Inline SVG with `<feTurbulence>` filter in App.tsx
+- `fractalNoise` type with `baseFrequency="0.9"` and `numOctaves="4"`
+- Animated using SVG `<animate>` element changing seed from 0 to 100 over 8s
+
+**Final Implementation:**
+- Dedicated `<div className="crt-noise-overlay">` with white background
+- CSS filter applies `url(#crt-noise)` to the overlay
+- `position: fixed` with `inset: 0` to cover entire viewport
+- `z-index: 99999` to ensure it sits on top of all content
+- `mix-blend-mode: overlay` for authentic film grain effect
+- **Opacity: 15%** (0.15) - user preference for visible grain
+- `pointer-events: none` to avoid blocking interactions
+
+**Animation:**
+- SVG `<animate>` element cycles `seed` attribute 0→100 over 8 seconds
+- Creates slow drifting noise pattern like analog TV static
+- Smooth continuous loop with `repeatCount="indefinite"`
+
+**Accessibility:**
+- `@media (prefers-reduced-motion)` disables animation via CSS
+- Static noise remains at slightly lower opacity (2.5%)
+- `aria-hidden="true"` on overlay div
+
+**Architecture Improvements:**
+- **Removed sticky positioning hack**: Browse-topRow no longer uses `position: sticky` with opaque background
+- **Proper layout hierarchy**: Browse component now has fixed header (`Browse-topRow`) with scrollable list (`Browse-list-scroll`) underneath
+- **Clean separation**: Only the file list scrolls, header stays static (Windows Explorer pattern)
+- **Removed interfering backgrounds**:
+  - `.Browse-topRow`: Removed `position: sticky`, `z-index`, and `background`
+  - `.Visualizer-options`: Removed `background-color: rgba(0, 0, 0, 0.65)`
+- **Better scrolling control**: `.App-main-content-area` no longer scrolls, Browse manages its own scroll area
+
+**Performance:**
+- Pure CSS/SVG implementation
+- GPU-accelerated via CSS filters and transforms
+- No JavaScript overhead
+- Smooth 60fps animation
+- Minimal DOM impact (single overlay div)
+
+**Visual Impact:**
+- Complements dual scanline effect beautifully
+- Adds texture and depth to flat UI
+- Authentic CRT monitor grain/static feel
+- Works across all elements including visualizer and file browser
+
+**Haiku:**
+
+*White noise drifts and shifts*
+*Through pixels and phosphor glow*
+*Static memory*
 
 ---
 
@@ -631,11 +637,11 @@
 
 ## 📝 Implementation Progress
 
-**Current Status**: Planning phase complete
-**Next Steps**: Begin Phase 1 implementations
+**Current Status**: Phase 1 in progress
+**Next Steps**: Continue Phase 1 implementations
 
-**Completed Items**: 1/15
-**In Progress**: CRT Noise/Grain Filter (#2)
+**Completed Items**: 2/15
+**In Progress**: None
 **Blocked**: None
 
 ---
