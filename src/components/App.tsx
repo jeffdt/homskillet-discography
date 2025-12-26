@@ -697,6 +697,33 @@ class App extends React.Component<AppProps, AppState> {
 
     return (
       <div className={`App ${!this.state.paused && !this.state.ejected ? 'is-playing' : ''}`}>
+        {/* SVG filter definition for CRT noise effect */}
+        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+          <defs>
+            <filter id="crt-noise">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.9"
+                numOctaves="4"
+                result="noise"
+                seed="0"
+              >
+                <animate
+                  attributeName="seed"
+                  from="0"
+                  to="100"
+                  dur="8s"
+                  repeatCount="indefinite"
+                />
+              </feTurbulence>
+              <feComponentTransfer in="noise" result="opacity">
+                <feFuncA type="discrete" tableValues="0 0 0 1" />
+              </feComponentTransfer>
+            </filter>
+          </defs>
+        </svg>
+        {/* CRT noise overlay */}
+        <div className="crt-noise-overlay" aria-hidden="true" />
         <MessageBox showInfo={this.state.showInfo}
           infoTexts={this.state.infoTexts}
           toggleInfo={this.toggleInfo} />
