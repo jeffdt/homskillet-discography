@@ -2,9 +2,9 @@ import React, { Fragment } from 'react';
 import autoBindReact from 'auto-bind/react';
 import VirtualizedList from './VirtualizedList';
 import DirectoryLink from './DirectoryLink';
-import bytes from 'bytes';
 import trimEnd from 'lodash/trimEnd';
 import { BrowseProps } from '../types/app';
+import { formatFileSize } from '../util';
 
 
 export default class Browse extends React.PureComponent<BrowseProps> {
@@ -73,7 +73,7 @@ export default class Browse extends React.PureComponent<BrowseProps> {
               {item.mtime}
             </div>
             <div className="BrowseList-colSize" title={`Directory size is ${item.size} bytes (recursive)`}>
-              {item.size != null && bytes(item.size, { unitSeparator: ' ' })}
+              {item.size != null && formatFileSize(item.size)}
             </div>
           </>
         );
@@ -91,7 +91,7 @@ export default class Browse extends React.PureComponent<BrowseProps> {
               {item.mtime}
             </div>
             <div className="BrowseList-colSize">
-              {bytes(item.size, { unitSeparator: ' ' })}
+              {formatFileSize(item.size)}
             </div>
           </>
         );
