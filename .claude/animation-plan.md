@@ -555,7 +555,7 @@
 
 ---
 
-### - [ ] 15. Slider Knob Pixel Sparks
+### - [x] 15. Slider Knob Pixel Sparks
 *Chunky pixel particles trailing the time slider knob*
 
 **What**: Small pixel sparks fly off the slider knob as it moves during playback
@@ -564,46 +564,102 @@
 **Why**: Adds dynamic energy to playback visualization, makes the passage of time feel more exciting
 
 **Implementation Tasks:**
-- [ ] Create particle system that spawns chunky pixel sparks from slider knob position
-- [ ] Particles should fly outward/upward and fade out
-- [ ] Use canvas overlay or CSS positioned elements for particles
-- [ ] Spawn rate tied to playback state (only during playback, not when dragging)
-- [ ] Keep particle count low for performance (3-5 active particles max)
-- [ ] Particles should be 2x2 or 4x4 pixel blocks (chunky aesthetic)
-- [ ] Use `--accent` color (#9BFE38) with slight hue variation
-- [ ] Stepped/chunky movement using CSS `steps()` or discrete position updates
-- [ ] Test with `prefers-reduced-motion` (disable particles entirely)
-- [ ] Ensure doesn't interfere with slider interaction
+- [x] Create particle system that spawns chunky pixel sparks from slider knob position
+- [x] Particles should fly outward/upward and fade out
+- [x] Use canvas overlay or CSS positioned elements for particles
+- [x] Spawn rate tied to playback state (only during playback, not when dragging)
+- [x] Keep particle count low for performance (3-5 active particles max)
+- [x] Particles should be 2x2 or 4x4 pixel blocks (chunky aesthetic)
+- [x] Use `--accent` color (#9BFE38) with slight hue variation
+- [x] Stepped/chunky movement using CSS `steps()` or discrete position updates
+- [x] Test with `prefers-reduced-motion` (disable particles entirely)
+- [x] Ensure doesn't interfere with slider interaction
 
-**Implementation Approaches:**
-
-**Option A: CSS Pseudo-elements (Simplest)**
-- Use `::after` on `.Slider-knob` with animation
-- Multiple stacked animations with different delays
-- Pros: Pure CSS, performant
-- Cons: Limited to fixed animation patterns
-
-**Option B: JavaScript Canvas Overlay (Most Flexible)**
-- Canvas element positioned over slider
-- Spawn particles in `requestAnimationFrame` loop
-- Pros: Full control, dynamic spawning
-- Cons: More complex, needs cleanup
-
-**Option C: React Particle Component (Recommended)**
-- Component that renders positioned `<div>` particles
-- Spawn new particles when knob position changes during playback
-- Animate with CSS transforms and opacity
-- Pros: Integrates with React lifecycle, easier cleanup
-- Cons: More DOM elements
-
-**Files to modify:**
-- `src/components/TimeSlider.tsx` - Integrate particle system
-- `src/components/Slider.tsx` - Expose knob position/movement state
-- `src/index.css` - Particle styling and animations
-- Optional: Create `SliderParticles.tsx` component
+**Files modified:**
+- `src/components/SliderParticles.tsx` - Created new particle component
+- `src/components/Slider.tsx` - Integrated particle system, added progress bar visualization
+- `src/components/TimeSlider.tsx` - Pass shouldSpawnParticles prop
+- `src/index.css` - Added particle animations and redesigned slider appearance
 
 **Implementation Notes:**
-<!-- Add notes here after implementation -->
+
+**Chosen Approach: React Particle Component (Option C)**
+- Created dedicated `SliderParticles.tsx` component
+- Renders positioned `<div>` elements for each particle
+- Integrates cleanly with React lifecycle for spawn/cleanup
+
+**Particle System Architecture:**
+- **Dual independent spawners**: 2 separate spawners run simultaneously with random intervals
+- **Random spawn timing**: Each spawner waits 40-120ms (randomized) between spawns
+- **Organic clustering**: Dual spawners create natural bursts when they fire simultaneously
+- **Max particles**: 15 active particles at once
+- **Particle lifetime**: 600ms before removal
+
+**Particle Physics:**
+- **Velocity randomization**:
+  - Horizontal (vx): -0.4 to -1.5 (leftward, wide speed variation)
+  - Vertical (vy): -1.1 to 0.9 (slight upward bias to compensate for gravity)
+- **Gravity simulation**: CSS keyframes add progressive downward acceleration
+  - Midpoint (50%): +10px downward
+  - Endpoint (100%): +40px downward
+- **Travel distance**: 80px horizontal, with parabolic arc
+- **Direction**: Particles fly LEFT (backward) like sparks being carved off as slider advances right
+
+**Visual Design:**
+- **Size**: 2x2px blocks (retro chunky aesthetic)
+- **Color**: Bright green (`--accent` #9BFE38) with 0-30° hue variation
+- **Animation**: steps(20) for high frame rate chunky motion (600ms duration)
+- **No fade**: Particles stay full opacity then disappear instantly (retro feel)
+- **Accessibility**: `@media (prefers-reduced-motion)` disables particles entirely
+
+**Slider Redesign (Bonus Enhancement):**
+The slider was completely redesigned during this implementation to enhance the "carving" metaphor:
+
+- **Progress Bar Style**: Replaced vertical knob marker with horizontal fill
+  - Gray rail (`#7F7F7F`): Unplayed portion
+  - Dark green fill (`--accent-dark` #66CB01): Played portion
+  - Bright green arrowhead (`--accent` #9BFE38): Leading edge "chisel"
+
+- **Arrowhead Design**:
+  - Right-pointing chevron created with CSS borders
+  - Size: 4px wide × 3px tall (matches rail height)
+  - Positioned at leading edge of progress bar
+  - Sparks spawn from center of arrowhead
+
+- **Visual Metaphor**: Dark green bar "carves" into gray unplayed area, with bright arrowhead at the cutting edge shooting sparks backward
+
+**Performance:**
+- Pure CSS animations (GPU-accelerated transforms)
+- Minimal DOM impact (max 15 particle divs)
+- No JavaScript animation loops (CSS handles motion)
+- Efficient cleanup via setTimeout
+- No interference with slider interaction (transparent overlay, pointer-events: none)
+
+**Spawn Control:**
+- Only spawns during playback (paused = no particles)
+- Stops spawning when user drags slider
+- Spawners start/stop cleanly on playback state changes
+- Proper cleanup on component unmount
+
+**Accessibility:**
+- `@media (prefers-reduced-motion: reduce)` completely hides particles
+- `aria-hidden="true"` on particle overlay
+- `pointer-events: none` prevents interaction blocking
+- Keyboard navigation unaffected
+
+**Design Evolution:**
+- Initial design had particles flying upward/outward - changed to leftward for "carving" effect
+- Originally used opacity fade - removed for instant disappearance (more retro)
+- Started with fixed spawn intervals - switched to random dual-spawner system for organic feel
+- Added gravity after initial implementation for realistic parabolic arcs
+- Vertical velocity adjusted multiple times to balance gravity and achieve centered distribution
+- Arrowhead iterated from vertical bar → wide chevron → narrow chevron matching rail height
+
+**Haiku:**
+
+*Green sparks fly backward*
+*As the chisel carves through gray*
+*Time made visible*
 
 ---
 
