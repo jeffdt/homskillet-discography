@@ -169,7 +169,6 @@ function VirtualizedList(props: VirtualizedListProps) {
       >
         {({ height, registerChild, onChildScroll, scrollTop }) => (
           <>
-            {props.children}
             <div ref={registerChild}>
               <ArrowKeyStepper
                 ref={arrowKeyStepperRef}

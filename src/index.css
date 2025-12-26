@@ -829,16 +829,12 @@ button.box-button.AppFooter-back {
 .Browse-topRow {
     display: flex;
     justify-content: space-between;
-    margin-bottom: var(--charH);
     gap: var(--charW2);
     min-height: var(--buttonHeight);
-    position: sticky;
-    top: 0;
-    background: var(--background);
-    z-index: 10;
     padding-bottom: var(--charH);
     border-bottom: 1px solid var(--clickable);
     margin-bottom: 0;
+    flex-shrink: 0; /* Don't shrink when space is tight */
 }
 
 .BrowseList-row {
