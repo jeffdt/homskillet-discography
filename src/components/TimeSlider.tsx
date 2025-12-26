@@ -95,7 +95,9 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
         <Slider
           pos={this.getSongPos()}
           onDrag={this.handlePositionDrag}
-          onChange={this.handlePositionDrop}/>
+          onChange={this.handlePositionDrop}
+          shouldSpawnParticles={!this.props.paused}
+        />
         <div className='TimeSlider-labels'>
           <div>{this.getTimeLabel()}</div>
           <div>{this.getTime(this.props.currentSongDurationMs)}</div>

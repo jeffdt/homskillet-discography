@@ -1,10 +1,12 @@
 import React, { PureComponent } from 'react';
 import autoBindReact from 'auto-bind/react';
+import SliderParticles from './SliderParticles';
 
 interface SliderProps {
   pos: number;
   onDrag: (pos: number) => void;
   onChange: (pos: number) => void;
+  shouldSpawnParticles?: boolean; // Whether to spawn particles (during playback)
 }
 
 interface SliderState {
@@ -15,6 +17,7 @@ interface SliderState {
 export default class Slider extends PureComponent<SliderProps, SliderState> {
   private node: React.RefObject<HTMLDivElement>;
   private knob: React.RefObject<HTMLDivElement>;
+  private chisel: React.RefObject<HTMLDivElement>;
 
   constructor(props: SliderProps) {
     super(props);
@@ -22,6 +25,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
 
     this.node = React.createRef();
     this.knob = React.createRef();
+    this.chisel = React.createRef();
     this.state = {
       dragging: false,
       draggedPos: null,
@@ -65,15 +69,41 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   }
 
   render(): React.ReactNode {
-    const pos = Math.max(Math.min((this.state.dragging ? this.state.draggedPos ?? this.props.pos : this.props.pos), 1), 0) * 100 + '%';
+    const posValue = Math.max(Math.min((this.state.dragging ? this.state.draggedPos ?? this.props.pos : this.props.pos), 1), 0);
+    const pos = posValue * 100 + '%';
+
+    // Calculate chisel position in pixels for particles
+    const node = this.node.current;
+    const chisel = this.chisel.current;
+    let knobX = 0;
+    let knobY = 0;
+
+    if (node && chisel) {
+      // Chisel position relative to viewport
+      const chiselRect = chisel.getBoundingClientRect();
+      knobX = chiselRect.left + chiselRect.width / 2; // Center of chisel
+      knobY = chiselRect.top + chiselRect.height / 2; // Center of chisel
+    }
+
+    const shouldSpawn = this.props.shouldSpawnParticles && !this.state.dragging;
+
     return (
       <div ref={this.node}
            className="Slider"
            onMouseDown={this.onMouseDown}>
         <div className="Slider-rail"/>
+        <div className="Slider-fill" style={{width: pos}}/>
+        <div className="Slider-chisel"
+             ref={this.chisel}
+             style={{left: pos}}/>
         <div className="Slider-knob"
              ref={this.knob}
              style={{left: pos}}/>
+        <SliderParticles
+          knobX={knobX}
+          knobY={knobY}
+          shouldSpawn={shouldSpawn}
+        />
       </div>
     );
   }
