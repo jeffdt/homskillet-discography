@@ -187,16 +187,6 @@ select option {
 .Song-now-playing .FavoriteButton:not(.isFavorite) {
     color: var(--background);
 }
-@media screen and (max-width: 800px) {
-    .BrowseList-colMtime {
-        display: none;
-    }
-}
-@container (max-width: 800px) {
-    .BrowseList-colMtime {
-        display: none;
-    }
-}
 button:active {
     background: var(--active);
 }
@@ -1015,10 +1005,15 @@ button.box-button.AppFooter-back {
         line-height: 1.3;
     }
 
-    .BrowseList-colDir,
+    /* Hide metadata on mobile - show only names and <DIR> indicator */
     .BrowseList-colSize,
     .BrowseList-colCount {
-        font-size: 16px;
+        display: none;
+    }
+
+    .BrowseList-colDir {
+        font-size: 14px;
+        margin-left: var(--charW1);
     }
 }
 /* Selected */
@@ -1077,10 +1072,7 @@ button.box-button.AppFooter-back {
     text-align: right;
 }
 .BrowseList-colMtime {
-    text-align: right;
-    text-transform: uppercase;
-    white-space: nowrap;
-    min-width: calc(var(--charW1) * 12);
+    display: none; /* Hide dates on all screens - unnecessary clutter */
 }
 .BrowseList-colSize {
     text-align: right;
