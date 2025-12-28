@@ -7,7 +7,7 @@
       "Bash(brew install:*)",
       "Bash(brew list:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)",
+      "Bash(git push:*)",
       "Bash(ls:*)",
       "Bash(npm run build-lite:*)",
       "Skill(gc)",
@@ -15,7 +15,9 @@
       "Skill(frontend-design:frontend-design)",
       "Bash(grep:*)",
       "Bash(bun run build-lite:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(bun add:*)",
+      "Bash(bunx husky init)"
     ]
   }
 }

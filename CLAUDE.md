@@ -23,6 +23,7 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 ## Key Commands
 
 ### Development
+
 - `bun start` - Start Vite dev server on localhost:3000
 - `bun run server` - Start Node.js API server on port 8080 (DEV mode)
 - `bun test` - Run Vitest unit tests
@@ -33,18 +34,22 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 - `bun run build` - Full build (catalog + chip-core + frontend)
 
 ### Deployment
+
 - `bun run deploy` - Full build and deploy to GitHub Pages
 - `bun run deploy-lite` - Build frontend and deploy (skip chip-core rebuild)
 
 See `.claude/deployment-plan.md` for the complete deployment strategy.
 
 ### Additional Scripts
+
 - `bun run fixvgm` - Fix VGM files utility (legacy, being removed)
 
 ## Architecture
 
 ### Audio Pipeline
+
 The application uses Web Audio API with this graph structure:
+
 ```
 ┌────────────┐      ┌────────────┐      ┌─────────────┐
 │ playerNode ├─────>│  gainNode  ├─────>│ destination │
@@ -52,7 +57,9 @@ The application uses Web Audio API with this graph structure:
 ```
 
 ### Player State Machine
+
 Players follow a state machine pattern with 3 states and 5 transitions:
+
 ```
                         ╭– (seek) –╮
                         ^          v
@@ -65,6 +72,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 ```
 
 ### Component Structure
+
 - **src/components/App.tsx** - Main application component, manages audio context, player lifecycle, and routing
 - **src/components/** - React UI components (mostly TypeScript)
   - Browse.tsx - Directory browser for music catalog
@@ -82,26 +90,33 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
 
 ### Emscripten Build System
+
 The C/C++ audio engines are compiled to WebAssembly:
+
 - **scripts/build-chip-core.js** - Main build script that links all static libraries
 - **public/chip-core.wasm** - Output WebAssembly module (committed to repo)
 - **src/chip-core.js** - Generated JavaScript interface (committed to repo)
 
 Primary dependency:
+
 - **game-music-emu/** - Included as git submodule, provides NSF/NSFE player core
 
 Legacy dependencies (being removed):
+
 - libxmp, fluidlite, libvgm, psflib, lazyusf2, libADLMIDI, mdxmini, farbrausch-v2m
 
 Building requires Emscripten SDK 3.1.39. Use Docker (`bun run build-chip-core:docker`) to avoid local Emscripten setup.
 
 ### Configuration
+
 - **src/config/index.ts** - API endpoints, catalog paths, supported formats
   - Local dev: localhost:3000 (webpack dev server)
   - Production: Static files served from build/ directory via GitHub Pages
 
 ### Music Catalog
+
 The catalog system indexes music files for browsing and playback:
+
 - **scripts/build-catalog.js** - Scans public/music/ and generates catalog indexes
 - **public/catalog.json** - Flat list of all music file paths (for playlist generation)
 - **public/directories.json** - Nested directory structure with metadata (size, type, index)
@@ -110,7 +125,9 @@ The catalog system indexes music files for browsing and playback:
 - Run `bun run build-catalog` after adding/removing music files to regenerate indexes
 
 ### Routing
+
 React Router handles navigation:
+
 - `/*` - Browse catalog (simplified single-route structure)
 - Query params: `?play=path` to auto-play a file
 
@@ -146,6 +163,65 @@ React Router handles navigation:
    - Create test files in `src/__tests__/` with `.test.ts` or `.test.tsx` extension
    - Use Vitest and React Testing Library
    - Run `bun test` to execute all tests
+
+## Design & Styling Guidelines
+
+### Color Palette
+
+The project uses a custom "Metallic Wing Green" color palette defined in `src/index.css` (lines 14-34). **Always use CSS variables from this palette for all UI elements.**
+
+#### Available Color Variables:
+
+**Accent Colors:**
+
+- `--accent` (#9bfe38) - Light green, main accent (playing songs, hover feedback, title)
+- `--accent-dark` (#66cb01) - Dark green, darker accent for active/pressed states
+
+**Functional Colors:**
+
+- `--clickable` (#c3c3c3) - Light gray for interactive elements
+- `--active` (var(--accent-dark)) - Active/pressed states
+- `--button` (#202020) - Button backgrounds
+- `--selected` (var(--accent)) - Selected items
+- `--focus` (#202020) - Focus indication
+- `--background` (#101010) - Main background
+- `--shadow` (#000000) - Shadows
+
+**Grayscale Neutrals:**
+
+- `--neutral0` (#101010) - Black
+- `--neutral1` (#202020) - Dark gray
+- `--neutral2` (#7f7f7f) - Medium gray (body text)
+- `--neutral3` (#c3c3c3) - Light gray (emphasized text)
+- `--neutral4` (#fefefe) - Metallic Wing White (headings, high contrast)
+
+#### Important Rules:
+
+1. **Always use CSS variables first** - Use `var(--neutral4)` instead of hardcoded colors like `#fefefe` or `rgba(255, 255, 255, 1)`
+2. **Never use pure white** - Use `var(--neutral4)` instead of `#ffffff` or `rgb(255, 255, 255)`
+3. **If unclear which color to use** - Stop and use the `AskUserQuestion` tool to ask which palette variable should be used
+4. **If user requests a color not in the palette** - Stop and use the `AskUserQuestion` tool to confirm whether to:
+   - Add a new variable to the palette
+   - Use the requested color directly (for special cases like gradients)
+   - Map to an existing palette color
+
+#### Examples:
+
+✅ **Good:**
+
+```css
+border: 1px solid var(--neutral4);
+color: var(--accent);
+background: var(--background);
+```
+
+❌ **Bad:**
+
+```css
+border: 1px solid #fefefe;
+color: #9bfe38;
+background: rgb(16, 16, 16);
+```
 
 ## Building chip-core WebAssembly Module
 
@@ -213,6 +289,7 @@ bun run build-chip-core
 See `.claude/TODO.md` for the complete task list and active work items.
 
 **Phase 1 (Stripping Down)**: Mostly complete
+
 - ✅ Removed Firebase authentication, favorites, login UI
 - ✅ Removed tabbed navigation (Search, Local file uploads)
 - ✅ Removed file drop functionality
@@ -221,9 +298,11 @@ See `.claude/TODO.md` for the complete task list and active work items.
 - 🚧 Update branding and styling
 
 **Phase 2 (Custom Features)**: In progress
+
 - See TODO.md sections for Simplification and Enhancement tasks
 
 **Phase 3 (Deployment)**: Configured but not deployed yet
+
 - GitHub Pages deployment scripts ready (`bun run deploy`)
 
 ## Target Format Support
