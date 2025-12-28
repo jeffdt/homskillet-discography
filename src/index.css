@@ -671,7 +671,7 @@ body,
     .SongDisplay {
         font-size: 18px;
         line-height: 1.4;
-        padding: var(--charH) var(--charW2);
+        padding: var(--charW2) var(--charW2); /* Reduce from 44px to 24px vertical padding */
     }
 }
 
@@ -690,8 +690,10 @@ body,
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter {
         height: auto;
-        min-height: unset; /* Let footer size naturally based on controls */
+        min-height: 140px; /* Ensure footer fits controls */
+        max-height: 150px; /* Tighter cap to fit in viewport */
         flex-direction: column; /* Stack children vertically */
+        overflow: hidden; /* Prevent controls from overflowing below viewport */
     }
 
     .AppFooter-attribution {
@@ -701,7 +703,7 @@ body,
     .AppFooter-main {
         order: 0; /* Controls first */
         flex-shrink: 0; /* Don't shrink controls */
-        padding: var(--charW2) var(--charW2); /* Reduce vertical padding */
+        padding: var(--charW1) var(--charW2); /* Compact vertical padding */
         min-height: unset; /* Remove min-height constraint */
     }
 
@@ -767,8 +769,15 @@ button.box-button.AppFooter-back {
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter-main {
-        overflow: visible; /* Allow content to be visible on mobile */
-        padding: calc(var(--charH) / 2) var(--charW1);
+        overflow: hidden; /* Prevent content overflow */
+        padding: 8px var(--charW2); /* Minimal vertical padding */
+        min-height: unset; /* Remove min-height constraint to prevent black gaps */
+        width: 100%; /* Ensure full width on mobile */
+        flex-basis: auto; /* Override flex-basis: 0 */
+        container-type: normal; /* Disable container query on mobile */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly; /* Distribute space evenly with minimal gaps */
     }
 }
 
@@ -802,13 +811,14 @@ button.box-button.AppFooter-back {
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter-controls-row {
-        margin: calc(var(--charW2) / 2) 0; /* Reduce from charH (44px) to 12px for compactness */
+        margin: 0; /* No margin for ultra-compact layout */
         gap: var(--charW1);
     }
 
     .AppFooter-controls-row .box-button {
+        height: 44px !important; /* Override desktop height for compact layout */
         min-height: 44px;
-        padding: var(--charW1) var(--charW2);
+        padding: 0 var(--charW2); /* Minimal vertical padding */
     }
 }
 
@@ -960,18 +970,23 @@ button.box-button.AppFooter-back {
     .Browse-topRow {
         flex-wrap: wrap;
         gap: var(--charW1);
+        padding-bottom: var(--charW2); /* Reduce from charH (44px) to 24px */
     }
 
     .Browse-topRow h3 {
-        font-size: 18px;
-        line-height: 1.3;
+        font-size: 16px; /* Slightly smaller */
+        line-height: 1.2;
         word-break: break-word;
         flex-basis: 100%;
+        margin: 0; /* Remove margin */
     }
 
     .Browse-topRow button {
-        min-height: var(--buttonHeight);
-        font-size: 18px;
+        min-height: 32px; /* Much smaller button */
+        height: 32px;
+        font-size: 11px; /* Tiny font for compact button */
+        padding: 4px 12px; /* Minimal padding */
+        white-space: nowrap;
     }
 }
 
@@ -1394,12 +1409,13 @@ button.IconButton {
 
 @media (orientation: portrait), (max-width: 768px) {
     .TimeSlider {
-        margin: calc(var(--charW2) / 2) 0; /* Reduce from 44px to 12px for compactness */
+        margin: 0; /* No margin for ultra-compact layout */
     }
 
     .TimeSlider-labels,
     .VolumeSlider-labels {
-        font-size: 16px;
+        font-size: 12px; /* Smaller for compactness */
+        line-height: 1.2;
     }
 }
 
