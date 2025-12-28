@@ -95,6 +95,16 @@ Legacy dependencies (being removed):
 
 Building requires Emscripten SDK 3.1.39. Use Docker (`bun run build-chip-core:docker`) to avoid local Emscripten setup.
 
+### Stub Mode (Development Without WebAssembly)
+The application includes a **stub mode** that allows UI development without chip-core:
+- **src/chip-core-stub.js** - Mock implementation of the game-music-emu API
+- **src/stub-data/mock-directories.ts** - Mock catalog data for development
+- **Automatic fallback** - If chip-core.wasm fails to load, the app automatically uses the stub
+- **Use cases**: UI/UX work, remote development, testing without audio dependencies
+- See `.claude/stub-mode.md` for detailed documentation
+
+To enable stub mode, simply remove or rename `public/chip-core.wasm`. The app will detect the missing WASM and use mock implementations. All UI features work normally, but no actual audio is played.
+
 ### Configuration
 - **src/config/index.ts** - API endpoints, catalog paths, supported formats
   - Local dev: localhost:3000 (webpack dev server)
