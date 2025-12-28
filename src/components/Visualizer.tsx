@@ -54,7 +54,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       this.props.sourceNode,
       this.freqCanvasRef.current!,
       this.specCanvasRef.current!,
-      null,
+      null
     );
     // Hardcode best quality settings
     this.spectrogram.setMode(2); // Constant Q - best quality
@@ -79,7 +79,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
         this.props.sourceNode,
         this.freqCanvasRef.current!,
         this.specCanvasRef.current!,
-        null,
+        null
       );
       // Hardcode best quality settings
       this.spectrogram.setMode(2); // Constant Q
@@ -100,7 +100,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
 
   handleToggleVisualizer = (e: React.MouseEvent<HTMLInputElement>) => {
     const enabled = (e.target as HTMLInputElement).value === 'true';
-    this.setState({enabled: enabled});
+    this.setState({ enabled: enabled });
   };
 
   handleThemeClick = (themeIndex: number) => {
@@ -118,7 +118,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       // Enter fullscreen
       const container = this.specCanvasRef.current?.parentElement;
       if (container) {
-        container.requestFullscreen().catch(err => {
+        container.requestFullscreen().catch((err) => {
           console.error('Error entering fullscreen:', err);
         });
       }
@@ -139,43 +139,56 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       boxSizing: 'border-box',
     };
     return (
-      <div className='Visualizer'>
-        <h3 className='Visualizer-toggle'>
+      <div className="Visualizer">
+        <h3 className="Visualizer-toggle">
           Visualizer{' '}
-          <input onClick={this.handleToggleVisualizer}
-                 id='vis-on'
-                 type='radio'
-                 value={'true'}
-                 defaultChecked={this.state.enabled === true}
-                 name='visualizer-enabled'/>
-          <label htmlFor='vis-on' className='inline'>On</label>
-          <input onClick={this.handleToggleVisualizer}
-                 id='vis-off'
-                 type='radio'
-                 value={'false'}
-                 defaultChecked={this.state.enabled === false}
-                 name='visualizer-enabled'/>
-          <label htmlFor='vis-off' className='inline'>Off</label>
-
+          <input
+            onClick={this.handleToggleVisualizer}
+            id="vis-on"
+            type="radio"
+            value={'true'}
+            defaultChecked={this.state.enabled === true}
+            name="visualizer-enabled"
+          />
+          <label htmlFor="vis-on" className="inline">
+            On
+          </label>
+          <input
+            onClick={this.handleToggleVisualizer}
+            id="vis-off"
+            type="radio"
+            value={'false'}
+            defaultChecked={this.state.enabled === false}
+            name="visualizer-enabled"
+          />
+          <label htmlFor="vis-off" className="inline">
+            Off
+          </label>
           <button
-            className='Visualizer-fullscreen-btn'
+            className="Visualizer-fullscreen-btn"
             onClick={this.handleFullscreenToggle}
             title={this.state.isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           >
             {this.state.isFullscreen ? '⊗' : '⛶'}
           </button>
         </h3>
-        <div className='Visualizer-options' style={enabledStyle}>
+        <div className="Visualizer-options" style={enabledStyle}>
           <div className="Visualizer-themes">
             <h4 onClick={this.handleToggleThemes}>
-              <span className={`Visualizer-themes-arrow ${
-                this.props.persistedSettings.visualizerThemesExpanded ? 'expanded' : ''
-              }`}>▸</span>
+              <span
+                className={`Visualizer-themes-arrow ${
+                  this.props.persistedSettings.visualizerThemesExpanded ? 'expanded' : ''
+                }`}
+              >
+                ▸
+              </span>
               Theme
             </h4>
-            <div className={`Visualizer-themes-content ${
-              this.props.persistedSettings.visualizerThemesExpanded ? 'expanded' : ''
-            }`}>
+            <div
+              className={`Visualizer-themes-content ${
+                this.props.persistedSettings.visualizerThemesExpanded ? 'expanded' : ''
+              }`}
+            >
               <div className="Visualizer-theme-grid">
                 {COLOR_PALETTES.map((palette, i) => (
                   <div
@@ -183,12 +196,15 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
                     className={`Visualizer-theme-card ${this.state.colorPalette === i ? 'selected' : ''}`}
                     onClick={() => this.handleThemeClick(i)}
                   >
-                    <div
-                      className="Visualizer-theme-swatch"
-                      style={{
-                        background: `linear-gradient(to right, ${palette.colors.join(', ')})`
-                      }}
-                    />
+                    <div className="Visualizer-theme-swatch">
+                      {palette.colors.map((color, colorIndex) => (
+                        <div
+                          key={`color-${colorIndex}`}
+                          className="Visualizer-theme-pixel"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
                     <span className="Visualizer-theme-label">{palette.label}</span>
                   </div>
                 ))}
@@ -196,10 +212,20 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
             </div>
           </div>
         </div>
-        <canvas style={enabledStyle} className='Visualizer-analyzer' width={VIS_WIDTH} height={60}
-                ref={this.freqCanvasRef}/>
-        <canvas style={enabledStyle} className='Visualizer-spectrogram' width={VIS_WIDTH} height={800}
-                ref={this.specCanvasRef}/>
+        <canvas
+          style={enabledStyle}
+          className="Visualizer-analyzer"
+          width={VIS_WIDTH}
+          height={60}
+          ref={this.freqCanvasRef}
+        />
+        <canvas
+          style={enabledStyle}
+          className="Visualizer-spectrogram"
+          width={VIS_WIDTH}
+          height={800}
+          ref={this.specCanvasRef}
+        />
       </div>
     );
   }
