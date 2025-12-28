@@ -37,6 +37,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 **E8**: Swap the favicon out to something custom from one of our games.
 
 **E9**: Improve UX when songs are loaded via `?play=` link. Currently, when you paste a song link (e.g., `/?play=%2FBazaar%2Ftectonictechniques.nsf`), the song loads but doesn't autoplay due to browser autoplay policies - it waits for user interaction to resume the AudioContext. This is correct behavior, but the UI doesn't indicate that the user needs to click to start audio. Consider:
+
 - Showing a visual indicator (toast, overlay, or button state) that audio is waiting for interaction
 - Auto-showing the "Click to enable audio" message when a song is queued but AudioContext is suspended
 - Displaying the paused state more prominently when audio is ready but suspended
@@ -51,11 +52,16 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **E14**: Multiple spark generators with their own parameter sets (i.e. blue sparks shooting infrequently, green sparks shooting constantly)
 
+**E15**: Slider sparks toggle for alpha fade vs instant fadeout
+
+**E16**: Slider sparks can change color over lifespan through a gradient.
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
 
 **M2**: (OPTIONAL FUTURE WORK) Complete TypeScript migration of remaining player implementations:
+
 - Player.js → Player.ts (base class - state machine logic)
 - GMEPlayer.js → GMEPlayer.ts (main player - audio processing)
 - Spectrogram.js → Spectrogram.ts (visualization math)
