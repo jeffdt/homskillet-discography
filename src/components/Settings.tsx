@@ -1,6 +1,6 @@
-import React, { memo, useContext } from "react";
-import PlayerParams, { ParamDef } from "./PlayerParams";
-import { UserContext } from "./UserProvider";
+import React, { memo, useContext } from 'react';
+import PlayerParams, { ParamDef } from './PlayerParams';
+import { UserContext } from './UserProvider';
 
 interface SettingsProps {
   ejected: boolean;
@@ -76,7 +76,7 @@ function Settings(props: SettingsProps) {
             onClick={(e) => e.stopPropagation()}
           />
           <span
-            className={`Settings-subsection-arrow ${persistedSettings.sliderSparksExpanded ? "expanded" : ""}`}
+            className={`Settings-subsection-arrow ${persistedSettings.sliderSparksExpanded ? 'expanded' : ''}`}
           >
             ▸
           </span>
@@ -102,7 +102,7 @@ function Settings(props: SettingsProps) {
         </h4>
 
         <div
-          className={`Settings-collapsible-content ${persistedSettings.sliderSparksExpanded ? "expanded" : ""}`}
+          className={`Settings-collapsible-content ${persistedSettings.sliderSparksExpanded ? 'expanded' : ''}`}
         >
           <div className="Settings-param">
             <label>Spawn Rate</label>
@@ -216,9 +216,7 @@ function Settings(props: SettingsProps) {
                 })
               }
             />
-            <span>
-              {(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×
-            </span>
+            <span>{(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×</span>
           </div>
         </div>
       </div>
@@ -244,34 +242,6 @@ function Settings(props: SettingsProps) {
       ) : (
         <div>(No active player)</div>
       )}
-
-      <div className="Settings-section">
-        <h3>About</h3>
-        <div className="Settings-about">
-          <p>
-            Forked from{" "}
-            <a
-              href="https://github.com/mmontag/chip-player-js"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Chip Player JS
-            </a>{" "}
-            by Matt Montag
-          </p>
-          <p>
-            Title font: Nixdorf 8810 M15 by{" "}
-            <a
-              href="https://int10h.org/oldschool-pc-fonts/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              VileR
-            </a>{" "}
-            (CC BY-SA 4.0)
-          </p>
-        </div>
-      </div>
     </div>
   );
 }
