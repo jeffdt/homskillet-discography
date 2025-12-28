@@ -541,8 +541,7 @@ body,
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppHeader {
-        padding: var(--charH) var(--charW2);
-        margin-bottom: var(--charH);
+        display: none; /* Hide header on mobile to maximize content space */
     }
 }
 
@@ -691,20 +690,19 @@ body,
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter {
         height: auto;
-        min-height: 300px; /* Taller to fit larger controls */
+        min-height: unset; /* Let footer size naturally based on controls */
         flex-direction: column; /* Stack children vertically */
     }
 
     .AppFooter-attribution {
-        padding: var(--charH) var(--charW1);
-        margin-top: var(--charH); /* Space above */
-        font-size: 14px;
+        display: none; /* Hide attribution on mobile - can be moved to Settings/About */
     }
 
     .AppFooter-main {
         order: 0; /* Controls first */
         flex-shrink: 0; /* Don't shrink controls */
-        padding: var(--charH) var(--charW2);
+        padding: var(--charW2) var(--charW2); /* Reduce vertical padding */
+        min-height: unset; /* Remove min-height constraint */
     }
 
     .AppFooter-art {
@@ -804,8 +802,8 @@ button.box-button.AppFooter-back {
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter-controls-row {
-        margin: var(--charH) 0;
-        gap: var(--charW2);
+        margin: calc(var(--charW2) / 2) 0; /* Reduce from charH (44px) to 12px for compactness */
+        gap: var(--charW1);
     }
 
     .AppFooter-controls-row .box-button {
@@ -1396,7 +1394,7 @@ button.IconButton {
 
 @media (orientation: portrait), (max-width: 768px) {
     .TimeSlider {
-        margin: var(--charH) 0;
+        margin: calc(var(--charW2) / 2) 0; /* Reduce from 44px to 12px for compactness */
     }
 
     .TimeSlider-labels,
