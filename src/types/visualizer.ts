@@ -11,6 +11,7 @@ export interface WeightingMode {
 export interface VisualizerState {
   enabled: boolean;
   colorPalette: number;
+  isFullscreen: boolean;
 }
 
 export interface VisualizerProps {
@@ -20,4 +21,5 @@ export interface VisualizerProps {
   paused: boolean;
   persistedSettings: Record<string, any>;
   onThemeChange: (theme: number) => void;
+  onThemesExpandedChange: (expanded: boolean) => void;
 }

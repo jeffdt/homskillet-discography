@@ -793,7 +793,8 @@ class App extends React.Component<AppProps, AppState> {
                 chipCore={this.chipCore}
                 paused={this.state.ejected || this.state.paused}
                 persistedSettings={this.props.userContext.settings}
-                onThemeChange={(theme) => this.props.userContext.updateSettings({ visualizerTheme: theme })} />
+                onThemeChange={(theme) => this.props.userContext.updateSettings({ visualizerTheme: theme })}
+                onThemesExpandedChange={(expanded) => this.props.userContext.updateSettings({ visualizerThemesExpanded: expanded })} />
             </div>}
         </div>
         <SongDisplay

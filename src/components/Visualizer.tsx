@@ -37,6 +37,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.state = {
       enabled: true,
       colorPalette: props.persistedSettings.visualizerTheme ?? 0,
+      isFullscreen: false,
     };
 
     this.freqCanvasRef = React.createRef();
@@ -60,6 +61,13 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.spectrogram.setWeighting(1); // A-Weighting - natural sound
     this.spectrogram.setSpeed(2); // Medium speed
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
+
+    // Listen for fullscreen changes
+    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
   }
 
   componentDidUpdate(prevProps: VisualizerProps, prevState: VisualizerState) {
@@ -100,6 +108,30 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.props.onThemeChange(themeIndex);
   };
 
+  handleToggleThemes = () => {
+    const newState = !this.props.persistedSettings.visualizerThemesExpanded;
+    this.props.onThemesExpandedChange(newState);
+  };
+
+  handleFullscreenToggle = () => {
+    if (!document.fullscreenElement) {
+      // Enter fullscreen
+      const container = this.specCanvasRef.current?.parentElement;
+      if (container) {
+        container.requestFullscreen().catch(err => {
+          console.error('Error entering fullscreen:', err);
+        });
+      }
+    } else {
+      // Exit fullscreen
+      document.exitFullscreen();
+    }
+  };
+
+  handleFullscreenChange = () => {
+    this.setState({ isFullscreen: !!document.fullscreenElement });
+  };
+
   render() {
     const enabledStyle: React.CSSProperties = {
       display: this.state.enabled ? 'block' : 'none',
@@ -124,26 +156,43 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
                  defaultChecked={this.state.enabled === false}
                  name='visualizer-enabled'/>
           <label htmlFor='vis-off' className='inline'>Off</label>
+
+          <button
+            className='Visualizer-fullscreen-btn'
+            onClick={this.handleFullscreenToggle}
+            title={this.state.isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+          >
+            {this.state.isFullscreen ? '⊗' : '⛶'}
+          </button>
         </h3>
         <div className='Visualizer-options' style={enabledStyle}>
           <div className="Visualizer-themes">
-            <h4>Theme</h4>
-            <div className="Visualizer-theme-grid">
-              {COLOR_PALETTES.map((palette, i) => (
-                <div
-                  key={`theme-${i}`}
-                  className={`Visualizer-theme-card ${this.state.colorPalette === i ? 'selected' : ''}`}
-                  onClick={() => this.handleThemeClick(i)}
-                >
+            <h4 onClick={this.handleToggleThemes}>
+              <span className={`Visualizer-themes-arrow ${
+                this.props.persistedSettings.visualizerThemesExpanded ? 'expanded' : ''
+              }`}>▸</span>
+              Theme
+            </h4>
+            <div className={`Visualizer-themes-content ${
+              this.props.persistedSettings.visualizerThemesExpanded ? 'expanded' : ''
+            }`}>
+              <div className="Visualizer-theme-grid">
+                {COLOR_PALETTES.map((palette, i) => (
                   <div
-                    className="Visualizer-theme-swatch"
-                    style={{
-                      background: `linear-gradient(to right, ${palette.colors.join(', ')})`
-                    }}
-                  />
-                  <span className="Visualizer-theme-label">{palette.label}</span>
-                </div>
-              ))}
+                    key={`theme-${i}`}
+                    className={`Visualizer-theme-card ${this.state.colorPalette === i ? 'selected' : ''}`}
+                    onClick={() => this.handleThemeClick(i)}
+                  >
+                    <div
+                      className="Visualizer-theme-swatch"
+                      style={{
+                        background: `linear-gradient(to right, ${palette.colors.join(', ')})`
+                      }}
+                    />
+                    <span className="Visualizer-theme-label">{palette.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

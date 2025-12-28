@@ -1392,6 +1392,28 @@ button.IconButton {
 .Visualizer-themes h4 {
     margin: 0 0 calc(var(--charH) / 2) 0;
     color: var(--neutral4);
+    cursor: pointer;
+    user-select: none;
+}
+
+.Visualizer-themes-arrow {
+    display: inline-block;
+    transition: transform 200ms ease-out;
+    margin-right: calc(var(--charW1) / 2);
+}
+
+.Visualizer-themes-arrow.expanded {
+    transform: rotate(90deg);
+}
+
+.Visualizer-themes-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 300ms ease-out;
+}
+
+.Visualizer-themes-content.expanded {
+    max-height: 600px;
 }
 
 .Visualizer-theme-grid {
@@ -1431,6 +1453,46 @@ button.IconButton {
 
 .Visualizer-theme-card.selected .Visualizer-theme-label {
     color: var(--accent);
+}
+
+/* Fullscreen button */
+.Visualizer-fullscreen-btn {
+    background: none;
+    border: 1px solid var(--neutral2);
+    color: var(--neutral4);
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 2px 8px;
+    margin-left: var(--charW1);
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.Visualizer-fullscreen-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Fullscreen mode styling */
+.Visualizer:fullscreen {
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.Visualizer:fullscreen .Visualizer-toggle,
+.Visualizer:fullscreen .Visualizer-options {
+    position: absolute;
+    top: var(--charH);
+    right: var(--charW2);
+    z-index: 10;
+}
+
+.Visualizer:fullscreen .Visualizer-spectrogram {
+    width: 100vw !important;
+    height: 100vh !important;
+    object-fit: contain;
 }
 
 .Visualizer-toggle {

@@ -38,6 +38,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 
   // Visualizer settings
   visualizerTheme: 0,            // default to MW Green theme
+  visualizerThemesExpanded: false,  // collapsed by default for cleaner view
 };
 
 function migrateSettings(settings: Partial<UserSettings>): UserSettings {
