@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+
+# Build outputs
+build
+dist
+*.wasm
+
+# Auto-generated files
+src/chip-core.js
+public/chip-core.wasm
+public/catalog.json
+public/directories.json
+
+# Lock files
+package-lock.json
+bun.lockb
+yarn.lock
+
+# Git
+.git
+
+# IDE
+.vscode
+.idea
+
+# Other
+coverage
+*.log
