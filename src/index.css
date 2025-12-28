@@ -712,6 +712,79 @@ body,
   text-decoration: underline;
 }
 
+.AppFooter-about-button {
+  display: none; /* Hidden on desktop */
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+  .AppFooter-about-button {
+    display: block;
+    position: fixed;
+    bottom: var(--charH);
+    right: var(--charW2);
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--neutral2);
+    background: var(--button);
+    color: var(--neutral4);
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 100;
+    border-radius: 50%;
+  }
+
+  .AppFooter-about-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.AppFooter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.AppFooter-modal {
+  background: var(--background);
+  border: 1px solid var(--neutral3);
+  padding: var(--charW2);
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+}
+
+.AppFooter-modal h3 {
+  margin-top: 0;
+  color: var(--neutral4);
+}
+
+.AppFooter-modal p {
+  color: var(--neutral2);
+  margin: var(--charH) 0;
+}
+
+.AppFooter-modal a {
+  color: var(--accent);
+  font: var(--font-title) !important;
+}
+
+.AppFooter-modal a:hover {
+  text-decoration: underline;
+}
+
+.AppFooter-modal button {
+  margin-top: var(--charH);
+}
+
 .AppFooter-art {
   width: 210px;
   height: 210px;
