@@ -1,8 +1,9 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import TimeSlider from './TimeSlider';
 import VolumeSlider from './VolumeSlider';
 import { REPEAT_LABELS, SHUFFLE_LABELS } from '../Sequencer';
 import { useAudioPulse } from '../contexts/AudioPulseContext';
+import { UserContext } from './UserProvider';
 
 interface AppFooterProps {
   // State props
@@ -74,6 +75,19 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
   const { amplitude } = useAudioPulse();
   const pulseIntensity = (paused || ejected) ? 0 : amplitude;
 
+  const userContext = useContext(UserContext);
+  const particleSettings = {
+    particleEnabled: userContext.settings.sliderSparksEnabled,
+    particleSpawnRate: userContext.settings.particleSpawnRate,
+    particleLifespan: userContext.settings.particleLifespan,
+    particleBaseAngle: userContext.settings.particleBaseAngle,
+    particleAngleSpread: userContext.settings.particleAngleSpread,
+    particleSpeed: userContext.settings.particleSpeed,
+    particleSpeedVariance: userContext.settings.particleSpeedVariance,
+    particleGravity: userContext.settings.particleGravity,
+    particleHueVariation: userContext.settings.particleHueVariation,
+  };
+
   return (
     <div className="AppFooter">
       <div className="AppFooter-attribution">
@@ -93,7 +107,9 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
               }
               return 0;
             }}
-            onChange={handleTimeSliderChange}/>
+            onChange={handleTimeSliderChange}
+            {...particleSettings}
+          />
           <VolumeSlider
             onChange={(e) => {
               handleVolumeChange(e.target.value);

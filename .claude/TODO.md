@@ -6,7 +6,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-**B1**: 
+**B1**: The visualizer shows blue briefly when the song starts. Why?
+
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
@@ -45,6 +46,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 **E12**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
 
 **E13**: Slider sparks are reactive to the music intensity.
+
+**E14**: Multiple spark generators with their own parameter sets (i.e. blue sparks shooting infrequently, green sparks shooting constantly)
 
 ---
 

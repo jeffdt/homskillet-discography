@@ -8,6 +8,16 @@ interface SliderProps {
   onChange: (pos: number) => void;
   shouldSpawnParticles?: boolean; // Whether to spawn particles (during playback)
   pulseIntensity?: number; // Audio-reactive pulse intensity (0-1)
+
+  // Particle settings (optional, passed to SliderParticles)
+  particleSpawnRate?: number;
+  particleLifespan?: number;
+  particleBaseAngle?: number;
+  particleAngleSpread?: number;
+  particleSpeed?: number;
+  particleSpeedVariance?: number;
+  particleGravity?: number;
+  particleHueVariation?: number;
 }
 
 interface SliderState {
@@ -104,6 +114,15 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           knobX={knobX}
           knobY={knobY}
           shouldSpawn={shouldSpawn}
+          intensity={this.props.pulseIntensity ?? 0}
+          spawnRate={this.props.particleSpawnRate}
+          lifespan={this.props.particleLifespan}
+          baseAngle={this.props.particleBaseAngle}
+          angleSpread={this.props.particleAngleSpread}
+          speed={this.props.particleSpeed}
+          speedVariance={this.props.particleSpeedVariance}
+          gravity={this.props.particleGravity}
+          hueVariation={this.props.particleHueVariation}
         />
       </div>
     );

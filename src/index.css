@@ -881,27 +881,7 @@ button.box-button.AppFooter-back {
     width: 2px;
     height: 2px;
     background-color: var(--accent);
-    filter: hue-rotate(calc(var(--particle-hue) * 1deg));
-    animation: particle-fly 600ms steps(20) forwards;
     pointer-events: none;
-}
-
-@keyframes particle-fly {
-    0% {
-        transform: translate(0, 0);
-    }
-    50% {
-        transform: translate(
-            calc(var(--particle-vx) * 40px),
-            calc(var(--particle-vy) * 40px + 10px)
-        );
-    }
-    100% {
-        transform: translate(
-            calc(var(--particle-vx) * 80px),
-            calc(var(--particle-vy) * 80px + 40px)
-        );
-    }
 }
 
 /* Disable particles for users who prefer reduced motion */
@@ -1059,6 +1039,99 @@ button.box-button.AppFooter-back {
     font-size: 0.9em;
     color: var(--neutral3);
     font-style: italic;
+}
+
+.Settings-subsection {
+    margin-top: calc(var(--charH) * 1.5);
+    margin-bottom: var(--charH);
+    font-size: 0.9em;
+    color: var(--neutral3);
+}
+
+.Settings-subsection-collapsible {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--charW1) / 2);
+}
+
+.Settings-subsection-collapsible:hover {
+    color: var(--clickable);
+}
+
+.Settings-subsection-with-toggle input[type="checkbox"] {
+    margin: 0;
+    margin-right: calc(var(--charW1) / 2);
+    cursor: pointer;
+}
+
+.Settings-subsection-arrow {
+    display: inline-block;
+    transition: transform 150ms ease-out;
+    font-size: 0.8em;
+}
+
+.Settings-subsection-arrow.expanded {
+    transform: rotate(90deg);
+}
+
+.Settings-reset-button {
+    margin-left: auto;
+    padding: 0 calc(var(--charW1) / 2);
+    background: transparent;
+    border: 1px solid var(--neutral2);
+    color: var(--neutral2);
+    cursor: pointer;
+    font-size: 1.2em;
+    line-height: 1;
+    border-radius: 2px;
+    transition: all 100ms ease-out;
+}
+
+.Settings-reset-button:hover {
+    border-color: var(--clickable);
+    color: var(--clickable);
+    background: var(--neutral1);
+}
+
+.Settings-reset-button:active {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(0.95);
+}
+
+.Settings-collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 300ms ease-out;
+}
+
+.Settings-collapsible-content.expanded {
+    max-height: 1000px;
+}
+
+.Settings-param {
+    display: flex;
+    align-items: center;
+    gap: var(--charW1);
+    margin-bottom: calc(var(--charH) / 2);
+}
+
+.Settings-param label {
+    width: calc(var(--charW1) * 16);
+    color: var(--clickable);
+}
+
+.Settings-param input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+}
+
+.Settings-param span {
+    width: calc(var(--charW1) * 6);
+    text-align: right;
+    color: var(--accent);
 }
 
 .PlayerParams h3 {
