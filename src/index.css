@@ -187,16 +187,6 @@ select option {
 .Song-now-playing .FavoriteButton:not(.isFavorite) {
     color: var(--background);
 }
-@media screen and (max-width: 800px) {
-    .BrowseList-colMtime {
-        display: none;
-    }
-}
-@container (max-width: 800px) {
-    .BrowseList-colMtime {
-        display: none;
-    }
-}
 button:active {
     background: var(--active);
 }
@@ -212,6 +202,14 @@ button:disabled {
     display: inline-flex;
     align-items: center;
     gap: var(--charW1);
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .box-button {
+        min-height: 44px;
+        padding: var(--charW1) var(--charW2);
+        font-size: 18px;
+    }
 }
 .box-button:hover {
     background: #fefefe;
@@ -264,6 +262,14 @@ input[type="checkbox"]:before {
     border: 2px solid #7f7f7f; /* Medium Gray - darker when unchecked */
     box-sizing: border-box;
     vertical-align: middle;
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    input[type="checkbox"]:before {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #7f7f7f;
+    }
 }
 input[type="checkbox"]:checked:before {
     background-color: #c3c3c3; /* Light Gray - filled when checked */
@@ -486,6 +492,23 @@ body,
 }
 
 @media (orientation: portrait), (max-width: 768px) {
+    :root {
+        /* Increase character dimensions for mobile touch targets */
+        --charH: 44px; /* Apple recommends 44px minimum touch target */
+        --charW1: 12px;
+        --charW2: 24px;
+        --rowHeight: 44px;
+        --buttonHeight: 44px;
+        --railH: 6px; /* Thicker rail for easier touch interaction */
+        --knobW: 16px; /* Wider knob for easier grabbing */
+        --knobH: 44px; /* Taller knob for easier grabbing */
+
+        /* Increase font sizes for mobile readability */
+        --font: 18px/44px 'Silkscreen', monospace;
+        --font-accent: 18px/44px 'Silkscreen', monospace;
+        --font-title: 24px/44px 'Nixdorf_M15', monospace;
+    }
+
     .App {
         padding: 0 var(--charW1);
     }
@@ -508,8 +531,7 @@ body,
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppHeader {
-        padding: calc(var(--charH) / 2) var(--charW2);
-        margin-bottom: calc(var(--charH) / 2);
+        display: none; /* Hide header on mobile to maximize content space */
     }
 }
 
@@ -607,6 +629,10 @@ body,
 }
 
 @media (orientation: portrait), (max-width: 768px) {
+    .App-main-content-area {
+        padding-top: 12px; /* Reduce from 44px to save vertical space */
+    }
+
     .App-main-content-area.settings {
         width: 100%;
         min-width: 0;
@@ -635,6 +661,14 @@ body,
     flex-shrink: 0;
 }
 
+@media (orientation: portrait), (max-width: 768px) {
+    .SongDisplay {
+        font-size: 18px;
+        line-height: 1.4;
+        padding: var(--charW2) var(--charW2); /* Reduce from 44px to 24px vertical padding */
+    }
+}
+
 .AppFooter {
     border-top: 1px solid var(--clickable);
     margin: 0 var(--charW2neg);
@@ -650,19 +684,21 @@ body,
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter {
         height: auto;
-        min-height: 200px; /* Taller to fit everything */
+        min-height: 140px; /* Ensure footer fits controls */
+        max-height: 150px; /* Tighter cap to fit in viewport */
         flex-direction: column; /* Stack children vertically */
+        overflow: hidden; /* Prevent controls from overflowing below viewport */
     }
 
     .AppFooter-attribution {
-        padding: calc(var(--charH) / 2) var(--charW1);
-        margin-top: var(--charH); /* Space above */
-        font-size: 0.7em;
+        display: none; /* Hide attribution on mobile - can be moved to Settings/About */
     }
 
     .AppFooter-main {
         order: 0; /* Controls first */
         flex-shrink: 0; /* Don't shrink controls */
+        padding: var(--charW1) var(--charW2); /* Compact vertical padding */
+        min-height: unset; /* Remove min-height constraint */
     }
 
     .AppFooter-art {
@@ -727,8 +763,15 @@ button.box-button.AppFooter-back {
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter-main {
-        overflow: visible; /* Allow content to be visible on mobile */
-        padding: calc(var(--charH) / 2) var(--charW1);
+        overflow: hidden; /* Prevent content overflow */
+        padding: 8px var(--charW2); /* Minimal vertical padding */
+        min-height: unset; /* Remove min-height constraint to prevent black gaps */
+        width: 100%; /* Ensure full width on mobile */
+        flex-basis: auto; /* Override flex-basis: 0 */
+        container-type: normal; /* Disable container query on mobile */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly; /* Distribute space evenly with minimal gaps */
     }
 }
 
@@ -762,7 +805,18 @@ button.box-button.AppFooter-back {
 
 @media (orientation: portrait), (max-width: 768px) {
     .AppFooter-controls-row {
-        margin: calc(var(--charH) / 2) 0;
+        margin: 0; /* No margin for ultra-compact layout */
+        gap: var(--charW1);
+    }
+
+    .AppFooter-controls-row .box-button {
+        height: 44px !important; /* Override desktop height for compact layout */
+        min-height: 44px;
+        padding: 0 var(--charW2); /* Minimal vertical padding */
+    }
+
+    .AppFooter-secondary-controls {
+        display: none; /* Hide repeat/shuffle buttons on mobile to save space */
     }
 }
 
@@ -910,6 +964,31 @@ button.box-button.AppFooter-back {
     flex-shrink: 0; /* Don't shrink when space is tight */
 }
 
+@media (orientation: portrait), (max-width: 768px) {
+    .Browse-topRow {
+        flex-wrap: wrap;
+        gap: var(--charW1);
+        padding-bottom: 8px; /* Minimal padding below album name */
+        margin-bottom: 12px !important; /* Small spacing before file list - override h3 default */
+    }
+
+    .Browse-topRow h3 {
+        font-size: 16px; /* Slightly smaller */
+        line-height: 1.2;
+        word-break: break-word;
+        flex-basis: 100%;
+        margin: 0; /* Remove margin */
+    }
+
+    .Browse-topRow button {
+        min-height: 32px; /* Much smaller button */
+        height: 32px;
+        font-size: 11px; /* Tiny font for compact button */
+        padding: 4px 12px; /* Minimal padding */
+        white-space: nowrap;
+    }
+}
+
 .Browse-list-scroll {
     flex-grow: 1;
     overflow-y: auto;
@@ -921,6 +1000,30 @@ button.box-button.AppFooter-back {
     display: flex;
     align-items: center;
     height: var(--rowHeight);
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .BrowseList-row {
+        padding: 0 var(--charW1);
+        min-height: 44px;
+    }
+
+    .BrowseList-row a,
+    .BrowseList-colName {
+        font-size: 18px;
+        line-height: 1.3;
+    }
+
+    /* Hide metadata on mobile - show only names and <DIR> indicator */
+    .BrowseList-colSize,
+    .BrowseList-colCount {
+        display: none;
+    }
+
+    .BrowseList-colDir {
+        font-size: 14px;
+        margin-left: var(--charW1);
+    }
 }
 /* Selected */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected {
@@ -978,10 +1081,7 @@ button.box-button.AppFooter-back {
     text-align: right;
 }
 .BrowseList-colMtime {
-    text-align: right;
-    text-transform: uppercase;
-    white-space: nowrap;
-    min-width: calc(var(--charW1) * 12);
+    display: none; /* Hide dates on all screens - unnecessary clutter */
 }
 .BrowseList-colSize {
     text-align: right;
@@ -1014,6 +1114,23 @@ button.box-button.AppFooter-back {
     gap: var(--charW1);
     cursor: pointer;
     margin-bottom: calc(var(--charH) / 2);
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+    .Settings-toggle {
+        min-height: 44px;
+        margin-bottom: var(--charH);
+    }
+
+    .Settings-toggle span {
+        font-size: 18px;
+        line-height: 1.4;
+    }
+
+    .Settings-section h3 {
+        font-size: 20px;
+        line-height: 1.3;
+    }
 }
 
 .Settings-toggle input[type="checkbox"] {
@@ -1293,7 +1410,13 @@ button.IconButton {
 
 @media (orientation: portrait), (max-width: 768px) {
     .TimeSlider {
-        margin: calc(var(--charH) / 2) 0;
+        margin: 0; /* No margin for ultra-compact layout */
+    }
+
+    .TimeSlider-labels,
+    .VolumeSlider-labels {
+        font-size: 12px; /* Smaller for compactness */
+        line-height: 1.2;
     }
 }
 
@@ -1304,7 +1427,7 @@ button.IconButton {
 
 @media (orientation: portrait), (max-width: 768px) {
     .VolumeSlider {
-        margin: calc(var(--charH) / 2) 0;
+        margin: var(--charH) 0;
     }
 }
 
@@ -1419,6 +1542,14 @@ button.IconButton {
         background: var(--background);
         margin: 0 calc(var(--charW1) * -1);
         flex-shrink: 0; /* Don't shrink the tab bar */
+    }
+
+    .mobile-tab-bar .tab {
+        min-height: 44px;
+        font-size: 18px;
+        padding: var(--charW1) var(--charW2);
+        display: flex;
+        align-items: center;
     }
 
     /* Hide all tab content by default on mobile */
