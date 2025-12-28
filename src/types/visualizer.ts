@@ -9,10 +9,6 @@ export interface WeightingMode {
 }
 
 export interface VisualizerState {
-  vizMode: number;
-  weightingMode: number;
-  fftSize: number;
-  speed: number;
   enabled: boolean;
   colorPalette: number;
 }
@@ -22,4 +18,6 @@ export interface VisualizerProps {
   audioCtx: AudioContext;
   sourceNode: ScriptProcessorNode;
   paused: boolean;
+  persistedSettings: Record<string, any>;
+  onThemeChange: (theme: number) => void;
 }

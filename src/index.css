@@ -1355,6 +1355,19 @@ button.IconButton {
         text-align: center;
         padding: calc(var(--charH) / 2) var(--charW2) 0;
     }
+
+    .Visualizer-theme-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+        gap: var(--charW2);
+    }
+
+    .Visualizer-theme-card {
+        padding: var(--charW2);
+    }
+
+    .Visualizer-theme-swatch {
+        height: calc(var(--charH) * 2); /* Taller swatches for easier tapping */
+    }
 }
 .Visualizer-overlay {
     position: absolute;
@@ -1370,6 +1383,56 @@ button.IconButton {
     z-index: 2;
     /* background-color removed to allow CRT noise overlay to show through */
 }
+
+/* Theme selector styles */
+.Visualizer-themes {
+    margin-bottom: var(--charH);
+}
+
+.Visualizer-themes h4 {
+    margin: 0 0 calc(var(--charH) / 2) 0;
+    color: var(--neutral4);
+}
+
+.Visualizer-theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--charW1);
+}
+
+.Visualizer-theme-card {
+    cursor: pointer;
+    border: 1px solid var(--neutral2);
+    padding: var(--charW1);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.Visualizer-theme-card:hover {
+    border-color: var(--neutral4);
+}
+
+.Visualizer-theme-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.Visualizer-theme-swatch {
+    height: calc(var(--charH) * 1.5);
+    width: 100%;
+    margin-bottom: calc(var(--charW1) / 2);
+}
+
+.Visualizer-theme-label {
+    display: block;
+    text-align: center;
+    font-size: 0.8em;
+    color: var(--neutral3);
+}
+
+.Visualizer-theme-card.selected .Visualizer-theme-label {
+    color: var(--accent);
+}
+
 .Visualizer-toggle {
     position: fixed;
     top: var(--charH);
