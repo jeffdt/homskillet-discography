@@ -6,23 +6,17 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-**B1**: The visualizer shows blue briefly when the song starts. Why?
-
-**B2**: I shouldn't see attribution in settings menu in desktop mode. in mobile, it should be a small question mark icon somewhere that opens a modal you can dismiss.
+None!
 
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S1**: Eliminate "Mode" settings for visualizer, hardcode to constant Q. Eliminate Weighting, hardcode to A-weighting. Eliminate speed, hardcode to medium. The only option should be palette.
+None!
 
 ---
 
 ## ENHANCEMENT (new features & styling)
-
-**E1**: In the player settings, switch from floats to percentages (speed, bass, stereo width).
-
-**E2**: Add UI buttons to swap between multiple color palettes across the entire UI.
 
 **E3**: Clicking the currently playing song title above the player should also take you directly to that file in the browser. It should open whatever dir it's located in and everything. It shouldn't interrupt the song, just navigate to that dir and make sure the file is visible on screen.
 

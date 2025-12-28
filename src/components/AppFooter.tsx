@@ -74,6 +74,9 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
 
   const { amplitude } = useAudioPulse();
   const pulseIntensity = paused || ejected ? 0 : amplitude;
+  const accentColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--accent')
+    .trim();
 
   const userContext = useContext(UserContext);
   const particleSettings = {
@@ -180,6 +183,7 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
             style={
               {
                 '--pulse-intensity': pulseIntensity,
+                '--pulse-color': accentColor,
               } as React.CSSProperties
             }
           >
