@@ -895,7 +895,12 @@ button.box-button.AppFooter-back {
   --pulse-spread: calc(0px + var(--pulse-intensity, 0) * 12px);
   --pulse-opacity: calc(0.15 + var(--pulse-intensity, 0) * 0.85);
   box-shadow:
-    0 0 var(--pulse-spread) calc(var(--pulse-spread) * 0.5) rgba(155, 254, 56, var(--pulse-opacity)),
+    0 0 var(--pulse-spread) calc(var(--pulse-spread) * 0.5)
+      color-mix(
+        in srgb,
+        var(--pulse-color, var(--accent)) calc(var(--pulse-opacity) * 100%),
+        transparent
+      ),
     var(--box-shadow);
   transition: box-shadow 50ms ease-out;
 }
@@ -1516,6 +1521,72 @@ button.IconButton {
 
 .Visualizer-theme-card.selected .Visualizer-theme-label {
   color: var(--accent);
+}
+
+/* UI Palette selector styles */
+.UIPalette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--charW1);
+  margin-top: calc(var(--charH) / 2);
+}
+
+.UIPalette-card {
+  cursor: pointer;
+  border: 1px solid var(--neutral2);
+  padding: calc(var(--charW1) / 2);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.UIPalette-card:hover {
+  border-color: var(--neutral4);
+}
+
+.UIPalette-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.UIPalette-swatch {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-bottom: calc(var(--charW1) / 2);
+  border: 1px solid var(--neutral4);
+}
+
+.UIPalette-color {
+  flex: 1;
+  height: 16px;
+}
+
+.UIPalette-label {
+  display: block;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--neutral3);
+}
+
+.UIPalette-card.selected .UIPalette-label {
+  color: var(--accent);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 800px) {
+  .UIPalette-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--charW2);
+  }
+
+  .UIPalette-card {
+    padding: calc(var(--charW2) / 2);
+  }
+
+  .UIPalette-color {
+    height: 20px;
+  }
 }
 
 /* Fullscreen button */

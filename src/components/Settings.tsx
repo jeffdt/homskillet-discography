@@ -1,6 +1,7 @@
 import React, { memo, useContext } from 'react';
 import PlayerParams, { ParamDef } from './PlayerParams';
 import { UserContext } from './UserProvider';
+import { UI_PALETTES } from '../config/uiPalettes';
 
 interface SettingsProps {
   ejected: boolean;
@@ -55,6 +56,51 @@ function Settings(props: SettingsProps) {
           />
           <span>Reactive UI</span>
         </label>
+
+        <h4
+          className="Settings-subsection Settings-subsection-collapsible"
+          onClick={() =>
+            userContext.updateSettings({
+              uiPaletteSelectorExpanded: !persistedSettings.uiPaletteSelectorExpanded,
+            })
+          }
+        >
+          <span
+            className={`Settings-subsection-arrow ${
+              persistedSettings.uiPaletteSelectorExpanded ? 'expanded' : ''
+            }`}
+          >
+            ▸
+          </span>
+          UI Color Palette
+        </h4>
+
+        <div
+          className={`Settings-collapsible-content ${
+            persistedSettings.uiPaletteSelectorExpanded ? 'expanded' : ''
+          }`}
+        >
+          <div className="UIPalette-grid">
+            {UI_PALETTES.map((palette, i) => (
+              <div
+                key={`ui-palette-${i}`}
+                className={`UIPalette-card ${
+                  (persistedSettings.uiPalette ?? 0) === i ? 'selected' : ''
+                }`}
+                onClick={() => userContext.updateSettings({ uiPalette: i })}
+              >
+                <div className="UIPalette-swatch">
+                  <div
+                    className="UIPalette-color"
+                    style={{ backgroundColor: palette.accentDark }}
+                  />
+                  <div className="UIPalette-color" style={{ backgroundColor: palette.accent }} />
+                </div>
+                <span className="UIPalette-label">{palette.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <h4
           className="Settings-subsection Settings-subsection-collapsible Settings-subsection-with-toggle"
