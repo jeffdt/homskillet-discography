@@ -814,6 +814,10 @@ button.box-button.AppFooter-back {
         min-height: 44px;
         padding: 0 var(--charW2); /* Minimal vertical padding */
     }
+
+    .AppFooter-secondary-controls {
+        display: none; /* Hide repeat/shuffle buttons on mobile to save space */
+    }
 }
 
 .AppFooter-controls-row .box-button {

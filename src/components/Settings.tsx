@@ -199,6 +199,26 @@ function Settings(props: SettingsProps) {
         />
         :
         <div>(No active player)</div>}
+
+      <div className="Settings-section">
+        <h3>About</h3>
+        <div className="Settings-about">
+          <p>
+            Forked from{' '}
+            <a href="https://github.com/mmontag/chip-player-js" target="_blank" rel="noopener noreferrer">
+              Chip Player JS
+            </a>
+            {' '}by Matt Montag
+          </p>
+          <p>
+            Title font: Nixdorf 8810 M15 by{' '}
+            <a href="https://int10h.org/oldschool-pc-fonts/" target="_blank" rel="noopener noreferrer">
+              VileR
+            </a>
+            {' '}(CC BY-SA 4.0)
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
