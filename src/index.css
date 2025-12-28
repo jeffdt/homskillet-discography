@@ -629,6 +629,10 @@ body,
 }
 
 @media (orientation: portrait), (max-width: 768px) {
+    .App-main-content-area {
+        padding-top: 12px; /* Reduce from 44px to save vertical space */
+    }
+
     .App-main-content-area.settings {
         width: 100%;
         min-width: 0;
@@ -960,7 +964,8 @@ button.box-button.AppFooter-back {
     .Browse-topRow {
         flex-wrap: wrap;
         gap: var(--charW1);
-        padding-bottom: var(--charW2); /* Reduce from charH (44px) to 24px */
+        padding-bottom: 8px; /* Minimal padding below album name */
+        margin-bottom: 12px !important; /* Small spacing before file list - override h3 default */
     }
 
     .Browse-topRow h3 {
