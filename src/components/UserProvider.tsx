@@ -27,13 +27,13 @@ const DEFAULT_SETTINGS: UserSettings = {
   sliderSparksExpanded: false,   // collapsed by default
 
   // Slider particle settings
-  particleSpawnRate: 40,        // min spawn interval (lower = faster)
+  particleSpawnRate: 20,        // min spawn interval (lower = faster)
   particleLifespan: 600,         // milliseconds
   particleBaseAngle: 180,        // base angle in degrees (0=right, 90=down, 180=left, 270=up)
   particleAngleSpread: 30,       // angle spread in degrees (cone width)
-  particleSpeed: 1.0,            // speed multiplier
+  particleSpeed: 1.7,            // speed multiplier
   particleSpeedVariance: 20,     // speed variance percentage (0-100)
-  particleGravity: 0.5,          // gravity strength (0=none, 1=normal, 2=strong)
+  particleGravity: 0.0,          // gravity strength (0=none, 1=normal, 2=strong)
   particleHueVariation: 30,      // hue degrees
 };
 

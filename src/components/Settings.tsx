@@ -74,13 +74,13 @@ function Settings(props: SettingsProps) {
             onClick={(e) => {
               e.stopPropagation();
               userContext.updateSettings({
-                particleSpawnRate: 40,
+                particleSpawnRate: 20,
                 particleLifespan: 600,
                 particleBaseAngle: 180,
                 particleAngleSpread: 30,
-                particleSpeed: 1.0,
+                particleSpeed: 1.7,
                 particleSpeedVariance: 20,
-                particleGravity: 0.5,
+                particleGravity: 0.0,
               });
             }}
             title="Reset to defaults"
@@ -96,10 +96,10 @@ function Settings(props: SettingsProps) {
               type="range"
               min="20"
               max="200"
-              value={persistedSettings.particleSpawnRate ?? 40}
+              value={persistedSettings.particleSpawnRate ?? 20}
               onChange={(e) => userContext.updateSettings({ particleSpawnRate: parseInt(e.target.value) })}
             />
-            <span>{persistedSettings.particleSpawnRate ?? 40}ms</span>
+            <span>{persistedSettings.particleSpawnRate ?? 20}ms</span>
           </div>
 
           <div className="Settings-param">
@@ -146,10 +146,10 @@ function Settings(props: SettingsProps) {
               min="0.5"
               max="3.0"
               step="0.1"
-              value={persistedSettings.particleSpeed ?? 1.0}
+              value={persistedSettings.particleSpeed ?? 1.7}
               onChange={(e) => userContext.updateSettings({ particleSpeed: parseFloat(e.target.value) })}
             />
-            <span>{(persistedSettings.particleSpeed ?? 1.0).toFixed(1)}×</span>
+            <span>{(persistedSettings.particleSpeed ?? 1.7).toFixed(1)}×</span>
           </div>
 
           <div className="Settings-param">
@@ -171,10 +171,10 @@ function Settings(props: SettingsProps) {
               min="0"
               max="2.0"
               step="0.1"
-              value={persistedSettings.particleGravity ?? 0.5}
+              value={persistedSettings.particleGravity ?? 0.0}
               onChange={(e) => userContext.updateSettings({ particleGravity: parseFloat(e.target.value) })}
             />
-            <span>{(persistedSettings.particleGravity ?? 0.5).toFixed(1)}×</span>
+            <span>{(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×</span>
           </div>
         </div>
       </div>

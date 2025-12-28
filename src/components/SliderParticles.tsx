@@ -8,6 +8,8 @@ interface Particle {
   vy: number; // Velocity Y (-1 to 1)
   gravity: number; // Gravity strength (0-2)
   hueOffset: number; // Slight hue variation (0-30)
+  startTime: number; // Animation start time (ms)
+  lifetime: number; // Particle lifetime (ms)
 }
 
 interface SliderParticlesProps {
@@ -29,6 +31,7 @@ interface SliderParticlesProps {
 
 interface SliderParticlesState {
   particles: Particle[];
+  animationTime: number; // Current animation time for RAF updates
 }
 
 const MAX_PARTICLES = 15;
@@ -40,12 +43,18 @@ const NUM_SPAWNERS = 2; // Multiple independent spawners for randomness
 export default class SliderParticles extends PureComponent<SliderParticlesProps, SliderParticlesState> {
   private nextId = 0;
   private spawnerTimers: NodeJS.Timeout[] = [];
+  private animationFrameId: number | null = null;
 
   constructor(props: SliderParticlesProps) {
     super(props);
     this.state = {
       particles: [],
+      animationTime: performance.now(),
     };
+  }
+
+  componentDidMount(): void {
+    this.startAnimationLoop();
   }
 
   componentDidUpdate(prevProps: SliderParticlesProps): void {
@@ -62,6 +71,27 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
 
   componentWillUnmount(): void {
     this.stopSpawners();
+    this.stopAnimationLoop();
+  }
+
+  startAnimationLoop(): void {
+    const animate = () => {
+      const now = performance.now();
+      // Remove expired particles and update animation time
+      this.setState((prevState) => ({
+        particles: prevState.particles.filter(p => (now - p.startTime) < p.lifetime),
+        animationTime: now,
+      }));
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+    this.animationFrameId = requestAnimationFrame(animate);
+  }
+
+  stopAnimationLoop(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
   }
 
   startSpawners(): void {
@@ -122,6 +152,7 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
     const vy = Math.sin(angleRadians) * speed;
 
     const hueOffset = Math.random() * hueVariation;
+    const lifetime = this.props.lifespan ?? PARTICLE_LIFETIME_MS;
 
     const particle: Particle = {
       id: this.nextId++,
@@ -131,43 +162,46 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
       vy,
       gravity,
       hueOffset,
+      startTime: performance.now(),
+      lifetime,
     };
 
     this.setState((prevState) => ({
       particles: [...prevState.particles, particle],
     }));
-
-    // Schedule particle removal after lifetime
-    const lifetime = this.props.lifespan ?? PARTICLE_LIFETIME_MS;
-    setTimeout(() => {
-      this.setState((prevState) => ({
-        particles: prevState.particles.filter(p => p.id !== particle.id),
-      }));
-    }, lifetime);
   }
 
   render(): React.ReactNode {
-    const lifetime = this.props.lifespan ?? PARTICLE_LIFETIME_MS;
-    const distanceMultiplier = lifetime / PARTICLE_LIFETIME_MS; // Scale distance to maintain velocity
+    const now = this.state.animationTime;
 
     return (
       <div className="SliderParticles">
-        {this.state.particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="SliderParticle"
-            style={{
-              left: `${particle.x}px`,
-              top: `${particle.y}px`,
-              '--particle-vx': particle.vx,
-              '--particle-vy': particle.vy,
-              '--particle-gravity': particle.gravity,
-              '--particle-hue': particle.hueOffset,
-              '--particle-lifetime': `${lifetime}ms`,
-              '--particle-distance-multiplier': distanceMultiplier,
-            } as React.CSSProperties}
-          />
-        ))}
+        {this.state.particles.map((particle) => {
+          // Calculate elapsed time in seconds
+          const elapsedMs = now - particle.startTime;
+          const t = elapsedMs / 1000;
+
+          // Physics: position = initial + velocity*time + 0.5*gravity*time^2
+          const pixelScale = 80; // Base distance scale
+          const x = particle.x + particle.vx * pixelScale * t;
+          const y = particle.y + particle.vy * pixelScale * t + 0.5 * particle.gravity * pixelScale * t * t;
+
+          // Calculate opacity fade (1.0 at start, 0.0 at end)
+          const progress = elapsedMs / particle.lifetime;
+          const opacity = Math.max(0, 1 - progress);
+
+          return (
+            <div
+              key={particle.id}
+              className="SliderParticle"
+              style={{
+                left: `${x}px`,
+                top: `${y}px`,
+                opacity,
+              }}
+            />
+          );
+        })}
       </div>
     );
   }
