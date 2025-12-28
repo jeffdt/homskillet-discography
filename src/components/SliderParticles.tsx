@@ -6,6 +6,7 @@ interface Particle {
   y: number; // Starting Y position (pixels from top)
   vx: number; // Velocity X (-1 to 1)
   vy: number; // Velocity Y (-1 to 1)
+  gravity: number; // Gravity strength (0-2)
   hueOffset: number; // Slight hue variation (0-30)
 }
 
@@ -18,9 +19,11 @@ interface SliderParticlesProps {
   // Settings (all optional with defaults)
   spawnRate?: number; // Min spawn interval in ms (lower = faster)
   lifespan?: number; // Particle lifetime in ms
-  maxCount?: number; // Max particles on screen
-  speedX?: number; // Horizontal velocity multiplier
-  speedY?: number; // Vertical spread multiplier
+  baseAngle?: number; // Base angle in degrees (0=right, 90=down, 180=left, 270=up)
+  angleSpread?: number; // Angle spread in degrees (cone width)
+  speed?: number; // Speed multiplier
+  speedVariance?: number; // Speed variance percentage (0-100)
+  gravity?: number; // Gravity strength (0=none, 1=normal, 2=strong)
   hueVariation?: number; // Hue variation in degrees
 }
 
@@ -82,8 +85,7 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
     const randomDelay = minSpawnInterval + Math.random() * (maxSpawnInterval - minSpawnInterval);
 
     const timer = setTimeout(() => {
-      const maxParticles = this.props.maxCount ?? MAX_PARTICLES;
-      if (this.props.shouldSpawn && this.state.particles.length < maxParticles) {
+      if (this.props.shouldSpawn) {
         this.spawnParticle();
       }
       // Schedule the next spawn if still active
@@ -98,15 +100,28 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
   spawnParticle(): void {
     const { knobX, knobY } = this.props;
 
-    // Random velocity: fly LEFT like sparks being carved off with wide fan
-    // Very slight upward bias to compensate for gravity pulling particles down
-    const speedXMultiplier = this.props.speedX ?? 1.1;
-    const speedYMultiplier = this.props.speedY ?? 2.0;
+    // Get settings with defaults
+    const baseAngle = this.props.baseAngle ?? 180;
+    const angleSpread = this.props.angleSpread ?? 30;
+    const baseSpeed = this.props.speed ?? 1.0;
+    const speedVariance = this.props.speedVariance ?? 20;
+    const gravity = this.props.gravity ?? 0.5;
     const hueVariation = this.props.hueVariation ?? 30;
 
-    const vx = -0.4 - Math.random() * speedXMultiplier; // -0.4 to -(0.4 + speedX) (wide speed variation)
-    const vy = (Math.random() - 0.55) * speedYMultiplier; // Vertical spread controlled by speedY
-    const hueOffset = Math.random() * hueVariation; // 0 to hueVariation degrees hue shift
+    // Calculate random angle: baseAngle ± angleSpread
+    const angleOffset = (Math.random() - 0.5) * 2 * angleSpread; // Random ±angleSpread
+    const angleDegrees = baseAngle + angleOffset;
+    const angleRadians = (angleDegrees * Math.PI) / 180;
+
+    // Calculate random speed with variance
+    const speedVarianceFactor = 1 + (Math.random() - 0.5) * 2 * (speedVariance / 100);
+    const speed = baseSpeed * speedVarianceFactor;
+
+    // Convert angle and speed to velocity components
+    const vx = Math.cos(angleRadians) * speed;
+    const vy = Math.sin(angleRadians) * speed;
+
+    const hueOffset = Math.random() * hueVariation;
 
     const particle: Particle = {
       id: this.nextId++,
@@ -114,6 +129,7 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
       y: knobY,
       vx,
       vy,
+      gravity,
       hueOffset,
     };
 
@@ -145,6 +161,7 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
               top: `${particle.y}px`,
               '--particle-vx': particle.vx,
               '--particle-vy': particle.vy,
+              '--particle-gravity': particle.gravity,
               '--particle-hue': particle.hueOffset,
               '--particle-lifetime': `${lifetime}ms`,
               '--particle-distance-multiplier': distanceMultiplier,

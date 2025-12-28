@@ -881,8 +881,7 @@ button.box-button.AppFooter-back {
     width: 2px;
     height: 2px;
     background-color: var(--accent);
-    filter: hue-rotate(calc(var(--particle-hue) * 1deg));
-    animation: particle-fly var(--particle-lifetime, 600ms) steps(20) forwards;
+    animation: particle-fly var(--particle-lifetime, 600ms) linear forwards;
     pointer-events: none;
 }
 
@@ -890,16 +889,28 @@ button.box-button.AppFooter-back {
     0% {
         transform: translate(0, 0);
     }
+    25% {
+        transform: translate(
+            calc(var(--particle-vx) * 20px * var(--particle-distance-multiplier, 1)),
+            calc(var(--particle-vy) * 20px * var(--particle-distance-multiplier, 1) + var(--particle-gravity, 0.5) * 2.5px * var(--particle-distance-multiplier, 1))
+        );
+    }
     50% {
         transform: translate(
             calc(var(--particle-vx) * 40px * var(--particle-distance-multiplier, 1)),
-            calc(var(--particle-vy) * 40px * var(--particle-distance-multiplier, 1) + 10px * var(--particle-distance-multiplier, 1))
+            calc(var(--particle-vy) * 40px * var(--particle-distance-multiplier, 1) + var(--particle-gravity, 0.5) * 10px * var(--particle-distance-multiplier, 1))
+        );
+    }
+    75% {
+        transform: translate(
+            calc(var(--particle-vx) * 60px * var(--particle-distance-multiplier, 1)),
+            calc(var(--particle-vy) * 60px * var(--particle-distance-multiplier, 1) + var(--particle-gravity, 0.5) * 22.5px * var(--particle-distance-multiplier, 1))
         );
     }
     100% {
         transform: translate(
             calc(var(--particle-vx) * 80px * var(--particle-distance-multiplier, 1)),
-            calc(var(--particle-vy) * 80px * var(--particle-distance-multiplier, 1) + 40px * var(--particle-distance-multiplier, 1))
+            calc(var(--particle-vy) * 80px * var(--particle-distance-multiplier, 1) + var(--particle-gravity, 0.5) * 40px * var(--particle-distance-multiplier, 1))
         );
     }
 }
@@ -1078,6 +1089,12 @@ button.box-button.AppFooter-back {
 
 .Settings-subsection-collapsible:hover {
     color: var(--clickable);
+}
+
+.Settings-subsection-with-toggle input[type="checkbox"] {
+    margin: 0;
+    margin-right: calc(var(--charW1) / 2);
+    cursor: pointer;
 }
 
 .Settings-subsection-arrow {

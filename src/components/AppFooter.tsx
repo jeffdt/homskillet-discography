@@ -77,11 +77,14 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
 
   const userContext = useContext(UserContext);
   const particleSettings = {
+    particleEnabled: userContext.settings.sliderSparksEnabled,
     particleSpawnRate: userContext.settings.particleSpawnRate,
     particleLifespan: userContext.settings.particleLifespan,
-    particleMaxCount: userContext.settings.particleMaxCount,
-    particleSpeedX: userContext.settings.particleSpeedX,
-    particleSpeedY: userContext.settings.particleSpeedY,
+    particleBaseAngle: userContext.settings.particleBaseAngle,
+    particleAngleSpread: userContext.settings.particleAngleSpread,
+    particleSpeed: userContext.settings.particleSpeed,
+    particleSpeedVariance: userContext.settings.particleSpeedVariance,
+    particleGravity: userContext.settings.particleGravity,
     particleHueVariation: userContext.settings.particleHueVariation,
   };
 

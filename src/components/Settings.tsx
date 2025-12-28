@@ -55,9 +55,18 @@ function Settings(props: SettingsProps) {
         </label>
 
         <h4
-          className="Settings-subsection Settings-subsection-collapsible"
+          className="Settings-subsection Settings-subsection-collapsible Settings-subsection-with-toggle"
           onClick={() => userContext.updateSettings({ sliderSparksExpanded: !persistedSettings.sliderSparksExpanded })}
         >
+          <input
+            type="checkbox"
+            checked={persistedSettings.sliderSparksEnabled ?? true}
+            onChange={(e) => {
+              e.stopPropagation();
+              userContext.updateSettings({ sliderSparksEnabled: e.target.checked });
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
           <span className={`Settings-subsection-arrow ${persistedSettings.sliderSparksExpanded ? 'expanded' : ''}`}>▸</span>
           Slider Sparks
           <button
@@ -67,10 +76,11 @@ function Settings(props: SettingsProps) {
               userContext.updateSettings({
                 particleSpawnRate: 40,
                 particleLifespan: 600,
-                particleMaxCount: 15,
-                particleSpeedX: 1.1,
-                particleSpeedY: 2.0,
-                particleHueVariation: 30,
+                particleBaseAngle: 180,
+                particleAngleSpread: 30,
+                particleSpeed: 1.0,
+                particleSpeedVariance: 20,
+                particleGravity: 0.5,
               });
             }}
             title="Reset to defaults"
@@ -97,7 +107,7 @@ function Settings(props: SettingsProps) {
             <input
               type="range"
               min="200"
-              max="1200"
+              max="2400"
               step="100"
               value={persistedSettings.particleLifespan ?? 600}
               onChange={(e) => userContext.updateSettings({ particleLifespan: parseInt(e.target.value) })}
@@ -106,58 +116,70 @@ function Settings(props: SettingsProps) {
           </div>
 
           <div className="Settings-param">
-            <label>Max Count</label>
-            <input
-              type="range"
-              min="5"
-              max="30"
-              value={persistedSettings.particleMaxCount ?? 15}
-              onChange={(e) => userContext.updateSettings({ particleMaxCount: parseInt(e.target.value) })}
-            />
-            <span>{persistedSettings.particleMaxCount ?? 15}</span>
-          </div>
-
-          <div className="Settings-param">
-            <label>Horizontal Speed</label>
-            <input
-              type="range"
-              min="0.5"
-              max="2.5"
-              step="0.1"
-              value={persistedSettings.particleSpeedX ?? 1.1}
-              onChange={(e) => userContext.updateSettings({ particleSpeedX: parseFloat(e.target.value) })}
-            />
-            <span>{(persistedSettings.particleSpeedX ?? 1.1).toFixed(1)}×</span>
-          </div>
-
-          <div className="Settings-param">
-            <label>Vertical Spread</label>
-            <input
-              type="range"
-              min="0.5"
-              max="4.0"
-              step="0.1"
-              value={persistedSettings.particleSpeedY ?? 2.0}
-              onChange={(e) => userContext.updateSettings({ particleSpeedY: parseFloat(e.target.value) })}
-            />
-            <span>{(persistedSettings.particleSpeedY ?? 2.0).toFixed(1)}×</span>
-          </div>
-
-          <div className="Settings-param">
-            <label>Color Variation</label>
+            <label>Base Angle</label>
             <input
               type="range"
               min="0"
-              max="60"
-              value={persistedSettings.particleHueVariation ?? 30}
-              onChange={(e) => userContext.updateSettings({ particleHueVariation: parseInt(e.target.value) })}
+              max="360"
+              value={persistedSettings.particleBaseAngle ?? 180}
+              onChange={(e) => userContext.updateSettings({ particleBaseAngle: parseInt(e.target.value) })}
             />
-            <span>{persistedSettings.particleHueVariation ?? 30}°</span>
+            <span>{persistedSettings.particleBaseAngle ?? 180}°</span>
+          </div>
+
+          <div className="Settings-param">
+            <label>Angle Spread</label>
+            <input
+              type="range"
+              min="0"
+              max="90"
+              value={persistedSettings.particleAngleSpread ?? 30}
+              onChange={(e) => userContext.updateSettings({ particleAngleSpread: parseInt(e.target.value) })}
+            />
+            <span>{persistedSettings.particleAngleSpread ?? 30}°</span>
+          </div>
+
+          <div className="Settings-param">
+            <label>Speed</label>
+            <input
+              type="range"
+              min="0.5"
+              max="3.0"
+              step="0.1"
+              value={persistedSettings.particleSpeed ?? 1.0}
+              onChange={(e) => userContext.updateSettings({ particleSpeed: parseFloat(e.target.value) })}
+            />
+            <span>{(persistedSettings.particleSpeed ?? 1.0).toFixed(1)}×</span>
+          </div>
+
+          <div className="Settings-param">
+            <label>Speed Variance</label>
+            <input
+              type="range"
+              min="0"
+              max="50"
+              value={persistedSettings.particleSpeedVariance ?? 20}
+              onChange={(e) => userContext.updateSettings({ particleSpeedVariance: parseInt(e.target.value) })}
+            />
+            <span>{persistedSettings.particleSpeedVariance ?? 20}%</span>
+          </div>
+
+          <div className="Settings-param">
+            <label>Gravity</label>
+            <input
+              type="range"
+              min="0"
+              max="2.0"
+              step="0.1"
+              value={persistedSettings.particleGravity ?? 0.5}
+              onChange={(e) => userContext.updateSettings({ particleGravity: parseFloat(e.target.value) })}
+            />
+            <span>{(persistedSettings.particleGravity ?? 0.5).toFixed(1)}×</span>
           </div>
         </div>
       </div>
 
-      <h3>{sequencer?.getPlayer()?.name || 'Player'} Settings</h3>
+      <h3>Music Settings</h3>
       {sequencer?.getPlayer() ?
         <PlayerParams
           ejected={ejected}

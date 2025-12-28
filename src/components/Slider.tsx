@@ -12,9 +12,11 @@ interface SliderProps {
   // Particle settings (optional, passed to SliderParticles)
   particleSpawnRate?: number;
   particleLifespan?: number;
-  particleMaxCount?: number;
-  particleSpeedX?: number;
-  particleSpeedY?: number;
+  particleBaseAngle?: number;
+  particleAngleSpread?: number;
+  particleSpeed?: number;
+  particleSpeedVariance?: number;
+  particleGravity?: number;
   particleHueVariation?: number;
 }
 
@@ -115,9 +117,11 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           intensity={this.props.pulseIntensity ?? 0}
           spawnRate={this.props.particleSpawnRate}
           lifespan={this.props.particleLifespan}
-          maxCount={this.props.particleMaxCount}
-          speedX={this.props.particleSpeedX}
-          speedY={this.props.particleSpeedY}
+          baseAngle={this.props.particleBaseAngle}
+          angleSpread={this.props.particleAngleSpread}
+          speed={this.props.particleSpeed}
+          speedVariance={this.props.particleSpeedVariance}
+          gravity={this.props.particleGravity}
           hueVariation={this.props.particleHueVariation}
         />
       </div>

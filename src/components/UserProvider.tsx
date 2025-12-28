@@ -23,14 +23,17 @@ const UserContext = createContext<UserContextValue>({
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
   audioReactivePulse: true,
+  sliderSparksEnabled: true,     // enable/disable slider sparks
   sliderSparksExpanded: false,   // collapsed by default
 
   // Slider particle settings
   particleSpawnRate: 40,        // min spawn interval (lower = faster)
   particleLifespan: 600,         // milliseconds
-  particleMaxCount: 15,          // max particles
-  particleSpeedX: 1.1,           // horizontal velocity multiplier
-  particleSpeedY: 2.0,           // vertical spread multiplier
+  particleBaseAngle: 180,        // base angle in degrees (0=right, 90=down, 180=left, 270=up)
+  particleAngleSpread: 30,       // angle spread in degrees (cone width)
+  particleSpeed: 1.0,            // speed multiplier
+  particleSpeedVariance: 20,     // speed variance percentage (0-100)
+  particleGravity: 0.5,          // gravity strength (0=none, 1=normal, 2=strong)
   particleHueVariation: 30,      // hue degrees
 };
 
