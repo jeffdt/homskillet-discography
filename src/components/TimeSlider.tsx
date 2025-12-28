@@ -13,6 +13,14 @@ interface TimeSliderProps {
   currentSongDurationMs: number;
   getCurrentPositionMs: () => number;
   onChange: (event: number) => void;
+
+  // Particle settings (optional, passed to Slider)
+  particleSpawnRate?: number;
+  particleLifespan?: number;
+  particleMaxCount?: number;
+  particleSpeedX?: number;
+  particleSpeedY?: number;
+  particleHueVariation?: number;
 }
 
 interface TimeSliderState {
@@ -98,6 +106,12 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
           onDrag={this.handlePositionDrag}
           onChange={this.handlePositionDrop}
           shouldSpawnParticles={!this.props.paused}
+          particleSpawnRate={this.props.particleSpawnRate}
+          particleLifespan={this.props.particleLifespan}
+          particleMaxCount={this.props.particleMaxCount}
+          particleSpeedX={this.props.particleSpeedX}
+          particleSpeedY={this.props.particleSpeedY}
+          particleHueVariation={this.props.particleHueVariation}
         />
         <div className='TimeSlider-labels'>
           <div>{this.getTimeLabel()}</div>

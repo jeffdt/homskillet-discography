@@ -14,7 +14,8 @@
       "Bash(cat:*)",
       "Skill(frontend-design:frontend-design)",
       "Bash(grep:*)",
-      "Bash(bun run build-lite:*)"
+      "Bash(bun run build-lite:*)",
+      "Bash(git log:*)"
     ]
   }
 }
