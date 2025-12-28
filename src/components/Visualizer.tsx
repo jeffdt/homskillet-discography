@@ -5,7 +5,23 @@ import { ColorPalette, VisualizerState, VisualizerProps } from '../types/visuali
 const COLOR_PALETTES: ColorPalette[] = [
   {
     label: 'MW Green',
-    colors: ['#101010', '#202020', '#66CB01', '#9BFE38', '#FEFEFE'],
+    colors: ['#101010', '#202020', '#66CB01', '#9BFE38', '#FEFEFE', '#FEFEFE'],
+  },
+  {
+    label: 'MW Yellow',
+    colors: ['#101010', '#202020', '#FFBB3E', '#EFE903', '#FEFEFE', '#FEFEFE'],
+  },
+  {
+    label: 'MW Blue',
+    colors: ['#101010', '#202020', '#009FF4', '#66CAFF', '#FEFEFE', '#FEFEFE'],
+  },
+  {
+    label: 'MW Pink',
+    colors: ['#101010', '#202020', '#FF6A9B', '#FFAEC9', '#FEFEFE', '#FEFEFE'],
+  },
+  {
+    label: 'MW Red',
+    colors: ['#101010', '#202020', '#DA0205', '#F0424A', '#FEFEFE', '#FEFEFE'],
   },
   {
     label: 'Game Genie',
@@ -20,7 +36,7 @@ const COLOR_PALETTES: ColorPalette[] = [
     colors: ['#020202', '#35012c', '#731630', '#ee4c2c', '#fde06f', '#fffce8'],
   },
   {
-    label: 'Monochrome',
+    label: 'Chrome Plated',
     colors: ['#050505', '#303030', '#606060', '#a0a0a0', '#f0f0f0'],
   },
 ];
@@ -197,7 +213,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
                     onClick={() => this.handleThemeClick(i)}
                   >
                     <div className="Visualizer-theme-swatch">
-                      {palette.colors.map((color, colorIndex) => (
+                      {palette.colors.slice(0, -1).map((color, colorIndex) => (
                         <div
                           key={`color-${colorIndex}`}
                           className="Visualizer-theme-pixel"
