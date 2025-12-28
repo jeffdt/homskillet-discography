@@ -8,6 +8,8 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 **B1**: The visualizer shows blue briefly when the song starts. Why?
 
+**B2**: I shouldn't see attribution in settings menu in desktop mode. in mobile, it should be a small question mark icon somewhere that opens a modal you can dismiss.
+
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
