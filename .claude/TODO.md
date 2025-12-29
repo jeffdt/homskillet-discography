@@ -12,7 +12,7 @@ None!
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-None!
+**S1**: Remove LINEAR and LOG visualization modes from Spectrogram.js. Only Constant Q mode is needed since it provides musically-aligned frequency bins. This would simplify the updateFrame() method and remove unused mode switching code.
 
 ---
 

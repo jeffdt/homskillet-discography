@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 import { ColorPalette, VisualizerState, VisualizerProps } from '../types/visualizer';
 
 const COLOR_PALETTES: ColorPalette[] = [
+  // MW Palettes
   {
     label: 'MW Green',
     colors: ['#101010', '#202020', '#66CB01', '#9BFE38', '#FEFEFE', '#FEFEFE'],
@@ -23,18 +24,7 @@ const COLOR_PALETTES: ColorPalette[] = [
     label: 'MW Red',
     colors: ['#101010', '#202020', '#DA0205', '#F0424A', '#FEFEFE', '#FEFEFE'],
   },
-  {
-    label: 'Game Genie',
-    colors: DEFAULT_COLOR_PALETTE,
-  },
-  {
-    label: 'Midnight',
-    colors: ['#020024', '#090979', '#0f5a9e', '#0fd7b1', '#f2f2f2'],
-  },
-  {
-    label: 'Sunset',
-    colors: ['#020202', '#35012c', '#731630', '#ee4c2c', '#fde06f', '#fffce8'],
-  },
+  // bz Palettes
   {
     label: 'bz chrome',
     colors: ['#101010', '#000000', '#707070', '#bbbbbb', '#e0e0e0', '#FEFEFE'],
@@ -94,6 +84,19 @@ const COLOR_PALETTES: ColorPalette[] = [
   {
     label: 'bz Lavender',
     colors: ['#101010', '#301850', '#7a5da5', '#e7d69c', '#f8f8b8', '#FEFEFE', '#FEFEFE'],
+  },
+  // Misc Palettes
+  {
+    label: 'Game Genie',
+    colors: DEFAULT_COLOR_PALETTE,
+  },
+  {
+    label: 'Midnight',
+    colors: ['#020024', '#090979', '#0f5a9e', '#0fd7b1', '#f2f2f2'],
+  },
+  {
+    label: 'Sunset',
+    colors: ['#020202', '#35012c', '#731630', '#ee4c2c', '#fde06f', '#fffce8'],
   },
 ];
 const VIS_WIDTH = 448;
@@ -254,7 +257,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
               >
                 ▸
               </span>
-              Theme
+              Palette
             </h4>
             <div
               className={`Visualizer-themes-content ${
@@ -265,7 +268,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
                 {COLOR_PALETTES.map((palette, i) => (
                   <div
                     key={`theme-${i}`}
-                    className={`Visualizer-theme-card ${this.state.colorPalette === i ? 'selected' : ''}`}
+                    className={`Visualizer-theme-card ${this.state.colorPalette === i ? 'selected' : ''} ${i === 5 || i === 20 ? 'Visualizer-theme-card-new-row' : ''}`}
                     onClick={() => this.handleThemeClick(i)}
                   >
                     <div className="Visualizer-theme-swatch">
