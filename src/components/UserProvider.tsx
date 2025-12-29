@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   particleSpeedVariance: 20, // speed variance percentage (0-100)
   particleGravity: 0.0, // gravity strength (0=none, 1=normal, 2=strong)
   particleHueVariation: 30, // hue degrees
+  particleFadeMode: 'fade', // 'fade' or 'instant'
 
   // Visualizer settings
   visualizerTheme: 0, // default to MW Green theme

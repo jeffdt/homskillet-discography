@@ -27,6 +27,7 @@ interface SliderParticlesProps {
   speedVariance?: number; // Speed variance percentage (0-100)
   gravity?: number; // Gravity strength (0=none, 1=normal, 2=strong)
   hueVariation?: number; // Hue variation in degrees
+  fadeMode?: 'fade' | 'instant'; // Fade mode: 'fade' (linear) or 'instant' (sudden disappearance)
 }
 
 interface SliderParticlesState {
@@ -40,7 +41,10 @@ const MIN_SPAWN_INTERVAL_MS = 40;
 const MAX_SPAWN_INTERVAL_MS = 120;
 const NUM_SPAWNERS = 2; // Multiple independent spawners for randomness
 
-export default class SliderParticles extends PureComponent<SliderParticlesProps, SliderParticlesState> {
+export default class SliderParticles extends PureComponent<
+  SliderParticlesProps,
+  SliderParticlesState
+> {
   private nextId = 0;
   private spawnerTimers: NodeJS.Timeout[] = [];
   private animationFrameId: number | null = null;
@@ -79,7 +83,7 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
       const now = performance.now();
       // Remove expired particles and update animation time
       this.setState((prevState) => ({
-        particles: prevState.particles.filter(p => (now - p.startTime) < p.lifetime),
+        particles: prevState.particles.filter((p) => now - p.startTime < p.lifetime),
         animationTime: now,
       }));
       this.animationFrameId = requestAnimationFrame(animate);
@@ -103,7 +107,7 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
 
   stopSpawners(): void {
     // Clear all spawner timers
-    this.spawnerTimers.forEach(timer => clearTimeout(timer));
+    this.spawnerTimers.forEach((timer) => clearTimeout(timer));
     this.spawnerTimers = [];
     // Clear all particles
     this.setState({ particles: [] });
@@ -184,11 +188,18 @@ export default class SliderParticles extends PureComponent<SliderParticlesProps,
           // Physics: position = initial + velocity*time + 0.5*gravity*time^2
           const pixelScale = 80; // Base distance scale
           const x = particle.x + particle.vx * pixelScale * t;
-          const y = particle.y + particle.vy * pixelScale * t + 0.5 * particle.gravity * pixelScale * t * t;
+          const y =
+            particle.y + particle.vy * pixelScale * t + 0.5 * particle.gravity * pixelScale * t * t;
 
-          // Calculate opacity fade (1.0 at start, 0.0 at end)
+          // Calculate opacity based on fade mode
           const progress = elapsedMs / particle.lifetime;
-          const opacity = Math.max(0, 1 - progress);
+          const fadeMode = this.props.fadeMode ?? 'fade';
+          const opacity =
+            fadeMode === 'instant'
+              ? progress < 0.95
+                ? 1.0
+                : 0.0 // Instant: full opacity until 95% complete
+              : Math.max(0, 1 - progress); // Fade: linear fade from 1 to 0
 
           return (
             <div

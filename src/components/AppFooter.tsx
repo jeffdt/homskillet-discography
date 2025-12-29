@@ -89,6 +89,7 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
     particleSpeedVariance: userContext.settings.particleSpeedVariance,
     particleGravity: userContext.settings.particleGravity,
     particleHueVariation: userContext.settings.particleHueVariation,
+    particleFadeMode: userContext.settings.particleFadeMode,
   };
 
   const [showAboutModal, setShowAboutModal] = useState(false);
