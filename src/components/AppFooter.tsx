@@ -1,4 +1,5 @@
 import React, { memo, useContext, useState } from 'react';
+import SongDisplay from './SongDisplay';
 import TimeSlider from './TimeSlider';
 import VolumeSlider from './VolumeSlider';
 import { REPEAT_LABELS, SHUFFLE_LABELS } from '../Sequencer';
@@ -8,8 +9,6 @@ import { UserContext } from './UserProvider';
 interface AppFooterProps {
   // State props
   currentSongDurationMs: number;
-  currentSongNumSubtunes: number;
-  currentSongSubtune: number;
   ejected: boolean;
   imageUrl: string | null;
   paused: boolean;
@@ -19,16 +18,15 @@ interface AppFooterProps {
   volume: number;
 
   // Method props
-  getCurrentSongLink: (withSubtune?: boolean) => string;
+  getCurrentSongLink: () => string | null;
   handleCopyLink: (link: string) => void;
   handleCycleRepeat: () => void;
   handleCycleShuffle: () => void;
   handleTimeSliderChange: (position: number) => void;
   handleVolumeChange: (volume: number) => void;
+  navigateToCurrentSong: () => void;
   nextSong: () => void;
-  nextSubtune: () => void;
   prevSong: () => void;
-  prevSubtune: () => void;
   sequencer: any; // TODO: Type Sequencer properly when migrating
   togglePause: () => void;
 }
@@ -37,8 +35,6 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
   const {
     // this.state.
     currentSongDurationMs,
-    currentSongNumSubtunes,
-    currentSongSubtune,
     ejected,
     imageUrl,
     paused,
@@ -54,20 +50,12 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
     handleCycleShuffle,
     handleTimeSliderChange,
     handleVolumeChange,
+    navigateToCurrentSong,
     nextSong,
-    nextSubtune,
     prevSong,
-    prevSubtune,
     sequencer,
     togglePause,
   } = props;
-
-  const subtuneText = `Tune ${currentSongSubtune + 1} of ${currentSongNumSubtunes}`;
-
-  const handleCopySubtuneLink = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    handleCopyLink(getCurrentSongLink(/*withSubtune=*/ true));
-  };
 
   const playPauseTitle = paused ? 'Play' : 'Pause';
   const playPauseClass = paused ? 'icon-play' : 'icon-pause';
@@ -145,32 +133,39 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
         </div>
       )}
       <div className="AppFooter-main">
-        <div style={{ display: 'flex', gap: 'var(--charW2)' }}>
-          <TimeSlider
-            paused={paused}
-            currentSongDurationMs={currentSongDurationMs}
-            getCurrentPositionMs={() => {
-              // TODO: reevaluate this approach
-              if (sequencer && sequencer.getPlayer()) {
-                return sequencer.getPlayer().getPositionMs();
-              }
-              return 0;
-            }}
-            onChange={handleTimeSliderChange}
-            {...particleSettings}
+        <div className="AppFooter-playback-info">
+          <SongDisplay
+            songUrl={songUrl}
+            ejected={ejected}
+            navigateToCurrentSong={navigateToCurrentSong}
           />
-          <VolumeSlider
-            onChange={(e) => {
-              handleVolumeChange(e.target.value);
-            }}
-            handleReset={(e) => {
-              handleVolumeChange(100);
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            title="Double-click or right-click to reset to 100%."
-            value={volume}
-          />
+          <div style={{ display: 'flex', gap: 'var(--charW2)' }}>
+            <TimeSlider
+              paused={paused}
+              currentSongDurationMs={currentSongDurationMs}
+              getCurrentPositionMs={() => {
+                // TODO: reevaluate this approach
+                if (sequencer && sequencer.getPlayer()) {
+                  return sequencer.getPlayer().getPositionMs();
+                }
+                return 0;
+              }}
+              onChange={handleTimeSliderChange}
+              {...particleSettings}
+            />
+            <VolumeSlider
+              onChange={(e) => {
+                handleVolumeChange(e.target.value);
+              }}
+              handleReset={(e) => {
+                handleVolumeChange(100);
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              title="Double-click or right-click to reset to 100%."
+              value={volume}
+            />
+          </div>
         </div>
         <div className="AppFooter-controls-row">
           <button onClick={prevSong} title="Previous" className="box-button" disabled={ejected}>
@@ -193,37 +188,6 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
           <button onClick={nextSong} title="Next" className="box-button" disabled={ejected}>
             <span className="inline-icon icon-next" />
           </button>
-          {currentSongNumSubtunes > 1 && (
-            <>
-              <button
-                className="AppFooter-back box-button"
-                disabled={ejected}
-                onClick={prevSubtune}
-              >
-                <span className="inline-icon icon-back" />
-              </button>
-              <button
-                className="AppFooter-forward box-button"
-                disabled={ejected}
-                onClick={nextSubtune}
-              >
-                <span className="inline-icon icon-forward" />
-              </button>
-              {songUrl ? (
-                <a
-                  style={{ color: 'var(--neutral4)' }}
-                  href={getCurrentSongLink(/*subtune=*/ true)}
-                  title="Copy subtune link to clipboard"
-                  onClick={handleCopySubtuneLink}
-                >
-                  {subtuneText}
-                  <span className="inline-icon icon-copy" />
-                </a>
-              ) : (
-                <span>{subtuneText}</span>
-              )}
-            </>
-          )}
         </div>
         <div className="AppFooter-controls-row AppFooter-secondary-controls">
           <button

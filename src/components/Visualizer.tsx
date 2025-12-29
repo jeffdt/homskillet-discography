@@ -132,7 +132,6 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       null
     );
     // Hardcode best quality settings
-    this.spectrogram.setMode(2); // Constant Q - best quality
     this.spectrogram.setWeighting(1); // A-Weighting - natural sound
     this.spectrogram.setSpeed(2); // Medium speed
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
@@ -157,7 +156,6 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
         null
       );
       // Hardcode best quality settings
-      this.spectrogram.setMode(2); // Constant Q
       this.spectrogram.setWeighting(1); // A-Weighting
       this.spectrogram.setSpeed(2); // Medium speed
       this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
