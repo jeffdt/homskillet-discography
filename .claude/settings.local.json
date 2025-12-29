@@ -17,7 +17,8 @@
       "Bash(bun run build-lite:*)",
       "Bash(git log:*)",
       "Bash(bun add:*)",
-      "Bash(bunx husky init)"
+      "Bash(bunx husky init)",
+      "Bash(bun run:*)"
     ]
   }
 }

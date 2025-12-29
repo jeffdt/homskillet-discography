@@ -723,7 +723,30 @@ class App extends React.Component<AppProps, AppState> {
 
   handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url);
-    this.props.toastContext.enqueueToast('Copied song link to clipboard.', ToastLevels.INFO);
+  };
+
+  navigateToCurrentSong = () => {
+    const currUrl = this.sequencer?.getCurrUrl();
+    if (!currUrl) return;
+
+    // Strip CATALOG_PREFIX to get relative path
+    const playPath = currUrl.startsWith(CATALOG_PREFIX)
+      ? currUrl.substring(CATALOG_PREFIX.length)
+      : currUrl;
+    const dirPath = dirname(playPath);
+
+    // Load directory, then navigate
+    this.fetchDirectory(dirPath).then(() => {
+      // Find file index for scroll positioning
+      const listing = this.state.directories[dirPath];
+      const index = listing?.findIndex((item) => item.href === currUrl) ?? -1;
+
+      // Navigate with scroll state
+      this.props.history.push(pathJoin('/', dirPath), {
+        selectedRow: index >= 0 ? index : 0,
+        scrollTop: 0,
+      });
+    });
   };
 
   handleTabChange = (tab: TabType) => {
@@ -880,6 +903,7 @@ class App extends React.Component<AppProps, AppState> {
             ejected={this.state.ejected}
             getCurrentSongLink={this.getCurrentSongLink}
             handleCopyLink={this.handleCopyLink}
+            navigateToCurrentSong={this.navigateToCurrentSong}
           />
           <AppFooter
             currentSongDurationMs={this.state.currentSongDurationMs}

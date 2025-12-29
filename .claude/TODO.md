@@ -18,8 +18,6 @@ None!
 
 ## ENHANCEMENT (new features & styling)
 
-**E3**: Clicking the currently playing song title above the player should also take you directly to that file in the browser. It should open whatever dir it's located in and everything. It shouldn't interrupt the song, just navigate to that dir and make sure the file is visible on screen.
-
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
 **E5**: Let's make the time slider more dynamic. Can it be wavy and ripple down the line?
@@ -27,8 +25,6 @@ None!
 **E6**: Add ability for me to store metadata for songs and albums. I assume this would be json files that live alongside the songs but i am open to other ideas. Should include things like my personal comments on the song or album, and per-song presets for the player settings (tempo, stereo width).
 
 **E7**: Add ability to play MP3s for the handful of Ableton covers or remixes I made.
-
-**E8**: Swap the favicon out to something custom from one of our games.
 
 **E9**: Improve UX when songs are loaded via `?play=` link. Currently, when you paste a song link (e.g., `/?play=%2FBazaar%2Ftectonictechniques.nsf`), the song loads but doesn't autoplay due to browser autoplay policies - it waits for user interaction to resume the AudioContext. This is correct behavior, but the UI doesn't indicate that the user needs to click to start audio. Consider:
 
@@ -64,11 +60,7 @@ None!
 - This would provide 100% TypeScript coverage of hand-written source code
 - Can be done incrementally when touching these files for features
 
-**M3**: Add pre-commit hooks for linting, formatting and tests.
-
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this.
-
-**M6**: Is src/gm-patch-map.ts used?
 
 ---
 
