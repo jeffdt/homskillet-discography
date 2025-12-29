@@ -645,6 +645,15 @@ body,
   flex-shrink: 0;
 }
 
+.song-title-link:hover {
+  color: var(--neutral4);
+  text-decoration: underline;
+}
+
+.icon-copy:hover {
+  opacity: 0.7;
+}
+
 @media (orientation: portrait), (max-width: 768px) {
   .SongDisplay {
     font-size: 18px;
