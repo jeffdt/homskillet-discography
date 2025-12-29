@@ -12,11 +12,13 @@ None!
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S1**: Remove LINEAR and LOG visualization modes from Spectrogram.js. Only Constant Q mode is needed since it provides musically-aligned frequency bins. This would simplify the updateFrame() method and remove unused mode switching code.
+**S2**: Remove all subtune functionality. NSF files can contain multiple tracks (subtunes), but this discography will only use the first track of each file. Remove: subtune UI controls (next/prev buttons, "Tune N of M" display), subtune state management (currentSongNumSubtunes, currentSongSubtune), navigation methods (nextSubtune, prevSubtune, playSubtune), URL parameter handling (?subtune=N), and player methods (getNumSubtunes, getSubtune).
 
 ---
 
 ## ENHANCEMENT (new features & styling)
+
+**E3**: Visualizer peak decay should be configurable via settings.
 
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
@@ -33,8 +35,6 @@ None!
 - Displaying the paused state more prominently when audio is ready but suspended
 
 **E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
-
-**E12**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
 
 **E14**: Multiple spark generators with their own parameter sets (i.e. blue sparks shooting infrequently, green sparks shooting constantly)
 

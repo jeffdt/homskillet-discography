@@ -138,8 +138,6 @@ class App extends React.Component<AppProps, AppState> {
       ejected: true,
       currentSongMetadata: {},
       currentSongNumVoices: 0,
-      currentSongNumSubtunes: 0,
-      currentSongSubtune: 0,
       currentSongDurationMs: 1,
       currentSongPositionMs: 0,
       tempo: 1,
@@ -233,12 +231,8 @@ class App extends React.Component<AppProps, AppState> {
       // Treat play params as "transient command" and strip them after starting playback.
       // See comment in Browse.js for more about why a sticky play param is not a good idea.
       const playPath = playParam;
-      const subtune = urlSearchParams.get('subtune')
-        ? parseInt(urlSearchParams.get('subtune')!, 10)
-        : 0;
       const time = urlSearchParams.get('t') ? parseInt(urlSearchParams.get('t')!, 10) : 0;
       urlSearchParams.delete('play');
-      urlSearchParams.delete('subtune');
       urlSearchParams.delete('t');
       const qs = urlSearchParams.toString();
       const search = qs ? `?${qs}` : '';
@@ -250,7 +244,7 @@ class App extends React.Component<AppProps, AppState> {
         const playHref = pathJoin(CATALOG_PREFIX, playPath);
         const index = this.playContexts[dirPath].indexOf(playHref);
 
-        this.playContext(this.playContexts[dirPath], index, subtune);
+        this.playContext(this.playContexts[dirPath], index);
 
         if (time) {
           setTimeout(() => {
@@ -269,12 +263,10 @@ class App extends React.Component<AppProps, AppState> {
     const map: Record<string, string> = {
       ejected: 'isEjected',
       paused: 'isPaused',
-      currentSongSubtune: 'subtune',
       currentSongMetadata: 'metadata',
       currentSongNumVoices: 'numVoices',
       currentSongPositionMs: 'positionMs',
       currentSongDurationMs: 'durationMs',
-      currentSongNumSubtunes: 'numSubtunes',
       tempo: 'tempo',
       voiceNames: 'voiceNames',
       voiceMask: 'voiceMask',
@@ -380,12 +372,12 @@ class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  playContext(context: PlayContext, index = 0, subtune = 0) {
+  playContext(context: PlayContext, index = 0) {
     if (!this.sequencer) {
       console.warn('Sequencer not ready yet, cannot play');
       return;
     }
-    this.sequencer.playContext(context, index, subtune);
+    this.sequencer.playContext(context, index);
   }
 
   prevSong() {
@@ -398,16 +390,6 @@ class App extends React.Component<AppProps, AppState> {
     this.sequencer.nextSong();
   }
 
-  prevSubtune() {
-    if (!this.sequencer) return;
-    this.sequencer.prevSubtune();
-  }
-
-  nextSubtune() {
-    if (!this.sequencer) return;
-    this.sequencer.nextSubtune();
-  }
-
   handleSequencerStateUpdate(sequencerState: SequencerState) {
     const { isEjected } = sequencerState;
     console.debug('App.handleSequencerStateUpdate(isEjected=%s)', isEjected);
@@ -415,12 +397,10 @@ class App extends React.Component<AppProps, AppState> {
     if (isEjected) {
       this.setState({
         ejected: true,
-        currentSongSubtune: 0,
         currentSongMetadata: {},
         currentSongNumVoices: 0,
         currentSongPositionMs: 0,
         currentSongDurationMs: 1,
-        currentSongNumSubtunes: 0,
         imageUrl: null,
         songUrl: null,
       });
@@ -706,23 +686,32 @@ class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  getCurrentSongLink(withSubtune = false): string | null {
+  getCurrentSongLink(): string | null {
     const url = this.sequencer?.getCurrUrl();
     if (!url) return null;
     // Remove CATALOG_PREFIX and ensure we don't duplicate path segments
     const relativeUrl = url.startsWith(CATALOG_PREFIX) ? url.substring(CATALOG_PREFIX.length) : url;
     let link = BASE_URL + '/?play=' + encodeURIComponent(relativeUrl);
-    if (withSubtune) {
-      const subtune = this.sequencer?.getSubtune();
-      if (subtune !== 0) {
-        link += '&subtune=' + subtune;
-      }
-    }
     return link;
   }
 
   handleCopyLink = (url: string) => {
     navigator.clipboard.writeText(url);
+  };
+
+  getSongLinkForHref(href: string): string {
+    if (!href) return '';
+    const relativeUrl = href.startsWith(CATALOG_PREFIX)
+      ? href.substring(CATALOG_PREFIX.length)
+      : href;
+    return BASE_URL + '/?play=' + encodeURIComponent(relativeUrl);
+  }
+
+  handleCopyLinkForHref = (href: string) => {
+    const link = this.getSongLinkForHref(href);
+    if (link) {
+      this.handleCopyLink(link);
+    }
   };
 
   navigateToCurrentSong = () => {
@@ -847,6 +836,7 @@ class App extends React.Component<AppProps, AppState> {
                               fetchDirectory={this.fetchDirectory}
                               onSongClick={this.handleSongClick}
                               handleShufflePlay={this.handleShufflePlay}
+                              onCopyLink={this.handleCopyLinkForHref}
                               scrollContainerRef={this.contentAreaRef}
                               listRef={this.listRef}
                             />
@@ -898,17 +888,8 @@ class App extends React.Component<AppProps, AppState> {
               </div>
             )}
           </div>
-          <SongDisplay
-            songUrl={this.state.songUrl}
-            ejected={this.state.ejected}
-            getCurrentSongLink={this.getCurrentSongLink}
-            handleCopyLink={this.handleCopyLink}
-            navigateToCurrentSong={this.navigateToCurrentSong}
-          />
           <AppFooter
             currentSongDurationMs={this.state.currentSongDurationMs}
-            currentSongNumSubtunes={this.state.currentSongNumSubtunes}
-            currentSongSubtune={this.state.currentSongSubtune}
             ejected={this.state.ejected}
             getCurrentSongLink={this.getCurrentSongLink}
             handleCopyLink={this.handleCopyLink}
@@ -917,11 +898,10 @@ class App extends React.Component<AppProps, AppState> {
             handleTimeSliderChange={this.handleTimeSliderChange}
             handleVolumeChange={this.handleVolumeChange}
             imageUrl={this.state.imageUrl}
+            navigateToCurrentSong={this.navigateToCurrentSong}
             nextSong={this.nextSong}
-            nextSubtune={this.nextSubtune}
             paused={this.state.paused}
             prevSong={this.prevSong}
-            prevSubtune={this.prevSubtune}
             repeat={this.state.repeat}
             shuffle={this.state.shuffle}
             sequencer={this.sequencer}

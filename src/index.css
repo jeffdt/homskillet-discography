@@ -637,11 +637,9 @@ body,
 }
 
 .SongDisplay {
-  padding: var(--charH) var(--charW2);
   color: var(--accent); /* Accent - pop of color for currently playing song title */
   font: var(--font-accent) !important;
-  border-top: 1px solid var(--clickable);
-  margin: 0 var(--charW2neg);
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -658,7 +656,6 @@ body,
   .SongDisplay {
     font-size: 18px;
     line-height: 1.4;
-    padding: var(--charW2) var(--charW2); /* Reduce from 44px to 24px vertical padding */
   }
 }
 
@@ -827,6 +824,13 @@ button.box-button.AppFooter-back {
   container-type: size;
 }
 
+.AppFooter-playback-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: var(--charH);
+}
+
 @media (orientation: portrait), (max-width: 768px) {
   .AppFooter-main {
     overflow: hidden; /* Prevent content overflow */
@@ -838,6 +842,10 @@ button.box-button.AppFooter-back {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly; /* Distribute space evenly with minimal gaps */
+  }
+
+  .AppFooter-playback-info {
+    margin-bottom: var(--charW1);
   }
 }
 
@@ -1158,6 +1166,52 @@ button.box-button.AppFooter-back {
   text-transform: uppercase;
   white-space: nowrap;
   min-width: calc(var(--charW1) * 10);
+}
+
+/* Copy icon column */
+.BrowseList-colCopy {
+  flex-shrink: 0;
+  margin-left: calc(var(--charW1) * 2);
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Copy icon - hidden by default */
+.BrowseList-copy-icon {
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  background-color: var(--clickable);
+}
+
+/* Desktop: Show on row hover */
+@media (min-width: 769px) and (hover: hover) {
+  .BrowseList-row:hover .BrowseList-copy-icon {
+    opacity: 1;
+  }
+
+  .BrowseList-copy-icon:hover {
+    opacity: 0.7;
+  }
+}
+
+/* Always show for currently playing song */
+.BrowseList-copy-icon.is-playing {
+  opacity: 1;
+  background-color: var(--accent);
+}
+
+/* Mobile: Only show when playing */
+@media (orientation: portrait), (max-width: 768px) {
+  .BrowseList-copy-icon {
+    opacity: 0;
+  }
+
+  .BrowseList-copy-icon.is-playing {
+    opacity: 1;
+  }
 }
 
 .DirectoryLink-dim {

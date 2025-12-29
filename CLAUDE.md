@@ -27,6 +27,9 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 - `bun start` - Start Vite dev server on localhost:3000
 - `bun run server` - Start Node.js API server on port 8080 (DEV mode)
 - `bun test` - Run Vitest unit tests
+
+**Note:** During active development, assume the dev server is already running. Do not attempt to start it automatically.
+
 - `bun run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
 - `bun run build-chip-core` - Build chip-core locally (requires Emscripten setup)
 - `bun run build-catalog` - Build music catalog index from public/music/ folder

@@ -12,6 +12,8 @@ function VirtualizedList(props: VirtualizedListProps) {
     currContext,
     currIdx,
     onSongClick,
+    onCopyLink,
+    isPlaying,
     itemList,
     songContext,
     rowRenderer,
@@ -57,35 +59,41 @@ function VirtualizedList(props: VirtualizedListProps) {
         updateHistoryRef.current();
       }
     });
-    return () => unblock();  // Cleanup on unmount
+    return () => unblock(); // Cleanup on unmount
   }, [history, updateHistoryRef]);
 
-  const onActivate = useCallback((index: number) => {
-    // Song index may differ from item index if there are directories
-    const item = itemList[index];
-    const songIndex = item.idx ?? index;
+  const onActivate = useCallback(
+    (index: number) => {
+      // Song index may differ from item index if there are directories
+      const item = itemList[index];
+      const songIndex = item.idx ?? index;
 
-    if (item.type === 'directory') {
-      return (e: React.MouseEvent) => {
-        // console.log('Directory clicked', index, e);
-        e.preventDefault();
-        if (item.isBackLink) {
-          history.goBack();
-        } else {
-          history.push(item.href, {
-            prevPathname: window.location.pathname,
-          });
-        }
+      if (item.type === 'directory') {
+        return (e: React.MouseEvent) => {
+          // console.log('Directory clicked', index, e);
+          e.preventDefault();
+          if (item.isBackLink) {
+            history.goBack();
+          } else {
+            history.push(item.href, {
+              prevPathname: window.location.pathname,
+            });
+          }
+        };
+      } else {
+        return onSongClick(null, songContext, songIndex);
       }
-    } else {
-      return onSongClick(null, songContext, songIndex);
-    }
-  }, [history, itemList, songContext, onSongClick]);
+    },
+    [history, itemList, songContext, onSongClick]
+  );
 
   // Callback for ArrowKeyStepper.
-  const selectCell = useCallback(({ scrollToRow }: { scrollToRow: number }) => {
-    setSelectedRow(scrollToRow);
-  }, [setSelectedRow]);
+  const selectCell = useCallback(
+    ({ scrollToRow }: { scrollToRow: number }) => {
+      setSelectedRow(scrollToRow);
+    },
+    [setSelectedRow]
+  );
 
   // Reset/restore selected row when itemList changes.
   useEffect(() => {
@@ -109,51 +117,58 @@ function VirtualizedList(props: VirtualizedListProps) {
   }, [history.location.pathname]);
 
   return (
-    <div onKeyDown={(e) => {
-      // TODO: Possibly remove ArrowKeyStepper and just use this instead.
-      if ((e.target as HTMLElement).tagName === 'INPUT') return;
-      if (!e.repeat && (e.key === 'Enter' || e.key === 'Return')) {
-        if ((e.target as HTMLElement).tagName === 'BUTTON') return;
-        const index = listRef.current?.props.scrollToIndex;
-        if (listRef.current && typeof index === 'number') {
-          listRef.current.scrollToRow(index);
-          onActivate(index)(e as any);
-        }
-      } else if (e.key === 'Backspace') {
-        history.goBack();
-      } else if (e.key === 'Home') {
-        setSelectedRow(0);
-      } else if (e.key === 'End') {
-        setSelectedRow(itemList.length - 1);
-      } else if (e.key === 'PageUp') {
-        e.preventDefault();
-        setSelectedRow(Math.max(0, selectedRow - 10));
-      } else if (e.key === 'PageDown') {
-        e.preventDefault();
-        setSelectedRow(Math.min(itemList.length - 1, selectedRow + 10));
-      } else if (isSorted && e.metaKey === false && e.ctrlKey === false && e.altKey === false
-        && 'abcdefghijklmnopqrstuvwxyz0123456789'.includes(e.key)) {
-        e.preventDefault();
-        const char = e.key.toLowerCase();
-        let left = 0;
-        let right = itemList.length - 1;
-        let mid = 0;
-        while (left <= right) {
-          mid = Math.floor((left + right) / 2);
-          const name = itemList[mid].name.toLowerCase();
-          if (name.startsWith(char)) {
-            break;
-          } else if (name.toLowerCase() < char) {
-            left = mid + 1;
-          } else {
-            right = mid - 1;
+    <div
+      onKeyDown={(e) => {
+        // TODO: Possibly remove ArrowKeyStepper and just use this instead.
+        if ((e.target as HTMLElement).tagName === 'INPUT') return;
+        if (!e.repeat && (e.key === 'Enter' || e.key === 'Return')) {
+          if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+          const index = listRef.current?.props.scrollToIndex;
+          if (listRef.current && typeof index === 'number') {
+            listRef.current.scrollToRow(index);
+            onActivate(index)(e as any);
           }
+        } else if (e.key === 'Backspace') {
+          history.goBack();
+        } else if (e.key === 'Home') {
+          setSelectedRow(0);
+        } else if (e.key === 'End') {
+          setSelectedRow(itemList.length - 1);
+        } else if (e.key === 'PageUp') {
+          e.preventDefault();
+          setSelectedRow(Math.max(0, selectedRow - 10));
+        } else if (e.key === 'PageDown') {
+          e.preventDefault();
+          setSelectedRow(Math.min(itemList.length - 1, selectedRow + 10));
+        } else if (
+          isSorted &&
+          e.metaKey === false &&
+          e.ctrlKey === false &&
+          e.altKey === false &&
+          'abcdefghijklmnopqrstuvwxyz0123456789'.includes(e.key)
+        ) {
+          e.preventDefault();
+          const char = e.key.toLowerCase();
+          let left = 0;
+          let right = itemList.length - 1;
+          let mid = 0;
+          while (left <= right) {
+            mid = Math.floor((left + right) / 2);
+            const name = itemList[mid].name.toLowerCase();
+            if (name.startsWith(char)) {
+              break;
+            } else if (name.toLowerCase() < char) {
+              left = mid + 1;
+            } else {
+              right = mid - 1;
+            }
+          }
+          // Rewind to first instance of char
+          while (mid > 0 && itemList[mid - 1].name.toLowerCase()[0] === char) mid--;
+          setSelectedRow(mid);
         }
-        // Rewind to first instance of char
-        while (mid > 0 && itemList[mid - 1].name.toLowerCase()[0] === char) mid--;
-        setSelectedRow(mid);
-      }
-    }}>
+      }}
+    >
       <WindowScroller
         scrollElement={scrollContainerRef.current}
         onScroll={({ scrollTop }) => {
@@ -183,7 +198,7 @@ function VirtualizedList(props: VirtualizedListProps) {
                   <List
                     ref={listRef}
                     onRowsRendered={({ startIndex, stopIndex }) => {
-                      onSectionRendered({ rowStartIndex: startIndex, rowStopIndex: stopIndex })
+                      onSectionRendered({ rowStartIndex: startIndex, rowStopIndex: stopIndex });
                     }}
                     scrollToIndex={scrollToRow}
                     scrollToAlignment="auto"
@@ -192,8 +207,8 @@ function VirtualizedList(props: VirtualizedListProps) {
                     width={500}
                     onScroll={onChildScroll}
                     containerProps={{ autoFocus: true }}
-                    containerStyle={{ width: "100%", maxWidth: "100%" }}
-                    style={{ width: "100%" }}
+                    containerStyle={{ width: '100%', maxWidth: '100%' }}
+                    style={{ width: '100%' }}
                     rowCount={itemList.length}
                     rowHeight={rowHeight}
                     rowRenderer={({ index, key, style }) => {
@@ -201,12 +216,13 @@ function VirtualizedList(props: VirtualizedListProps) {
                       // Song index may differ from item index if there are directories
                       // const songIndex = item.idx;
                       // const isPlaying = currContext === songContext && currIdx === songIndex;
-                      const isPlaying = currContext && currContext[currIdx!] === item.href;
+                      const isCurrentlyPlaying = currContext && currContext[currIdx!] === item.href;
                       const isSelected = index === scrollToRow;
                       const classNames = ['BrowseList-row'];
-                      if (isPlaying) classNames.push('Song-now-playing');
+                      if (isCurrentlyPlaying) classNames.push('Song-now-playing');
                       if (isSelected) classNames.push('BrowseList-row-selected');
-                      if (index % 2 === 0) classNames.push('even'); else classNames.push('odd');
+                      if (index % 2 === 0) classNames.push('even');
+                      else classNames.push('odd');
 
                       // NOTE: Why not use ref.current.focus(), and rely on browser default behaviors?
                       // Focusing <a> element seems to force it to center of viewport.
@@ -223,20 +239,27 @@ function VirtualizedList(props: VirtualizedListProps) {
                         let el = (e.target as HTMLElement).parentElement;
                         while (el && el.tabIndex < 0) el = el.parentElement;
                         el?.focus({
-                          preventScroll: true
+                          preventScroll: true,
                         });
                         // Play the song on click
                         onActivateWithIndex(e);
                       };
 
-                      return <div key={key} style={style}
-                                  className={classNames.join(' ')}
-                                  onClick={onRowClick}>{
-                        rowRenderer({
-                          item,
-                          onPlay: onActivateWithIndex,
-                        })
-                      }</div>;
+                      return (
+                        <div
+                          key={key}
+                          style={style}
+                          className={classNames.join(' ')}
+                          onClick={onRowClick}
+                        >
+                          {rowRenderer({
+                            item,
+                            onPlay: onActivateWithIndex,
+                            onCopyLink,
+                            isPlaying: isPlaying ? isPlaying(item.href) : false,
+                          })}
+                        </div>
+                      );
                     }}
                   />
                 )}

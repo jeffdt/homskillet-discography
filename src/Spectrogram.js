@@ -1,10 +1,6 @@
 import autoBind from 'auto-bind';
 import chroma from 'chroma-js';
 
-const MODE_LINEAR = 0;
-const MODE_LOG = 1;
-const MODE_CONSTANT_Q = 2;
-
 const WEIGHTING_NONE = 0;
 const WEIGHTING_A = 1;
 const DEFAULT_COLOR_PALETTE = [
@@ -69,7 +65,6 @@ export default class Spectrogram {
     this.dataPtr = this.core._malloc(cqtSize * 4);
 
     this.paused = true;
-    this.mode = MODE_LINEAR;
     this.weighting = WEIGHTING_NONE;
 
     this.analyserNode = audioCtx.createAnalyser();
@@ -78,9 +73,7 @@ export default class Spectrogram {
     this.analyserNode.minDecibels = minDb;
     this.analyserNode.maxDecibels = maxDb;
     this.analyserNode.smoothingTimeConstant = 0.0;
-    this.analyserNode.fftSize = this.fftSize = 2048;
-
-    this.byteFrequencyData = new Uint8Array(this.analyserNode.frequencyBinCount);
+    this.analyserNode.fftSize = this.cqtSize || 2048;
 
     this.freqCanvas = freqCanvas;
     this.specCanvas = specCanvas;
@@ -94,7 +87,6 @@ export default class Spectrogram {
     this.setColorPalette(DEFAULT_COLOR_PALETTE);
 
     this.pianoKeysImage = pianoKeysImage;
-    this.lastData = [];
 
     // Peak hold for frequency analyzer
     this.peakData = [];
@@ -108,32 +100,6 @@ export default class Spectrogram {
       requestAnimationFrame(this.updateFrame);
     }
     this.paused = paused;
-  }
-
-  setMode(mode) {
-    this.mode = mode;
-    if (mode === MODE_CONSTANT_Q) {
-      this.analyserNode.fftSize = this.cqtSize || 2048;
-    } else {
-      this.analyserNode.fftSize = this.fftSize;
-    }
-  }
-
-  setFFTSize(size) {
-    this.fftSize = size;
-    this.analyserNode.fftSize = size;
-  }
-
-  isRepeatedFrequencyData(data) {
-    // Jitter correction: ignore repeated frequency data in spectrogram
-    let isRepeated = true;
-    for (let bin = 0; bin < 40; bin += 2) {
-      if (data[bin] !== this.lastData[bin]) {
-        isRepeated = false;
-      }
-      this.lastData[bin] = data[bin];
-    }
-    return isRepeated;
   }
 
   setWeighting(mode) {
@@ -167,7 +133,7 @@ export default class Spectrogram {
     tempCtx.clearRect(0, 0, this.tempCanvas.width, specSpeed);
 
     // Draw note-based frequency band columns (piano roll style)
-    if (this.mode === MODE_CONSTANT_Q && this.cqtFreqs) {
+    if (this.cqtFreqs) {
       // Convert frequency to MIDI note number
       const freqToMidi = (freq) => 12 * Math.log2(freq / 440) + 69;
 
@@ -198,19 +164,21 @@ export default class Spectrogram {
 
     const _start = performance.now();
     const dataHeap = new Float32Array(this.core.HEAPF32.buffer, this.dataPtr, this.cqtSize);
-    const bins = this.fftSize / 2;
-    let isRepeated = false;
 
-    if (this.mode === MODE_LINEAR) {
-      analyserNode.getByteFrequencyData(data);
-      isRepeated = this.isRepeatedFrequencyData(data);
-      for (let x = 0; x < bins && x < canvasWidth; ++x) {
-        const style = this.colorMap(data[x]).hex();
-        const h = (data[x] * hCoeff) | 0;
+    analyserNode.getFloatTimeDomainData(dataHeap);
+    if (!dataHeap.every((n) => n === 0)) {
+      this.core._cqt_calc(this.dataPtr, this.dataPtr);
+      this.core._cqt_render_line(this.dataPtr);
+      // copy output to canvas
+      for (let x = 0; x < canvasWidth; x++) {
+        const weighting = this.weighting === WEIGHTING_A ? _aWeightingLUT[x] : 1;
+        const val = (255 * weighting * dataHeap[x]) | 0; //this.core.getValue(this.cqtOutput + x * 4, 'float') | 0;
+        const h = (val * hCoeff) | 0;
+        const style = this.colorMap(val).hex();
 
         // Update peak hold
-        if (!this.peakData[x] || data[x] > this.peakData[x]) {
-          this.peakData[x] = data[x];
+        if (!this.peakData[x] || val > this.peakData[x]) {
+          this.peakData[x] = val;
         } else {
           this.peakData[x] *= this.peakDecayRate;
         }
@@ -228,88 +196,19 @@ export default class Spectrogram {
         tempCtx.fillStyle = style;
         tempCtx.fillRect(x, 0, 1, specSpeed);
       }
-    } else if (this.mode === MODE_LOG) {
-      analyserNode.getByteFrequencyData(data);
-      isRepeated = this.isRepeatedFrequencyData(data);
-      const logmax = Math.log(bins);
-      for (let i = 0; i < bins; i++) {
-        const x = ((Math.log(i + 1) / logmax) * canvasWidth) | 0;
-        const binWidth = ((Math.log(i + 2) / logmax) * canvasWidth - x) | 0;
-        const h = (data[i] * hCoeff) | 0;
-        const style = this.colorMap(data[i] || 0).hex();
-
-        // Update peak hold
-        if (!this.peakData[i] || data[i] > this.peakData[i]) {
-          this.peakData[i] = data[i];
-        } else {
-          this.peakData[i] *= this.peakDecayRate;
-        }
-
-        // Draw frequency bar
-        freqCtx.fillStyle = style;
-        freqCtx.fillRect(x, fqHeight - h, binWidth, h);
-
-        // Draw peak hold indicator
-        const peakH = (this.peakData[i] * hCoeff) | 0;
-        const peakStyle = this.colorMap(this.peakData[i]).hex();
-        freqCtx.fillStyle = peakStyle;
-        freqCtx.fillRect(x, fqHeight - peakH, binWidth, 2);
-
-        tempCtx.fillStyle = style;
-        tempCtx.fillRect(x, 0, binWidth, specSpeed);
-      }
-    } else if (this.mode === MODE_CONSTANT_Q) {
-      analyserNode.getFloatTimeDomainData(dataHeap);
-      if (!dataHeap.every((n) => n === 0)) {
-        this.core._cqt_calc(this.dataPtr, this.dataPtr);
-        this.core._cqt_render_line(this.dataPtr);
-        // copy output to canvas
-        for (let x = 0; x < canvasWidth; x++) {
-          const weighting = this.weighting === WEIGHTING_A ? _aWeightingLUT[x] : 1;
-          const val = (255 * weighting * dataHeap[x]) | 0; //this.core.getValue(this.cqtOutput + x * 4, 'float') | 0;
-          const h = (val * hCoeff) | 0;
-          const style = this.colorMap(val).hex();
-
-          // Update peak hold
-          if (!this.peakData[x] || val > this.peakData[x]) {
-            this.peakData[x] = val;
-          } else {
-            this.peakData[x] *= this.peakDecayRate;
-          }
-
-          // Draw frequency bar
-          freqCtx.fillStyle = style;
-          freqCtx.fillRect(x, fqHeight - h, 1, h);
-
-          // Draw peak hold indicator
-          const peakH = (this.peakData[x] * hCoeff) | 0;
-          const peakStyle = this.colorMap(this.peakData[x]).hex();
-          freqCtx.fillStyle = peakStyle;
-          freqCtx.fillRect(x, fqHeight - peakH, 1, 2);
-
-          tempCtx.fillStyle = style;
-          tempCtx.fillRect(x, 0, 1, specSpeed);
-        }
-      }
     }
 
     const _middle = performance.now();
 
-    if (!isRepeated) {
-      // tempCtx.drawImage(this.specCanvas, 0, 0);
-      // translate the transformation matrix. subsequent draws happen in this frame
-      tempCtx.translate(0, specSpeed);
-      // draw the copied image
-      tempCtx.drawImage(this.tempCanvas, 0, 0);
-      // reset the transformation matrix
-      tempCtx.setTransform(1, 0, 0, 1, 0, 0);
+    // tempCtx.drawImage(this.specCanvas, 0, 0);
+    // translate the transformation matrix. subsequent draws happen in this frame
+    tempCtx.translate(0, specSpeed);
+    // draw the copied image
+    tempCtx.drawImage(this.tempCanvas, 0, 0);
+    // reset the transformation matrix
+    tempCtx.setTransform(1, 0, 0, 1, 0, 0);
 
-      this.specCtx.drawImage(this.tempCanvas, 0, 0);
-      // Disabled because this is rendered as plain HTML IMG element
-      // if (this.mode === MODE_CONSTANT_Q) {
-      //   this.specCtx.drawImage(this.pianoKeysImage, 0, 0);
-      // }
-    }
+    this.specCtx.drawImage(this.tempCanvas, 0, 0);
 
     const _end = performance.now();
 

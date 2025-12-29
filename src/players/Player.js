@@ -24,7 +24,7 @@ export default class Player extends EventEmitter {
    * @param {number} [bufferSize=2048] - Audio buffer size
    * @param {boolean} [debug=false] - Enable debug logging
    */
-  constructor(core, sampleRate, bufferSize=2048, debug=false) {
+  constructor(core, sampleRate, bufferSize = 2048, debug = false) {
     super();
 
     this.playerKey = null; // Should be overridden by subclasses
@@ -91,7 +91,8 @@ export default class Player extends EventEmitter {
     throw Error('Player.isPlaying() must be implemented.');
   }
 
-  getTempo() { // TODO: rename all tempo to speed
+  getTempo() {
+    // TODO: rename all tempo to speed
     console.debug(`Player.getTempo() not implemented for ${this.constructor.name}.`);
     return 1;
   }
@@ -179,19 +180,11 @@ export default class Player extends EventEmitter {
     return [];
   }
 
-  getNumSubtunes() {
-    return 1;
-  }
-
-  getSubtune() {
-    return 0;
-  }
-
   getMetadata() {
     return {
       title: null,
       author: null,
-    }
+    };
   }
 
   getInfoTexts() {
@@ -203,7 +196,7 @@ export default class Player extends EventEmitter {
   }
 
   getParamDefault(paramId) {
-    const paramDef = this.paramDefs.find(p => p.id === paramId);
+    const paramDef = this.paramDefs.find((p) => p.id === paramId);
     return paramDef?.defaultValue;
   }
 
@@ -250,8 +243,6 @@ export default class Player extends EventEmitter {
       durationMs: this.getDurationMs(),
       positionMs: this.getPositionMs(),
       numVoices: this.getNumVoices(),
-      numSubtunes: this.getNumSubtunes(),
-      subtune: this.getSubtune(),
       paramDefs: this.getParamDefs(),
       paramValues: this.getParamValues(),
       tempo: this.getTempo(),
@@ -279,14 +270,14 @@ export default class Player extends EventEmitter {
       this.timeCount++;
       if (this.timeCount >= this.perfLoggingInterval) {
         const cost = this.renderTime / this.timeCount;
-        const budget = 1000 * this.bufferSize / this.sampleRate;
+        const budget = (1000 * this.bufferSize) / this.sampleRate;
         console.log(
           '[%s] %s ms to render %d frames (%s ms) (%s% utilization)',
           this.constructor.name,
           cost.toFixed(2),
           this.bufferSize,
           budget.toFixed(1),
-          (100 * cost / budget).toFixed(1),
+          ((100 * cost) / budget).toFixed(1)
         );
         this.renderTime = 0.0;
         this.timeCount = 0;
@@ -334,7 +325,8 @@ export default class Player extends EventEmitter {
  * Still not supported in Safari as of March 2025.
  * @see https://developers.google.com/web/updates/2015/08/using-requestidlecallback
  */
-window.requestIdleCallback = window.requestIdleCallback ||
+window.requestIdleCallback =
+  window.requestIdleCallback ||
   function (cb) {
     return setTimeout(function () {
       var start = Date.now();
@@ -342,12 +334,13 @@ window.requestIdleCallback = window.requestIdleCallback ||
         didTimeout: false,
         timeRemaining: function () {
           return Math.max(0, 50 - (Date.now() - start));
-        }
+        },
       });
     }, 1);
   };
 
-window.cancelIdleCallback = window.cancelIdleCallback ||
+window.cancelIdleCallback =
+  window.cancelIdleCallback ||
   function (id) {
     clearTimeout(id);
   };

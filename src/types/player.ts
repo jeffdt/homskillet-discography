@@ -36,8 +36,6 @@ export interface BasePlayerState {
   durationMs: number;
   positionMs: number;
   numVoices: number;
-  numSubtunes: number;
-  subtune: number;
   paramDefs: PlayerParamDef[];
   paramValues: Record<string, any>;
   tempo: number;
@@ -63,7 +61,6 @@ export interface IPlayer extends EventEmitter {
   togglePause(): boolean;
   isPaused(): boolean;
   stop(): void;
-  playSubtune(subtune: number): number;
   isPlaying(): boolean;
   getTempo(): number;
   setTempo(tempo: number): void;
@@ -77,17 +74,11 @@ export interface IPlayer extends EventEmitter {
   getNumVoices(): number;
   getVoiceNames(): (string | undefined)[];
   getVoiceGroups(): any[];
-  getNumSubtunes(): number;
-  getSubtune(): number;
   getMetadata(): PlayerMetadata;
   getInfoTexts(): string[];
   getParamDefs(): PlayerParamDef[];
   getParamDefault(paramId: string): any;
-  resolveParamValue(
-    paramId: string,
-    transientValue: any,
-    persistedSettings: any
-  ): any;
+  resolveParamValue(paramId: string, transientValue: any, persistedSettings: any): any;
   resolveParamValues(persistedSettings: any): void;
   getParamValues(): Record<string, any>;
   getBasePlayerState(): BasePlayerState;
