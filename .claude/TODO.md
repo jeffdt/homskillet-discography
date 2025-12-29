@@ -34,15 +34,9 @@ None!
 
 **E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
 
-**E11**: Mobile fonts/buttons need to be bigger.
-
 **E12**: The currently playing song title should not appear left-aligned in a separate div from the timer. It should appear above the timer, center aligned.
 
-**E13**: Slider sparks are reactive to the music intensity.
-
 **E14**: Multiple spark generators with their own parameter sets (i.e. blue sparks shooting infrequently, green sparks shooting constantly)
-
-**E15**: Slider sparks toggle for alpha fade vs instant fadeout
 
 **E16**: Slider sparks can change color over lifespan through a gradient.
 
@@ -66,4 +60,4 @@ None!
 
 ## DEPLOYMENT (going live)
 
-**D1**
+None!

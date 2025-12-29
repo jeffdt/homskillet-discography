@@ -72,7 +72,7 @@ function Settings(props: SettingsProps) {
           >
             ▸
           </span>
-          UI Color Palette
+          Palette
         </h4>
 
         <div
@@ -264,6 +264,19 @@ function Settings(props: SettingsProps) {
             />
             <span>{(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×</span>
           </div>
+
+          <label className="Settings-toggle">
+            <input
+              type="checkbox"
+              checked={persistedSettings.particleFadeMode === 'fade'}
+              onChange={(e) => {
+                userContext.updateSettings({
+                  particleFadeMode: e.target.checked ? 'fade' : 'instant',
+                });
+              }}
+            />
+            <span>Alpha fade</span>
+          </label>
         </div>
       </div>
 

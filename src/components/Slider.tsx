@@ -18,6 +18,7 @@ interface SliderProps {
   particleSpeedVariance?: number;
   particleGravity?: number;
   particleHueVariation?: number;
+  particleFadeMode?: string;
 }
 
 interface SliderState {
@@ -80,7 +81,10 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   }
 
   render(): React.ReactNode {
-    const posValue = Math.max(Math.min((this.state.dragging ? this.state.draggedPos ?? this.props.pos : this.props.pos), 1), 0);
+    const posValue = Math.max(
+      Math.min(this.state.dragging ? (this.state.draggedPos ?? this.props.pos) : this.props.pos, 1),
+      0
+    );
     const pos = posValue * 100 + '%';
 
     // Calculate chisel position in pixels for particles
@@ -99,17 +103,11 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     const shouldSpawn = this.props.shouldSpawnParticles && !this.state.dragging;
 
     return (
-      <div ref={this.node}
-           className="Slider"
-           onMouseDown={this.onMouseDown}>
-        <div className="Slider-rail"/>
-        <div className="Slider-fill" style={{width: pos}}/>
-        <div className="Slider-chisel"
-             ref={this.chisel}
-             style={{left: pos}}/>
-        <div className="Slider-knob"
-             ref={this.knob}
-             style={{left: pos}}/>
+      <div ref={this.node} className="Slider" onMouseDown={this.onMouseDown}>
+        <div className="Slider-rail" />
+        <div className="Slider-fill" style={{ width: pos }} />
+        <div className="Slider-chisel" ref={this.chisel} style={{ left: pos }} />
+        <div className="Slider-knob" ref={this.knob} style={{ left: pos }} />
         <SliderParticles
           knobX={knobX}
           knobY={knobY}
@@ -123,6 +121,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           speedVariance={this.props.particleSpeedVariance}
           gravity={this.props.particleGravity}
           hueVariation={this.props.particleHueVariation}
+          fadeMode={this.props.particleFadeMode}
         />
       </div>
     );
