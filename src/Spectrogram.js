@@ -96,6 +96,10 @@ export default class Spectrogram {
     this.pianoKeysImage = pianoKeysImage;
     this.lastData = [];
 
+    // Peak hold for frequency analyzer
+    this.peakData = [];
+    this.peakDecayRate = 0.95; // How fast peaks fall (0.95 = slow decay)
+
     this.updateFrame();
   }
 
@@ -161,6 +165,37 @@ export default class Spectrogram {
     // Clear canvases - let transparent background show the natural UI background
     freqCtx.clearRect(0, 0, this.freqCanvas.width, this.freqCanvas.height);
     tempCtx.clearRect(0, 0, this.tempCanvas.width, specSpeed);
+
+    // Draw note-based frequency band columns (piano roll style)
+    if (this.mode === MODE_CONSTANT_Q && this.cqtFreqs) {
+      // Convert frequency to MIDI note number
+      const freqToMidi = (freq) => 12 * Math.log2(freq / 440) + 69;
+
+      let currentNote = -1;
+      let bandStart = 0;
+      const colors = ['#101010', '#181818']; // Alternating dark grays for each note
+      let colorIndex = 0;
+
+      for (let x = 0; x < canvasWidth; x++) {
+        const freq = this.cqtFreqs[x];
+        const midiNote = Math.round(freqToMidi(freq));
+
+        // When note changes, draw the previous band
+        if (midiNote !== currentNote) {
+          if (currentNote !== -1) {
+            freqCtx.fillStyle = colors[colorIndex % 2];
+            freqCtx.fillRect(bandStart, 0, x - bandStart, fqHeight);
+            colorIndex++;
+          }
+          currentNote = midiNote;
+          bandStart = x;
+        }
+      }
+      // Draw final band
+      freqCtx.fillStyle = colors[colorIndex % 2];
+      freqCtx.fillRect(bandStart, 0, canvasWidth - bandStart, fqHeight);
+    }
+
     const _start = performance.now();
     const dataHeap = new Float32Array(this.core.HEAPF32.buffer, this.dataPtr, this.cqtSize);
     const bins = this.fftSize / 2;
@@ -172,8 +207,24 @@ export default class Spectrogram {
       for (let x = 0; x < bins && x < canvasWidth; ++x) {
         const style = this.colorMap(data[x]).hex();
         const h = (data[x] * hCoeff) | 0;
+
+        // Update peak hold
+        if (!this.peakData[x] || data[x] > this.peakData[x]) {
+          this.peakData[x] = data[x];
+        } else {
+          this.peakData[x] *= this.peakDecayRate;
+        }
+
+        // Draw frequency bar
         freqCtx.fillStyle = style;
         freqCtx.fillRect(x, fqHeight - h, 1, h);
+
+        // Draw peak hold indicator
+        const peakH = (this.peakData[x] * hCoeff) | 0;
+        const peakStyle = this.colorMap(this.peakData[x]).hex();
+        freqCtx.fillStyle = peakStyle;
+        freqCtx.fillRect(x, fqHeight - peakH, 1, 2);
+
         tempCtx.fillStyle = style;
         tempCtx.fillRect(x, 0, 1, specSpeed);
       }
@@ -186,8 +237,24 @@ export default class Spectrogram {
         const binWidth = ((Math.log(i + 2) / logmax) * canvasWidth - x) | 0;
         const h = (data[i] * hCoeff) | 0;
         const style = this.colorMap(data[i] || 0).hex();
+
+        // Update peak hold
+        if (!this.peakData[i] || data[i] > this.peakData[i]) {
+          this.peakData[i] = data[i];
+        } else {
+          this.peakData[i] *= this.peakDecayRate;
+        }
+
+        // Draw frequency bar
         freqCtx.fillStyle = style;
         freqCtx.fillRect(x, fqHeight - h, binWidth, h);
+
+        // Draw peak hold indicator
+        const peakH = (this.peakData[i] * hCoeff) | 0;
+        const peakStyle = this.colorMap(this.peakData[i]).hex();
+        freqCtx.fillStyle = peakStyle;
+        freqCtx.fillRect(x, fqHeight - peakH, binWidth, 2);
+
         tempCtx.fillStyle = style;
         tempCtx.fillRect(x, 0, binWidth, specSpeed);
       }
@@ -202,8 +269,24 @@ export default class Spectrogram {
           const val = (255 * weighting * dataHeap[x]) | 0; //this.core.getValue(this.cqtOutput + x * 4, 'float') | 0;
           const h = (val * hCoeff) | 0;
           const style = this.colorMap(val).hex();
+
+          // Update peak hold
+          if (!this.peakData[x] || val > this.peakData[x]) {
+            this.peakData[x] = val;
+          } else {
+            this.peakData[x] *= this.peakDecayRate;
+          }
+
+          // Draw frequency bar
           freqCtx.fillStyle = style;
           freqCtx.fillRect(x, fqHeight - h, 1, h);
+
+          // Draw peak hold indicator
+          const peakH = (this.peakData[x] * hCoeff) | 0;
+          const peakStyle = this.colorMap(this.peakData[x]).hex();
+          freqCtx.fillStyle = peakStyle;
+          freqCtx.fillRect(x, fqHeight - peakH, 1, 2);
+
           tempCtx.fillStyle = style;
           tempCtx.fillRect(x, 0, 1, specSpeed);
         }
