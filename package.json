@@ -28,8 +28,6 @@
     "immutability-helper": "^2.7.1",
     "ismobilejs": "^0.4.1",
     "lodash": "^4.17.21",
-    "midievents": "latest",
-    "midifile": "^2.0.0",
     "node-unrar-js": "^0.8.1",
     "object-assign": "4.1.1",
     "path-parse": "^1.0.7",
@@ -38,7 +36,6 @@
     "raf": "3.4.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
-    "react-dropzone": "7.0.0",
     "react-router-dom": "^5.2.0",
     "react-virtual-list": "git+https://github.com/glebcha/react-virtual-list.git#544bc7",
     "react-virtualized": "^9.22.5",
@@ -92,8 +89,7 @@
     "deploy-lite": "bun run build-lite && bun run gh-pages -d build --nojekyll",
     "prepare": "husky",
     "server": "DEV=1 bun run server/index.js",
-    "stop": "bash scripts/kill-servers.sh",
-    "fixvgm": "bun run scripts/fixvgm.js"
+    "stop": "bash scripts/kill-servers.sh"
   },
   "eslintConfig": {
     "extends": "react-app",
