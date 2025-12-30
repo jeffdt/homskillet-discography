@@ -115,6 +115,10 @@ export default class Spectrogram {
     this.colorMap = chroma.scale(palette).domain([0, 255]);
   }
 
+  setPeakDecayRate(rate) {
+    this.peakDecayRate = rate;
+  }
+
   updateFrame() {
     if (this.paused) return;
     requestAnimationFrame(this.updateFrame);

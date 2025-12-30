@@ -135,6 +135,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.spectrogram.setWeighting(1); // A-Weighting - natural sound
     this.spectrogram.setSpeed(2); // Medium speed
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
+    this.spectrogram.setPeakDecayRate(this.props.persistedSettings.visualizerPeakDecay ?? 0.95);
 
     // Listen for fullscreen changes
     document.addEventListener('fullscreenchange', this.handleFullscreenChange);
@@ -159,11 +160,21 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       this.spectrogram.setWeighting(1); // A-Weighting
       this.spectrogram.setSpeed(2); // Medium speed
       this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
+      this.spectrogram.setPeakDecayRate(this.props.persistedSettings.visualizerPeakDecay ?? 0.95);
     }
 
     // Update theme if changed
     if (this.spectrogram && prevState.colorPalette !== this.state.colorPalette) {
       this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
+    }
+
+    // Update peak decay rate if changed
+    if (
+      this.spectrogram &&
+      prevProps.persistedSettings.visualizerPeakDecay !==
+        this.props.persistedSettings.visualizerPeakDecay
+    ) {
+      this.spectrogram.setPeakDecayRate(this.props.persistedSettings.visualizerPeakDecay ?? 0.95);
     }
 
     if (this.spectrogram) {
@@ -282,6 +293,24 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+          <div className="Visualizer-peak-decay">
+            <h4>Peak Decay</h4>
+            <div className="Visualizer-peak-decay-control">
+              <input
+                type="range"
+                min="0.85"
+                max="0.99"
+                step="0.01"
+                value={this.props.persistedSettings.visualizerPeakDecay ?? 0.95}
+                onChange={(e) => {
+                  this.props.onPeakDecayChange(parseFloat(e.target.value));
+                }}
+              />
+              <span className="Visualizer-peak-decay-label">
+                {this.props.persistedSettings.visualizerPeakDecay ?? 0.95}
+              </span>
             </div>
           </div>
         </div>

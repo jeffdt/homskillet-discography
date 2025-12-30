@@ -884,6 +884,9 @@ class App extends React.Component<AppProps, AppState> {
                   onThemesExpandedChange={(expanded) =>
                     this.props.userContext.updateSettings({ visualizerThemesExpanded: expanded })
                   }
+                  onPeakDecayChange={(rate) =>
+                    this.props.userContext.updateSettings({ visualizerPeakDecay: rate })
+                  }
                 />
               </div>
             )}

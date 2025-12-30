@@ -22,4 +22,5 @@ export interface VisualizerProps {
   persistedSettings: Record<string, any>;
   onThemeChange: (theme: number) => void;
   onThemesExpandedChange: (expanded: boolean) => void;
+  onPeakDecayChange: (rate: number) => void;
 }
