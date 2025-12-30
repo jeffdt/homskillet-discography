@@ -18,8 +18,6 @@ None!
 
 ## ENHANCEMENT (new features & styling)
 
-**E3**: Visualizer peak decay should be configurable via settings.
-
 **E4**: (PLAN) Explore more options for visualizers. I want to know how the current visualizer works, and if there are other web-friendly visualizers. I really like the frequency spectrum aspect of the current one because it does a great job shining a light on the technical work in the songs, so other cool frequency spectrum visualizers would be sweet. However, I also loved WinAmp's Milkdrop and would love trippy options if there are any open source options for that. Bonus points if I can somehow separate out visualizers per NSF channel to show all the intricacies of the music.
 
 **E5**: Let's make the time slider more dynamic. Can it be wavy and ripple down the line?
