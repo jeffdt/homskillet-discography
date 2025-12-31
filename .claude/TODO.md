@@ -6,17 +6,19 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-None!
+**B1**: There is a 1px gap between the analyzer and spectrogram when you fullscreen the visualizer. See ./.claude/screenshots/viz-pixels.png. Can we fix it so they're flush/seamless?
 
 ---
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S2**: Remove all subtune functionality. NSF files can contain multiple tracks (subtunes), but this discography will only use the first track of each file. Remove: subtune UI controls (next/prev buttons, "Tune N of M" display), subtune state management (currentSongNumSubtunes, currentSongSubtune), navigation methods (nextSubtune, prevSubtune, playSubtune), URL parameter handling (?subtune=N), and player methods (getNumSubtunes, getSubtune).
+None!
 
 ---
 
 ## ENHANCEMENT (new features & styling)
+
+**E1**: When I play arps.nsf, there is a very cool effect in the visualizer's analyzer component. We have a decay effect when a frequency peak drops, and for some reason, the very tall peaks created by the triangle in that song create a really cool pixelated effect that I don't see in other frequencies or in many other songs. See ./.claude/screenshots/viz-pixels.png. I would love if the decay ALWAYS had that pixelated effect for all frequencies as it fits the aesthetic of the site well. Is that possible?
 
 **E3**: Visualizer peak decay should be configurable via settings.
 
@@ -36,13 +38,21 @@ None!
 
 **E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
 
+_Implementation note: Attempted using React Router's history.push() state to pass `shouldAnimate: true` from DirectoryLink to Browse, but the Browse component re-renders from parent state changes before the navigation with state completes, causing `shouldAnimate` to always be `false`. A working solution would likely require a React context or global state (e.g., Zustand) to coordinate animation state across navigation, rather than relying on router state._
+
 **E14**: Multiple spark generators with their own parameter sets (i.e. blue sparks shooting infrequently, green sparks shooting constantly)
 
 **E16**: Slider sparks can change color over lifespan through a gradient.
 
+**E17**: Visualizer fullscreen should rotate 90 degrees when entering fullscreen mode.
+
+**E18**: Add a player button to "lock" the current song. This should remove the timer check and play the song continuously until the user manually stops it or advances to the next song.
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
+
+**M1**: Why do we need SQLite? Do we use localstorage for storing user preferences? If so, can we eliminate SQLite as a dependency?
 
 **M2**: (OPTIONAL FUTURE WORK) Complete TypeScript migration of remaining player implementations:
 
@@ -55,6 +65,8 @@ None!
 - Can be done incrementally when touching these files for features
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this.
+
+**M5**: Help me investigate this build warning about bundle size and the react-virtualized module directive error.
 
 ---
 

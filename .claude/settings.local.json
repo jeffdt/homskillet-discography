@@ -18,7 +18,9 @@
       "Bash(git log:*)",
       "Bash(bun add:*)",
       "Bash(bunx husky init)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(git worktree:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

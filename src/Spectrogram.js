@@ -66,6 +66,7 @@ export default class Spectrogram {
 
     this.paused = true;
     this.weighting = WEIGHTING_NONE;
+    this.horizontal = false; // Horizontal mode: frequency vertical, time horizontal (right-to-left)
 
     this.analyserNode = audioCtx.createAnalyser();
     sourceNode.connect(this.analyserNode);
@@ -102,12 +103,63 @@ export default class Spectrogram {
     this.paused = paused;
   }
 
+  setCanvasDimensions(width, height) {
+    // Reinitialize CQT with new width
+    this.cqtSize = this.core._cqt_init(
+      this.audioCtx.sampleRate,
+      width,
+      this.params.minFreq,
+      this.params.maxFreq,
+      this.params.bpo
+    );
+
+    // Update analyzer fftSize
+    this.analyserNode.fftSize = this.cqtSize;
+
+    // Rebuild frequency array and A-weighting LUT
+    this.cqtFreqs = Array.from({ length: width }, (_, i) => this.core._cqt_freq(i));
+    this._buildAWeightingLUT();
+
+    // Resize temp canvas
+    this.tempCanvas.width = width;
+    this.tempCanvas.height = height;
+
+    // Clear peak data array
+    this.peakData = new Array(width).fill(0);
+  }
+
   setWeighting(mode) {
     this.weighting = mode;
   }
 
   setSpeed(speed) {
     this.specSpeed = speed;
+  }
+
+  setHorizontal(horizontal) {
+    this.horizontal = horizontal;
+    // Sync temp canvas to spec canvas dimensions and clear all canvases
+    this.syncTempCanvas();
+  }
+
+  // Sync temp canvas dimensions with spec canvas (call after resizing spec canvas)
+  syncTempCanvas() {
+    if (this.tempCanvas && this.specCanvas) {
+      this.tempCanvas.width = this.specCanvas.width;
+      this.tempCanvas.height = this.specCanvas.height;
+      // Clear all canvases to start fresh after resize
+      if (this.tempCtx) {
+        this.tempCtx.clearRect(0, 0, this.tempCanvas.width, this.tempCanvas.height);
+      }
+      if (this.specCtx) {
+        this.specCtx.clearRect(0, 0, this.specCanvas.width, this.specCanvas.height);
+      }
+      if (this.freqCtx) {
+        this.freqCtx.clearRect(0, 0, this.freqCanvas.width, this.freqCanvas.height);
+      }
+      // Reset peak data since canvas dimensions changed
+      this.peakData = [];
+    }
   }
 
   setColorPalette(colors) {
@@ -119,34 +171,57 @@ export default class Spectrogram {
     if (this.paused) return;
     requestAnimationFrame(this.updateFrame);
 
+    const _start = performance.now();
+
+    if (this.horizontal) {
+      this.updateFrameHorizontal();
+    } else {
+      this.updateFrameVertical();
+    }
+
+    const _end = performance.now();
+
+    if (_debug) {
+      _totalTime += _end - _start;
+      _timeCount++;
+      if (_timeCount >= 200) {
+        console.log(
+          '[Viz] %s ms total (%s fps)',
+          (_totalTime / _timeCount).toFixed(2),
+          ((1000 * _timeCount) / (_end - _lastTime)).toFixed(1)
+        );
+        _timeCount = 0;
+        _totalTime = 0;
+        _lastTime = _start;
+      }
+    }
+  }
+
+  // Vertical mode: frequency on X-axis, time flows top-to-bottom
+  updateFrameVertical() {
     const fqHeight = this.freqCanvas.height;
     const canvasWidth = this.freqCanvas.width;
     const hCoeff = fqHeight / 256.0;
     const specSpeed = this.specSpeed;
-    const data = this.byteFrequencyData;
     const analyserNode = this.analyserNode;
     const freqCtx = this.freqCtx;
-    //const specCtx = this.specCtx;
     const tempCtx = this.tempCtx;
-    // Clear canvases - let transparent background show the natural UI background
+
+    // Clear canvases
     freqCtx.clearRect(0, 0, this.freqCanvas.width, this.freqCanvas.height);
     tempCtx.clearRect(0, 0, this.tempCanvas.width, specSpeed);
 
     // Draw note-based frequency band columns (piano roll style)
     if (this.cqtFreqs) {
-      // Convert frequency to MIDI note number
       const freqToMidi = (freq) => 12 * Math.log2(freq / 440) + 69;
-
       let currentNote = -1;
       let bandStart = 0;
-      const colors = ['#101010', '#181818']; // Alternating dark grays for each note
+      const colors = ['#101010', '#181818'];
       let colorIndex = 0;
 
       for (let x = 0; x < canvasWidth; x++) {
         const freq = this.cqtFreqs[x];
         const midiNote = Math.round(freqToMidi(freq));
-
-        // When note changes, draw the previous band
         if (midiNote !== currentNote) {
           if (currentNote !== -1) {
             freqCtx.fillStyle = colors[colorIndex % 2];
@@ -157,22 +232,20 @@ export default class Spectrogram {
           bandStart = x;
         }
       }
-      // Draw final band
       freqCtx.fillStyle = colors[colorIndex % 2];
       freqCtx.fillRect(bandStart, 0, canvasWidth - bandStart, fqHeight);
     }
 
-    const _start = performance.now();
     const dataHeap = new Float32Array(this.core.HEAPF32.buffer, this.dataPtr, this.cqtSize);
-
     analyserNode.getFloatTimeDomainData(dataHeap);
+
     if (!dataHeap.every((n) => n === 0)) {
       this.core._cqt_calc(this.dataPtr, this.dataPtr);
       this.core._cqt_render_line(this.dataPtr);
-      // copy output to canvas
+
       for (let x = 0; x < canvasWidth; x++) {
         const weighting = this.weighting === WEIGHTING_A ? _aWeightingLUT[x] : 1;
-        const val = (255 * weighting * dataHeap[x]) | 0; //this.core.getValue(this.cqtOutput + x * 4, 'float') | 0;
+        const val = (255 * weighting * dataHeap[x]) | 0;
         const h = (val * hCoeff) | 0;
         const style = this.colorMap(val).hex();
 
@@ -183,53 +256,103 @@ export default class Spectrogram {
           this.peakData[x] *= this.peakDecayRate;
         }
 
-        // Draw frequency bar
+        // Draw frequency bar (grows upward)
         freqCtx.fillStyle = style;
         freqCtx.fillRect(x, fqHeight - h, 1, h);
 
         // Draw peak hold indicator
         const peakH = (this.peakData[x] * hCoeff) | 0;
-        const peakStyle = this.colorMap(this.peakData[x]).hex();
-        freqCtx.fillStyle = peakStyle;
+        freqCtx.fillStyle = this.colorMap(this.peakData[x]).hex();
         freqCtx.fillRect(x, fqHeight - peakH, 1, 2);
 
+        // Draw to temp canvas for waterfall
         tempCtx.fillStyle = style;
         tempCtx.fillRect(x, 0, 1, specSpeed);
       }
     }
 
-    const _middle = performance.now();
-
-    // tempCtx.drawImage(this.specCanvas, 0, 0);
-    // translate the transformation matrix. subsequent draws happen in this frame
+    // Scroll waterfall downward
     tempCtx.translate(0, specSpeed);
-    // draw the copied image
     tempCtx.drawImage(this.tempCanvas, 0, 0);
-    // reset the transformation matrix
     tempCtx.setTransform(1, 0, 0, 1, 0, 0);
-
     this.specCtx.drawImage(this.tempCanvas, 0, 0);
+  }
 
-    const _end = performance.now();
+  // Horizontal mode: frequency on Y-axis (low at bottom), time flows right-to-left
+  updateFrameHorizontal() {
+    const fqWidth = this.freqCanvas.width;
+    const wCoeff = fqWidth / 256.0;
+    const specSpeed = this.specSpeed;
+    const analyserNode = this.analyserNode;
+    const freqCtx = this.freqCtx;
+    const tempCtx = this.tempCtx;
+    // Use tempCanvas dimensions for spectrogram
+    const tempWidth = this.tempCanvas.width;
+    const tempHeight = this.tempCanvas.height;
+    // Both canvases should have same height for alignment
+    const canvasHeight = this.freqCanvas.height;
 
-    if (_debug) {
-      _calcTime += _middle - _start;
-      _totalTime += _end - _start;
-      _timeCount++;
-      if (_timeCount >= 200) {
-        console.log(
-          '[Viz] %s ms analysis, %s ms total (%s fps) (%s% utilization)',
-          (_calcTime / _timeCount).toFixed(2),
-          (_totalTime / _timeCount).toFixed(2),
-          ((1000 * _timeCount) / (_start - _lastTime)).toFixed(1),
-          ((100 * _totalTime) / (_end - _lastTime)).toFixed(1)
-        );
-        _calcTime = 0;
-        _timeCount = 0;
-        _totalTime = 0;
-        _lastTime = _start;
+    // Clear analyzer canvas with solid dark background
+    freqCtx.fillStyle = '#101010';
+    freqCtx.fillRect(0, 0, this.freqCanvas.width, this.freqCanvas.height);
+
+    const dataHeap = new Float32Array(this.core.HEAPF32.buffer, this.dataPtr, this.cqtSize);
+    analyserNode.getFloatTimeDomainData(dataHeap);
+
+    if (!dataHeap.every((n) => n === 0)) {
+      this.core._cqt_calc(this.dataPtr, this.dataPtr);
+      this.core._cqt_render_line(this.dataPtr);
+
+      // Number of CQT frequency bins (output of constant Q transform)
+      // Use same bin count for both analyzer and spectrogram so frequencies align
+      const numBins = this.cqtFreqs.length;
+
+      // Calculate height per frequency band for each canvas
+      // Add 1 pixel overlap to ensure no gaps from rounding
+      const analyzerBinHeight = Math.ceil(canvasHeight / numBins) + 1;
+      const specBinHeight = Math.ceil(tempHeight / numBins) + 1;
+
+      // Draw analyzer bars and spectrogram column in same loop
+      for (let i = 0; i < numBins; i++) {
+        const weighting = this.weighting === WEIGHTING_A ? _aWeightingLUT[i] : 1;
+        const val = (255 * weighting * dataHeap[i]) | 0;
+        const style = this.colorMap(val).hex();
+
+        // Update peak hold
+        if (!this.peakData[i] || val > this.peakData[i]) {
+          this.peakData[i] = val;
+        } else {
+          this.peakData[i] *= this.peakDecayRate;
+        }
+
+        // Map frequency bin to y position (low freq at bottom, high at top)
+        // Use same formula for both so frequencies align
+        const analyzerY = canvasHeight - Math.ceil(((i + 1) / numBins) * canvasHeight);
+        const specY = tempHeight - Math.ceil(((i + 1) / numBins) * tempHeight);
+
+        // Draw analyzer frequency bar (grows rightward from left edge)
+        const w = (val * wCoeff) | 0;
+        freqCtx.fillStyle = style;
+        freqCtx.fillRect(0, analyzerY, w, analyzerBinHeight);
+
+        // Draw analyzer peak hold indicator
+        const peakW = (this.peakData[i] * wCoeff) | 0;
+        freqCtx.fillStyle = this.colorMap(this.peakData[i]).hex();
+        freqCtx.fillRect(peakW - 2, analyzerY, 2, analyzerBinHeight);
+
+        // Draw spectrogram pixel
+        tempCtx.fillStyle = style;
+        tempCtx.fillRect(tempWidth - specSpeed, specY, specSpeed, specBinHeight);
       }
     }
+
+    // Scroll waterfall leftward (shift existing content left, new data on right)
+    tempCtx.translate(-specSpeed, 0);
+    tempCtx.drawImage(this.tempCanvas, 0, 0);
+    tempCtx.setTransform(1, 0, 0, 1, 0, 0);
+    // Clear the right edge where new data will be drawn next frame
+    tempCtx.clearRect(tempWidth - specSpeed, 0, specSpeed, tempHeight);
+    this.specCtx.drawImage(this.tempCanvas, 0, 0);
   }
 }
 
