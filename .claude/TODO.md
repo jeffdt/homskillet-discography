@@ -6,7 +6,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## BUGS
 
-None!
+**B1**: There is a 1px gap between the analyzer and spectrogram when you fullscreen the visualizer. See ./.claude/screenshots/viz-pixels.png. Can we fix it so they're flush/seamless?
 
 ---
 
@@ -17,6 +17,8 @@ None!
 ---
 
 ## ENHANCEMENT (new features & styling)
+
+**E1**: When I play arps.nsf, there is a very cool effect in the visualizer's analyzer component. We have a decay effect when a frequency peak drops, and for some reason, the very tall peaks created by the triangle in that song create a really cool pixelated effect that I don't see in other frequencies or in many other songs. See ./.claude/screenshots/viz-pixels.png. I would love if the decay ALWAYS had that pixelated effect for all frequencies as it fits the aesthetic of the site well. Is that possible?
 
 **E3**: Visualizer peak decay should be configurable via settings.
 
@@ -36,6 +38,8 @@ None!
 
 **E10**: Let's make the site feel more dynamic with animations. When you click an album, make the title flash twice, then the contents should expand out to the right and unfold.
 
+_Implementation note: Attempted using React Router's history.push() state to pass `shouldAnimate: true` from DirectoryLink to Browse, but the Browse component re-renders from parent state changes before the navigation with state completes, causing `shouldAnimate` to always be `false`. A working solution would likely require a React context or global state (e.g., Zustand) to coordinate animation state across navigation, rather than relying on router state._
+
 **E14**: Multiple spark generators with their own parameter sets (i.e. blue sparks shooting infrequently, green sparks shooting constantly)
 
 **E16**: Slider sparks can change color over lifespan through a gradient.
@@ -47,6 +51,8 @@ None!
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
+
+**M1**: Why do we need SQLite? Do we use localstorage for storing user preferences? If so, can we eliminate SQLite as a dependency?
 
 **M2**: (OPTIONAL FUTURE WORK) Complete TypeScript migration of remaining player implementations:
 
