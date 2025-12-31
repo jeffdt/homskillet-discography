@@ -1,5 +1,5 @@
-import { Link, useHistory } from "react-router-dom";
-import React, { memo } from "react";
+import { Link, useHistory } from 'react-router-dom';
+import React, { memo, useState, useRef, useEffect } from 'react';
 
 interface DirectoryLinkProps {
   to: string;
@@ -17,6 +17,8 @@ function getSearch(): string {
 
 const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLink, children }) => {
   const history = useHistory();
+  const [isFlashing, setIsFlashing] = useState(false);
+  const linkRef = useRef<HTMLAnchorElement>(null);
   const linkClassName = dim ? 'DirectoryLink-dim' : undefined;
   const folderClassName = dim ? 'inline-icon dim-icon icon-folder' : 'inline-icon icon-folder';
 
@@ -30,21 +32,54 @@ const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLi
   const toObj = {
     pathname: encodedTo,
     search: finalSearch,
-    state: { prevPathname: window.location.pathname }
+    state: { prevPathname: window.location.pathname, shouldAnimate: true },
   };
 
-  const onClick = isBackLink
-    ? (e: React.MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault();
-        history.goBack();
-      }
-    : undefined;
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isBackLink) {
+      e.preventDefault();
+      history.goBack();
+      return;
+    }
+
+    console.log('DirectoryLink clicked - starting flash animation');
+    setIsFlashing(true);
+
+    e.preventDefault();
+
+    setTimeout(() => {
+      console.log('DirectoryLink - navigating with state:', toObj);
+      history.push(toObj);
+    }, 800);
+  };
+
+  useEffect(() => {
+    if (isFlashing) {
+      console.log('DirectoryLink - flash state set to true');
+      const timer = setTimeout(() => {
+        console.log('DirectoryLink - flash state cleared');
+        setIsFlashing(false);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [isFlashing]);
+
+  const combinedClassName = [linkClassName, isFlashing ? 'directory-flash' : '']
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <Link to={toObj} className={linkClassName} onClick={onClick} tabIndex={-1}>
-      <span className={folderClassName}/>{children}
+    <Link
+      ref={linkRef}
+      to={toObj}
+      className={combinedClassName}
+      onClick={handleClick}
+      tabIndex={-1}
+    >
+      <span className={folderClassName} />
+      {children}
     </Link>
   );
-}
+};
 
 export default memo(DirectoryLink);

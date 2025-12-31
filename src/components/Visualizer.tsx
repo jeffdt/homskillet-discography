@@ -105,6 +105,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
   private spectrogram!: Spectrogram;
   private freqCanvasRef: React.RefObject<HTMLCanvasElement>;
   private specCanvasRef: React.RefObject<HTMLCanvasElement>;
+  private containerRef: React.RefObject<HTMLDivElement>;
 
   constructor(props: VisualizerProps) {
     super(props);
@@ -112,11 +113,12 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.state = {
       enabled: true,
       colorPalette: props.persistedSettings.visualizerTheme ?? 0,
-      isFullscreen: false,
+      isMaximized: false,
     };
 
     this.freqCanvasRef = React.createRef();
     this.specCanvasRef = React.createRef();
+    this.containerRef = React.createRef();
   }
 
   componentDidMount() {
@@ -135,13 +137,6 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.spectrogram.setWeighting(1); // A-Weighting - natural sound
     this.spectrogram.setSpeed(2); // Medium speed
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
-
-    // Listen for fullscreen changes
-    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
   }
 
   componentDidUpdate(prevProps: VisualizerProps, prevState: VisualizerState) {
@@ -186,33 +181,91 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.props.onThemesExpandedChange(newState);
   };
 
-  handleFullscreenToggle = () => {
-    if (!document.fullscreenElement) {
-      // Enter fullscreen
-      const container = this.specCanvasRef.current?.parentElement;
-      if (container) {
-        container.requestFullscreen().catch((err) => {
-          console.error('Error entering fullscreen:', err);
-        });
+  handleMaximizeToggle = () => {
+    const newMaximized = !this.state.isMaximized;
+    this.setState({ isMaximized: newMaximized });
+    this.props.onMaximizedChange(newMaximized);
+
+    // Update spectrogram mode and canvas dimensions after state change
+    // Use longer timeout to ensure React has applied the CSS class changes
+    setTimeout(() => {
+      if (!this.spectrogram) return;
+
+      const { analyzerWidth, analyzerHeight, spectrogramWidth, spectrogramHeight } =
+        this.calculateDimensions(newMaximized);
+
+      // Set canvas dimensions FIRST
+      if (this.freqCanvasRef.current) {
+        this.freqCanvasRef.current.width = analyzerWidth;
+        this.freqCanvasRef.current.height = analyzerHeight;
       }
+
+      if (this.specCanvasRef.current) {
+        this.specCanvasRef.current.width = spectrogramWidth;
+        this.specCanvasRef.current.height = spectrogramHeight;
+      }
+
+      // THEN switch mode (which syncs temp canvas to the new dimensions)
+      this.spectrogram.setHorizontal(newMaximized);
+    }, 50);
+  };
+
+  calculateDimensions = (isMaximized: boolean) => {
+    if (isMaximized) {
+      // Horizontal mode: analyzer on right (seismograph), spectrogram on left
+      // Get actual container dimensions from the DOM
+      const container = this.containerRef.current;
+      const containerWidth = container?.offsetWidth || window.innerWidth;
+      const containerHeight = container?.offsetHeight || 400;
+
+      // Analyzer: small width, full height (frequency on Y-axis)
+      const analyzerWidth = 64;
+      const analyzerHeight = containerHeight;
+
+      // Spectrogram: remaining width + 1px overlap to close gap, full height
+      const spectrogramWidth = containerWidth - analyzerWidth + 1;
+      const spectrogramHeight = containerHeight;
+
+      return { analyzerWidth, analyzerHeight, spectrogramWidth, spectrogramHeight };
     } else {
-      // Exit fullscreen
-      document.exitFullscreen();
+      // Normal vertical mode: analyzer on top, spectrogram below
+      return {
+        analyzerWidth: VIS_WIDTH, // 448
+        analyzerHeight: 60,
+        spectrogramWidth: VIS_WIDTH, // 448
+        spectrogramHeight: 800,
+      };
     }
   };
 
-  handleFullscreenChange = () => {
-    this.setState({ isFullscreen: !!document.fullscreenElement });
-  };
-
   render() {
-    const enabledStyle: React.CSSProperties = {
+    // Calculate dimensions once for reuse
+    const dims = this.calculateDimensions(this.state.isMaximized);
+    const { analyzerWidth, analyzerHeight, spectrogramWidth, spectrogramHeight } = dims;
+
+    // Style for canvases
+    const canvasStyle: React.CSSProperties = {
       display: this.state.enabled ? 'block' : 'none',
+    };
+
+    // Style for options panel - hide if disabled OR in maximized mode
+    const optionsStyle: React.CSSProperties = {
+      display: this.state.enabled && !this.state.isMaximized ? 'block' : 'none',
       width: VIS_WIDTH,
       boxSizing: 'border-box',
     };
+
+    // In maximized mode, layout is horizontal (spectrogram left, analyzer right - seismograph style)
+    // In normal mode, layout is vertical (analyzer top, spectrogram bottom)
+    const canvasInnerStyle: React.CSSProperties = this.state.isMaximized
+      ? { display: 'flex', flexDirection: 'row-reverse' }
+      : { display: 'flex', flexDirection: 'column' };
+
     return (
-      <div className="Visualizer">
+      <div
+        ref={this.containerRef}
+        className={`Visualizer ${this.state.isMaximized ? 'maximized' : ''}`}
+      >
         <h3 className="Visualizer-toggle">
           Visualizer{' '}
           <input
@@ -238,14 +291,14 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
             Off
           </label>
           <button
-            className="Visualizer-fullscreen-btn"
-            onClick={this.handleFullscreenToggle}
-            title={this.state.isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            className="Visualizer-maximize-btn"
+            onClick={this.handleMaximizeToggle}
+            title={this.state.isMaximized ? 'Exit Maximized' : 'Maximize'}
           >
-            {this.state.isFullscreen ? '⊗' : '⛶'}
+            {this.state.isMaximized ? '⊗' : '⛶'}
           </button>
         </h3>
-        <div className="Visualizer-options" style={enabledStyle}>
+        <div className="Visualizer-options" style={optionsStyle}>
           <div className="Visualizer-themes">
             <h4 onClick={this.handleToggleThemes}>
               <span
@@ -285,20 +338,24 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
             </div>
           </div>
         </div>
-        <canvas
-          style={enabledStyle}
-          className="Visualizer-analyzer"
-          width={VIS_WIDTH}
-          height={60}
-          ref={this.freqCanvasRef}
-        />
-        <canvas
-          style={enabledStyle}
-          className="Visualizer-spectrogram"
-          width={VIS_WIDTH}
-          height={800}
-          ref={this.specCanvasRef}
-        />
+        <div className="Visualizer-canvases">
+          <div className="Visualizer-canvases-inner" style={canvasInnerStyle}>
+            <canvas
+              style={canvasStyle}
+              className="Visualizer-analyzer"
+              width={analyzerWidth}
+              height={analyzerHeight}
+              ref={this.freqCanvasRef}
+            />
+            <canvas
+              style={canvasStyle}
+              className="Visualizer-spectrogram"
+              width={spectrogramWidth}
+              height={spectrogramHeight}
+              ref={this.specCanvasRef}
+            />
+          </div>
+        </div>
       </div>
     );
   }

@@ -27,13 +27,29 @@ function VirtualizedList(props: VirtualizedListProps) {
   const [selectedRow, setSelectedRow] = useState(0);
   const [rowHeight, setRowHeight] = useState(20);
   const updateHistoryRef = useRef<(() => void) | undefined>();
+  const [scrollContainerReady, setScrollContainerReady] = useState(!!scrollContainerRef.current);
+
+  // Watch for scroll container ref to become available (handles remounts)
+  useEffect(() => {
+    if (scrollContainerRef.current && !scrollContainerReady) {
+      setScrollContainerReady(true);
+    }
+    // Check periodically in case ref becomes available after initial render
+    const checkRef = setInterval(() => {
+      if (scrollContainerRef.current && !scrollContainerReady) {
+        setScrollContainerReady(true);
+        clearInterval(checkRef);
+      }
+    }, 50);
+    return () => clearInterval(checkRef);
+  }, [scrollContainerRef, scrollContainerReady]);
 
   useEffect(() => {
     if (!scrollContainerRef.current) return;
     const rowHeight = getComputedStyle(scrollContainerRef.current).getPropertyValue('--rowHeight');
     if (!rowHeight) return;
     setRowHeight(parseInt(rowHeight, 10));
-  }, [scrollContainerRef]);
+  }, [scrollContainerRef, scrollContainerReady]);
 
   // Create a new 'update history' function every time selection changes.
   // TODO: Use a selectedRowRef instead, so that the callback doesn't have to be updated?
@@ -115,6 +131,11 @@ function VirtualizedList(props: VirtualizedListProps) {
     // We only want to run this scroll-restoration effect when location pathname changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history.location.pathname]);
+
+  // Don't render WindowScroller until scroll container is available
+  if (!scrollContainerReady || !scrollContainerRef.current) {
+    return <div className="VirtualizedList-loading" />;
+  }
 
   return (
     <div

@@ -6,18 +6,90 @@ import trimEnd from 'lodash/trimEnd';
 import { BrowseProps } from '../types/app';
 import { formatFileSize } from '../util';
 
-export default class Browse extends React.PureComponent<BrowseProps> {
+interface BrowseState {
+  shouldFlashTitle: boolean;
+  shouldUnfoldList: boolean;
+}
+
+export default class Browse extends React.PureComponent<BrowseProps, BrowseState> {
+  private titleFlashTimeout?: number;
+  private unfoldTimeout?: number;
+
   constructor(props: BrowseProps) {
     super(props);
     autoBindReact(this);
+
+    const shouldAnimate = (props.history.location.state as any)?.shouldAnimate || false;
+    this.state = {
+      shouldFlashTitle: shouldAnimate,
+      shouldUnfoldList: shouldAnimate,
+    };
   }
 
   componentDidMount() {
     this.navigate();
+
+    console.log(
+      'Browse mounted - shouldFlashTitle:',
+      this.state.shouldFlashTitle,
+      'shouldUnfoldList:',
+      this.state.shouldUnfoldList
+    );
+
+    if (this.state.shouldFlashTitle) {
+      this.titleFlashTimeout = window.setTimeout(() => {
+        console.log('Browse - clearing flash title');
+        this.setState({ shouldFlashTitle: false });
+      }, 800);
+    }
+
+    if (this.state.shouldUnfoldList) {
+      this.unfoldTimeout = window.setTimeout(() => {
+        console.log('Browse - clearing unfold list');
+        this.setState({ shouldUnfoldList: false });
+      }, 600);
+    }
   }
 
   componentDidUpdate(prevProps: BrowseProps, prevState: any) {
     this.navigate();
+
+    if (prevProps.browsePath !== this.props.browsePath) {
+      const shouldAnimate = (this.props.history.location.state as any)?.shouldAnimate || false;
+      console.log(
+        'Browse path changed - shouldAnimate:',
+        shouldAnimate,
+        'new path:',
+        this.props.browsePath
+      );
+
+      if (shouldAnimate) {
+        console.log('Browse - starting animations');
+        this.setState({
+          shouldFlashTitle: true,
+          shouldUnfoldList: true,
+        });
+
+        this.titleFlashTimeout = window.setTimeout(() => {
+          console.log('Browse - clearing flash title');
+          this.setState({ shouldFlashTitle: false });
+        }, 800);
+
+        this.unfoldTimeout = window.setTimeout(() => {
+          console.log('Browse - clearing unfold list');
+          this.setState({ shouldUnfoldList: false });
+        }, 600);
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.titleFlashTimeout) {
+      clearTimeout(this.titleFlashTimeout);
+    }
+    if (this.unfoldTimeout) {
+      clearTimeout(this.unfoldTimeout);
+    }
   }
 
   handleShufflePlay() {
@@ -102,9 +174,12 @@ export default class Browse extends React.PureComponent<BrowseProps> {
       }
     };
 
+    const titleClassName = `Browse-topRow${this.state.shouldFlashTitle ? ' flash-title' : ''}`;
+    const listClassName = `Browse-list-scroll${this.state.shouldUnfoldList ? ' unfold' : ''}`;
+
     return (
       <div className="Browse-container">
-        <h3 className="Browse-topRow">
+        <h3 className={titleClassName}>
           /{browsePath}{' '}
           <button
             className="box-button"
@@ -114,7 +189,7 @@ export default class Browse extends React.PureComponent<BrowseProps> {
             Randomize
           </button>
         </h3>
-        <div className="Browse-list-scroll">
+        <div className={listClassName}>
           <VirtualizedList
             scrollContainerRef={this.props.scrollContainerRef}
             currContext={this.props.currContext}

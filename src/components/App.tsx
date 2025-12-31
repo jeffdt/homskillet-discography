@@ -156,6 +156,7 @@ class App extends React.Component<AppProps, AppState> {
       paramDefs: [],
       paramValues: {},
       activeTab: 'browser' as TabType,
+      visualizerMaximized: false,
     };
 
     this.initChipCore(audioCtx, playerNode, bufferSize);
@@ -809,23 +810,26 @@ class App extends React.Component<AppProps, AppState> {
           <Toast />
           <AppHeader />
           <TabBar activeTab={this.state.activeTab} onTabChange={this.handleTabChange} />
-          <div className="App-main">
-            <div className="App-main-inner">
-              <div className="App-main-content-and-settings">
-                <div
-                  className={`App-main-content-area mobile-tab-content ${this.state.activeTab === 'browser' ? 'mobile-tab-active' : ''}`}
-                  ref={this.contentAreaRef}
-                >
-                  <Switch>
-                    <Route
-                      path="/:browsePath*"
-                      render={({ history, match, location }) => {
-                        // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
-                        const browsePath =
-                          (match.params as any)?.browsePath?.replace('%25', '%') || '';
-                        return (
-                          this.contentAreaRef.current && (
+          <div
+            className={`App-main ${this.state.visualizerMaximized ? 'visualizer-maximized' : ''}`}
+          >
+            {!this.state.visualizerMaximized && (
+              <div className="App-main-inner">
+                <div className="App-main-content-and-settings">
+                  <div
+                    className={`App-main-content-area mobile-tab-content ${this.state.activeTab === 'browser' ? 'mobile-tab-active' : ''}`}
+                    ref={this.contentAreaRef}
+                  >
+                    <Switch>
+                      <Route
+                        path="/:browsePath*"
+                        render={({ history, match, location }) => {
+                          // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
+                          const browsePath =
+                            (match.params as any)?.browsePath?.replace('%25', '%') || '';
+                          return (
                             <Browse
+                              key={`browse-${this.state.visualizerMaximized}`}
                               currContext={currContext}
                               currIdx={currIdx}
                               history={history}
@@ -840,34 +844,34 @@ class App extends React.Component<AppProps, AppState> {
                               scrollContainerRef={this.contentAreaRef}
                               listRef={this.listRef}
                             />
-                          )
-                        );
-                      }}
+                          );
+                        }}
+                      />
+                    </Switch>
+                  </div>
+                  <div
+                    className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}
+                  >
+                    <Settings
+                      ejected={this.state.ejected}
+                      tempo={this.state.tempo}
+                      numVoices={this.state.currentSongNumVoices}
+                      voiceMask={this.state.voiceMask}
+                      voiceNames={this.state.voiceNames}
+                      voiceGroups={this.state.voiceGroups}
+                      onVoiceMaskChange={this.handleSetVoiceMask}
+                      onTempoChange={this.handleTempoChange}
+                      paramDefs={this.state.paramDefs}
+                      paramValues={this.state.paramValues}
+                      onParamChange={this.handleParamChange}
+                      onPinParam={this.handlePinParam}
+                      persistedSettings={this.props.userContext.settings}
+                      sequencer={this.sequencer}
                     />
-                  </Switch>
-                </div>
-                <div
-                  className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}
-                >
-                  <Settings
-                    ejected={this.state.ejected}
-                    tempo={this.state.tempo}
-                    numVoices={this.state.currentSongNumVoices}
-                    voiceMask={this.state.voiceMask}
-                    voiceNames={this.state.voiceNames}
-                    voiceGroups={this.state.voiceGroups}
-                    onVoiceMaskChange={this.handleSetVoiceMask}
-                    onTempoChange={this.handleTempoChange}
-                    paramDefs={this.state.paramDefs}
-                    paramValues={this.state.paramValues}
-                    onParamChange={this.handleParamChange}
-                    onPinParam={this.handlePinParam}
-                    persistedSettings={this.props.userContext.settings}
-                    sequencer={this.sequencer}
-                  />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             {!this.state.loading && (
               <div
                 className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}
@@ -883,6 +887,9 @@ class App extends React.Component<AppProps, AppState> {
                   }
                   onThemesExpandedChange={(expanded) =>
                     this.props.userContext.updateSettings({ visualizerThemesExpanded: expanded })
+                  }
+                  onMaximizedChange={(maximized) =>
+                    this.setState({ visualizerMaximized: maximized })
                   }
                 />
               </div>

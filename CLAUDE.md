@@ -4,7 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Homskillet Discography** is an interactive discography website for NSF (NES Sound Format) files created by the musician Homskillet. This is a fork of the general-purpose chip-player-js by mmontag, being customized into a personal music showcase site.
+**Homskillet Discography** is a technical sandbox for exploring audio-visual and game development concepts, powered by NSF (NES Sound Format) files created by the musician Homskillet. This is a fork of the general-purpose chip-player-js by mmontag, being transformed into an interactive audio-visual laboratory and experimentation platform.
+
+### Core Philosophy: Exploration and Interactivity
+
+**This project is as much about learning and experimentation as it is about listening to music.** The goal is to create an engaging technical playground where visitors can:
+
+- Explore how audio visualization techniques work
+- Tweak parameters and see real-time effects
+- Understand the connection between audio data and visual representation
+- Experiment with audio processing controls (tempo, stereo width, bass boost, etc.)
+- Learn about WebAssembly, Web Audio API, and game music emulation
+
+**When implementing features, always consider:**
+
+1. **Expose configuration where appropriate** - If you're adding a new visual effect, algorithm parameter, or audio processing feature, consider exposing controls so visitors can experiment with it. Make the invisible visible.
+
+2. **Add audio-reactivity opportunities** - Look for places where existing or new visual elements could respond to audio data (frequency bands, amplitude, beats, etc.). The visualizer isn't the only place that can react to music.
+
+3. **Make experimentation inviting** - Use clear labels, helpful tooltips, and logical groupings. The goal is to make technical concepts accessible and explorable, not intimidating.
+
+4. **Document the "why" and "how"** - When exposing controls, consider adding brief explanations of what the parameter does or what technique is being demonstrated.
 
 ### Project Goals
 
@@ -12,7 +32,7 @@ This project is being developed in three phases:
 
 1. **Strip down to minimum** - Remove all components of the general-purpose player that aren't needed (MIDI, XMP, VGM players, Firebase auth, favorites, search, local file uploads, etc.). Simplify to just NSF playback via game-music-emu.
 
-2. **Add custom features** - Build new features to transform this into a personal discography site with custom branding, theming, and presentation tailored for showcasing Homskillet's musical works.
+2. **Add custom features** - Build new features to transform this into an interactive audio-visual laboratory with custom branding, theming, and presentation. Focus on exposing interesting technical concepts in an accessible way.
 
 3. **Deploy to GitHub Pages** - Deploy as a fully static site. (See `.claude/deployment-plan.md` for details - AWS is not needed for this small discography).
 

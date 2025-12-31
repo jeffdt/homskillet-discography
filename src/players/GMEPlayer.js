@@ -1,5 +1,5 @@
-import Player from "./Player.js";
-import SubBass from "../effects/SubBass";
+import Player from './Player.js';
+import SubBass from '../effects/SubBass';
 import { allOrNone, remap01 } from '../util';
 import autoBind from 'auto-bind';
 
@@ -16,19 +16,13 @@ const INT16_MAX = 65535;
 const TIMESLICED_SEEK_MS_MAP = {
   '.spc': 10000,
 };
-const fileExtensions = [
-  'nsf',
-  'nsfe',
-  'spc',
-  'ay',
-  'gbs',
-];
+const fileExtensions = ['nsf', 'nsfe', 'spc', 'ay', 'gbs'];
 
 export default class GMEPlayer extends Player {
   paramDefs = [
     {
       id: 'subbass',
-      label: 'Sub Bass',
+      label: 'Bass Boost',
       type: 'number',
       min: 0.0,
       max: 2.0,
@@ -93,11 +87,14 @@ export default class GMEPlayer extends Player {
 
       for (ch = 0; ch < channels.length; ch++) {
         for (i = 0; i < this.bufferSize; i++) {
-          channels[ch][i] = core.getValue(this.buffer +
-            // Interleaved channel format
-            i * 2 * 2 +             // frame offset   * bytes per sample * num channels +
-            ch * 2,                 // chhannel offset * bytes per sample
-            'i16') / INT16_MAX;     // convert int16 to float
+          channels[ch][i] =
+            core.getValue(
+              this.buffer +
+                // Interleaved channel format
+                i * 2 * 2 + // frame offset   * bytes per sample * num channels +
+                ch * 2, // chhannel offset * bytes per sample
+              'i16'
+            ) / INT16_MAX; // convert int16 to float
         }
       }
 
@@ -105,7 +102,7 @@ export default class GMEPlayer extends Player {
       if (this.seekTargetMs) {
         const fadeLength = Math.min(256, this.bufferSize / 2);
         for (i = 0; i < fadeLength; i++) {
-          const fade = i/fadeLength;
+          const fade = i / fadeLength;
           channels[0][i] *= fade;
           channels[1][i] *= fade;
           channels[0][this.bufferSize - (i + 1)] *= fade;
@@ -139,7 +136,10 @@ export default class GMEPlayer extends Player {
     } else {
       this.subtune++;
 
-      if (this.subtune >= core._gme_track_count(this.gmeCtx) || this.playSubtune(this.subtune) !== 0) {
+      if (
+        this.subtune >= core._gme_track_count(this.gmeCtx) ||
+        this.playSubtune(this.subtune) !== 0
+      ) {
         this.suspend();
         console.debug(
           'GMEPlayer.gmeAudioProcess(): _gme_track_ended == %s and subtune (%s) > _gme_track_count (%s).',
@@ -180,7 +180,7 @@ export default class GMEPlayer extends Player {
       this.stop();
       throw Error('gme_open_data failed');
     }
-    this.gmeCtx = core.getValue(this.emuPtr, "i32");
+    this.gmeCtx = core.getValue(this.emuPtr, 'i32');
     this.voiceMask = Array(core._gme_voice_count(this.gmeCtx)).fill(true);
 
     core._gme_ignore_silence(this.gmeCtx, 0);
@@ -196,13 +196,13 @@ export default class GMEPlayer extends Player {
   _parseMetadata(subtune) {
     const metadataPtr = core._malloc(4); // i32
     if (core._gme_track_info(this.gmeCtx, metadataPtr, subtune) !== 0)
-      console.error("could not load metadata");
-    const ref = core.getValue(metadataPtr, "*");
+      console.error('could not load metadata');
+    const ref = core.getValue(metadataPtr, '*');
 
     let offset = 0;
 
     const readInt32 = function () {
-      var value = core.getValue(ref + offset, "i32");
+      var value = core.getValue(ref + offset, 'i32');
       offset += 4;
       return value;
     };
@@ -246,10 +246,9 @@ export default class GMEPlayer extends Player {
     meta.comment = readString();
 
     meta.formatted = {
-      title: meta.game === meta.title ?
-        meta.title :
-        allOrNone(meta.game, ' - ') + meta.title,
-      subtitle: [meta.artist, meta.system].filter(x => x).join(' - ') +
+      title: meta.game === meta.title ? meta.title : allOrNone(meta.game, ' - ') + meta.title,
+      subtitle:
+        [meta.artist, meta.system].filter((x) => x).join(' - ') +
         allOrNone(' (', meta.copyright, ')'),
     };
 
@@ -344,7 +343,10 @@ export default class GMEPlayer extends Player {
   doIncrementalSeek(seekMsIncrement) {
     // console.log('Scheduling incremental seek of %s ms...', seekMsIncrement);
     this.seekRequestId = requestIdleCallback(() => {
-      const seekIntermediateMs = Math.min(this.getPositionMs() + seekMsIncrement, this.seekTargetMs);
+      const seekIntermediateMs = Math.min(
+        this.getPositionMs() + seekMsIncrement,
+        this.seekTargetMs
+      );
       core._gme_seek_scaled(this.gmeCtx, seekIntermediateMs);
       if (seekIntermediateMs < this.seekTargetMs) {
         this.doIncrementalSeek(seekMsIncrement);
@@ -371,7 +373,8 @@ export default class GMEPlayer extends Player {
         this.doIncrementalSeek(seekMsIncrement);
       } else {
         this.muteAudioDuringCall(this.audioNode, () =>
-          core._gme_seek_scaled(this.gmeCtx, positionMs));
+          core._gme_seek_scaled(this.gmeCtx, positionMs)
+        );
       }
     }
   }

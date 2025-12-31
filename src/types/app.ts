@@ -53,6 +53,7 @@ export interface AppState {
   paramDefs: PlayerParamDef[];
   paramValues: Record<string, any>;
   activeTab: TabType;
+  visualizerMaximized: boolean;
 }
 
 export interface BrowseProps {

@@ -12,7 +12,7 @@ None!
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-**S2**: Remove all subtune functionality. NSF files can contain multiple tracks (subtunes), but this discography will only use the first track of each file. Remove: subtune UI controls (next/prev buttons, "Tune N of M" display), subtune state management (currentSongNumSubtunes, currentSongSubtune), navigation methods (nextSubtune, prevSubtune, playSubtune), URL parameter handling (?subtune=N), and player methods (getNumSubtunes, getSubtune).
+None!
 
 ---
 
@@ -40,6 +40,10 @@ None!
 
 **E16**: Slider sparks can change color over lifespan through a gradient.
 
+**E17**: Visualizer fullscreen should rotate 90 degrees when entering fullscreen mode.
+
+**E18**: Add a player button to "lock" the current song. This should remove the timer check and play the song continuously until the user manually stops it or advances to the next song.
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
@@ -55,6 +59,8 @@ None!
 - Can be done incrementally when touching these files for features
 
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this.
+
+**M5**: Help me investigate this build warning about bundle size and the react-virtualized module directive error.
 
 ---
 
