@@ -1,4 +1,15 @@
 {
   "version": "1.0",
-  "worktrees": []
+  "worktrees": [
+    {
+      "id": "E18",
+      "branch": "feature/E18-player-lock-button",
+      "path": "/Users/hom/code/homskillet-worktrees/E18-player-lock-button",
+      "todoDescription": "Add a lock button to player area to lock in the current song. This should remove the timer check and play the song continuously until the user manually stops it or advances to the next song.",
+      "areas": ["player"],
+      "port": 5018,
+      "baseBranch": "main",
+      "createdAt": "2026-01-01T00:00:00Z"
+    }
+  ]
 }
