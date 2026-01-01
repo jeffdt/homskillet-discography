@@ -52,6 +52,8 @@ _Implementation note: Attempted using React Router's history.push() state to pas
 
 **E18**: Add a player button to "lock" the current song. This should remove the timer check and play the song continuously until the user manually stops it or advances to the next song. [area:player]
 
+**E19**: Create a new settings pane structure in `App-main-content-and-settings` div. Rather than trying to cram UI settings and player settings in the same pane, we should have separate panes for each. The file browser is a bit empty anyway, it's wasted real estate. [area:settings]
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)

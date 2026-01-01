@@ -136,6 +136,10 @@ export default class Spectrogram {
     this.specSpeed = speed;
   }
 
+  setPeakDecayRate(rate) {
+    this.peakDecayRate = rate;
+  }
+
   setHorizontal(horizontal) {
     this.horizontal = horizontal;
     // Sync temp canvas to spec canvas dimensions and clear all canvases
