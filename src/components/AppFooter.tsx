@@ -2,7 +2,6 @@ import React, { memo, useContext, useState } from 'react';
 import SongDisplay from './SongDisplay';
 import TimeSlider from './TimeSlider';
 import VolumeSlider from './VolumeSlider';
-import { REPEAT_LABELS, SHUFFLE_LABELS } from '../Sequencer';
 import { useAudioPulse } from '../contexts/AudioPulseContext';
 import { UserContext } from './UserProvider';
 
@@ -12,16 +11,16 @@ interface AppFooterProps {
   ejected: boolean;
   imageUrl: string | null;
   paused: boolean;
-  repeat: number;
   shuffle: number;
+  isLocked: boolean;
   songUrl: string | null;
   volume: number;
 
   // Method props
   getCurrentSongLink: () => string | null;
   handleCopyLink: (link: string) => void;
-  handleCycleRepeat: () => void;
   handleCycleShuffle: () => void;
+  handleToggleLock: () => void;
   handleTimeSliderChange: (position: number) => void;
   handleVolumeChange: (volume: number) => void;
   navigateToCurrentSong: () => void;
@@ -38,16 +37,16 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
     ejected,
     imageUrl,
     paused,
-    repeat,
     shuffle,
+    isLocked,
     songUrl,
     volume,
 
     // this.
     getCurrentSongLink,
     handleCopyLink,
-    handleCycleRepeat,
     handleCycleShuffle,
+    handleToggleLock,
     handleTimeSliderChange,
     handleVolumeChange,
     navigateToCurrentSong,
@@ -63,7 +62,7 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
   const { amplitude } = useAudioPulse();
   const pulseIntensity = paused || ejected ? 0 : amplitude;
   const accentColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--accent')
+    .getPropertyValue('--accent-dark')
     .trim();
 
   const userContext = useContext(UserContext);
@@ -174,7 +173,7 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
           <button
             onClick={togglePause}
             title={playPauseTitle}
-            className="box-button AppFooter-play-pause"
+            className={`box-button AppFooter-play-pause ${!paused ? 'AppFooter-play-pause-active' : ''}`}
             disabled={ejected}
             style={
               {
@@ -191,20 +190,18 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
         </div>
         <div className="AppFooter-controls-row AppFooter-secondary-controls">
           <button
-            title="Cycle Repeat (repeat off, repeat all songs in the context, or repeat one song)"
-            className="AppFooter-repeat box-button"
-            onClick={handleCycleRepeat}
-          >
-            <span className="inline-icon icon-repeat" />
-            {REPEAT_LABELS[repeat]}
-          </button>
-          <button
             title="Toggle shuffle mode"
-            className="AppFooter-shuffle box-button"
+            className={`AppFooter-shuffle box-button ${shuffle ? 'AppFooter-shuffle-active' : ''}`}
             onClick={handleCycleShuffle}
           >
             <span className="inline-icon icon-shuffle" />
-            {SHUFFLE_LABELS[shuffle]}
+          </button>
+          <button
+            title={isLocked ? 'Unlock player (allow auto-advance)' : 'Loop current song (disable auto-advance)'}
+            className={`AppFooter-lock box-button ${isLocked ? 'AppFooter-lock-active' : ''}`}
+            onClick={handleToggleLock}
+          >
+            <span className="inline-icon icon-infinity" />
           </button>
         </div>
       </div>

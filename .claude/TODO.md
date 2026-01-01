@@ -14,7 +14,7 @@ When all elements in a section are complete, simply replace the list of tasks wi
 
 ## SIMPLIFICATION (stripping down to essentials)
 
-None!
+**S1**: Remove subtune handling code from GMEPlayer and related components. The subtune feature (multi-track NSF files) is not needed for this project and should be eliminated. [area:player]
 
 ---
 
@@ -53,7 +53,7 @@ _Implementation note: Attempted using React Router's history.push() state to pas
 
 **E17**: Visualizer fullscreen should rotate 90 degrees when entering fullscreen mode. [area:visualizer]
 
-**E18**: Add a lock button to player area to lock in the current song. This should remove the timer check and play the song continuously until the user manually stops it or advances to the next song. [area:player]
+**(WORKTREE:feature/E18-player-lock-button) E18**: Add a player button to "lock" the current song. This should remove the timer check and play the song continuously until the user manually stops it or advances to the next song. [area:player]
 
 **E19**: Create a new settings pane structure in `App-main-content-and-settings` div. Rather than trying to cram UI settings and player settings in the same pane, we should have separate panes for each. The file browser is a bit empty anyway, it's wasted real estate. [area:settings]
 

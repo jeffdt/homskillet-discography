@@ -23,9 +23,7 @@ import {
 import requestCache from '../RequestCache';
 import { handleShufflePlayLogic } from '../handleShufflePlayLogic';
 import Sequencer, {
-  NUM_REPEAT_MODES,
   NUM_SHUFFLE_MODES,
-  REPEAT_OFF,
   SHUFFLE_OFF,
 } from '../Sequencer';
 
@@ -149,8 +147,8 @@ class App extends React.Component<AppProps, AppState> {
       showInfo: false,
       songUrl: null,
       volume: 100,
-      repeat: REPEAT_OFF,
       shuffle: SHUFFLE_OFF,
+      isLocked: false,
       directories: {},
       hasPlayer: false,
       paramDefs: [],
@@ -618,11 +616,12 @@ class App extends React.Component<AppProps, AppState> {
     this.gainNode.gain.value = Math.max(0, Math.min(2, volume * 0.01));
   }
 
-  handleCycleRepeat() {
-    // TODO: Handle dropped file repeat
-    const repeat = (this.state.repeat + 1) % NUM_REPEAT_MODES;
-    this.setState({ repeat });
-    this.sequencer.setRepeat(repeat);
+  handleToggleLock() {
+    const isLocked = !this.state.isLocked;
+    this.setState({ isLocked });
+    if (this.sequencer) {
+      this.sequencer.setLocked(isLocked);
+    }
   }
 
   toggleInfo() {
@@ -900,7 +899,6 @@ class App extends React.Component<AppProps, AppState> {
             ejected={this.state.ejected}
             getCurrentSongLink={this.getCurrentSongLink}
             handleCopyLink={this.handleCopyLink}
-            handleCycleRepeat={this.handleCycleRepeat}
             handleCycleShuffle={this.handleCycleShuffle}
             handleTimeSliderChange={this.handleTimeSliderChange}
             handleVolumeChange={this.handleVolumeChange}
@@ -909,8 +907,9 @@ class App extends React.Component<AppProps, AppState> {
             nextSong={this.nextSong}
             paused={this.state.paused}
             prevSong={this.prevSong}
-            repeat={this.state.repeat}
             shuffle={this.state.shuffle}
+            isLocked={this.state.isLocked}
+            handleToggleLock={this.handleToggleLock}
             sequencer={this.sequencer}
             songUrl={this.state.songUrl}
             togglePause={this.togglePause}

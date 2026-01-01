@@ -6,12 +6,8 @@ import autoBind from 'auto-bind';
 import { pathJoin } from './util';
 import { IPlayer } from './types/player';
 import {
-  REPEAT_OFF,
-  REPEAT_ALL,
-  REPEAT_ONE,
   SHUFFLE_OFF,
   SHUFFLE_ON,
-  RepeatMode,
   ShuffleMode,
   SequencerState,
   LocalFilesManager,
@@ -19,11 +15,6 @@ import {
 
 // Re-export constants for backward compatibility
 export {
-  REPEAT_OFF,
-  REPEAT_ALL,
-  REPEAT_ONE,
-  NUM_REPEAT_MODES,
-  REPEAT_LABELS,
   SHUFFLE_OFF,
   SHUFFLE_ON,
   NUM_SHUFFLE_MODES,
@@ -41,7 +32,7 @@ export default class Sequencer extends EventEmitter {
   private shuffle: ShuffleMode = SHUFFLE_OFF;
   private shuffleOrder: number[] = [];
   private songRequest: XMLHttpRequest | null = null;
-  private repeat: RepeatMode = REPEAT_OFF;
+  private isLocked: boolean = false;
 
   constructor(players: IPlayer[], localFilesManager: LocalFilesManager, getSettings: () => any) {
     super();
@@ -58,7 +49,6 @@ export default class Sequencer extends EventEmitter {
     this.shuffle = SHUFFLE_OFF;
     this.shuffleOrder = [];
     this.songRequest = null;
-    this.repeat = REPEAT_OFF;
 
     this.players.forEach((player) => {
       player.on('playerStateUpdate', this.handlePlayerStateUpdate);
@@ -77,11 +67,12 @@ export default class Sequencer extends EventEmitter {
 
   private handlePlayerStateUpdate(playerState: SequencerState): void {
     const { isStopped } = playerState;
-    console.debug('Sequencer.handlePlayerStateUpdate(isStopped=%s)', isStopped);
+    console.debug('Sequencer.handlePlayerStateUpdate(isStopped=%s, isLocked=%s)', isStopped, this.isLocked);
 
     if (isStopped) {
       this.currUrl = null;
-      if (this.context) {
+      // Only advance if NOT locked
+      if (this.context && !this.isLocked) {
         this.nextSong();
       }
     } else {
@@ -139,34 +130,31 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  setRepeat(repeat: RepeatMode): void {
-    this.repeat = repeat;
+  setLocked(locked: boolean): void {
+    this.isLocked = locked;
+    // Inform the current player about lock state
+    if (this.player) {
+      this.player.setLocked(locked);
+    }
   }
 
   private advanceSong(direction: number): void {
     if (this.context == null) return;
 
-    if (this.repeat !== REPEAT_ONE) {
-      this.currIdx += direction;
-    }
+    this.currIdx += direction;
 
     if (this.currIdx < 0 || this.currIdx >= this.context.length) {
-      if (this.repeat === REPEAT_ALL) {
-        this.currIdx = (this.currIdx + this.context.length) % this.context.length;
-        this.playCurrentSong();
-      } else {
-        console.debug(
-          'Sequencer.advanceSong(direction=%s) %s passed end of context length %s',
-          direction,
-          this.currIdx,
-          this.context.length
-        );
-        this.currIdx = 0;
-        this.context = null;
-        this.player!.stop();
-        this.player = null;
-        this.emit('sequencerStateUpdate', { isEjected: true });
-      }
+      console.debug(
+        'Sequencer.advanceSong(direction=%s) %s passed end of context length %s',
+        direction,
+        this.currIdx,
+        this.context.length
+      );
+      this.currIdx = 0;
+      this.context = null;
+      this.player!.stop();
+      this.player = null;
+      this.emit('sequencerStateUpdate', { isEjected: true });
     } else {
       this.playCurrentSong();
     }
