@@ -1,26 +1,25 @@
 ---
-description: Start working on a TODO item (with or without isolated worktree)
-allowed-tools: Read, Glob, Grep, Edit, Write, Bash, AskUserQuestion, TodoWrite, Task
+description: Initialize an isolated worktree for a TODO item
+allowed-tools: Read, Edit, Bash, AskUserQuestion
 ---
 
-# /feature:start - Start Working on a Feature
+# /feature:init - Initialize Worktree for a Feature
 
-This command helps you select and begin working on a TODO item from `.claude/TODO.md`. It offers two workflows:
+This command scaffolds an isolated git worktree for working on a TODO item from `.claude/TODO.md`. It creates the worktree, symlinks dependencies, and prepares everything for development.
 
-1. **Isolated worktree** - Create a separate working directory for parallel development
-2. **Direct work** - Work on the current branch (traditional workflow)
-
-This command replaces the deprecated `/todo:implement` with enhanced worktree support.
+After initialization, use `/feature:implement` to actually implement the feature.
 
 ## Usage
 
 ```bash
 # Interactive: Shows available TODO items to choose from
-/feature:start
+/feature:init
 
-# Direct: Start working on a specific TODO by ID
-/feature:start E16
+# Direct: Initialize worktree for a specific TODO by ID
+/feature:init E16
 ```
+
+After initialization, CD to the worktree and run `/feature:implement` to begin work.
 
 ## Workflow
 
@@ -107,14 +106,14 @@ Remove from consideration:
 
 ### Step 4: Select TODO Item
 
-**If user provided ID** (e.g., `/feature:start E16`):
+**If user provided ID** (e.g., `/feature:init E16`):
 
 - Verify the ID exists in TODO.md
 - Verify it's not marked `(WIP)`, `(WORKTREE:*)`, or excluded due to conflicts
 - If valid, use that item
 - If invalid/excluded, explain why and show available alternatives
 
-**If no ID provided** (e.g., `/feature:start`):
+**If no ID provided** (e.g., `/feature:init`):
 
 - Categorize remaining available items by complexity:
   - **Quick Wins**: Simple, well-defined tasks
@@ -136,39 +135,13 @@ Options:
 4. E6: Add song metadata storage [area:browser] (Complex - needs design)
 ```
 
-### Step 5: Ask About Worktree Creation
-
-Once a TODO item is selected, ask the user how they want to work on it:
-
-Use `AskUserQuestion` tool:
-
-```
-Selected {ID}: {Description}
-
-How do you want to work on this?
-1. Create isolated worktree (recommended for parallel work)
-2. Work directly on current branch
-```
-
-**When to recommend worktrees:**
-
-- User is already working on other items (active WIP/WORKTREE items exist)
-- Item is medium/complex (will take time, may want to switch)
-- Item affects multiple files (reduces risk)
-
-**When direct work is fine:**
-
-- Quick wins that can be done in one session
-- User has no other active work
-- Urgent fixes
-
-### Step 6A: If "Create Isolated Worktree" Selected
-
-#### 6A.1: Read Worktree Registry
+### Step 5: Read Worktree Registry
 
 Read `.claude/worktrees.json` to get list of active worktrees.
 
-#### 6A.2: Conflict Detection
+### Step 6: Create Worktree
+
+#### Step 6.1: Conflict Detection
 
 Check if the selected TODO's area tags overlap with any active worktree's areas.
 
@@ -207,7 +180,7 @@ Continue anyway? (yes/no)
 
 Allow user to override the warning. If they say no, return to step 4 to select a different item.
 
-#### 6A.3: Calculate Port
+#### Step 6.2: Calculate Port
 
 Generate predictable port from TODO ID:
 
@@ -238,7 +211,7 @@ function calculatePort(todoId) {
 // M5 → 6005
 ```
 
-#### 6A.4: Generate Slug
+#### Step 6.3: Generate Slug
 
 Create URL-friendly slug from TODO description:
 
@@ -266,37 +239,51 @@ function generateSlug(description) {
 // → "ability-play-mp3s-handful"
 ```
 
-#### 6A.5: Create Worktree
+#### Step 6.4: Create Worktree
 
-Execute git commands to create the worktree:
+Use the helper script to create the worktree with optimized setup:
 
 ```bash
-# 1. Ensure parent directory exists
-mkdir -p /Users/hom/code/homskillet-worktrees
-
-# 2. Create worktree with new branch in one command
-# Pattern: /Users/hom/code/homskillet-worktrees/{ID}-{slug}/
-# Branch: feature/{ID}-{slug}
-git worktree add -b feature/{ID}-{slug} /Users/hom/code/homskillet-worktrees/{ID}-{slug}
+# Call the helper script with TODO ID, slug, and port
+./scripts/create-worktree.sh {ID} {slug} {port}
 
 # Example for E16:
-# git worktree add -b feature/E16-slider-sparks /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+# ./scripts/create-worktree.sh E16 slider-sparks 5016
+```
 
-# 3. Push branch to remote and set upstream
-cd /Users/hom/code/homskillet-worktrees/{ID}-{slug}
-git push -u origin feature/{ID}-{slug}
+**What the script does:**
 
-# 4. Return to main worktree
-cd /Users/hom/code/homskillet-discography
+1. Creates git worktree at `/Users/hom/code/homskillet-worktrees/{ID}-{slug}/`
+2. Creates feature branch `feature/{ID}-{slug}`
+3. **Symlinks `node_modules/` from main repo** (instant setup, no duplicate install)
+4. Pushes branch to remote and sets upstream
+5. Returns detailed output with paths and port
+
+**Symlink Optimization:**
+
+The script symlinks `node_modules` instead of running `bun install` because:
+
+- **Instant setup** - No 30+ second install time
+- **No disk duplication** - Saves ~500MB-1GB per worktree
+- **Shared dependencies** - Since dependency changes are rare, sharing is safe
+- **Still isolated** - Source code and git history remain independent
+
+If you ever need different dependencies in a worktree, simply delete the symlink and run `bun install`:
+
+```bash
+cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+rm node_modules
+bun install
 ```
 
 **Handle errors:**
 
-- If `git worktree add` fails, check if worktree already exists
+- If script fails, check if worktree already exists
 - If branch already exists, suggest using existing worktree or creating new branch name
 - If push fails, continue anyway (user can push later)
+- Script includes error handling with `set -e` for safety
 
-#### 6A.6: Update Registry
+#### Step 6.5: Update Registry
 
 Add entry to `.claude/worktrees.json`:
 
@@ -315,7 +302,7 @@ Add entry to `.claude/worktrees.json`:
 
 Use current timestamp for `createdAt`.
 
-#### 6A.7: Update TODO.md Marker
+#### Step 6.6: Update TODO.md Marker
 
 Add `(WORKTREE:branch-name)` marker to the TODO item in `.claude/TODO.md`:
 
@@ -331,7 +318,7 @@ After:
 **(WORKTREE:feature/E16-slider-sparks) E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
 ```
 
-#### 6A.8: Provide User Guidance
+#### Step 6.7: Provide User Guidance
 
 ```
 ✅ Created worktree for E16
@@ -354,149 +341,14 @@ When ready:
 The TODO item has been marked with (WORKTREE:feature/E16-slider-sparks) in TODO.md.
 ```
 
-**End workflow here** - user will CD to worktree and work there.
-
-### Step 6B: If "Work Directly on Current Branch" Selected
-
-This follows the traditional `/todo:implement` workflow:
-
-#### 6B.1: Mark as WIP
-
-Immediately add `(WIP)` marker to TODO.md to prevent conflicts:
-
-Before:
-
-```markdown
-**E7**: Add ability to play MP3s [area:player]
-```
-
-After:
-
-```markdown
-**(WIP) E7**: Add ability to play MP3s [area:player]
-```
-
-#### 6B.2: Check Git History
-
-Verify the item hasn't already been completed:
-
-```bash
-# Search for TODO ID in commit messages
-git log --all --oneline --grep="E7"
-
-# Search for keywords from description
-git log --all --oneline --grep="MP3"
-```
-
-If evidence of completion found, ask user:
-
-```
-Found commits that may have already completed this:
-- abc1234 Add MP3 playback support (E7)
-
-Has this TODO been completed? If so, I'll remove it from TODO.md.
-```
-
-#### 6B.3: Use TodoWrite to Plan
-
-Break down the work into subtasks using the `TodoWrite` tool:
-
-```
-Working on E7: Add ability to play MP3s
-
-Breaking down into subtasks:
-1. Research Web Audio API MP3 decoding
-2. Add MP3 to supported file formats in config
-3. Update GMEPlayer to handle MP3 files
-4. Test with sample MP3 file
-5. Update catalog to index MP3 files
-```
-
-#### 6B.4: Explore if Needed
-
-For items requiring understanding of existing code, use `Task` tool with `subagent_type=Explore`:
-
-```
-Launching exploration agent to understand MP3 playback requirements...
-```
-
-#### 6B.5: Follow Project Guidelines
-
-Before implementing, remind yourself:
-
-- **CRITICAL:** Always use CSS variables from the color palette in `src/index.css`
-- Use `var(--neutral4)` instead of pure white
-- Use `var(--accent)` for interactive elements
-- See CLAUDE.md "Design & Styling Guidelines" section for full palette
-- Assume dev server (`bun start`) is already running - don't try to start it
-
-#### 6B.6: Implement Changes
-
-Make focused changes that address only the TODO item:
-
-- Don't over-engineer or add unrequested features
-- Follow existing code patterns
-- Keep changes minimal and focused
-
-#### 6B.7: Request User Verification
-
-After making changes:
-
-```
-✅ Implementation complete for E7
-
-Changes made:
-- Added MP3 decoder to GMEPlayer.js
-- Updated config.ts with MP3 format support
-- Modified build-catalog.js to index MP3 files
-
-Please verify the changes work correctly in your running dev server at localhost:3000.
-
-Test by:
-1. Adding an MP3 file to public/music/
-2. Running bun run build-catalog
-3. Checking that the MP3 appears and plays
-
-Does everything work as expected? (yes/no)
-```
-
-**Wait for user confirmation.** Do not proceed until user verifies.
-
-#### 6B.8: Update TODO.md
-
-After user confirms it works:
-
-1. **Delete the entire TODO item** from TODO.md (not just remove WIP marker)
-2. If section becomes empty, replace with "None!"
-
-Before:
-
-```markdown
-## ENHANCEMENT (new features & styling)
-
-**(WIP) E7**: Add ability to play MP3s [area:player]
-
-**E9**: Improve autoplay UX [area:browser]
-
----
-```
-
-After:
-
-```markdown
-## ENHANCEMENT (new features & styling)
-
-**E9**: Improve autoplay UX [area:browser]
-
----
-```
+**Next step:** CD to the worktree and run `/feature:implement` to begin implementation.
 
 ## Examples
 
 ### Example 1: No Items in Progress, Create Worktree
 
 ```
-User: /feature:start
+User: /feature:init
 
 Claude: No items currently in progress.
 
@@ -508,13 +360,7 @@ User: Selects E16
 
 Claude: Selected E16: Slider sparks can change color over lifespan through a gradient
 
-How do you want to work on this?
-1. Create isolated worktree (recommended for parallel work)
-2. Work directly on current branch
-
-User: Selects 1
-
-Claude: No conflicts detected with active worktrees.
+No conflicts detected with active worktrees.
 
 ✅ Created worktree for E16
 
@@ -525,25 +371,19 @@ Worktree Details:
 
 To work on this feature:
   cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-  bun start --port 5016
+  /feature:implement
 
-Test your changes at: http://localhost:5016
+Test your changes at: http://localhost:5016 (after starting dev server)
 ```
 
 ### Example 2: Conflict Warning on Worktree Creation
 
 ```
-User: /feature:start E17
+User: /feature:init E17
 
 Claude: Selected E17: Visualizer fullscreen should rotate 90 degrees
 
-How do you want to work on this?
-1. Create isolated worktree (recommended for parallel work)
-2. Work directly on current branch
-
-User: Selects 1
-
-Claude: ⚠️  WARNING: Potential conflicts detected
+⚠️  WARNING: Potential conflicts detected
 
 Current active worktrees:
 - E16 (feature/E16-slider-sparks) [area:visualizer]
@@ -565,65 +405,26 @@ Which TODO item would you like to work on instead?
 [Shows alternatives without visualizer area]
 ```
 
-### Example 3: Direct Work (No Worktree)
-
-```
-User: /feature:start M5
-
-Claude: Selected M5: Investigate bundle size warning [area:build]
-
-How do you want to work on this?
-1. Create isolated worktree (recommended for parallel work)
-2. Work directly on current branch
-
-User: Selects 2
-
-Claude: Marked M5 as (WIP) in TODO.md
-
-Breaking down work:
-1. Run bun run build and capture warning
-2. Analyze react-virtualized module directive error
-3. Research solutions
-4. Implement fix
-5. Verify warning is resolved
-
-Starting investigation...
-
-[Continues with implementation]
-```
-
 ## Best Practices
 
-1. **Always mark as WIP/WORKTREE immediately** - Prevents other agents from selecting the same item
+1. **Always mark as WORKTREE immediately** - Prevents other agents from selecting the same item
 2. **Check git history** - Verify item hasn't been completed before starting work
-3. **Use TodoWrite for multi-step items** - Break down complex work to track progress
-4. **Prefer worktrees for parallel work** - Enables context switching and isolation
-5. **Respect conflict warnings** - HIGH severity warnings usually indicate real problems
-6. **Follow project conventions** - Use color palette variables, respect patterns
-7. **Wait for user verification** - Don't assume changes work without testing
-8. **Delete completed items** - Remove from TODO.md entirely, don't just mark [x]
+3. **Respect conflict warnings** - HIGH severity warnings usually indicate real problems
+4. **Use /feature:implement after creation** - This command only scaffolds, implementation happens next
+5. **Follow project conventions** - Use color palette variables, respect patterns in implementation
+6. **Delete completed items** - Remove from TODO.md entirely after finishing, don't just mark [x]
 
 ## Important Notes
 
-- **Replaces /todo:implement**: This command supersedes the old `/todo:implement` workflow
-- **Single source of truth**: TODO.md tracks state via `(WIP)` and `(WORKTREE:*)` markers
+- **Scaffolding only**: This command only creates the worktree infrastructure. Use `/feature:implement` for actual work
+- **Single source of truth**: TODO.md tracks state via `(WORKTREE:*)` markers
 - **Worktree registry**: `.claude/worktrees.json` stores worktree metadata for queries
 - **Port management**: Each worktree gets predictable port based on TODO ID
 - **Area tags are critical**: Enable automatic conflict detection
-- **Dev server**: Assume it's running on main repo at localhost:3000 for direct work
 - **Parallel testing**: Worktrees use different ports, allowing simultaneous testing
+- **Next step**: After initialization, CD to the worktree and run `/feature:implement`
 
 ## Edge Cases
-
-**Item already has WIP marker:**
-
-```
-E12 is already marked (WIP) in TODO.md.
-Either another agent is working on it, or the marker is stale.
-Would you like to:
-1. Take over this item (remove stale WIP marker)
-2. Select a different item
-```
 
 **Item already has WORKTREE marker:**
 
@@ -654,13 +455,13 @@ Would you like me to:
 ```
 All TODO items are currently being worked on or excluded due to conflicts.
 
-Active work:
-- (WIP) E12 [area:browser]
-- (WORKTREE:feature/E16-slider-sparks) E16 [area:visualizer]
+Active worktrees:
+- (WORKTREE:feature/E3-visualizer-peak-decay) E3 [area:visualizer]
+- (WORKTREE:feature/E18-player-lock-button) E18 [area:player]
 
-This blocks: E6, E9 (browser conflicts) and E1, E3, E5, E14, E17, B1 (visualizer conflicts)
+This blocks: E1, E5, E14, E16, E17, B1 (visualizer conflicts)
 
-Available when current work completes: E7, E18 (player), M1, M2, M4, M5 (build)
+Available when current work completes: E7 (player), E6, E9 (browser), M1, M2, M4, M5 (build)
 
 Would you like to start one of the available items?
 ```

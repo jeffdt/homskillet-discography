@@ -78,7 +78,7 @@ What would you like to do?
 ```
 
 **If user chooses "Commit changes now":**
-Use the `/gc` skill to create a commit with proper message format.
+Use the `/gc` command to create a commit with proper message format.
 
 **If user chooses "Stash":**
 
@@ -149,11 +149,11 @@ If user selects "Create Pull Request":
 # Ensure we're in the worktree directory
 cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
 
-# Use the /pr:draft skill
+# Use the /pr:draft command
 /pr:draft
 ```
 
-The `/pr:draft` skill will:
+The `/pr:draft` command will:
 
 - Auto-populate PR title from TODO description
 - Create PR body with summary
