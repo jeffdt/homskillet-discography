@@ -1,9 +1,47 @@
 ---
-description: Pick and implement an item from .claude/TODO.md, avoiding conflicts with work-in-progress items
-allowed-tools: Read, Glob, Grep, Edit, Write, Bash, AskUserQuestion, TodoWrite, Task
+description: Pick and implement an item from .claude/TODO.md, avoiding conflicts with work-in-progress items (DEPRECATED - use /feature:start instead)
+allowed-tools: Read, Glob, Grep, Edit, Write, Bash, AskUserQuestion, TodoWrite, Task, Skill
 ---
 
 # /todo:implement - Implement TODO Items
+
+⚠️ **DEPRECATED**: This command is deprecated in favor of `/feature:start`.
+
+`/feature:start` provides all the functionality of `/todo:implement` plus:
+
+- **Isolated worktrees** for parallel feature development
+- **Conflict detection** between parallel work
+- **Port management** for testing multiple features simultaneously
+- **Registry tracking** of active work
+
+**Migration:**
+
+- Instead of `/todo:implement`, use `/feature:start`
+- Existing workflow is preserved - choose "Work directly on current branch" option
+- New worktree workflow available via "Create isolated worktree" option
+
+**This command will be removed in a future version. Please switch to `/feature:start`.**
+
+---
+
+## Redirect to /feature:start
+
+For now, this command redirects to `/feature:start` with the traditional workflow.
+
+When you run `/todo:implement`, you'll be automatically redirected to `/feature:start`, which will offer you the choice between:
+
+1. Create isolated worktree (new workflow)
+2. Work directly on current branch (traditional /todo:implement behavior)
+
+To use the new command directly:
+
+```bash
+/feature:start
+```
+
+---
+
+## Original Documentation (for reference)
 
 This command helps you pick and implement items from `.claude/TODO.md` while avoiding conflicts with work being done by other agents.
 
