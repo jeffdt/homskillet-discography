@@ -40,6 +40,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   // Visualizer settings
   visualizerTheme: 0, // default to MW Green theme
   visualizerThemesExpanded: false, // collapsed by default for cleaner view
+  peakDecayRate: 0.95, // peak hold decay rate (0.50=fast, 0.99=slow)
 
   // UI Palette settings
   uiPalette: 0, // default to MW Green (index 0)

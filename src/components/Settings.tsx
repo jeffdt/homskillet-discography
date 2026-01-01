@@ -102,6 +102,23 @@ function Settings(props: SettingsProps) {
           </div>
         </div>
 
+        <div className="Settings-param">
+          <label>Peak Decay</label>
+          <input
+            type="range"
+            min="0"
+            max="5"
+            step="1"
+            value={Math.round(((persistedSettings.peakDecayRate ?? 0.95) - 0.92) / 0.015)}
+            onChange={(e) =>
+              userContext.updateSettings({
+                peakDecayRate: 0.92 + parseInt(e.target.value) * 0.015,
+              })
+            }
+          />
+          <span>Level {Math.round(((persistedSettings.peakDecayRate ?? 0.95) - 0.92) / 0.015)}</span>
+        </div>
+
         <h4
           className="Settings-subsection Settings-subsection-collapsible Settings-subsection-with-toggle"
           onClick={() =>
