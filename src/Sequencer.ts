@@ -259,8 +259,7 @@ export default class Sequencer extends EventEmitter {
     uint8Array = new Uint8Array(buffer);
     const persistedSettings = this.getSettings();
     try {
-      // Always load the first subtune (index 0)
-      await this.player!.loadData(uint8Array, filepath, persistedSettings, 0);
+      await this.player!.loadData(uint8Array, filepath, persistedSettings);
     } catch (e: any) {
       this.handlePlayerError(`Unable to play ${filepath} (${e.message}).`);
     }
