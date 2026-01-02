@@ -119,9 +119,38 @@ If user confirms "yes", proceed. If "no", ask if they want to:
 2. Manually specify category/areas
 3. Cancel
 
+### Step 4.5: Generate Worktree Slug
+
+Before creating the issue, generate a URL-friendly slug for the worktree/branch name:
+
+```javascript
+function generateSlug(title) {
+  // Extract first 3-4 meaningful words from title
+  // Convert to lowercase, remove special chars
+  // Join with hyphens
+
+  const words = title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+    .split(/\s+/) // Split on whitespace
+    .filter((word) => word.length > 2) // Skip short words (a, an, to, etc)
+    .slice(0, 3); // Take first 3 words
+
+  return words.join('-');
+}
+```
+
+**Examples:**
+
+- "Add tempo preset buttons to player controls" → `"tempo-preset-buttons"`
+- "Fix visualizer decay pixelated effect" → `"fix-visualizer-decay"`
+- "Remove unused MP3 player code" → `"remove-unused-mp3"`
+
+This slug will be stored in the GitHub issue's custom field and used by `init-feature.sh` to create consistent worktree names.
+
 ### Step 5: Create GitHub Issue
 
-Use `gh issue create` to create the issue with appropriate labels:
+Use `gh issue create` to create the issue with appropriate labels and the generated slug:
 
 ```bash
 gh issue create \
@@ -133,8 +162,11 @@ gh issue create \
 
 ---
 *Created via /feature:record*" \
-  --label "category:enhancement,area:visualizer,status:ready"
+  --label "category:enhancement,area:visualizer,status:ready" \
+  --field worktree_slug="particle-explosion-effect"
 ```
+
+**Important:** The `--field worktree_slug="{slug}"` parameter stores the generated slug in the GitHub custom field. This enables the shell scripts to create consistent worktree names.
 
 **Special Cases:**
 
@@ -153,9 +185,11 @@ After successfully creating the issue:
 ```
 ✅ Created issue #47: Add particle explosion effect when slider sparks fade out
    Labels: category:enhancement, area:visualizer, status:ready
+   Slug: particle-explosion-effect
    GitHub: https://github.com/jeffdt/homskillet-discography/issues/47
 
-You can now use /feature:init 47 to begin working on this issue.
+To start working on this issue:
+  ./scripts/init-feature.sh 47
 ```
 
 ## Examples

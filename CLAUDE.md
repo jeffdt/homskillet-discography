@@ -185,31 +185,48 @@ gh issue list --state all                  # Include closed issues
 **Create issue:**
 
 ```bash
-/feature:record    # Interactive issue creation with AI-powered label detection
+/feature:record    # Interactive issue creation with AI-powered label detection and slug generation
 ```
+
+The `/feature:record` command uses AI to:
+
+- Detect appropriate category (bug, enhancement, maintainability, etc.)
+- Predict relevant area tags (visualizer, player, browser, etc.)
+- Generate a URL-friendly slug for worktree/branch naming
+- Store the slug in the GitHub issue's `worktree_slug` custom field
+
+**Prerequisites:** The repository must have a custom field named `worktree_slug` (text field) configured in GitHub Issues settings.
 
 **Worktree workflow:**
 
 ```bash
-/feature:init              # Interactive - shows available issues to choose from
-/feature:init 77           # Direct - start work on specific issue #77
-# ... work on feature ...
-/feature:finish            # Complete work, close issue, clean up worktree
+# Initialize worktree from issue
+./scripts/init-feature.sh 77           # Start work on specific issue #77
+./scripts/init-feature.sh              # Interactive - shows available issues
+
+# Work on feature (edit files, commit, push, create PR, merge)
+
+# Clean up after merge
+./scripts/finish-feature.sh 77         # Close issue and clean up worktree
+./scripts/finish-feature.sh            # Auto-detect from current directory or show list
 ```
 
 **List worktrees:**
 
 ```bash
 /feature:list              # List active worktrees with GitHub issue info
+git worktree list          # List all worktrees (built-in git command)
 ```
 
 ### Best Practices
 
-1. **Always use feature commands** - They automatically manage issue labels and project board state
-2. **Add comments to issues** - Document decisions, research findings, blockers using `gh issue comment`
-3. **Link related issues** - Use #77 syntax in issue descriptions to reference other issues
-4. **Update issue body** - Add implementation notes as you discover them using `gh issue edit`
-5. **Check for duplicates** - Search existing issues before creating new ones using `gh issue list --search`
+1. **Always use feature scripts** - They automatically manage issue labels and worktree state
+2. **Create issues with /feature:record** - Ensures proper labeling and slug generation
+3. **Add comments to issues** - Document decisions, research findings, blockers using `gh issue comment`
+4. **Link related issues** - Use #77 syntax in issue descriptions to reference other issues
+5. **Update issue body** - Add implementation notes as you discover them using `gh issue edit`
+6. **Check for duplicates** - Search existing issues before creating new ones using `gh issue list --search`
+7. **Merge before finishing** - Use `./scripts/finish-feature.sh` only after your PR is merged
 
 ### GitHub Issues Skill
 
