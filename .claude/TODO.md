@@ -57,6 +57,8 @@ _Implementation note: Attempted using React Router's history.push() state to pas
 
 **E19**: Create a new settings pane structure in `App-main-content-and-settings` div. Rather than trying to cram UI settings and player settings in the same pane, we should have separate panes for each. The file browser is a bit empty anyway, it's wasted real estate. [area:settings]
 
+**E20**: We need a (fuzzy) search feature in the file browser. [area:browser]
+
 ---
 
 ## MAINTAINABILITY (code quality & tooling)
@@ -78,6 +80,10 @@ _Implementation note: Attempted using React Router's history.push() state to pas
 **M4**: (PLAN) Identify the main areas of the application that would benefit from unit tests. I do not need thorough coverage of every part of the app. Just the places that are most testable, most critical, or most brittle. I want maximum bang for my buck. Create a plan for this. [area:build]
 
 **M5**: Help me investigate this build warning about bundle size and the react-virtualized module directive error. [area:build]
+
+**M6**: Conduct comprehensive performance audit across devices and browsers (mobile overheating, battery drain, Firefox degradation vs Chrome/Brave). Investigate bottlenecks in visualizer rendering, audio processing, and overall app architecture. Analyze whether our limited HTML canvas usage (primarily in visualizer) is a performance bottleneck that should be reduced, or if we should be leveraging canvas more extensively throughout the app for better performance. Determine if performance issues stem from implementation problems or are inherent to real-time audio visualization, and identify optimization opportunities without sacrificing features. [area:visualizer] [area:player] [area:build]
+
+**M7**: Investigate whether it's possible to split out visualizer colors by gme player voice, rather than using one color for all sounds. For example, use green for triangle, blue for square 1, yellow for square 2. [area:visualizer] [area:player]
 
 ---
 
