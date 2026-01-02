@@ -50,7 +50,6 @@ export default class GMEPlayer extends Player {
     this.name = 'Game Music Emu Player';
     this.paused = false;
     this.fileExtensions = fileExtensions;
-    this.subtune = 0;
     this.tempo = 1.0;
     this.params = {};
     this.voiceMask = []; // GME does not expose a method to get the current voice mask
@@ -76,7 +75,7 @@ export default class GMEPlayer extends Player {
       return;
     }
 
-    // Only check duration and trigger fadeout if NOT locked
+    // Check duration and trigger fadeout (only if NOT locked)
     if (!this.isLocked && this.getPositionMs() >= this.getDurationMs() && this.fadingOut === false) {
       console.log('Fading out at %d ms.', this.getPositionMs());
       this.setFadeout(this.getPositionMs());
@@ -135,46 +134,14 @@ export default class GMEPlayer extends Player {
         }
       }
     } else {
-      // Track ended
-      if (this.isLocked) {
-        // In locked mode: restart current subtune
-        console.debug('GMEPlayer: Track ended but locked - restarting subtune %s', this.subtune);
-        this.playSubtune(this.subtune);
-      } else {
-        // Normal mode: try to advance to next subtune
-        this.subtune++;
-
-        if (
-          this.subtune >= core._gme_track_count(this.gmeCtx) ||
-          this.playSubtune(this.subtune) !== 0
-        ) {
-          this.suspend();
-          console.debug(
-            'GMEPlayer.gmeAudioProcess(): _gme_track_ended == %s and subtune (%s) > _gme_track_count (%s).',
-            core._gme_track_ended(this.gmeCtx),
-            this.subtune,
-            core._gme_track_count(this.gmeCtx)
-          );
-          this.emit('playerStateUpdate', { isStopped: true });
-        }
-      }
+      // Track ended - stop playback
+      this.suspend();
+      console.debug('GMEPlayer: Track ended.');
+      this.emit('playerStateUpdate', { isStopped: true });
     }
   }
 
-  playSubtune(subtune) {
-    this.fadingOut = false;
-    this.subtune = subtune;
-    this.metadata = this._parseMetadata(subtune);
-    console.debug('GMEPlayer.playSubtune(subtune=%s)', subtune);
-    this.emit('playerStateUpdate', {
-      ...this.getBasePlayerState(),
-      isStopped: false,
-    });
-    return core._gme_start_track(this.gmeCtx, subtune);
-  }
-
-  loadData(data, filepath, persistedSettings, subtune = 0) {
-    this.subtune = subtune;
+  loadData(data, filepath, persistedSettings) {
     this.fadingOut = false;
     this.seekTargetMs = null;
     this.seekRequestId = null;
@@ -196,7 +163,16 @@ export default class GMEPlayer extends Player {
     this.resolveParamValues(persistedSettings);
     this.setTempo(persistedSettings.tempo || 1);
     this.resume();
-    if (this.playSubtune(this.subtune) !== 0) {
+
+    // Start playback at track 0
+    this.fadingOut = false;
+    this.metadata = this._parseMetadata(0);
+    console.debug('GMEPlayer: Starting track 0');
+    this.emit('playerStateUpdate', {
+      ...this.getBasePlayerState(),
+      isStopped: false,
+    });
+    if (core._gme_start_track(this.gmeCtx, 0) !== 0) {
       this.stop();
       throw Error('gme_start_track failed');
     }
@@ -270,14 +246,6 @@ export default class GMEPlayer extends Player {
 
   getNumVoices() {
     if (this.gmeCtx) return core._gme_voice_count(this.gmeCtx);
-  }
-
-  getNumSubtunes() {
-    if (this.gmeCtx) return core._gme_track_count(this.gmeCtx);
-  }
-
-  getSubtune() {
-    return this.subtune;
   }
 
   getPositionMs() {

@@ -53,12 +53,13 @@ export interface IPlayer extends EventEmitter {
   loadData(
     data: Uint8Array,
     filepath: string,
-    persistedSettings: any,
-    subtune?: number
+    persistedSettings: any
   ): Promise<void>;
   suspend(): void;
   resume(): void;
   togglePause(): boolean;
+  setLocked(locked: boolean): void;
+  getIsLocked(): boolean;
   isPaused(): boolean;
   stop(): void;
   isPlaying(): boolean;
