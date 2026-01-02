@@ -82,7 +82,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
    - Extract area labels (filter for `area:*` prefix)
 
 3. **Load Active Worktrees**
-   - Read `.claude/worktrees.json`
+   - Scan `.worktrees/` directory
    - Extract area tags from each active worktree's issue
 
 4. **Detect Conflicts**
@@ -112,19 +112,19 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 
    # Add comment with worktree metadata
    gh issue comment {number} --body "Worktree created:
-   - Path: /Users/hom/code/homskillet-worktrees/{slug}
+   - Path: .worktrees/{slug}
    - Port: {port}
    - Branch: feature/{slug}"
    ```
 
 8. **Update Worktree Registry**
-   Add entry to `.claude/worktrees.json`:
+   Create worktree directory:
    ```json
    {
      "githubIssue": 45,
      "branch": "feature/45-slider-sparks",
      "slug": "45-slider-sparks",
-     "path": "/Users/hom/code/homskillet-worktrees/45-slider-sparks",
+     "path": ".worktrees/45-slider-sparks",
      "todoDescription": "Slider sparks can change color over lifespan through a gradient",
      "areas": ["visualizer"],
      "port": 5045,
@@ -156,7 +156,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 
 4. **Clean Up**
    - Remove worktree via `scripts/remove-worktree.sh`
-   - Remove entry from `.claude/worktrees.json`
+   - Remove worktree directory
 
 ### Path B: Create Pull Request
 
@@ -194,7 +194,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 
 3. **Clean Up**
    - Remove worktree
-   - Remove entry from `.claude/worktrees.json`
+   - Remove worktree directory
    - Issue remains open for future work
 
 ---
@@ -204,7 +204,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 ### Steps
 
 1. **Read Worktree Registry**
-   - Load `.claude/worktrees.json`
+   - Load `.worktrees/ directory`
 
 2. **Validate Against Git**
 
@@ -229,7 +229,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 
    1. Issue #45 - Slider sparks gradient
       Branch:  feature/45-slider-sparks
-      Path:    /Users/hom/code/homskillet-worktrees/45-slider-sparks
+      Path:    .worktrees/45-slider-sparks
       Port:    5045
       Areas:   visualizer
       GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45

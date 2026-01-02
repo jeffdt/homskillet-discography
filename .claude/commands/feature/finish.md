@@ -5,7 +5,7 @@ allowed-tools: Bash, AskUserQuestion, Skill
 
 # /feature:finish - Complete Worktree Work
 
-This command helps you finish work on a worktree by creating a PR, merging to main, or abandoning the changes. It handles all cleanup including removing the worktree, updating the registry, and updating the GitHub Issue.
+This command helps you finish work on a worktree by creating a PR, merging to main, or abandoning the changes. It handles all cleanup including removing the worktree and updating the GitHub Issue.
 
 ## Usage
 
@@ -35,7 +35,12 @@ Parse output to find worktree matching `$(pwd)`.
 
 **Option B: User specifies issue number**
 
-If user provides an issue number (e.g., `/feature:finish 45`), look up that worktree in `.claude/worktrees.json` by matching the `githubIssue` field.
+If user provides an issue number (e.g., `/feature:finish 45`), look for that worktree in `.worktrees/{number}-*` directory pattern.
+
+```bash
+# Find worktree directory for issue #45
+ls -d .worktrees/45-* 2>/dev/null
+```
 
 **If not in a worktree:**
 
@@ -54,7 +59,7 @@ Which worktree would you like to finish? (1, 2, or cancel)
 Check for uncommitted changes:
 
 ```bash
-cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+cd .worktrees/E16-slider-sparks
 git status --short
 ```
 
@@ -135,7 +140,7 @@ How would you like to finish E16?
 
 3. Abandon work
    - Deletes worktree without merging
-   - Removes TODO marker (item returns to available)
+   - Removes worktree:active label (issue returns to available)
    - Optionally deletes the branch
 
 What would you like to do?
@@ -147,7 +152,7 @@ If user selects "Create Pull Request":
 
 ```bash
 # Ensure we're in the worktree directory
-cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+cd .worktrees/E16-slider-sparks
 
 # Use the /pr:draft command
 /pr:draft
@@ -193,7 +198,7 @@ This will:
 - Push to origin/main
 - Delete the remote branch
 - Remove the worktree
-- Mark TODO item as complete
+- Close the GitHub Issue
 
 This action cannot be undone. Continue? (yes/no)
 ```
@@ -201,7 +206,7 @@ This action cannot be undone. Continue? (yes/no)
 #### 5B.2: Switch to Main Worktree
 
 ```bash
-cd /Users/hom/code/homskillet-discography
+cd /Users/hom/code/homskillet-discography  # or just 'cd' to return to main repo
 ```
 
 #### 5B.3: Ensure Main is Up to Date
@@ -253,14 +258,14 @@ git push origin --delete feature/E16-slider-sparks
 #### 5B.7: Remove Worktree
 
 ```bash
-git worktree remove /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+git worktree remove .worktrees/E16-slider-sparks
 ```
 
 **If worktree removal fails:**
 
 ```bash
 # Force removal if needed
-git worktree remove --force /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+git worktree remove --force .worktrees/E16-slider-sparks
 ```
 
 #### 5B.8: Delete Local Branch
@@ -271,7 +276,7 @@ git branch -d feature/45-slider-sparks
 
 #### 5B.9: Close GitHub Issue
 
-Close the issue and remove the worktree:active label:
+Close the issue:
 
 ```bash
 # Close the issue
@@ -298,7 +303,7 @@ If user selects "Abandon work":
 This will:
 - Delete the worktree and all uncommitted changes
 - Optionally delete the branch (local and remote)
-- Remove from worktree registry (item returns to available pool)
+- Remove worktree:active label (issue returns to available pool)
 
 All work in this worktree will be lost. Continue? (yes/no)
 ```
@@ -332,13 +337,13 @@ If option 2: Keep branch, only remove worktree.
 #### 5C.3: Remove Worktree
 
 ```bash
-git worktree remove /Users/hom/code/homskillet-worktrees/45-slider-sparks
+git worktree remove .worktrees/45-slider-sparks
 ```
 
 or force:
 
 ```bash
-git worktree remove --force /Users/hom/code/homskillet-worktrees/45-slider-sparks
+git worktree remove --force .worktrees/45-slider-sparks
 ```
 
 #### 5C.4: Update GitHub Issue
@@ -362,51 +367,7 @@ gh issue comment 45 --body "Work abandoned. Issue returned to backlog."
 
 The issue remains open and available for future work.
 
-### Step 6: Update Registry
-
-Remove the worktree entry from `.claude/worktrees.json`:
-
-Before:
-
-```json
-{
-  "version": "1.0",
-  "worktrees": [
-    {
-      "id": "E16",
-      "branch": "feature/E16-slider-sparks",
-      "path": "/Users/hom/code/homskillet-worktrees/E16-slider-sparks",
-      ...
-    },
-    {
-      "id": "E7",
-      ...
-    }
-  ]
-}
-```
-
-After:
-
-```json
-{
-  "version": "1.0",
-  "worktrees": [
-    {
-      "id": "E7",
-      ...
-    }
-  ]
-}
-```
-
-### Step 7: Update Worktrees Registry
-
-Remove the worktree entry from `.claude/worktrees.json`.
-
-**Note:** GitHub Issue state is updated in steps 5B.9 (merge) or 5C.4 (abandon). No additional GitHub operations needed here.
-
-### Step 8: Provide Completion Summary
+### Step 6: Provide Completion Summary
 
 **For merged:**
 
@@ -414,54 +375,50 @@ Remove the worktree entry from `.claude/worktrees.json`.
 ✅ Successfully finished issue #45!
 
 Summary:
-- ✓ Merged feature/E16-slider-sparks to main
+- ✓ Merged feature/45-slider-sparks to main
 - ✓ Pushed to origin/main
-- ✓ Deleted remote branch feature/E16-slider-sparks
-- ✓ Removed worktree from /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-- ✓ Deleted TODO item E16 from TODO.md
-- ✓ Removed from worktree registry
+- ✓ Deleted remote branch feature/45-slider-sparks
+- ✓ Removed worktree from .worktrees/45-slider-sparks
+- ✓ Closed GitHub Issue #45
 
 You are now in: /Users/hom/code/homskillet-discography (main branch)
 
-Active worktrees remaining: 1
-- E7: MP3 support
-
 To start new work:
-  /feature:start
+  /feature:init
 ```
 
 **For abandoned:**
 
 ```
-Abandoned E16
+Abandoned #45
 
 Summary:
-- ✓ Removed worktree from /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-- ✓ Deleted branch feature/E16-slider-sparks (local and remote)
-- ✓ Removed from worktree registry
+- ✓ Removed worktree from .worktrees/45-slider-sparks
+- ✓ Deleted branch feature/45-slider-sparks (local and remote)
+- ✓ Removed worktree:active label from issue
 
-E16 is now available again in the TODO pool for future work.
+Issue #45 is now available again for future work.
 
 To start different work:
-  /feature:start
+  /feature:init
 ```
 
 **For PR created:**
 
 ```
-✅ Pull Request created for E16
+✅ Pull Request created for #45
 
 PR: https://github.com/jeffdt/homskillet-discography/pull/64
 
 The worktree is still active at:
-  /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+  .worktrees/45-slider-sparks
 
 You can continue making changes and pushing updates to the PR.
 
 When the PR is merged on GitHub:
 1. Return to main worktree: cd /Users/hom/code/homskillet-discography
 2. Pull latest: git pull origin main
-3. Clean up: /feature:finish E16
+3. Clean up: /feature:finish 45
 ```
 
 ## Examples
@@ -469,7 +426,7 @@ When the PR is merged on GitHub:
 ### Example 1: Create PR
 
 ```
-User: cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+User: cd .worktrees/E16-slider-sparks
 User: /feature:finish
 
 Claude: Detected worktree: E16 (feature/E16-slider-sparks)
@@ -516,7 +473,7 @@ User: Selects 2
 
 Claude: ⚠️  You're about to merge feature/E7-mp3-support directly to main.
 
-This will merge all commits, delete the worktree, and mark the TODO complete.
+This will merge all commits, delete the worktree, and close the issue.
 
 Continue? (yes/no)
 
@@ -526,7 +483,6 @@ Claude: Merging to main...
 Pushing to origin/main...
 Deleting remote branch...
 Removing worktree...
-Updating TODO.md...
 
 ✅ Successfully finished E7!
 
@@ -587,11 +543,10 @@ User: Selects 1
 
 Claude: Removing worktree...
 Deleting branch...
-Updating TODO.md...
 
 Abandoned E16.
 
-E16 is now available again in TODO.md.
+Issue is now available again.
 ```
 
 ## Best Practices
@@ -608,10 +563,9 @@ E16 is now available again in TODO.md.
 - **Destructive operations** - Merge and abandon cannot be undone
 - **PR workflow recommended** - Safer, enables review
 - **Clean state required** - Must commit or stash before finishing
-- **Registry cleanup** - Automatically updates `.claude/worktrees.json`
-- **TODO.md cleanup** - Merged items deleted completely from TODO.md
+- **Worktree tracking** - Tracked via `.worktrees/` directory + `worktree:active` GitHub label
 - **Branch cleanup** - Remote branches deleted automatically
-- **No markers in TODO.md** - Only `(WIP)` markers exist for direct work, never worktree markers
+- **GitHub Issue state** - Closed on merge, label removed on abandon
 
 ## Edge Cases
 
@@ -622,7 +576,7 @@ You are not currently in a worktree.
 
 Current directory: /Users/hom/code/homskillet-discography (main branch)
 
-Use /feature:finish E16 to finish a specific worktree.
+Use /feature:finish 45 to finish a specific worktree.
 Or cd to a worktree first.
 ```
 
@@ -656,11 +610,11 @@ Options:
 What would you like to do?
 ```
 
-**Worktree not in registry:**
+**Worktree directory without GitHub label:**
 
 ```
-Warning: This worktree exists in git but not in the registry.
-It may have been created manually or the registry is out of sync.
+Warning: This worktree directory exists but the GitHub Issue doesn't have the worktree:active label.
+The label may have been removed manually.
 
 I can still clean it up. Would you like to proceed? (yes/no)
 ```

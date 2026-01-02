@@ -180,7 +180,7 @@ gh issue comment 45 --body "This is a comment"
 
 ```bash
 gh issue comment 45 --body "Worktree created:
-- Path: /Users/hom/code/homskillet-worktrees/45-title
+- Path: .worktrees/45-title
 - Port: 5045
 - Branch: feature/45-title"
 ```

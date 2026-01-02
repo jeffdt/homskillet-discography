@@ -22,7 +22,8 @@ if [ -z "$TODO_ID" ] || [ -z "$SLUG" ]; then
 fi
 
 # Configuration
-WORKTREE_PARENT="/Users/hom/code/homskillet-worktrees"
+MAIN_REPO_PATH="$(pwd)"
+WORKTREE_PARENT="${MAIN_REPO_PATH}/.worktrees"
 WORKTREE_NAME="${TODO_ID}-${SLUG}"
 WORKTREE_PATH="${WORKTREE_PARENT}/${WORKTREE_NAME}"
 BRANCH_NAME="feature/${TODO_ID}-${SLUG}"
