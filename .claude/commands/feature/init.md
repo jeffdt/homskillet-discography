@@ -59,9 +59,20 @@ Available to work on: N
 
 ### Step 2: Load Active Worktrees and Detect Conflicts
 
-Read `.claude/worktrees.json` to get active worktrees.
+Scan `.worktrees/` directory to discover active worktrees:
 
-For each active worktree, get its issue number and area tags.
+```bash
+# List worktree directories
+ls -1 .worktrees/ 2>/dev/null || echo "No worktrees"
+```
+
+For each directory, parse the issue number from the directory name (e.g., `96-reorganize-worktrees` → issue #96).
+
+For each active worktree, fetch GitHub Issue metadata to get area tags:
+
+```bash
+gh issue view {issue_number} --json labels
+```
 
 Cross-reference with available issues to detect area conflicts.
 
@@ -80,7 +91,7 @@ Items are tagged with area labels that map to component areas:
 **Conflict Detection Logic:**
 
 - If a `(WIP)` item has `[area:visualizer]`, exclude ALL other items with `[area:visualizer]`
-- If an active worktree (from worktrees.json) has `[area:visualizer]`, exclude ALL other items with `[area:visualizer]`
+- If an active worktree (from `.worktrees/` directory) has `[area:visualizer]`, exclude ALL other items with `[area:visualizer]`
 - Items can have multiple area tags: `[area:visualizer] [area:player]` - exclude items matching ANY tag
 - Example: If `(WIP) E5` has `[area:visualizer]`, also exclude E1, E3, E14, E16, E17, B1 (all visualizer items)
 
@@ -89,7 +100,7 @@ Items are tagged with area labels that map to component areas:
 Remove from consideration:
 
 1. All items marked with `(WIP)` prefix
-2. All items whose TODO IDs match active worktrees in worktrees.json
+2. All items whose issue numbers match active worktrees in `.worktrees/` directory
 3. Items that share area tags with WIP items or active worktrees (conflict prevention)
 4. Items marked with `(PLAN)` prefix (require exploration first)
 5. Items marked with `(OPTIONAL FUTURE WORK)` unless user specifically requests them
@@ -127,15 +138,11 @@ Options:
 4. #55: Add song metadata storage (category:enhancement, area:browser)
 ```
 
-### Step 5: Read Worktree Registry
+### Step 5: Create Worktree
 
-Read `.claude/worktrees.json` to get list of active worktrees.
+#### Step 5.1: Conflict Detection
 
-### Step 6: Create Worktree
-
-#### Step 6.1: Conflict Detection
-
-Check if the selected TODO's area tags overlap with any active worktree's areas.
+Check if the selected issue's area tags overlap with any active worktree's areas.
 
 Calculate conflict severity:
 
@@ -172,7 +179,7 @@ Continue anyway? (yes/no)
 
 Allow user to override the warning. If they say no, return to step 4 to select a different item.
 
-#### Step 6.2: Calculate Port
+#### Step 5.2: Calculate Port
 
 Generate predictable port from issue number:
 
@@ -190,7 +197,7 @@ function calculatePort(issueNumber) {
 // #123 → 5123
 ```
 
-#### Step 6.3: Generate Slug
+#### Step 5.3: Generate Slug
 
 Create URL-friendly slug from issue number and title:
 
@@ -219,7 +226,7 @@ function generateSlug(issueNumber, title) {
 // → "52-tempo-preset-buttons"
 ```
 
-#### Step 6.4: Create Worktree
+#### Step 5.4: Create Worktree
 
 Use the helper script to create the worktree with optimized setup:
 
@@ -233,7 +240,7 @@ Use the helper script to create the worktree with optimized setup:
 
 **What the script does:**
 
-1. Creates git worktree at `/Users/hom/code/homskillet-worktrees/{ID}-{slug}/`
+1. Creates git worktree at `.worktrees/{ID}-{slug}/`
 2. Creates feature branch `feature/{ID}-{slug}`
 3. **Symlinks `node_modules/` from main repo** (instant setup, no duplicate install)
 4. Pushes branch to remote and sets upstream
@@ -251,7 +258,7 @@ The script symlinks `node_modules` instead of running `bun install` because:
 If you ever need different dependencies in a worktree, simply delete the symlink and run `bun install`:
 
 ```bash
-cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+cd .worktrees/E16-slider-sparks
 rm node_modules
 bun install
 ```
@@ -263,7 +270,7 @@ bun install
 - If push fails, continue anyway (user can push later)
 - Script includes error handling with `set -e` for safety
 
-#### Step 6.5: Update GitHub Issue
+#### Step 5.5: Update GitHub Issue
 
 Add `worktree:active` label to the issue and add a comment:
 
@@ -273,7 +280,7 @@ gh issue edit {issue_number} --add-label "worktree:active"
 
 # Add comment with worktree details
 gh issue comment {issue_number} --body "Worktree created:
-- Path: /Users/hom/code/homskillet-worktrees/{slug}
+- Path: .worktrees/{slug}
 - Port: {port}
 - Branch: feature/{slug}"
 ```
@@ -283,34 +290,12 @@ Example for issue #45:
 ```bash
 gh issue edit 45 --add-label "worktree:active"
 gh issue comment 45 --body "Worktree created:
-- Path: /Users/hom/code/homskillet-worktrees/45-slider-sparks
+- Path: .worktrees/45-slider-sparks
 - Port: 5045
 - Branch: feature/45-slider-sparks"
 ```
 
-#### Step 6.6: Update Registry
-
-Add entry to `.claude/worktrees.json`:
-
-```json
-{
-  "githubIssue": 45,
-  "branch": "feature/45-slider-sparks",
-  "slug": "45-slider-sparks",
-  "path": "/Users/hom/code/homskillet-worktrees/45-slider-sparks",
-  "todoDescription": "Slider sparks can change color over lifespan through a gradient",
-  "areas": ["visualizer"],
-  "port": 5045,
-  "baseBranch": "main",
-  "createdAt": "2026-01-02T20:30:00Z"
-}
-```
-
-**Note:** Use `githubIssue` field instead of old `id` field. The `todoDescription` field contains the issue title.
-
-Use current timestamp for `createdAt`.
-
-#### Step 6.7: Provide User Guidance
+#### Step 5.6: Provide User Guidance
 
 ```
 ✅ Created worktree for issue #45
@@ -318,12 +303,12 @@ Use current timestamp for `createdAt`.
 Worktree Details:
 - Issue: #45 - Slider sparks can change color over lifespan through a gradient
 - Branch: feature/45-slider-sparks
-- Path: /Users/hom/code/homskillet-worktrees/45-slider-sparks
+- Path: .worktrees/45-slider-sparks
 - Port: 5045
 - GitHub: https://github.com/jeffdt/homskillet-discography/issues/45
 
 To work on this feature:
-  cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+  cd .worktrees/45-slider-sparks
   bun start --port 5045
 
 Test your changes at: http://localhost:5045
@@ -332,7 +317,7 @@ When ready:
 - Create PR: /pr:draft (from within the worktree)
 - Complete work: /feature:finish
 
-The worktree has been registered in .claude/worktrees.json and the issue labeled with worktree:active.
+The issue has been labeled with worktree:active to prevent duplicate work.
 ```
 
 ## Examples
@@ -361,12 +346,12 @@ No conflicts detected with active worktrees.
 Worktree Details:
 - Issue: #45 - Slider sparks can change color over lifespan through a gradient
 - Branch: feature/45-slider-sparks
-- Path: /Users/hom/code/homskillet-worktrees/45-slider-sparks
+- Path: .worktrees/45-slider-sparks
 - Port: 5045
 - GitHub: https://github.com/jeffdt/homskillet-discography/issues/45
 
 To work on this feature:
-  cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+  cd .worktrees/45-slider-sparks
   bun start --port 5045
 
 Test your changes at: http://localhost:5045
@@ -403,19 +388,20 @@ Which TODO item would you like to work on instead?
 
 ## Best Practices
 
-1. **Always register worktree immediately** - Prevents other agents from selecting the same item
+1. **Always label issue immediately** - The `worktree:active` label prevents other agents from selecting the same item
 2. **Check git history** - Verify item hasn't been completed before starting work
 3. **Respect conflict warnings** - HIGH severity warnings usually indicate real problems
 4. **Use /feature:implement after creation** - This command only scaffolds, implementation happens next
 5. **Follow project conventions** - Use color palette variables, respect patterns in implementation
-6. **Delete completed items** - Remove from TODO.md entirely after finishing, don't just mark [x]
 
 ## Important Notes
 
 - **Scaffolding only**: This command only creates the worktree infrastructure. Use `/feature:implement` for actual work
-- **Worktree tracking**: `.claude/worktrees.json` (local file, not in git) is the source of truth for active worktrees
-- **TODO.md only tracks WIP**: Only `(WIP)` markers appear in TODO.md for items being worked on directly
-- **Port management**: Each worktree gets predictable port based on TODO ID
+- **Worktree tracking**: Active worktrees are tracked via:
+  1. `.worktrees/` directory (filesystem)
+  2. `worktree:active` label on GitHub Issue
+  3. `git worktree list` command
+- **Port management**: Each worktree gets predictable port based on issue number (5000 + issue number)
 - **Area tags are critical**: Enable automatic conflict detection
 - **Parallel testing**: Worktrees use different ports, allowing simultaneous testing
 - **Next step**: After initialization, CD to the worktree and run `/feature:implement`
@@ -425,9 +411,9 @@ Which TODO item would you like to work on instead?
 **Item already has active worktree:**
 
 ```
-E16 is already being worked on in an active worktree:
-Branch: feature/E16-slider-sparks
-Path: /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+#45 is already being worked on in an active worktree:
+Branch: feature/45-slider-sparks
+Path: .worktrees/45-slider-sparks
 
 Would you like to:
 1. Continue work in that existing worktree (I'll give you the path)
@@ -437,28 +423,28 @@ Would you like to:
 **Worktree creation fails:**
 
 ```
-Failed to create worktree: worktree '/Users/hom/code/homskillet-worktrees/E16-slider-sparks' already exists
+Failed to create worktree: worktree '.worktrees/45-slider-sparks' already exists
 
-This likely means the worktree directory exists but isn't tracked in the registry.
+This likely means the worktree directory exists but isn't tracked properly.
 
 Would you like me to:
 1. Clean up the existing directory and recreate
-2. Add the existing worktree to the registry
-3. Cancel and select a different TODO
+2. Use the existing worktree (I'll update the GitHub label)
+3. Cancel and select a different issue
 ```
 
 **No items available:**
 
 ```
-All TODO items are currently being worked on or excluded due to conflicts.
+All issues are currently being worked on or excluded due to conflicts.
 
-Active worktrees (from worktrees.json):
-- E3 [area:visualizer] - feature/E3-visualizer-peak-decay
-- E18 [area:player] - feature/E18-player-lock-button
+Active worktrees (from .worktrees/ directory):
+- #70 [area:visualizer] - feature/70-slider-sparks
+- #82 [area:player] - feature/82-player-lock-button
 
-This blocks: E1, E5, E14, E16, E17, B1 (visualizer conflicts)
+This blocks: #71, #73, #74 (visualizer conflicts)
 
-Available when current work completes: E7 (player), E6, E9 (browser), M1, M2, M4, M5 (build)
+Available when current work completes: #75 (player), #76, #79 (browser), #80, #81 (build)
 
 Would you like to start one of the available items?
 ```

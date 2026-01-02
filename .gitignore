@@ -5,6 +5,9 @@
 # Dependencies
 node_modules
 
+# Worktrees
+.worktrees/
+
 # Build outputs
 build/
 cmake-build-debug/
@@ -36,7 +39,6 @@ _ignore/
 
 # Claude local config (machine-specific)
 .claude/settings.local.json
-.claude/worktrees.json
 
 # NOTE: The following are now COMMITTED (no longer ignored):
 # - src/chip-core.js

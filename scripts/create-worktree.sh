@@ -3,7 +3,7 @@
 # Usage: ./scripts/create-worktree.sh <todo-id> <slug> <port>
 #
 # This script:
-# 1. Creates a git worktree at ../homskillet-worktrees/{ID}-{slug}/
+# 1. Creates a git worktree at .worktrees/{ID}-{slug}/
 # 2. Creates and pushes a feature branch
 # 3. Symlinks node_modules from main repo (fast, shared dependencies)
 # 4. Returns paths and port info for the new worktree
@@ -23,7 +23,7 @@ fi
 
 # Configuration
 MAIN_REPO_PATH="$(pwd)"
-WORKTREE_PARENT="/Users/hom/code/homskillet-worktrees"
+WORKTREE_PARENT="${MAIN_REPO_PATH}/.worktrees"
 WORKTREE_NAME="${TODO_ID}-${SLUG}"
 WORKTREE_PATH="${WORKTREE_PARENT}/${WORKTREE_NAME}"
 BRANCH_NAME="feature/${TODO_ID}-${SLUG}"

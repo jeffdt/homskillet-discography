@@ -103,7 +103,7 @@ gh issue edit 45 --add-label "worktree:active"
 gh issue edit 45 --remove-label "worktree:active"
 
 # Add comment
-gh issue comment 45 --body "Worktree created at /Users/hom/code/homskillet-worktrees/45-title"
+gh issue comment 45 --body "Worktree created at .worktrees/45-title"
 ```
 
 ### Closing Issues
@@ -138,7 +138,7 @@ Extract area labels from issues and compare with active worktrees to detect conf
 
 1. Get area labels from issue: `gh issue view {num} --json labels`
 2. Parse `area:*` labels from the response
-3. Cross-reference with `.claude/worktrees.json` active worktree areas
+3. Cross-reference with `.worktrees/ directory` active worktree areas
 4. Flag conflicts if areas overlap
 
 ## Integration with Feature Commands
@@ -157,11 +157,11 @@ Extract area labels from issues and compare with active worktrees to detect conf
 - Detects area conflicts with active worktrees
 - On selection, adds `worktree:active` label
 - Adds worktree metadata to issue comments
-- Updates `.claude/worktrees.json` with githubIssue field
+- Worktree tracked via directory name and GitHub label
 
 ### /feature:finish
 
-- On merge: closes issue with comment, removes from worktrees.json
+- On merge: closes issue with comment, removes worktree directory
 - On abandon: removes `worktree:active` label, keeps issue open
 
 ### /feature:list
