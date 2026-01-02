@@ -1,29 +1,29 @@
 ---
-description: Add a new TODO item with AI-powered category detection and area tagging
-allowed-tools: Read, Edit, AskUserQuestion
+description: Create a new GitHub Issue with AI-powered category detection and area tagging
+allowed-tools: Bash, AskUserQuestion
 ---
 
-# /feature:record - Record New TODO Item
+# /feature:record - Create New GitHub Issue
 
-This command helps you add new TODO items to `.claude/TODO.md` with automatic category detection, area tag prediction, and sequential ID generation.
+This command helps you create new GitHub Issues for task tracking with automatic category detection and area tag prediction.
 
 ## Usage
 
 ```bash
-# Add a new TODO item (interactive)
+# Create a new issue (interactive)
 /feature:record
 ```
 
-No arguments needed. The command prompts you for the TODO description and handles the rest automatically.
+No arguments needed. The command prompts you for the issue description and handles the rest automatically.
 
 ## Workflow
 
-### Step 1: Prompt for TODO Description
+### Step 1: Prompt for Issue Description
 
-Use `AskUserQuestion` to collect the TODO description from the user:
+Use `AskUserQuestion` to collect the issue description from the user:
 
 ```
-What TODO item would you like to add?
+What issue would you like to create?
 
 (Provide a clear description of the bug, feature, or task)
 ```
@@ -32,31 +32,31 @@ Accept multi-line descriptions.
 
 ### Step 2: AI Analysis for Category Detection
 
-Read the TODO description and analyze it to determine the category using keyword heuristics.
+Analyze the issue description to determine the category label using keyword heuristics.
 
 **Category Detection Keywords:**
 
-**BUGS (B##):**
+**category:bug:**
 
 - Keywords: "bug", "fix", "broken", "doesn't work", "error", "crash", "issue", "regression", "gap", "pixel", "alignment", "problem", "incorrect"
 - Pattern: Problem statements, negative language about current behavior
 
-**ENHANCEMENT (E##):**
+**category:enhancement:**
 
 - Keywords: "add", "new", "feature", "improve", "enhance", "ability", "support", "make", "create", "toggle", "configurable", "animation", "implement", "allow"
 - Pattern: Additive language, feature requests, improvements
 
-**MAINTAINABILITY (M##):**
+**category:maintainability:**
 
 - Keywords: "refactor", "TypeScript", "test", "unit test", "coverage", "migration", "cleanup", "dependency", "investigate", "analyze", "code quality"
 - Pattern: Code quality, tooling, technical debt, infrastructure
 
-**SIMPLIFICATION (S##):**
+**category:simplification:**
 
 - Keywords: "remove", "delete", "strip", "unused", "legacy", "unnecessary", "eliminate", "clean up dead code"
 - Pattern: Subtractive language, removing features or code
 
-**DEPLOYMENT (D##):**
+**category:deployment:**
 
 - Keywords: "deploy", "build", "release", "publish", "GitHub Pages", "CI/CD", "production", "hosting"
 - Pattern: Infrastructure and deployment operations
@@ -66,12 +66,12 @@ Read the TODO description and analyze it to determine the category using keyword
 1. Convert description to lowercase
 2. Count keyword matches for each category
 3. Category with most matches wins
-4. If tie, prefer in this order: BUGS → ENHANCEMENT → MAINTAINABILITY → SIMPLIFICATION → DEPLOYMENT
-5. Default to ENHANCEMENT if no clear match
+4. If tie, prefer in this order: bug → enhancement → maintainability → simplification → deployment
+5. Default to enhancement if no clear match
 
 ### Step 3: AI Analysis for Area Tag Prediction
 
-Analyze the TODO description against area keywords to predict which component areas it will touch.
+Analyze the issue description against area keywords to predict which component areas it will touch.
 
 **Area Keywords (from existing conflict matrix):**
 
@@ -95,61 +95,22 @@ Analyze the TODO description against area keywords to predict which component ar
 
 - Description: "Add tempo preset buttons to player controls"
 - Matches: `player` (3 keywords: "tempo", "preset", "player"), `settings` (1 keyword: "controls")
-- Result: `[area:player]` (only assign if clear winner, or top 2 if both strong)
+- Result: `area:player` label (only assign if clear winner, or top 2 if both strong)
 
-### Step 4: Generate Next Sequential ID
+### Step 4: Confirm with User
 
-Read `.claude/TODO.md` to find the highest ID for the detected category.
-
-**ID Generation Logic:**
-
-```javascript
-// Extract category prefix
-const prefixes = {
-  BUGS: 'B',
-  ENHANCEMENT: 'E',
-  MAINTAINABILITY: 'M',
-  SIMPLIFICATION: 'S',
-  DEPLOYMENT: 'D',
-};
-
-const prefix = prefixes[category];
-
-// Parse TODO.md to find highest ID for this category
-// Search for pattern: **{PREFIX}{NUMBER}**:
-// Example: **E18**: or **B1**: or **M5**:
-
-const regex = new RegExp(`\\*\\*${prefix}(\\d+)\\*\\*`, 'g');
-const matches = [...todoContent.matchAll(regex)];
-const maxNum = Math.max(0, ...matches.map((m) => parseInt(m[1])));
-
-// Generate next ID
-const nextId = `${prefix}${maxNum + 1}`;
-```
-
-**Current highest IDs (as of last check):**
-
-- B1 → next is B2
-- E18 → next is E19
-- M5 → next is M6
-- S# (all complete) → next is S1
-- D# (all complete) → next is D1
-
-### Step 5: Confirm with User
-
-Before writing to TODO.md, show the user what will be added:
+Before creating the GitHub issue, show the user what will be created:
 
 ```
-Analyzed TODO item:
+Analyzed issue:
 
-Category: ENHANCEMENT
-ID: E19
-Area tags: [area:visualizer]
+Category: category:enhancement
+Area tags: area:visualizer
 Description: Add particle explosion effect when slider sparks fade out
 
-This will be added to the ENHANCEMENT section of TODO.md.
+This will create a GitHub issue with these labels.
 
-Add this item? (yes/no)
+Create this issue? (yes/no)
 ```
 
 If user confirms "yes", proceed. If "no", ask if they want to:
@@ -158,61 +119,43 @@ If user confirms "yes", proceed. If "no", ask if they want to:
 2. Manually specify category/areas
 3. Cancel
 
-### Step 6: Add to TODO.md
+### Step 5: Create GitHub Issue
 
-Find the appropriate section in `.claude/TODO.md` based on the category:
+Use `gh issue create` to create the issue with appropriate labels:
 
-- `## BUGS` for B## items
-- `## ENHANCEMENT (new features & styling)` for E## items
-- `## MAINTAINABILITY (code quality & tooling)` for M## items
-- `## SIMPLIFICATION (stripping down to essentials)` for S## items
-- `## DEPLOYMENT (going live)` for D## items
+```bash
+gh issue create \
+  --title "Add particle explosion effect when slider sparks fade out" \
+  --body "Add particle explosion effect when slider sparks fade out.
 
-**Format:**
-
-```markdown
-**{ID}**: {description} [area:{tag1}] [area:{tag2}]
-```
-
-**Insertion Logic:**
-
-1. Find the section header (e.g., `## ENHANCEMENT`)
-2. If section contains "None!", replace "None!" with the new item
-3. Otherwise, append to the end of the section (before the `---` separator)
-4. Maintain blank line spacing
-
-**Example Insertion:**
-
-Before:
-
-```markdown
-## ENHANCEMENT (new features & styling)
-
-**E18**: Add a player button to "lock" the current song. [area:player]
+## Areas
+- visualizer
 
 ---
+*Created via /feature:record*" \
+  --label "category:enhancement,area:visualizer,status:ready"
 ```
 
-After:
+**Special Cases:**
 
-```markdown
-## ENHANCEMENT (new features & styling)
+- If description contains "(PLAN)" or similar research-oriented language, use `status:planning` instead of `status:ready`
+- If description contains "(OPTIONAL FUTURE WORK)" or similar, add `optional` label
+- If referencing research docs (e.g., E8), include doc path in body
 
-**E18**: Add a player button to "lock" the current song. [area:player]
+**Capture Issue Number:**
 
-**E19**: Add particle explosion effect when slider sparks fade out. [area:visualizer]
+Parse the output from `gh issue create` to extract the created issue number. The command returns the issue URL, which contains the number.
 
----
-```
+### Step 6: Confirm Completion
 
-### Step 7: Confirm Completion
-
-After successfully adding the item:
+After successfully creating the issue:
 
 ```
-✅ Added E19 to TODO.md
+✅ Created issue #47: Add particle explosion effect when slider sparks fade out
+   Labels: category:enhancement, area:visualizer, status:ready
+   GitHub: https://github.com/jeffdt/homskillet-discography/issues/47
 
-You can now use `/feature:start E19` to begin working on this item.
+You can now use /feature:init 47 to begin working on this issue.
 ```
 
 ## Examples
@@ -222,26 +165,27 @@ You can now use `/feature:start E19` to begin working on this item.
 ```
 User: /feature:record
 
-Claude: What TODO item would you like to add?
+Claude: What issue would you like to create?
 
 User: Add tempo preset buttons (0.5x, 1x, 1.5x, 2x) to the player controls
 
-Claude: Analyzed TODO item:
+Claude: Analyzed issue:
 
-Category: ENHANCEMENT (detected keywords: "add", "preset")
-ID: E19
-Area tags: [area:player] [area:settings] (detected keywords: "tempo", "player", "controls")
+Category: category:enhancement (detected keywords: "add", "preset")
+Area tags: area:player, area:settings (detected keywords: "tempo", "player", "controls")
 Description: Add tempo preset buttons (0.5x, 1x, 1.5x, 2x) to the player controls
 
-This will be added to the ENHANCEMENT section of TODO.md.
+This will create a GitHub issue with these labels.
 
-Add this item? (yes/no)
+Create this issue? (yes/no)
 
 User: yes
 
-Claude: ✅ Added E19 to TODO.md
+Claude: ✅ Created issue #52: Add tempo preset buttons (0.5x, 1x, 1.5x, 2x) to the player controls
+   Labels: category:enhancement, area:player, area:settings, status:ready
+   GitHub: https://github.com/jeffdt/homskillet-discography/issues/52
 
-You can now use `/feature:start E19` to begin working on this item.
+You can now use /feature:init 52 to begin working on this issue.
 ```
 
 ### Example 2: Bug
@@ -249,26 +193,27 @@ You can now use `/feature:start E19` to begin working on this item.
 ```
 User: /feature:record
 
-Claude: What TODO item would you like to add?
+Claude: What issue would you like to create?
 
 User: The volume slider doesn't save its position when refreshing the page
 
-Claude: Analyzed TODO item:
+Claude: Analyzed issue:
 
-Category: BUGS (detected keywords: "doesn't", "bug-like description")
-ID: B2
-Area tags: [area:player] (detected keywords: "volume", "slider")
+Category: category:bug (detected keywords: "doesn't", problem description)
+Area tags: area:player (detected keywords: "volume", "slider")
 Description: The volume slider doesn't save its position when refreshing the page
 
-This will be added to the BUGS section of TODO.md.
+This will create a GitHub issue with these labels.
 
-Add this item? (yes/no)
+Create this issue? (yes/no)
 
 User: yes
 
-Claude: ✅ Added B2 to TODO.md
+Claude: ✅ Created issue #53: The volume slider doesn't save its position when refreshing the page
+   Labels: category:bug, area:player, status:ready
+   GitHub: https://github.com/jeffdt/homskillet-discography/issues/53
 
-You can now use `/feature:start B2` to begin working on this item.
+You can now use /feature:init 53 to begin working on this issue.
 ```
 
 ### Example 3: Maintainability
@@ -276,43 +221,44 @@ You can now use `/feature:start B2` to begin working on this item.
 ```
 User: /feature:record
 
-Claude: What TODO item would you like to add?
+Claude: What issue would you like to create?
 
 User: Add unit tests for the Sequencer class shuffle and repeat logic
 
-Claude: Analyzed TODO item:
+Claude: Analyzed issue:
 
-Category: MAINTAINABILITY (detected keywords: "unit tests", "test")
-ID: M6
-Area tags: [area:build] (detected keywords: "unit tests")
+Category: category:maintainability (detected keywords: "unit tests", "test")
+Area tags: area:build (detected keywords: "unit tests")
 Description: Add unit tests for the Sequencer class shuffle and repeat logic
 
-This will be added to the MAINTAINABILITY section of TODO.md.
+This will create a GitHub issue with these labels.
 
-Add this item? (yes/no)
+Create this issue? (yes/no)
 
 User: yes
 
-Claude: ✅ Added M6 to TODO.md
+Claude: ✅ Created issue #54: Add unit tests for the Sequencer class shuffle and repeat logic
+   Labels: category:maintainability, area:build, status:ready
+   GitHub: https://github.com/jeffdt/homskillet-discography/issues/54
 
-You can now use `/feature:start M6` to begin working on this item.
+You can now use /feature:init 54 to begin working on this issue.
 ```
 
 ## Best Practices
 
-1. **Be Descriptive**: Write clear, specific TODO descriptions that explain what needs to be done
+1. **Be Descriptive**: Write clear, specific issue descriptions that explain what needs to be done
 2. **Trust the AI**: The category and area detection is quite accurate. Override only if clearly wrong
-3. **Single Responsibility**: Each TODO should focus on one specific task
+3. **Single Responsibility**: Each issue should focus on one specific task
 4. **Reference Screenshots**: If relevant, mention screenshot paths (`.claude/screenshots/`)
-5. **Link Related Items**: If the TODO depends on another, mention it in the description
+5. **Link Related Items**: If the issue depends on another, mention it with #number syntax in the description
 
 ## Important Notes
 
-- **No Duplicates**: Before creating, the command should ideally check if a similar TODO already exists (optional enhancement)
-- **Area Tags Are Key**: Area tags enable conflict detection in `/feature:start` for parallel worktrees
-- **ID Sequence**: IDs are sequential within each category (B1, B2... E1, E2... M1, M2...)
-- **Format Consistency**: Always use `**ID**: Description [area:tag]` format
-- **Empty Sections**: If adding to an empty section with "None!", replace the "None!" text
+- **No Duplicates**: Consider searching existing issues before creating to avoid duplicates
+- **Area Tags Are Key**: Area labels enable conflict detection in `/feature:init` for parallel worktrees
+- **Issue Numbers**: GitHub automatically assigns sequential issue numbers
+- **Labels Are Data**: Labels are the primary way to categorize and filter issues
+- **Status Labels**: New issues default to `status:ready` unless marked as planning work
 
 ## Edge Cases
 
@@ -346,7 +292,7 @@ If description is very long (>200 chars), suggest:
 
 ```
 This description is quite long. Consider:
-1. Using it as-is (will wrap in TODO.md)
-2. Shortening the summary and adding details in a follow-up
-3. Breaking into multiple TODO items
+1. Using it as-is (will be the issue title and body)
+2. Shortening the title and adding details in the issue body
+3. Breaking into multiple issues
 ```

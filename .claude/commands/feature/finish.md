@@ -1,11 +1,11 @@
 ---
 description: Complete work on a worktree (merge, create PR, or abandon)
-allowed-tools: Read, Edit, Bash, AskUserQuestion, Skill
+allowed-tools: Bash, AskUserQuestion, Skill
 ---
 
 # /feature:finish - Complete Worktree Work
 
-This command helps you finish work on a worktree by creating a PR, merging to main, or abandoning the changes. It handles all cleanup including removing the worktree, updating the registry, and cleaning up TODO.md.
+This command helps you finish work on a worktree by creating a PR, merging to main, or abandoning the changes. It handles all cleanup including removing the worktree, updating the registry, and updating the GitHub Issue.
 
 ## Usage
 
@@ -13,8 +13,8 @@ This command helps you finish work on a worktree by creating a PR, merging to ma
 # From within a worktree directory
 /feature:finish
 
-# Or specify which worktree to finish (if not currently in one)
-/feature:finish E16
+# Or specify which worktree to finish by issue number (if not currently in one)
+/feature:finish 45
 ```
 
 ## Workflow
@@ -33,9 +33,9 @@ git worktree list --porcelain
 
 Parse output to find worktree matching `$(pwd)`.
 
-**Option B: User specifies TODO ID**
+**Option B: User specifies issue number**
 
-If user provides an ID (e.g., `/feature:finish E16`), look up that worktree in `.claude/worktrees.json`.
+If user provides an issue number (e.g., `/feature:finish 45`), look up that worktree in `.claude/worktrees.json` by matching the `githubIssue` field.
 
 **If not in a worktree:**
 
@@ -43,8 +43,8 @@ If user provides an ID (e.g., `/feature:finish E16`), look up that worktree in `
 You are currently in the main repository, not a worktree.
 
 Active worktrees:
-1. E16 - Slider sparks gradient (feature/E16-slider-sparks)
-2. E7 - MP3 support (feature/E7-mp3-support)
+1. #45 - Slider sparks gradient (feature/45-slider-sparks)
+2. #52 - MP3 support (feature/52-mp3-support)
 
 Which worktree would you like to finish? (1, 2, or cancel)
 ```
@@ -266,7 +266,24 @@ git worktree remove --force /Users/hom/code/homskillet-worktrees/E16-slider-spar
 #### 5B.8: Delete Local Branch
 
 ```bash
-git branch -d feature/E16-slider-sparks
+git branch -d feature/45-slider-sparks
+```
+
+#### 5B.9: Close GitHub Issue
+
+Close the issue and remove the worktree:active label:
+
+```bash
+# Close the issue
+gh issue close {issue_number} --comment "Merged to main"
+
+# Note: worktree:active label is automatically removed when issue is closed
+```
+
+Example:
+
+```bash
+gh issue close 45 --comment "Merged to main"
 ```
 
 ### Step 5C: Abandon Work
@@ -315,14 +332,35 @@ If option 2: Keep branch, only remove worktree.
 #### 5C.3: Remove Worktree
 
 ```bash
-git worktree remove /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+git worktree remove /Users/hom/code/homskillet-worktrees/45-slider-sparks
 ```
 
 or force:
 
 ```bash
-git worktree remove --force /Users/hom/code/homskillet-worktrees/E16-slider-sparks
+git worktree remove --force /Users/hom/code/homskillet-worktrees/45-slider-sparks
 ```
+
+#### 5C.4: Update GitHub Issue
+
+Remove the `worktree:active` label and add abandon comment:
+
+```bash
+# Remove worktree:active label
+gh issue edit {issue_number} --remove-label "worktree:active"
+
+# Add comment explaining abandonment
+gh issue comment {issue_number} --body "Work abandoned. Issue returned to backlog."
+```
+
+Example:
+
+```bash
+gh issue edit 45 --remove-label "worktree:active"
+gh issue comment 45 --body "Work abandoned. Issue returned to backlog."
+```
+
+The issue remains open and available for future work.
 
 ### Step 6: Update Registry
 
@@ -362,39 +400,18 @@ After:
 }
 ```
 
-### Step 7: Update TODO.md
+### Step 7: Update Worktrees Registry
 
-**If merged (Option 5B):**
-Delete the entire TODO item from `.claude/TODO.md`:
+Remove the worktree entry from `.claude/worktrees.json`.
 
-Before:
-
-```markdown
-**E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
-
-**E17**: Visualizer fullscreen should rotate 90 degrees. [area:visualizer]
-```
-
-After:
-
-```markdown
-**E17**: Visualizer fullscreen should rotate 90 degrees. [area:visualizer]
-```
-
-If section becomes empty, replace with "None!".
-
-**If abandoned (Option 5C):**
-No changes to TODO.md needed. The item remains unchanged and available in the pool.
-
-**If PR created (Option 5A):**
-No changes to TODO.md needed. Worktree tracking is handled solely through `.claude/worktrees.json`.
+**Note:** GitHub Issue state is updated in steps 5B.9 (merge) or 5C.4 (abandon). No additional GitHub operations needed here.
 
 ### Step 8: Provide Completion Summary
 
 **For merged:**
 
 ```
-✅ Successfully finished E16!
+✅ Successfully finished issue #45!
 
 Summary:
 - ✓ Merged feature/E16-slider-sparks to main

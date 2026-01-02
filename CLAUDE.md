@@ -154,11 +154,88 @@ React Router handles navigation:
 - `/*` - Browse catalog (simplified single-route structure)
 - Query params: `?play=path` to auto-play a file
 
-## Working with TODO.md
+## Working with GitHub Issues
 
-- **Always check git history before starting tasks** - Use `git log` to verify if a task from `.claude/TODO.md` has already been completed before beginning work on it.
-- **Remove completed tasks** - When you find that a TODO item has been implemented (check commit messages and git history), remove it from the TODO file.
-- **Check for completion evidence** - Look for related commits, file changes, and PR merges that indicate the work is done.
+This project uses GitHub Issues for task tracking, integrated with the git worktree workflow.
+
+### Issue Structure
+
+**Labels:**
+
+- **Category**: `category:bug`, `category:enhancement`, `category:maintainability`, `category:simplification`, `category:deployment`
+- **Area**: `area:visualizer`, `area:player`, `area:browser`, `area:settings`, `area:build`
+- **Status**: `status:wip`, `status:planning`, `status:ready`, `status:blocked`, `worktree:active`
+
+**Title Format**: Simple description (no prefix needed)
+
+- Example: `Slider sparks can change color over lifespan through gradient`
+- GitHub issue numbers (#70, #94, etc.) are the primary identifiers
+
+### Workflow
+
+**List issues:**
+
+```bash
+gh issue list                              # All open issues
+gh issue list --label "area:visualizer"    # By area
+gh issue list --label "category:bug"       # By category
+gh issue list --state all                  # Include closed issues
+```
+
+**Create issue:**
+
+```bash
+/feature:record    # Interactive issue creation with AI-powered label detection
+```
+
+**Worktree workflow:**
+
+```bash
+/feature:init              # Interactive - shows available issues to choose from
+/feature:init 77           # Direct - start work on specific issue #77
+# ... work on feature ...
+/feature:finish            # Complete work, close issue, clean up worktree
+```
+
+**List worktrees:**
+
+```bash
+/feature:list              # List active worktrees with GitHub issue info
+```
+
+### Best Practices
+
+1. **Always use feature commands** - They automatically manage issue labels and project board state
+2. **Add comments to issues** - Document decisions, research findings, blockers using `gh issue comment`
+3. **Link related issues** - Use #77 syntax in issue descriptions to reference other issues
+4. **Update issue body** - Add implementation notes as you discover them using `gh issue edit`
+5. **Check for duplicates** - Search existing issues before creating new ones using `gh issue list --search`
+
+### GitHub Issues Skill
+
+The `.claude/skills/github-issues/` skill provides guidance for all GitHub Issues operations. It's automatically invoked when working with issues and includes:
+
+- `SKILL.md` - Core operations and label system
+- `WORKFLOWS.md` - Detailed workflow patterns
+- `CLI-REFERENCE.md` - gh command reference and examples
+
+## Working with TODO.md (DEPRECATED)
+
+**TODO.md has been migrated to GitHub Issues as of 2026-01-02.**
+
+See "Working with GitHub Issues" section above for current workflow.
+
+**Why GitHub Issues?**
+
+- Better collaboration (comments, mentions, reactions)
+- Integrated with PRs and commits
+- Rich formatting and media support
+- API access for automation
+- Historical tracking and search
+- Project boards for visualization
+- No git conflicts when multiple agents/worktrees add tasks
+
+**Migration:** All TODO items converted to GitHub issues (issues #70-94). The feature workflow commands (`/feature:record`, `/feature:init`, `/feature:finish`, `/feature:list`) work exactly the same from a user perspective but now use GitHub Issues under the hood.
 
 ## Working with tmp directory
 
@@ -309,7 +386,7 @@ bun run build-chip-core
 
 ## Project Status
 
-See `.claude/TODO.md` for the complete task list and active work items.
+See GitHub Issues for the complete task list and active work items: `gh issue list` or https://github.com/jeffdt/homskillet-discography/issues
 
 **Phase 1 (Stripping Down)**: Mostly complete
 
@@ -322,7 +399,7 @@ See `.claude/TODO.md` for the complete task list and active work items.
 
 **Phase 2 (Custom Features)**: In progress
 
-- See TODO.md sections for Simplification and Enhancement tasks
+- See GitHub Issues with `category:enhancement` and `category:simplification` labels
 
 **Phase 3 (Deployment)**: Configured but not deployed yet
 
