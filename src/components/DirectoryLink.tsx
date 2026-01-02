@@ -1,5 +1,5 @@
 import { Link, useHistory } from 'react-router-dom';
-import React, { memo, useState, useRef, useEffect } from 'react';
+import React, { memo } from 'react';
 
 interface DirectoryLinkProps {
   to: string;
@@ -17,8 +17,6 @@ function getSearch(): string {
 
 const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLink, children }) => {
   const history = useHistory();
-  const [isFlashing, setIsFlashing] = useState(false);
-  const linkRef = useRef<HTMLAnchorElement>(null);
   const linkClassName = dim ? 'DirectoryLink-dim' : undefined;
   const folderClassName = dim ? 'inline-icon dim-icon icon-folder' : 'inline-icon icon-folder';
 
@@ -32,47 +30,30 @@ const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLi
   const toObj = {
     pathname: encodedTo,
     search: finalSearch,
-    state: { prevPathname: window.location.pathname, shouldAnimate: true },
+    state: { prevPathname: window.location.pathname },
   };
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (isBackLink) {
+      // Navigate to root instead of using history.goBack()
+      // This is reliable since we never nest directories
       e.preventDefault();
-      history.goBack();
+      history.push({
+        pathname: '/',
+        search: finalSearch,
+        state: { prevPathname: window.location.pathname },
+      });
       return;
     }
 
-    console.log('DirectoryLink clicked - starting flash animation');
-    setIsFlashing(true);
-
     e.preventDefault();
-
-    setTimeout(() => {
-      console.log('DirectoryLink - navigating with state:', toObj);
-      history.push(toObj);
-    }, 800);
+    history.push(toObj);
   };
-
-  useEffect(() => {
-    if (isFlashing) {
-      console.log('DirectoryLink - flash state set to true');
-      const timer = setTimeout(() => {
-        console.log('DirectoryLink - flash state cleared');
-        setIsFlashing(false);
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [isFlashing]);
-
-  const combinedClassName = [linkClassName, isFlashing ? 'directory-flash' : '']
-    .filter(Boolean)
-    .join(' ');
 
   return (
     <Link
-      ref={linkRef}
       to={toObj}
-      className={combinedClassName}
+      className={linkClassName}
       onClick={handleClick}
       tabIndex={-1}
     >
