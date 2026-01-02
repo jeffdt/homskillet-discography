@@ -1,11 +1,11 @@
 ---
 description: List all active worktrees with their status and details
-allowed-tools: Read, Bash
+allowed-tools: Bash
 ---
 
 # /feature:list - List Active Worktrees
 
-This command displays all active worktrees tracked in the registry, validates they still exist, and shows their metadata including TODO ID, description, port, and areas.
+This command displays all active worktrees tracked in the registry, validates they still exist, and shows their metadata including GitHub Issue number, description, port, areas, and GitHub Issue status.
 
 ## Usage
 
@@ -27,11 +27,11 @@ If the file doesn't exist or is empty:
 ```
 No active worktrees found.
 
-To create a worktree for a TODO item, use:
-  /feature:start {TODO_ID}
+To create a worktree for an issue, use:
+  /feature:init {issue_number}
 
 Example:
-  /feature:start E16
+  /feature:init 45
 ```
 
 ### Step 2: Get Active Worktrees from Git
@@ -65,47 +65,78 @@ Mark worktrees as:
 - **ACTIVE**: Path found in git worktree list
 - **STALE**: Path not found (directory deleted, worktree removed manually)
 
-### Step 4: Display Worktree Summary
+### Step 4: Fetch GitHub Issue Metadata
 
-Format and display the active worktrees:
+For each active worktree, fetch the GitHub Issue metadata:
+
+```bash
+gh issue view {githubIssue} --json number,title,state,labels,updatedAt,url
+```
+
+Extract:
+
+- Issue number
+- Title
+- State (open/closed)
+- Labels (especially category and area labels)
+- Last updated timestamp
+- GitHub URL
+
+Example:
+
+```bash
+gh issue view 45 --json number,title,state,labels,updatedAt,url
+```
+
+### Step 5: Display Worktree Summary
+
+Format and display the active worktrees with GitHub Issue metadata:
 
 ```
 Active Worktrees: (2)
 
-1. E16 - Slider sparks can change color over lifespan through a gradient
-   Branch:  feature/E16-slider-sparks
-   Path:    /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-   Port:    5016
-   Areas:   [visualizer]
-   Created: 2 hours ago
+1. Issue #45 - Slider sparks can change color over lifespan through a gradient
+   Branch:  feature/45-slider-sparks
+   Path:    /Users/hom/code/homskillet-worktrees/45-slider-sparks
+   Port:    5045
+   Areas:   visualizer
+   GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45
+   Labels:  category:enhancement, area:visualizer, worktree:active
+   State:   open
+   Updated: 2 hours ago
+   Created: 3 hours ago
 
    To work on this:
-     cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-     bun start --port 5016
+     cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+     bun start --port 5045
 
-   Test at: http://localhost:5016
+   Test at: http://localhost:5045
 
-2. E7 - Add ability to play MP3s for covers and remixes
-   Branch:  feature/E7-mp3-support
-   Path:    /Users/hom/code/homskillet-worktrees/E7-mp3-support
-   Port:    5007
-   Areas:   [player]
+2. Issue #52 - Add ability to play MP3s for covers and remixes
+   Branch:  feature/52-mp3-support
+   Path:    /Users/hom/code/homskillet-worktrees/52-mp3-support
+   Port:    5052
+   Areas:   player
+   GitHub:  https://github.com/jeffdt/homskillet-discography/issues/52
+   Labels:  category:enhancement, area:player, worktree:active
+   State:   open
+   Updated: 1 day ago
    Created: 1 day ago
 
    To work on this:
-     cd /Users/hom/code/homskillet-worktrees/E7-mp3-support
-     bun start --port 5007
+     cd /Users/hom/code/homskillet-worktrees/52-mp3-support
+     bun start --port 5052
 
-   Test at: http://localhost:5007
+   Test at: http://localhost:5052
 
 To finish a worktree:
   /feature:finish (from within the worktree directory)
 
 To create a new worktree:
-  /feature:start
+  /feature:init
 ```
 
-### Step 5: Display Stale Worktrees (if any)
+### Step 6: Display Stale Worktrees (if any)
 
 If any worktrees in the registry are marked STALE:
 
@@ -125,7 +156,7 @@ To clean up stale entries:
   2. Use /feature:finish to properly clean up next time
 ```
 
-### Step 6: Calculate Time Ago
+### Step 7: Calculate Time Ago
 
 Convert `createdAt` timestamp to relative time:
 
@@ -164,39 +195,45 @@ User: /feature:list
 
 Claude: Active Worktrees: (2)
 
-1. E16 - Slider sparks can change color over lifespan through a gradient
-   Branch:  feature/E16-slider-sparks
-   Path:    /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-   Port:    5016
-   Areas:   [visualizer]
+1. Issue #45 - Slider sparks can change color over lifespan through a gradient
+   Branch:  feature/45-slider-sparks
+   Path:    /Users/hom/code/homskillet-worktrees/45-slider-sparks
+   Port:    5045
+   Areas:   visualizer
+   GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45
+   Labels:  category:enhancement, area:visualizer, worktree:active
+   Updated: 2 hours ago
    Created: 3 hours ago
 
    To work on this:
-     cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-     bun start --port 5016
+     cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+     bun start --port 5045
 
-   Test at: http://localhost:5016
+   Test at: http://localhost:5045
 
-2. E19 - Add particle explosion effect when slider sparks fade out
-   Branch:  feature/E19-particle-explosion
-   Path:    /Users/hom/code/homskillet-worktrees/E19-particle-explosion
-   Port:    5019
-   Areas:   [visualizer]
+2. Issue #47 - Add particle explosion effect when slider sparks fade out
+   Branch:  feature/47-particle-explosion
+   Path:    /Users/hom/code/homskillet-worktrees/47-particle-explosion
+   Port:    5047
+   Areas:   visualizer
+   GitHub:  https://github.com/jeffdt/homskillet-discography/issues/47
+   Labels:  category:enhancement, area:visualizer, worktree:active
+   Updated: 30 minutes ago
    Created: 1 hour ago
 
    To work on this:
-     cd /Users/hom/code/homskillet-worktrees/E19-particle-explosion
-     bun start --port 5019
+     cd /Users/hom/code/homskillet-worktrees/47-particle-explosion
+     bun start --port 5047
 
-   Test at: http://localhost:5019
+   Test at: http://localhost:5047
 
-⚠️  Note: Both worktrees affect [visualizer] area - be mindful of merge conflicts.
+⚠️  Note: Both worktrees affect visualizer area - be mindful of merge conflicts.
 
 To finish a worktree:
   /feature:finish (from within the worktree directory)
 
 To create a new worktree:
-  /feature:start
+  /feature:init
 ```
 
 ### Example 2: No Active Worktrees
@@ -206,13 +243,13 @@ User: /feature:list
 
 Claude: No active worktrees found.
 
-To create a worktree for a TODO item, use:
-  /feature:start {TODO_ID}
+To create a worktree for an issue, use:
+  /feature:init {issue_number}
 
 Example:
-  /feature:start E16
+  /feature:init 45
 
-Or use /feature:start without an ID to see available TODO items.
+Or use /feature:init without an issue number to see available issues.
 ```
 
 ### Example 3: One Active, One Stale
@@ -222,28 +259,30 @@ User: /feature:list
 
 Claude: Active Worktrees: (1)
 
-1. E16 - Slider sparks can change color over lifespan through a gradient
-   Branch:  feature/E16-slider-sparks
-   Path:    /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-   Port:    5016
-   Areas:   [visualizer]
+1. Issue #45 - Slider sparks can change color over lifespan through a gradient
+   Branch:  feature/45-slider-sparks
+   Path:    /Users/hom/code/homskillet-worktrees/45-slider-sparks
+   Port:    5045
+   Areas:   visualizer
+   GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45
+   Labels:  category:enhancement, area:visualizer, worktree:active
    Created: 2 hours ago
 
    To work on this:
-     cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-     bun start --port 5016
+     cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+     bun start --port 5045
 
-   Test at: http://localhost:5016
+   Test at: http://localhost:5045
 
 ⚠️  Stale Worktrees: (1)
 
-- E5 - Make time slider wavy/ripply
-  Branch: feature/E5-wavy-slider
-  Path: /Users/hom/code/homskillet-worktrees/E5-wavy-slider (NOT FOUND)
+- Issue #43 - Make time slider wavy/ripply
+  Branch: feature/43-wavy-slider
+  Path: /Users/hom/code/homskillet-worktrees/43-wavy-slider (NOT FOUND)
 
 The worktree was likely removed manually. To clean up:
 1. Manually edit .claude/worktrees.json to remove the stale entry
-2. Or recreate the worktree using /feature:start E5
+2. Or recreate the worktree using /feature:init 43
 ```
 
 ## Best Practices
@@ -270,7 +309,7 @@ If multiple active worktrees share area tags, add a warning:
 
 ```
 ⚠️  Overlap detected:
-- E16 and E17 both affect [visualizer] area
+- #45 and #47 both affect visualizer area
 - May cause merge conflicts when integrating
 
 Consider finishing one before continuing the other.
@@ -284,14 +323,14 @@ Optionally group worktrees by their primary area:
 Active Worktrees by Area:
 
 [visualizer] (2)
-- E16: Slider sparks gradient
-- E17: Fullscreen rotation
+- #45: Slider sparks gradient
+- #47: Fullscreen rotation
 
 [player] (1)
-- E7: MP3 support
+- #52: MP3 support
 
 [build] (1)
-- M5: Bundle size investigation
+- #54: Bundle size investigation
 ```
 
 ### Quick Stats Summary
@@ -303,8 +342,8 @@ At the beginning, show quick stats:
 - Active: 3
 - Stale: 1
 - Areas in use: visualizer (2), player (1)
-- Oldest: E16 (2 days ago)
-- Newest: M5 (30 minutes ago)
+- Oldest: #45 (2 days ago)
+- Newest: #54 (30 minutes ago)
 ```
 
 ## Edge Cases
@@ -315,7 +354,7 @@ At the beginning, show quick stats:
 No worktrees tracked in registry, but git reports active worktrees:
 - /Users/hom/code/homskillet-worktrees/some-manual-worktree
 
-These were likely created manually outside of /feature:start.
+These were likely created manually outside of /feature:init.
 Would you like me to import them into the registry?
 ```
 

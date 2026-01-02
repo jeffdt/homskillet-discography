@@ -1,73 +1,69 @@
 ---
-description: Initialize an isolated worktree for a TODO item
-allowed-tools: Read, Edit, Bash, AskUserQuestion
+description: Initialize an isolated worktree for a GitHub Issue
+allowed-tools: Bash, AskUserQuestion
 ---
 
 # /feature:init - Initialize Worktree for a Feature
 
-This command scaffolds an isolated git worktree for working on a TODO item from `.claude/TODO.md`. It creates the worktree, symlinks dependencies, and prepares everything for development.
-
-After initialization, use `/feature:implement` to actually implement the feature.
+This command scaffolds an isolated git worktree for working on a GitHub Issue. It creates the worktree, symlinks dependencies, updates the issue labels, and prepares everything for development.
 
 ## Usage
 
 ```bash
-# Interactive: Shows available TODO items to choose from
+# Interactive: Shows available issues to choose from
 /feature:init
 
-# Direct: Initialize worktree for a specific TODO by ID
-/feature:init E16
+# Direct: Initialize worktree for a specific issue by number
+/feature:init 47
 ```
 
-After initialization, CD to the worktree and run `/feature:implement` to begin work.
+After initialization, CD to the worktree to begin work.
 
 ## Workflow
 
-### Step 1: Read TODO.md and Detect In-Progress Items
+### Step 1: Query GitHub Issues
 
-Read `.claude/TODO.md` to see all available items. The TODO uses these categories:
+Query all open GitHub Issues and filter for available ones:
 
-- **BUGS** - Bug fixes (labeled B1, B2, etc.)
-- **SIMPLIFICATION** - Removing unnecessary code (labeled S1, S2, etc.)
-- **ENHANCEMENT** - New features and styling (labeled E1, E2, etc.)
-- **MAINTAINABILITY** - Code quality and tooling (labeled M1, M2, etc.)
-- **DEPLOYMENT** - Going live tasks (labeled D1, D2, etc.)
-
-**Detect In-Progress Markers:**
-Look for items marked with:
-
-- `(WIP)` prefix - Currently being worked on directly
-
-Example WIP marker:
-
-```markdown
-**(WIP) E12**: The currently playing song title should not appear left-aligned...
+```bash
+gh issue list \
+  --state open \
+  --label "!worktree:active" \
+  --label "!status:wip" \
+  --label "!status:blocked" \
+  --json number,title,labels \
+  --limit 100
 ```
+
+**Label Filtering:**
+
+- Exclude issues with `worktree:active` label (already have a worktree)
+- Exclude issues with `status:wip` label (being worked on directly)
+- Exclude issues with `status:blocked` label (blocked by dependencies)
+
+**Parse Issue Data:**
+For each issue, extract:
+
+- Issue number
+- Title
+- Category label (category:\*)
+- Area labels (area:\*)
 
 **Output Status:**
-If any items are marked WIP, report them:
 
 ```
-Found items already in progress:
-- (WIP) E12: The currently playing song title should not appear left-aligned
-  (Working directly on current branch)
-
-These items will be excluded from selection.
+Found N available issues
+Active worktrees: M
+Available to work on: N
 ```
 
-If no items in progress:
+### Step 2: Load Active Worktrees and Detect Conflicts
 
-```
-No items currently in progress.
-```
+Read `.claude/worktrees.json` to get active worktrees.
 
-### Step 2: Analyze In-Progress Items for File Conflicts
+For each active worktree, get its issue number and area tags.
 
-For items marked `(WIP)`, determine which component areas they touch by reading their `[area:]` tags.
-
-For active worktrees, read `.claude/worktrees.json` to get their area tags.
-
-Then exclude ALL other items with overlapping area tags to prevent merge conflicts.
+Cross-reference with available issues to detect area conflicts.
 
 #### File Conflict Matrix
 
@@ -98,36 +94,37 @@ Remove from consideration:
 4. Items marked with `(PLAN)` prefix (require exploration first)
 5. Items marked with `(OPTIONAL FUTURE WORK)` unless user specifically requests them
 
-### Step 4: Select TODO Item
+### Step 4: Select Issue
 
-**If user provided ID** (e.g., `/feature:init E16`):
+**If user provided issue number** (e.g., `/feature:init 47`):
 
-- Verify the ID exists in TODO.md
-- Verify it's not marked `(WIP)` or already being worked on in an active worktree
+- Verify the issue exists and is open
+- Verify it doesn't have `worktree:active`, `status:wip`, or `status:blocked` labels
 - Verify it's not excluded due to area conflicts
-- If valid, use that item
+- If valid, use that issue
 - If invalid/excluded, explain why and show available alternatives
 
-**If no ID provided** (e.g., `/feature:init`):
+**If no issue number provided** (e.g., `/feature:init`):
 
-- Categorize remaining available items by complexity:
-  - **Quick Wins**: Simple, well-defined tasks
-  - **Medium**: Feature additions with clear scope
-  - **Complex**: Requires planning or exploration
+- Categorize available issues by category label:
+  - category:bug
+  - category:enhancement
+  - category:maintainability
+  - category:simplification
 - Present 2-4 diverse options from different areas using `AskUserQuestion`
-- Include TODO ID, full description, and area tags
+- Include issue number, title, and area labels
 - Recommend one option if there's a clear best choice
 
 Example presentation:
 
 ```
-Which TODO item would you like to work on?
+Which issue would you like to work on?
 
 Options:
-1. E7: Add ability to play MP3s [area:player] (Medium - new feature)
-2. E9: Improve autoplay UX for shared links [area:browser] (Quick win)
-3. M5: Investigate bundle size warning [area:build] (Quick win)
-4. E6: Add song metadata storage [area:browser] (Complex - needs design)
+1. #52: Add tempo preset buttons to player controls (category:enhancement, area:player)
+2. #53: Volume slider doesn't save position on refresh (category:bug, area:player)
+3. #54: Add unit tests for Sequencer class (category:maintainability, area:build)
+4. #55: Add song metadata storage (category:enhancement, area:browser)
 ```
 
 ### Step 5: Read Worktree Registry
@@ -177,61 +174,49 @@ Allow user to override the warning. If they say no, return to step 4 to select a
 
 #### Step 6.2: Calculate Port
 
-Generate predictable port from TODO ID:
+Generate predictable port from issue number:
 
 ```javascript
-function calculatePort(todoId) {
-  // Extract category prefix and number
-  // B1 → prefix='B', num=1
-  // E16 → prefix='E', num=16
-  const match = todoId.match(/^([BEMSD])(\d+)$/);
-  const prefix = match[1];
-  const num = parseInt(match[2]);
-
-  // Category-based port ranges to avoid conflicts
-  const basePort = {
-    B: 4000, // Bugs: 4001, 4002, ...
-    E: 5000, // Enhancements: 5001, 5002, ..., 5016, ...
-    M: 6000, // Maintainability: 6001, 6002, ...
-    S: 7000, // Simplification: 7001, 7002, ...
-    D: 8000, // Deployment: 8001, 8002, ...
-  };
-
-  return basePort[prefix] + num;
+function calculatePort(issueNumber) {
+  // Use issue number directly with 5000 base
+  // Issue #45 → 5045
+  // Issue #123 → 5123
+  return 5000 + issueNumber;
 }
 
 // Examples:
-// E16 → 5016
-// B1 → 4001
-// M5 → 6005
+// #45 → 5045
+// #52 → 5052
+// #123 → 5123
 ```
 
 #### Step 6.3: Generate Slug
 
-Create URL-friendly slug from TODO description:
+Create URL-friendly slug from issue number and title:
 
 ```javascript
-function generateSlug(description) {
-  // Extract first 3-4 meaningful words
+function generateSlug(issueNumber, title) {
+  // Include issue number + first 3-4 meaningful words
   // Remove special characters
   // Convert to lowercase
   // Join with hyphens
 
-  return description
+  const words = title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
     .split(/\s+/) // Split on whitespace
-    .filter((word) => word.length > 2) // Skip short words (a, an, the, etc.)
-    .slice(0, 4) // Take first 4 words
-    .join('-'); // Join with hyphens
+    .filter((word) => word.length > 2) // Skip short words
+    .slice(0, 3); // Take first 3 words
+
+  return `${issueNumber}-${words.join('-')}`;
 }
 
 // Examples:
-// "Slider sparks can change color over lifespan through a gradient"
-// → "slider-sparks-change-color"
+// #45, "Slider sparks can change color over lifespan through a gradient"
+// → "45-slider-sparks-change"
 
-// "Add ability to play MP3s for the handful of Ableton covers"
-// → "ability-play-mp3s-handful"
+// #52, "Add tempo preset buttons to player controls"
+// → "52-tempo-preset-buttons"
 ```
 
 #### Step 6.4: Create Worktree
@@ -239,11 +224,11 @@ function generateSlug(description) {
 Use the helper script to create the worktree with optimized setup:
 
 ```bash
-# Call the helper script with TODO ID, slug, and port
-./scripts/create-worktree.sh {ID} {slug} {port}
+# Call the helper script with issue number, slug, and port
+./scripts/create-worktree.sh {issue_number} {slug} {port}
 
-# Example for E16:
-# ./scripts/create-worktree.sh E16 slider-sparks 5016
+# Example for issue #45:
+# ./scripts/create-worktree.sh 45 45-slider-sparks 5045
 ```
 
 **What the script does:**
@@ -278,83 +263,113 @@ bun install
 - If push fails, continue anyway (user can push later)
 - Script includes error handling with `set -e` for safety
 
-#### Step 6.5: Update Registry
+#### Step 6.5: Update GitHub Issue
+
+Add `worktree:active` label to the issue and add a comment:
+
+```bash
+# Add worktree:active label
+gh issue edit {issue_number} --add-label "worktree:active"
+
+# Add comment with worktree details
+gh issue comment {issue_number} --body "Worktree created:
+- Path: /Users/hom/code/homskillet-worktrees/{slug}
+- Port: {port}
+- Branch: feature/{slug}"
+```
+
+Example for issue #45:
+
+```bash
+gh issue edit 45 --add-label "worktree:active"
+gh issue comment 45 --body "Worktree created:
+- Path: /Users/hom/code/homskillet-worktrees/45-slider-sparks
+- Port: 5045
+- Branch: feature/45-slider-sparks"
+```
+
+#### Step 6.6: Update Registry
 
 Add entry to `.claude/worktrees.json`:
 
 ```json
 {
-  "id": "E16",
-  "branch": "feature/E16-slider-sparks",
-  "path": "/Users/hom/code/homskillet-worktrees/E16-slider-sparks",
+  "githubIssue": 45,
+  "branch": "feature/45-slider-sparks",
+  "slug": "45-slider-sparks",
+  "path": "/Users/hom/code/homskillet-worktrees/45-slider-sparks",
   "todoDescription": "Slider sparks can change color over lifespan through a gradient",
   "areas": ["visualizer"],
-  "port": 5016,
+  "port": 5045,
   "baseBranch": "main",
-  "createdAt": "2025-12-31T20:30:00Z"
+  "createdAt": "2026-01-02T20:30:00Z"
 }
 ```
 
+**Note:** Use `githubIssue` field instead of old `id` field. The `todoDescription` field contains the issue title.
+
 Use current timestamp for `createdAt`.
 
-**Important:** Do NOT add any markers to TODO.md. Worktree tracking is done purely through `.claude/worktrees.json` (a local file not tracked in git). TODO.md only contains `(WIP)` markers for items being worked on directly without a worktree.
-
-#### Step 6.6: Provide User Guidance
+#### Step 6.7: Provide User Guidance
 
 ```
-✅ Created worktree for E16
+✅ Created worktree for issue #45
 
 Worktree Details:
-- Branch: feature/E16-slider-sparks
-- Path: /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-- Port: 5016
+- Issue: #45 - Slider sparks can change color over lifespan through a gradient
+- Branch: feature/45-slider-sparks
+- Path: /Users/hom/code/homskillet-worktrees/45-slider-sparks
+- Port: 5045
+- GitHub: https://github.com/jeffdt/homskillet-discography/issues/45
 
 To work on this feature:
-  cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-  bun start --port 5016
+  cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+  bun start --port 5045
 
-Test your changes at: http://localhost:5016
+Test your changes at: http://localhost:5045
 
 When ready:
 - Create PR: /pr:draft (from within the worktree)
 - Complete work: /feature:finish
 
-The worktree has been registered in .claude/worktrees.json (local file, not tracked in git).
+The worktree has been registered in .claude/worktrees.json and the issue labeled with worktree:active.
 ```
-
-**Next step:** CD to the worktree and run `/feature:implement` to begin implementation.
 
 ## Examples
 
-### Example 1: No Items in Progress, Create Worktree
+### Example 1: Interactive Selection, Create Worktree
 
 ```
 User: /feature:init
 
-Claude: No items currently in progress.
+Claude: Found 12 available issues
+Active worktrees: 0
+Available to work on: 12
 
-Which TODO item would you like to work on?
+Which issue would you like to work on?
 
 [Shows 2-4 options via AskUserQuestion]
 
-User: Selects E16
+User: Selects #45
 
-Claude: Selected E16: Slider sparks can change color over lifespan through a gradient
+Claude: Selected #45: Slider sparks can change color over lifespan through a gradient
 
 No conflicts detected with active worktrees.
 
-✅ Created worktree for E16
+✅ Created worktree for issue #45
 
 Worktree Details:
-- Branch: feature/E16-slider-sparks
-- Path: /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-- Port: 5016
+- Issue: #45 - Slider sparks can change color over lifespan through a gradient
+- Branch: feature/45-slider-sparks
+- Path: /Users/hom/code/homskillet-worktrees/45-slider-sparks
+- Port: 5045
+- GitHub: https://github.com/jeffdt/homskillet-discography/issues/45
 
 To work on this feature:
-  cd /Users/hom/code/homskillet-worktrees/E16-slider-sparks
-  /feature:implement
+  cd /Users/hom/code/homskillet-worktrees/45-slider-sparks
+  bun start --port 5045
 
-Test your changes at: http://localhost:5016 (after starting dev server)
+Test your changes at: http://localhost:5045
 ```
 
 ### Example 2: Conflict Warning on Worktree Creation
