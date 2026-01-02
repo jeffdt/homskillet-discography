@@ -46,8 +46,8 @@ export interface AppState {
   showInfo: boolean;
   songUrl: string | null;
   volume: number;
-  repeat: RepeatMode;
   shuffle: ShuffleMode;
+  isLocked: boolean;
   directories: Directories;
   hasPlayer: boolean;
   paramDefs: PlayerParamDef[];

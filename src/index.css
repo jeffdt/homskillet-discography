@@ -801,10 +801,29 @@ body,
   flex-shrink: 0;
 }
 
+.AppFooter-lock-active,
+.AppFooter-shuffle-active,
+.AppFooter-play-pause-active {
+  background: var(--active) !important;
+  color: var(--background) !important;
+}
+
+.AppFooter-lock-active .inline-icon,
+.AppFooter-shuffle-active .inline-icon,
+.AppFooter-play-pause-active .inline-icon {
+  background-color: var(--background) !important;
+}
+
+.AppFooter-lock-active:hover,
+.AppFooter-shuffle-active:hover,
+.AppFooter-play-pause-active:hover {
+  background: var(--selected) !important;
+}
+
 @media screen and (max-width: 600px) {
   .AppFooter-art,
   .AppFooter-shuffle,
-  .AppFooter-repeat {
+  .AppFooter-lock {
     display: none;
   }
 }
@@ -1858,6 +1877,10 @@ button.IconButton {
 .icon-shuffle {
   width: 16px;
   mask-image: url(images/shuffle.png);
+}
+.icon-infinity {
+  width: 16px;
+  mask-image: url(images/infinity.png);
 }
 .icon-chip {
   width: 24px;

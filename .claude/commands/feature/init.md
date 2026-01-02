@@ -37,7 +37,6 @@ Read `.claude/TODO.md` to see all available items. The TODO uses these categorie
 Look for items marked with:
 
 - `(WIP)` prefix - Currently being worked on directly
-- `(WORKTREE:branch-name)` prefix - Currently being worked on in a worktree
 
 Example WIP marker:
 
@@ -45,21 +44,13 @@ Example WIP marker:
 **(WIP) E12**: The currently playing song title should not appear left-aligned...
 ```
 
-Example WORKTREE marker:
-
-```markdown
-**(WORKTREE:feature/E16-sparks-gradient) E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
-```
-
 **Output Status:**
-If any items are in progress, report them:
+If any items are marked WIP, report them:
 
 ```
 Found items already in progress:
 - (WIP) E12: The currently playing song title should not appear left-aligned
   (Working directly on current branch)
-- (WORKTREE:feature/E16-sparks-gradient) E16: Slider sparks can change color over lifespan
-  (Working in isolated worktree)
 
 These items will be excluded from selection.
 ```
@@ -72,7 +63,9 @@ No items currently in progress.
 
 ### Step 2: Analyze In-Progress Items for File Conflicts
 
-For each item marked `(WIP)` or `(WORKTREE:*)`, determine which component areas it touches by reading its `[area:]` tags.
+For items marked `(WIP)`, determine which component areas they touch by reading their `[area:]` tags.
+
+For active worktrees, read `.claude/worktrees.json` to get their area tags.
 
 Then exclude ALL other items with overlapping area tags to prevent merge conflicts.
 
@@ -90,7 +83,8 @@ Items are tagged with area labels that map to component areas:
 
 **Conflict Detection Logic:**
 
-- If a `(WIP)` or `(WORKTREE:*)` item has `[area:visualizer]`, exclude ALL other items with `[area:visualizer]`
+- If a `(WIP)` item has `[area:visualizer]`, exclude ALL other items with `[area:visualizer]`
+- If an active worktree (from worktrees.json) has `[area:visualizer]`, exclude ALL other items with `[area:visualizer]`
 - Items can have multiple area tags: `[area:visualizer] [area:player]` - exclude items matching ANY tag
 - Example: If `(WIP) E5` has `[area:visualizer]`, also exclude E1, E3, E14, E16, E17, B1 (all visualizer items)
 
@@ -99,8 +93,8 @@ Items are tagged with area labels that map to component areas:
 Remove from consideration:
 
 1. All items marked with `(WIP)` prefix
-2. All items marked with `(WORKTREE:*)` prefix
-3. Items that share area tags with WIP/WORKTREE items (conflict prevention)
+2. All items whose TODO IDs match active worktrees in worktrees.json
+3. Items that share area tags with WIP items or active worktrees (conflict prevention)
 4. Items marked with `(PLAN)` prefix (require exploration first)
 5. Items marked with `(OPTIONAL FUTURE WORK)` unless user specifically requests them
 
@@ -109,7 +103,8 @@ Remove from consideration:
 **If user provided ID** (e.g., `/feature:init E16`):
 
 - Verify the ID exists in TODO.md
-- Verify it's not marked `(WIP)`, `(WORKTREE:*)`, or excluded due to conflicts
+- Verify it's not marked `(WIP)` or already being worked on in an active worktree
+- Verify it's not excluded due to area conflicts
 - If valid, use that item
 - If invalid/excluded, explain why and show available alternatives
 
@@ -302,23 +297,9 @@ Add entry to `.claude/worktrees.json`:
 
 Use current timestamp for `createdAt`.
 
-#### Step 6.6: Update TODO.md Marker
+**Important:** Do NOT add any markers to TODO.md. Worktree tracking is done purely through `.claude/worktrees.json` (a local file not tracked in git). TODO.md only contains `(WIP)` markers for items being worked on directly without a worktree.
 
-Add `(WORKTREE:branch-name)` marker to the TODO item in `.claude/TODO.md`:
-
-Before:
-
-```markdown
-**E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
-```
-
-After:
-
-```markdown
-**(WORKTREE:feature/E16-slider-sparks) E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
-```
-
-#### Step 6.7: Provide User Guidance
+#### Step 6.6: Provide User Guidance
 
 ```
 ✅ Created worktree for E16
@@ -338,7 +319,7 @@ When ready:
 - Create PR: /pr:draft (from within the worktree)
 - Complete work: /feature:finish
 
-The TODO item has been marked with (WORKTREE:feature/E16-slider-sparks) in TODO.md.
+The worktree has been registered in .claude/worktrees.json (local file, not tracked in git).
 ```
 
 **Next step:** CD to the worktree and run `/feature:implement` to begin implementation.
@@ -407,7 +388,7 @@ Which TODO item would you like to work on instead?
 
 ## Best Practices
 
-1. **Always mark as WORKTREE immediately** - Prevents other agents from selecting the same item
+1. **Always register worktree immediately** - Prevents other agents from selecting the same item
 2. **Check git history** - Verify item hasn't been completed before starting work
 3. **Respect conflict warnings** - HIGH severity warnings usually indicate real problems
 4. **Use /feature:implement after creation** - This command only scaffolds, implementation happens next
@@ -417,8 +398,8 @@ Which TODO item would you like to work on instead?
 ## Important Notes
 
 - **Scaffolding only**: This command only creates the worktree infrastructure. Use `/feature:implement` for actual work
-- **Single source of truth**: TODO.md tracks state via `(WORKTREE:*)` markers
-- **Worktree registry**: `.claude/worktrees.json` stores worktree metadata for queries
+- **Worktree tracking**: `.claude/worktrees.json` (local file, not in git) is the source of truth for active worktrees
+- **TODO.md only tracks WIP**: Only `(WIP)` markers appear in TODO.md for items being worked on directly
 - **Port management**: Each worktree gets predictable port based on TODO ID
 - **Area tags are critical**: Enable automatic conflict detection
 - **Parallel testing**: Worktrees use different ports, allowing simultaneous testing
@@ -426,10 +407,11 @@ Which TODO item would you like to work on instead?
 
 ## Edge Cases
 
-**Item already has WORKTREE marker:**
+**Item already has active worktree:**
 
 ```
-E16 is already being worked on in worktree: feature/E16-slider-sparks
+E16 is already being worked on in an active worktree:
+Branch: feature/E16-slider-sparks
 Path: /Users/hom/code/homskillet-worktrees/E16-slider-sparks
 
 Would you like to:
@@ -455,9 +437,9 @@ Would you like me to:
 ```
 All TODO items are currently being worked on or excluded due to conflicts.
 
-Active worktrees:
-- (WORKTREE:feature/E3-visualizer-peak-decay) E3 [area:visualizer]
-- (WORKTREE:feature/E18-player-lock-button) E18 [area:player]
+Active worktrees (from worktrees.json):
+- E3 [area:visualizer] - feature/E3-visualizer-peak-decay
+- E18 [area:player] - feature/E18-player-lock-button
 
 This blocks: E1, E5, E14, E16, E17, B1 (visualizer conflicts)
 

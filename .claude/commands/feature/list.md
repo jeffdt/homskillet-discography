@@ -121,7 +121,7 @@ These worktrees are in the registry but no longer exist on disk:
 This can happen if the worktree was removed manually instead of using /feature:finish.
 
 To clean up stale entries:
-  1. Remove the WORKTREE marker from TODO.md manually
+  1. Manually edit .claude/worktrees.json to remove the entry
   2. Use /feature:finish to properly clean up next time
 ```
 
@@ -242,7 +242,7 @@ Claude: Active Worktrees: (1)
   Path: /Users/hom/code/homskillet-worktrees/E5-wavy-slider (NOT FOUND)
 
 The worktree was likely removed manually. To clean up:
-1. Manually remove (WORKTREE:feature/E5-wavy-slider) marker from TODO.md
+1. Manually edit .claude/worktrees.json to remove the stale entry
 2. Or recreate the worktree using /feature:start E5
 ```
 
@@ -255,11 +255,12 @@ The worktree was likely removed manually. To clean up:
 
 ## Important Notes
 
-- **Registry is source of truth**: Displays what's tracked, not just what git knows
+- **Registry is source of truth**: `.claude/worktrees.json` (local file, not in git) tracks all active worktrees
 - **Stale detection**: Compares registry against `git worktree list`
 - **Port information**: Shows which port to use for testing each worktree
 - **Conflict awareness**: Highlights when multiple worktrees touch same areas
 - **Time tracking**: Shows how long ago each worktree was created
+- **No TODO.md markers**: Worktree tracking is done purely through worktrees.json, not TODO.md
 
 ## Additional Features
 

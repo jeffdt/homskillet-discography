@@ -76,7 +76,8 @@ export default class GMEPlayer extends Player {
       return;
     }
 
-    if (this.getPositionMs() >= this.getDurationMs() && this.fadingOut === false) {
+    // Only check duration and trigger fadeout if NOT locked
+    if (!this.isLocked && this.getPositionMs() >= this.getDurationMs() && this.fadingOut === false) {
       console.log('Fading out at %d ms.', this.getPositionMs());
       this.setFadeout(this.getPositionMs());
       this.fadingOut = true;
@@ -134,20 +135,28 @@ export default class GMEPlayer extends Player {
         }
       }
     } else {
-      this.subtune++;
+      // Track ended
+      if (this.isLocked) {
+        // In locked mode: restart current subtune
+        console.debug('GMEPlayer: Track ended but locked - restarting subtune %s', this.subtune);
+        this.playSubtune(this.subtune);
+      } else {
+        // Normal mode: try to advance to next subtune
+        this.subtune++;
 
-      if (
-        this.subtune >= core._gme_track_count(this.gmeCtx) ||
-        this.playSubtune(this.subtune) !== 0
-      ) {
-        this.suspend();
-        console.debug(
-          'GMEPlayer.gmeAudioProcess(): _gme_track_ended == %s and subtune (%s) > _gme_track_count (%s).',
-          core._gme_track_ended(this.gmeCtx),
-          this.subtune,
-          core._gme_track_count(this.gmeCtx)
-        );
-        this.emit('playerStateUpdate', { isStopped: true });
+        if (
+          this.subtune >= core._gme_track_count(this.gmeCtx) ||
+          this.playSubtune(this.subtune) !== 0
+        ) {
+          this.suspend();
+          console.debug(
+            'GMEPlayer.gmeAudioProcess(): _gme_track_ended == %s and subtune (%s) > _gme_track_count (%s).',
+            core._gme_track_ended(this.gmeCtx),
+            this.subtune,
+            core._gme_track_count(this.gmeCtx)
+          );
+          this.emit('playerStateUpdate', { isStopped: true });
+        }
       }
     }
   }

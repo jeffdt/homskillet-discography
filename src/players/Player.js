@@ -42,6 +42,7 @@ export default class Player extends EventEmitter {
     this.paramDefs = [];
     this.params = {};
     this.infoTexts = [];
+    this.isLocked = false;
   }
 
   /**
@@ -69,6 +70,15 @@ export default class Player extends EventEmitter {
   resume() {
     this.stopped = false;
     this.paused = false;
+  }
+
+  setLocked(locked) {
+    this.isLocked = locked;
+    console.debug(`${this.constructor.name}.setLocked(${locked})`);
+  }
+
+  getIsLocked() {
+    return this.isLocked;
   }
 
   canPlay(fileExtension) {
