@@ -281,8 +281,7 @@ If user selects "Abandon work":
 This will:
 - Delete the worktree and all uncommitted changes
 - Optionally delete the branch (local and remote)
-- Remove WORKTREE marker from TODO.md (item returns to available)
-- Remove from worktree registry
+- Remove from worktree registry (item returns to available pool)
 
 All work in this worktree will be lost. Continue? (yes/no)
 ```
@@ -371,7 +370,7 @@ Delete the entire TODO item from `.claude/TODO.md`:
 Before:
 
 ```markdown
-**(WORKTREE:feature/E16-slider-sparks) E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
+**E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
 
 **E17**: Visualizer fullscreen should rotate 90 degrees. [area:visualizer]
 ```
@@ -385,24 +384,10 @@ After:
 If section becomes empty, replace with "None!".
 
 **If abandoned (Option 5C):**
-Remove the WORKTREE marker but keep the TODO item:
-
-Before:
-
-```markdown
-**(WORKTREE:feature/E16-slider-sparks) E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
-```
-
-After:
-
-```markdown
-**E16**: Slider sparks can change color over lifespan through a gradient. [area:visualizer]
-```
-
-Item returns to available pool.
+No changes to TODO.md needed. The item remains unchanged and available in the pool.
 
 **If PR created (Option 5A):**
-Keep the WORKTREE marker as-is (worktree still active).
+No changes to TODO.md needed. Worktree tracking is handled solely through `.claude/worktrees.json`.
 
 ### Step 8: Provide Completion Summary
 
@@ -436,10 +421,9 @@ Abandoned E16
 Summary:
 - ✓ Removed worktree from /Users/hom/code/homskillet-worktrees/E16-slider-sparks
 - ✓ Deleted branch feature/E16-slider-sparks (local and remote)
-- ✓ Removed WORKTREE marker from TODO.md
 - ✓ Removed from worktree registry
 
-E16 is now available again in TODO.md for future work.
+E16 is now available again in the TODO pool for future work.
 
 To start different work:
   /feature:start
@@ -608,8 +592,9 @@ E16 is now available again in TODO.md.
 - **PR workflow recommended** - Safer, enables review
 - **Clean state required** - Must commit or stash before finishing
 - **Registry cleanup** - Automatically updates `.claude/worktrees.json`
-- **TODO.md cleanup** - Merged items deleted, abandoned items unmarked
+- **TODO.md cleanup** - Merged items deleted completely from TODO.md
 - **Branch cleanup** - Remote branches deleted automatically
+- **No markers in TODO.md** - Only `(WIP)` markers exist for direct work, never worktree markers
 
 ## Edge Cases
 
