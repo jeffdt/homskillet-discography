@@ -54,6 +54,21 @@ function Tooltip({ children, content, side = 'right' }: TooltipProps) {
     }
   }, [isVisible, side]);
 
+  // Randomize the glitch slice positions every time it opens
+  const [glitchVars, setGlitchVars] = useState<React.CSSProperties>({});
+
+  useEffect(() => {
+    if (isVisible) {
+      setGlitchVars({
+        '--g1': `${Math.floor(Math.random() * 60) + 20}%`, // Avoid very top/bottom
+        '--g2': `${Math.floor(Math.random() * 60) + 20}%`,
+        '--flicker-dur': `${Math.random() * 4 + 3}s`, // 3s to 7s
+        '--flicker-del': `${Math.random()}s`,
+        '--glitch-dur': `${Math.random() * 1.5 + 1}s`, // 1s to 2.5s (very fast/snappy)
+      } as React.CSSProperties);
+    }
+  }, [isVisible]);
+
   return (
     <>
       <span
@@ -74,7 +89,14 @@ function Tooltip({ children, content, side = 'right' }: TooltipProps) {
             opacity: position ? 1 : 0,
           }}
         >
-          <div style={{ paddingLeft: '16px' }}>{content}</div>
+          <div className="Tooltip-wrapper" style={glitchVars}>
+            <div className="Tooltip-box" style={glitchVars}>
+              <div style={{ paddingLeft: '16px' }}>{content}</div>
+            </div>
+            <div className="Tooltip-glitch" aria-hidden="true" style={glitchVars}>
+              <div style={{ paddingLeft: '16px' }}>{content}</div>
+            </div>
+          </div>
         </div>
       )}
     </>
