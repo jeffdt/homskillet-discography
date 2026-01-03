@@ -1,4 +1,4 @@
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useState } from 'react';
 import PlayerParams, { ParamDef } from './PlayerParams';
 import { UserContext } from './UserProvider';
 import { UI_PALETTES } from '../config/uiPalettes';
@@ -40,6 +40,15 @@ function Settings(props: SettingsProps) {
   } = props;
 
   const userContext = useContext(UserContext);
+
+  // Track which setting is currently flashing
+  const [flashingSetting, setFlashingSetting] = useState<string | null>(null);
+
+  // Helper to trigger flash effect on value change
+  const flashValue = (settingKey: string) => {
+    setFlashingSetting(settingKey);
+    setTimeout(() => setFlashingSetting(null), 500);
+  };
 
   const InfoIcon = ({ tooltip }: { tooltip: string }) => (
     <Tooltip content={tooltip} side="right">
@@ -120,13 +129,16 @@ function Settings(props: SettingsProps) {
             max="5"
             step="1"
             value={Math.round(((persistedSettings.peakDecayRate ?? 0.98) - 0.92) / 0.015)}
-            onChange={(e) =>
+            onChange={(e) => {
               userContext.updateSettings({
                 peakDecayRate: 0.92 + parseInt(e.target.value) * 0.015,
-              })
-            }
+              });
+              flashValue('peakDecayRate');
+            }}
           />
-          <span>{Math.round(((persistedSettings.peakDecayRate ?? 0.98) - 0.92) / 0.015)}</span>
+          <span className={flashingSetting === 'peakDecayRate' ? 'Settings-value-flash' : ''}>
+            {Math.round(((persistedSettings.peakDecayRate ?? 0.98) - 0.92) / 0.015)}
+          </span>
           <InfoIcon tooltip="How fast spectrogram peaks fall" />
         </div>
 
@@ -145,9 +157,10 @@ function Settings(props: SettingsProps) {
               const slider = parseInt(e.target.value);
               const quantization = slider === 0 ? 1 : slider === 1 ? 2 : slider === 2 ? 4 : 8;
               userContext.updateSettings({ peakQuantization: quantization });
+              flashValue('peakQuantization');
             }}
           />
-          <span>
+          <span className={flashingSetting === 'peakQuantization' ? 'Settings-value-flash' : ''}>
             {(() => {
               const q = persistedSettings.peakQuantization ?? 4;
               return q === 1 ? 'Off' : q === 2 ? 'Low' : q === 4 ? 'Med' : 'High';
@@ -212,13 +225,16 @@ function Settings(props: SettingsProps) {
               max="10"
               step="1"
               value={(220 - (persistedSettings.particleSpawnRate ?? 20)) / 20}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleSpawnRate: 220 - parseInt(e.target.value) * 20,
-                })
-              }
+                });
+                flashValue('particleSpawnRate');
+              }}
             />
-            <span>{(220 - (persistedSettings.particleSpawnRate ?? 20)) / 20}</span>
+            <span className={flashingSetting === 'particleSpawnRate' ? 'Settings-value-flash' : ''}>
+              {(220 - (persistedSettings.particleSpawnRate ?? 20)) / 20}
+            </span>
             <InfoIcon tooltip="How often sparks spawn" />
           </div>
 
@@ -230,13 +246,16 @@ function Settings(props: SettingsProps) {
               max="2400"
               step="200"
               value={persistedSettings.particleLifespan ?? 600}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleLifespan: parseInt(e.target.value),
-                })
-              }
+                });
+                flashValue('particleLifespan');
+              }}
             />
-            <span>{(persistedSettings.particleLifespan ?? 600) / 200}</span>
+            <span className={flashingSetting === 'particleLifespan' ? 'Settings-value-flash' : ''}>
+              {(persistedSettings.particleLifespan ?? 600) / 200}
+            </span>
             <InfoIcon tooltip="How long sparks live before disappearing" />
           </div>
 
@@ -248,13 +267,16 @@ function Settings(props: SettingsProps) {
               max="360"
               step="15"
               value={persistedSettings.particleBaseAngle ?? 180}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleBaseAngle: parseInt(e.target.value),
-                })
-              }
+                });
+                flashValue('particleBaseAngle');
+              }}
             />
-            <span>{persistedSettings.particleBaseAngle ?? 180}°</span>
+            <span className={flashingSetting === 'particleBaseAngle' ? 'Settings-value-flash' : ''}>
+              {persistedSettings.particleBaseAngle ?? 180}°
+            </span>
             <InfoIcon tooltip="Direction sparks fire (180°=left)" />
           </div>
 
@@ -265,13 +287,16 @@ function Settings(props: SettingsProps) {
               min="0"
               max="90"
               value={persistedSettings.particleAngleSpread ?? 30}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleAngleSpread: parseInt(e.target.value),
-                })
-              }
+                });
+                flashValue('particleAngleSpread');
+              }}
             />
-            <span>{persistedSettings.particleAngleSpread ?? 30}°</span>
+            <span className={flashingSetting === 'particleAngleSpread' ? 'Settings-value-flash' : ''}>
+              {persistedSettings.particleAngleSpread ?? 30}°
+            </span>
             <InfoIcon tooltip="Randomization range around spray angle (±degrees)" />
           </div>
 
@@ -283,13 +308,16 @@ function Settings(props: SettingsProps) {
               max="3.0"
               step="0.1"
               value={persistedSettings.particleSpeed ?? 1.7}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleSpeed: parseFloat(e.target.value),
-                })
-              }
+                });
+                flashValue('particleSpeed');
+              }}
             />
-            <span>{(persistedSettings.particleSpeed ?? 1.7).toFixed(1)}×</span>
+            <span className={flashingSetting === 'particleSpeed' ? 'Settings-value-flash' : ''}>
+              {(persistedSettings.particleSpeed ?? 1.7).toFixed(1)}×
+            </span>
             <InfoIcon tooltip="Base spark speed" />
           </div>
 
@@ -301,13 +329,16 @@ function Settings(props: SettingsProps) {
               max="9"
               step="1"
               value={(persistedSettings.particleSpeedVariance ?? 20) / 10}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleSpeedVariance: parseInt(e.target.value) * 10,
-                })
-              }
+                });
+                flashValue('particleSpeedVariance');
+              }}
             />
-            <span>{(persistedSettings.particleSpeedVariance ?? 20) / 10}</span>
+            <span className={flashingSetting === 'particleSpeedVariance' ? 'Settings-value-flash' : ''}>
+              {(persistedSettings.particleSpeedVariance ?? 20) / 10}
+            </span>
             <InfoIcon tooltip="Random speed variation applied per spark" />
           </div>
 
@@ -319,13 +350,16 @@ function Settings(props: SettingsProps) {
               max="2.0"
               step="0.1"
               value={persistedSettings.particleGravity ?? 0.0}
-              onChange={(e) =>
+              onChange={(e) => {
                 userContext.updateSettings({
                   particleGravity: parseFloat(e.target.value),
-                })
-              }
+                });
+                flashValue('particleGravity');
+              }}
             />
-            <span>{(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×</span>
+            <span className={flashingSetting === 'particleGravity' ? 'Settings-value-flash' : ''}>
+              {(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×
+            </span>
             <InfoIcon tooltip="Downward spark acceleration" />
           </div>
 

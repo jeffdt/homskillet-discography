@@ -1589,6 +1589,10 @@ button.box-button.AppFooter-back {
   margin-bottom: calc(var(--charH) / 2);
 }
 
+.Settings-row span {
+  transition: color 400ms ease-out;
+}
+
 .Settings-param label {
   width: calc(var(--charW1) * 16);
   color: var(--clickable);
@@ -1604,6 +1608,12 @@ button.box-button.AppFooter-back {
   width: calc(var(--charW1) * 6);
   text-align: right;
   color: var(--neutral3);
+  transition: color 400ms ease-out;
+}
+
+/* Flash effect for setting values on change */
+.Settings-value-flash {
+  color: var(--accent) !important;
 }
 
 .Settings-info-icon {
@@ -1917,6 +1927,10 @@ button.box-button.AppFooter-back {
 .PlayerParams-param input {
   margin-right: var(--charW1);
   flex-shrink: 0;
+}
+
+.PlayerParams-param > span {
+  transition: color 400ms ease-out;
 }
 
 .PlayerParams-group-title {

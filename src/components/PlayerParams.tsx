@@ -63,10 +63,35 @@ const InfoIcon = ({ tooltip }: { tooltip: string }) => (
   </Tooltip>
 );
 
-export default class PlayerParams extends React.PureComponent<PlayerParamsProps> {
+interface PlayerParamsState {
+  flashingSetting: string | null;
+}
+
+export default class PlayerParams extends React.PureComponent<PlayerParamsProps, PlayerParamsState> {
+  private flashTimer: NodeJS.Timeout | null = null;
+
   constructor(props: PlayerParamsProps) {
     super(props);
     autoBindReact(this);
+    this.state = {
+      flashingSetting: null,
+    };
+  }
+
+  componentWillUnmount() {
+    if (this.flashTimer) {
+      clearTimeout(this.flashTimer);
+    }
+  }
+
+  flashValue(settingKey: string): void {
+    if (this.flashTimer) {
+      clearTimeout(this.flashTimer);
+    }
+    this.setState({ flashingSetting: settingKey });
+    this.flashTimer = setTimeout(() => {
+      this.setState({ flashingSetting: null });
+    }, 500);
   }
 
   formatAsPercentage(value: number): string {
@@ -178,59 +203,17 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
             min="0.3"
             max="2.0"
             step="0.05"
-            onInput={onTempoChange}
+            onInput={(e) => {
+              onTempoChange(e);
+              this.flashValue('tempo');
+            }}
             onChange={onTempoChange}
           />{' '}
-          {this.formatAsPercentage(tempo)}
+          <span className={this.state.flashingSetting === 'tempo' ? 'Settings-value-flash' : ''}>
+            {this.formatAsPercentage(tempo)}
+          </span>
           <InfoIcon tooltip="Playback speed multiplier (30%-200%)" />
         </span>
-        {voiceGroups.length > 0
-          ? voiceGroups.map((voiceGroup, i) => {
-              return (
-                <span className="PlayerParams-param PlayerParams-group" key={voiceGroup.name}>
-                  <label className="PlayerParams-group-title" title="Sound chip">
-                    {voiceGroup.icon && <span className="inline-icon dim-icon icon-chip" />}{' '}
-                    {voiceGroup.name}:
-                  </label>
-                  <div className="PlayerParams-voiceList">
-                    {voiceGroup.voices.map((voice, j) => (
-                      <div key={voice.idx} className="App-voice-label">
-                        <input
-                          title="Alt+click to solo. Alt+click again to unmute all."
-                          type="checkbox"
-                          id={'v_' + i + j}
-                          onChange={(e) => this.handleVoiceToggle(e, voice.idx)}
-                          checked={voiceMask[voice.idx]}
-                        />
-                        <label htmlFor={'v_' + i + j}>{voice.name}</label>
-                      </div>
-                    ))}
-                  </div>
-                </span>
-              );
-            })
-          : numVoices > 0 && (
-              <span className="PlayerParams-param PlayerParams-group">
-                <label className="PlayerParams-group-title">Voices:</label>
-                <div className="PlayerParams-voiceList">
-                  {[...Array(numVoices)].map((_, i) => {
-                    return (
-                      <div key={i} className="App-voice-label">
-                        <input
-                          title="Alt+click to solo. Alt+click again to unmute all."
-                          type="checkbox"
-                          id={'v_' + i}
-                          onChange={(e) => this.handleVoiceToggle(e, i)}
-                          checked={voiceMask[i]}
-                        />
-                        <label htmlFor={'v_' + i}>{voiceNames[i]}</label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </span>
-            )}
-
         {paramDefs &&
           paramValues &&
           paramDefs.map((param) => {
@@ -285,6 +268,7 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
                         </optgroup>
                       ))}
                     </select>
+                    {param.hint && <InfoIcon tooltip={param.hint} />}
                   </span>
                 );
               case 'number':
@@ -301,10 +285,15 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
                       min={param.min}
                       max={param.max}
                       step={param.step}
-                      onChange={(e) => onParamChange?.(param.id, parseFloat(e.target.value))}
+                      onChange={(e) => {
+                        onParamChange?.(param.id, parseFloat(e.target.value));
+                        this.flashValue(param.id);
+                      }}
                       value={value}
                     ></input>{' '}
-                    {this.formatAsPercentage(value)}
+                    <span className={this.state.flashingSetting === param.id ? 'Settings-value-flash' : ''}>
+                      {this.formatAsPercentage(value)}
+                    </span>
                     {param.hint && <InfoIcon tooltip={param.hint} />}
                   </span>
                 );
@@ -321,6 +310,7 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
                     <label htmlFor={param.id} title={param.hint}>
                       {param.label}
                     </label>
+                    {param.hint && <InfoIcon tooltip={param.hint} />}
                   </span>
                 );
               case 'button':
@@ -338,6 +328,52 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
                 return null;
             }
           })}
+        {voiceGroups.length > 0
+          ? voiceGroups.map((voiceGroup, i) => {
+              return (
+                <span className="PlayerParams-param PlayerParams-group" key={voiceGroup.name}>
+                  <label className="PlayerParams-group-title" title="Sound chip">
+                    {voiceGroup.icon && <span className="inline-icon dim-icon icon-chip" />}{' '}
+                    {voiceGroup.name}:
+                  </label>
+                  <div className="PlayerParams-voiceList">
+                    {voiceGroup.voices.map((voice, j) => (
+                      <div key={voice.idx} className="App-voice-label">
+                        <input
+                          title="Alt+click to solo. Alt+click again to unmute all."
+                          type="checkbox"
+                          id={'v_' + i + j}
+                          onChange={(e) => this.handleVoiceToggle(e, voice.idx)}
+                          checked={voiceMask[voice.idx]}
+                        />
+                        <label htmlFor={'v_' + i + j}>{voice.name}</label>
+                      </div>
+                    ))}
+                  </div>
+                </span>
+              );
+            })
+          : numVoices > 0 && (
+              <span className="PlayerParams-param PlayerParams-group">
+                <label className="PlayerParams-group-title">Voices:</label>
+                <div className="PlayerParams-voiceList">
+                  {[...Array(numVoices)].map((_, i) => {
+                    return (
+                      <div key={i} className="App-voice-label">
+                        <input
+                          title="Alt+click to solo. Alt+click again to unmute all."
+                          type="checkbox"
+                          id={'v_' + i}
+                          onChange={(e) => this.handleVoiceToggle(e, i)}
+                          checked={voiceMask[i]}
+                        />
+                        <label htmlFor={'v_' + i}>{voiceNames[i]}</label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </span>
+            )}
       </div>
     );
   }
