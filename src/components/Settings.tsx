@@ -246,7 +246,7 @@ function Settings(props: SettingsProps) {
               type="range"
               min="0"
               max="360"
-              step="5"
+              step="15"
               value={persistedSettings.particleBaseAngle ?? 180}
               onChange={(e) =>
                 userContext.updateSettings({
