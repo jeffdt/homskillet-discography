@@ -137,7 +137,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.spectrogram.setWeighting(1); // A-Weighting - natural sound
     this.spectrogram.setSpeed(2); // Medium speed
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
-    this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.95);
+    this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.98);
     this.spectrogram.setPeakQuantization(this.props.persistedSettings.peakQuantization ?? 4);
   }
 
@@ -156,7 +156,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       this.spectrogram.setWeighting(1); // A-Weighting
       this.spectrogram.setSpeed(2); // Medium speed
       this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
-      this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.95);
+      this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.98);
       this.spectrogram.setPeakQuantization(this.props.persistedSettings.peakQuantization ?? 4);
     }
 
@@ -170,7 +170,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       this.spectrogram &&
       prevProps.persistedSettings.peakDecayRate !== this.props.persistedSettings.peakDecayRate
     ) {
-      this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.95);
+      this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.98);
     }
 
     // Update peak quantization if changed

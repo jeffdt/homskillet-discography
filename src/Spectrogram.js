@@ -91,7 +91,7 @@ export default class Spectrogram {
 
     // Peak hold for frequency analyzer
     this.peakData = [];
-    this.peakDecayRate = 0.95; // How fast peaks fall (0.95 = slow decay)
+    this.peakDecayRate = 0.98; // How fast peaks fall (0.98 = slow decay)
     this.peakQuantization = 4; // Quantization step for pixelated decay effect (4 = 256/4 = 64 discrete levels)
     this.peakQuantizationInv = 1 / this.peakQuantization; // Pre-calculate reciprocal for faster multiplication
 

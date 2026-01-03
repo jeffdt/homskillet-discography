@@ -23,6 +23,7 @@ export default class GMEPlayer extends Player {
     {
       id: 'subbass',
       label: 'Bass Boost',
+      hint: 'Synthetically enhance bass frequencies beyond original hardware capabilities',
       type: 'number',
       min: 0.0,
       max: 2.0,
@@ -32,6 +33,7 @@ export default class GMEPlayer extends Player {
     {
       id: 'stereoWidth',
       label: 'Stereo Width',
+      hint: 'Simulated stereo effect. Note: Some songs sound wack.',
       type: 'number',
       min: 0.0,
       max: 1.0,
@@ -76,7 +78,11 @@ export default class GMEPlayer extends Player {
     }
 
     // Check duration and trigger fadeout (only if NOT locked)
-    if (!this.isLocked && this.getPositionMs() >= this.getDurationMs() && this.fadingOut === false) {
+    if (
+      !this.isLocked &&
+      this.getPositionMs() >= this.getDurationMs() &&
+      this.fadingOut === false
+    ) {
       console.log('Fading out at %d ms.', this.getPositionMs());
       this.setFadeout(this.getPositionMs());
       this.fadingOut = true;
