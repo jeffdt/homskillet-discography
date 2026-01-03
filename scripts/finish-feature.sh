@@ -1,20 +1,24 @@
 #!/bin/bash
 # Helper script to finish a feature by closing GitHub issue and cleaning up worktree
-# Usage: ./scripts/finish-feature.sh [issue-number]
+# Usage: ./scripts/finish-feature.sh [issue-number] [--abandon]
 #
-# This script assumes work has already been committed, pushed, and merged to main.
-# It performs cleanup by:
-# 1. Finding the worktree for the given issue number (or auto-detecting)
-# 2. Closing the GitHub issue with a completion comment
-# 3. Removing the worktree directory
-# 4. Deleting local and remote feature branches
-# 5. Returning to main repo directory
+# Normal usage (work completed and merged):
+#   ./scripts/finish-feature.sh [issue-number]
+#   - Closes the GitHub issue with "Completed and merged" comment
+#   - Removes worktree and deletes branches
+#
+# Abandon usage (work not completed, return to backlog):
+#   ./scripts/finish-feature.sh [issue-number] --abandon
+#   - Keeps issue open, removes worktree:active label
+#   - Adds "Work abandoned" comment
+#   - Removes worktree and deletes branches
 
 set -e  # Exit on error
 
 # Configuration
 MAIN_REPO_PATH="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 WORKTREE_PARENT="${MAIN_REPO_PATH}/.worktrees"
+ABANDON_MODE=false
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -80,7 +84,16 @@ list_available_worktrees() {
 
 # Main script logic
 main() {
-  local issue_number="$1"
+  local issue_number=""
+
+  # Parse arguments
+  for arg in "$@"; do
+    if [ "$arg" = "--abandon" ]; then
+      ABANDON_MODE=true
+    elif [ -z "$issue_number" ]; then
+      issue_number="$arg"
+    fi
+  done
 
   # Step 1: Determine issue number
   if [ -z "$issue_number" ]; then
@@ -90,8 +103,9 @@ main() {
     else
       echo "No issue number provided and couldn't auto-detect from current directory."
       list_available_worktrees
-      echo "Usage: $0 <issue-number>"
+      echo "Usage: $0 <issue-number> [--abandon]"
       echo "Example: $0 73"
+      echo "         $0 73 --abandon"
       exit 1
     fi
   fi
@@ -103,7 +117,11 @@ main() {
   fi
 
   echo ""
-  echo "Finishing issue #${issue_number}..."
+  if [ "$ABANDON_MODE" = true ]; then
+    echo "Abandoning issue #${issue_number}..."
+  else
+    echo "Finishing issue #${issue_number}..."
+  fi
   echo ""
 
   # Step 2: Find worktree directory
@@ -157,18 +175,34 @@ main() {
     fi
   fi
 
-  # Step 6: Close GitHub issue
-  echo "→ Closing GitHub issue #${issue_number}..."
-  if gh issue close "$issue_number" --comment "Completed and merged to main." 2>/dev/null; then
-    echo "  ✓ Issue closed"
-  else
-    # Check if already closed
-    local state
-    state=$(gh issue view "$issue_number" --json state --jq '.state' 2>/dev/null || echo "UNKNOWN")
-    if [ "$state" = "CLOSED" ]; then
-      echo "  ✓ Issue already closed"
+  # Step 6: Update GitHub issue
+  if [ "$ABANDON_MODE" = true ]; then
+    echo "→ Updating GitHub issue #${issue_number} (abandoning work)..."
+    # Remove worktree:active label and add comment
+    if gh issue edit "$issue_number" --remove-label "worktree:active" 2>/dev/null; then
+      echo "  ✓ Removed worktree:active label"
     else
-      echo "  ⚠️  Warning: Could not close issue (may need to close manually)"
+      echo "  ⚠️  Warning: Could not remove worktree:active label"
+    fi
+
+    if gh issue comment "$issue_number" --body "Work abandoned. Issue returned to backlog." 2>/dev/null; then
+      echo "  ✓ Added comment to issue"
+    else
+      echo "  ⚠️  Warning: Could not add comment to issue"
+    fi
+  else
+    echo "→ Closing GitHub issue #${issue_number}..."
+    if gh issue close "$issue_number" --comment "Completed and merged to main." 2>/dev/null; then
+      echo "  ✓ Issue closed"
+    else
+      # Check if already closed
+      local state
+      state=$(gh issue view "$issue_number" --json state --jq '.state' 2>/dev/null || echo "UNKNOWN")
+      if [ "$state" = "CLOSED" ]; then
+        echo "  ✓ Issue already closed"
+      else
+        echo "  ⚠️  Warning: Could not close issue (may need to close manually)"
+      fi
     fi
   fi
 
@@ -199,12 +233,22 @@ main() {
 
   # Step 10: Success summary
   echo ""
-  echo -e "${GREEN}✅ Successfully finished issue #${issue_number}!${NC}"
-  echo ""
-  echo "Summary:"
-  echo "  ✓ Closed GitHub Issue #${issue_number}"
-  echo "  ✓ Removed worktree from ${worktree_dir}"
-  echo "  ✓ Deleted branch ${branch_name}"
+  if [ "$ABANDON_MODE" = true ]; then
+    echo -e "${GREEN}✅ Successfully abandoned issue #${issue_number}!${NC}"
+    echo ""
+    echo "Summary:"
+    echo "  ✓ Removed worktree:active label from Issue #${issue_number}"
+    echo "  ✓ Issue remains open in backlog"
+    echo "  ✓ Removed worktree from ${worktree_dir}"
+    echo "  ✓ Deleted branch ${branch_name}"
+  else
+    echo -e "${GREEN}✅ Successfully finished issue #${issue_number}!${NC}"
+    echo ""
+    echo "Summary:"
+    echo "  ✓ Closed GitHub Issue #${issue_number}"
+    echo "  ✓ Removed worktree from ${worktree_dir}"
+    echo "  ✓ Deleted branch ${branch_name}"
+  fi
   echo ""
   echo "You are now in: ${MAIN_REPO_PATH} (main branch)"
   echo ""

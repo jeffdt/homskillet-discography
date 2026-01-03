@@ -209,6 +209,28 @@ The `/feature:record` command uses AI to:
 # Clean up after merge
 ./scripts/finish-feature.sh 77         # Close issue and clean up worktree
 ./scripts/finish-feature.sh            # Auto-detect from current directory or show list
+
+# Abandon work (keep issue open, remove worktree)
+./scripts/finish-feature.sh 77 --abandon
+```
+
+**Recommended git aliases:**
+
+```bash
+# Set up convenient aliases
+git config alias.start '!./scripts/init-feature.sh'
+git config alias.finish '!./scripts/finish-feature.sh'
+git config alias.abandon '!./scripts/finish-feature.sh "$@" --abandon'
+
+# Then use them:
+git start          # Interactive or auto-detect
+git start 73       # Start specific issue
+
+git finish         # Auto-detect or interactive
+git finish 73      # Finish specific issue
+
+git abandon        # Auto-detect or interactive
+git abandon 73     # Abandon specific issue
 ```
 
 **List worktrees:**
@@ -226,7 +248,7 @@ git worktree list          # List all worktrees (built-in git command)
 4. **Link related issues** - Use #77 syntax in issue descriptions to reference other issues
 5. **Update issue body** - Add implementation notes as you discover them using `gh issue edit`
 6. **Check for duplicates** - Search existing issues before creating new ones using `gh issue list --search`
-7. **Merge before finishing** - Use `./scripts/finish-feature.sh` only after your PR is merged
+7. **Merge before finishing** - Use `./scripts/finish-feature.sh` after your PR is merged. Use `--abandon` flag if you want to clean up without closing the issue
 
 ### GitHub Issues Skill
 

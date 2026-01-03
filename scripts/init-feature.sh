@@ -97,7 +97,7 @@ main() {
   echo "→ Fetching issue details from GitHub..."
 
   local issue_data
-  if ! issue_data=$(gh issue view "$issue_number" --json title,state,labels,fields 2>/dev/null); then
+  if ! issue_data=$(gh issue view "$issue_number" --json title,state,labels,fields,body 2>/dev/null); then
     echo "Error: Could not fetch issue #${issue_number}"
     echo "Make sure the issue exists and you have access to it."
     list_available_issues
@@ -106,6 +106,9 @@ main() {
 
   local title
   title=$(echo "$issue_data" | jq -r '.title')
+
+  local body
+  body=$(echo "$issue_data" | jq -r '.body // ""')
 
   local state
   state=$(echo "$issue_data" | jq -r '.state')
