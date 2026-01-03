@@ -131,7 +131,7 @@ function Settings(props: SettingsProps) {
         </div>
 
         <div className="Settings-param">
-          <label>Decay Pixelation</label>
+          <label>Peak quantization</label>
           <input
             type="range"
             min="0"

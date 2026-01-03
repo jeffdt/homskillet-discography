@@ -1661,7 +1661,7 @@ button.box-button.AppFooter-back {
 }
 
 .Tooltip-box {
-  background: #000000;
+  background: var(--background);
   border: 2px solid var(--accent);
   padding: 8px 12px;
   font-family: 'Silkscreen', monospace;
@@ -1689,7 +1689,7 @@ button.box-button.AppFooter-back {
 .Tooltip-glitch {
   position: absolute;
   inset: 0;
-  background: #000000;
+  background: var(--background);
   border: 2px solid var(--accent);
   padding: 8px 12px;
   font-family: 'Silkscreen', monospace;
