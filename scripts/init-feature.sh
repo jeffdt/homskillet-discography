@@ -97,7 +97,7 @@ main() {
   echo "→ Fetching issue details from GitHub..."
 
   local issue_data
-  if ! issue_data=$(gh issue view "$issue_number" --json title,state,labels,fields,body 2>/dev/null); then
+  if ! issue_data=$(gh issue view "$issue_number" --json title,state,labels,body 2>/dev/null); then
     echo "Error: Could not fetch issue #${issue_number}"
     echo "Make sure the issue exists and you have access to it."
     list_available_issues
@@ -135,12 +135,13 @@ main() {
     exit 1
   fi
 
-  # Step 4: Get slug from custom field or generate from title
+  # Step 4: Get slug from issue body or generate from title
   local slug
-  slug=$(echo "$issue_data" | jq -r '.fields[] | select(.name=="worktree_slug") | .value' 2>/dev/null || echo "")
+  # Extract slug from "## Worktree Slug" section in body
+  slug=$(echo "$body" | grep -A 1 "## Worktree Slug" | tail -1 | sed 's/^[[:space:]]*`\(.*\)`[[:space:]]*$/\1/' | tr -d '\n' || echo "")
 
-  if [ -z "$slug" ] || [ "$slug" = "null" ]; then
-    echo "  ⚠️  No slug found in custom field, generating from title..."
+  if [ -z "$slug" ] || [ "$slug" = "null" ] || [[ "$slug" == *"Worktree Slug"* ]]; then
+    echo "  ⚠️  No slug found in issue body, generating from title..."
     slug=$(generate_slug_from_title "$title")
     echo "  Generated slug: $slug"
   else

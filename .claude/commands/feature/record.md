@@ -12,25 +12,81 @@ This command helps you create new GitHub Issues for task tracking with automatic
 ```bash
 # Create a new issue (interactive)
 /feature:record
+
+# Create a new issue with context provided as arguments
+/feature:record The visualizer should not render on mobile unless the tab is open
 ```
 
-No arguments needed. The command prompts you for the issue description and handles the rest automatically.
+The command can be invoked with or without arguments:
+
+- **Without arguments**: Prompts you for context interactively
+- **With arguments**: Uses the provided text as context to craft the issue
+
+In both cases, the command intelligently crafts a proper GitHub issue title and body from your input.
 
 ## Workflow
 
-### Step 1: Prompt for Issue Description
+### Step 1: Collect Context from User
 
-Use `AskUserQuestion` to collect the issue description from the user:
+**IMPORTANT:** The user's input is CONTEXT, not a literal title or description. You must intelligently craft the issue title and body based on this context.
+
+**If arguments were provided** with the command invocation, use those as the context and skip to Step 2.
+
+**If no arguments were provided**, use `AskUserQuestion` to collect context about the issue:
 
 ```
 What issue would you like to create?
 
-(Provide a clear description of the bug, feature, or task)
+(Describe the bug, feature, or task - I'll craft an appropriate GitHub issue from your input)
 ```
 
-Accept multi-line descriptions.
+Accept multi-line input. The user may include:
 
-### Step 2: AI Analysis for Category Detection
+- Problem descriptions
+- Feature requests
+- Implementation details
+- Context that helps you understand the issue but shouldn't appear verbatim in the GitHub issue
+
+### Step 2: Craft Issue Title and Body
+
+**Before categorization, synthesize a proper GitHub issue from the user's context:**
+
+**Title Crafting:**
+
+- Create a concise, clear title (5-12 words typically)
+- Use imperative mood for enhancements ("Add X", "Implement Y", "Create Z")
+- Use descriptive mood for bugs ("X doesn't work", "Y causes Z")
+- Focus on the WHAT, not implementation details
+- Should be scannable in issue lists
+
+**Body Crafting:**
+
+- Expand on the title with context and details
+- For multi-part issues, use numbered lists
+- Include technical rationale when relevant
+- Omit user's meta-commentary (e.g., "this is just for context", "by the way")
+- Structure for clarity (use headings, lists, emphasis)
+- Keep it concise but complete
+
+**Example Transformations:**
+
+User context: "On mobile, the visualizer should not attempt to render unless the visualizer tab is open. Also, player sparks should default to Off."
+
+Crafted title: "Mobile optimizations: conditional visualizer rendering and sparks default"
+
+Crafted body:
+
+```markdown
+Two mobile-focused improvements:
+
+1. **Conditional visualizer rendering**: Only render the visualizer when the visualizer tab is actively open on mobile devices. This improves performance by avoiding unnecessary rendering work when the visualizer isn't visible.
+
+2. **Sparks default setting**: Change the default value for player sparks to Off to reduce resource usage on mobile devices.
+
+Both changes aim to improve mobile performance and reduce battery consumption.
+```
+
+### Step 3: AI Analysis for Category Detection
 
 Analyze the issue description to determine the category label using keyword heuristics.
 
@@ -69,9 +125,9 @@ Analyze the issue description to determine the category label using keyword heur
 4. If tie, prefer in this order: bug → enhancement → maintainability → simplification → deployment
 5. Default to enhancement if no clear match
 
-### Step 3: AI Analysis for Area Tag Prediction
+### Step 4: AI Analysis for Area Tag Prediction
 
-Analyze the issue description against area keywords to predict which component areas it will touch.
+Analyze the crafted issue title and body against area keywords to predict which component areas it will touch.
 
 **Area Keywords (from existing conflict matrix):**
 
@@ -97,29 +153,59 @@ Analyze the issue description against area keywords to predict which component a
 - Matches: `player` (3 keywords: "tempo", "preset", "player"), `settings` (1 keyword: "controls")
 - Result: `area:player` label (only assign if clear winner, or top 2 if both strong)
 
-### Step 4: Confirm with User
+### Step 5: Confirm with User
 
-Before creating the GitHub issue, show the user what will be created:
+Before creating the GitHub issue, show the user the crafted title, body, and detected labels, then use the `AskUserQuestion` tool to confirm:
+
+**Display the crafted issue:**
 
 ```
-Analyzed issue:
+Crafted GitHub issue:
+
+Title: Mobile optimizations: conditional visualizer rendering and sparks default
+
+Body:
+Two mobile-focused improvements:
+
+1. **Conditional visualizer rendering**: Only render the visualizer when the visualizer tab is actively open on mobile devices...
+
+2. **Sparks default setting**: Change the default value for player sparks to Off...
 
 Category: category:enhancement
-Area tags: area:visualizer
-Description: Add particle explosion effect when slider sparks fade out
-
-This will create a GitHub issue with these labels.
-
-Create this issue? (yes/no)
+Area tags: area:visualizer, area:settings
 ```
 
-If user confirms "yes", proceed. If "no", ask if they want to:
+**Then use AskUserQuestion:**
 
-1. Modify the description
-2. Manually specify category/areas
-3. Cancel
+```javascript
+AskUserQuestion({
+  questions: [
+    {
+      question: 'Create this GitHub issue?',
+      header: 'Confirm',
+      multiSelect: false,
+      options: [
+        {
+          label: 'Yes',
+          description: 'Create the issue with the title, body, and labels shown above',
+        },
+        {
+          label: 'Cancel',
+          description: "Don't create this issue",
+        },
+      ],
+    },
+  ],
+});
+```
 
-### Step 4.5: Generate Worktree Slug
+**Handle the response:**
+
+- **"Yes"**: Proceed to Step 5.5 (generate slug) and Step 6 (create issue)
+- **"Cancel"**: Abort issue creation and inform user
+- **"Other" (freeform text)**: User can provide revisions to title, body, or labels. Apply their changes and show confirmation again
+
+### Step 5.5: Generate Worktree Slug
 
 Before creating the issue, generate a URL-friendly slug for the worktree/branch name:
 
@@ -148,7 +234,7 @@ function generateSlug(title) {
 
 This slug will be stored in the GitHub issue's custom field and used by `init-feature.sh` to create consistent worktree names.
 
-### Step 5: Create GitHub Issue
+### Step 6: Create GitHub Issue
 
 Use `gh issue create` to create the issue with appropriate labels and the generated slug:
 
@@ -178,7 +264,7 @@ gh issue create \
 
 Parse the output from `gh issue create` to extract the created issue number. The command returns the issue URL, which contains the number.
 
-### Step 6: Confirm Completion
+### Step 7: Confirm Completion
 
 After successfully creating the issue:
 
@@ -203,23 +289,27 @@ Claude: What issue would you like to create?
 
 User: Add tempo preset buttons (0.5x, 1x, 1.5x, 2x) to the player controls
 
-Claude: Analyzed issue:
+Claude: Crafted GitHub issue:
 
-Category: category:enhancement (detected keywords: "add", "preset")
-Area tags: area:player, area:settings (detected keywords: "tempo", "player", "controls")
-Description: Add tempo preset buttons (0.5x, 1x, 1.5x, 2x) to the player controls
+Title: Add tempo preset buttons to player controls
 
-This will create a GitHub issue with these labels.
+Body:
+Add quick-access preset buttons for common tempo adjustments (0.5x, 1x, 1.5x, 2x) to the player controls. This will allow users to quickly switch between standard playback speeds without manually adjusting the tempo slider.
 
-Create this issue? (yes/no)
+Category: category:enhancement
+Area tags: area:player, area:settings
 
-User: yes
+[Uses AskUserQuestion tool with "Yes" and "Cancel" options]
 
-Claude: ✅ Created issue #52: Add tempo preset buttons (0.5x, 1x, 1.5x, 2x) to the player controls
+User: [Selects "Yes"]
+
+Claude: ✅ Created issue #52: Add tempo preset buttons to player controls
    Labels: category:enhancement, area:player, area:settings, status:ready
+   Slug: tempo-preset-buttons
    GitHub: https://github.com/jeffdt/homskillet-discography/issues/52
 
-You can now use /feature:init 52 to begin working on this issue.
+To start working on this issue:
+  ./scripts/init-feature.sh 52
 ```
 
 ### Example 2: Bug
@@ -231,23 +321,27 @@ Claude: What issue would you like to create?
 
 User: The volume slider doesn't save its position when refreshing the page
 
-Claude: Analyzed issue:
+Claude: Crafted GitHub issue:
 
-Category: category:bug (detected keywords: "doesn't", problem description)
-Area tags: area:player (detected keywords: "volume", "slider")
-Description: The volume slider doesn't save its position when refreshing the page
+Title: Volume slider position not persisted across page refreshes
 
-This will create a GitHub issue with these labels.
+Body:
+The volume slider resets to its default value when the page is refreshed, losing the user's volume preference. Volume settings should be persisted to localStorage and restored on page load.
 
-Create this issue? (yes/no)
+Category: category:bug
+Area tags: area:player, area:settings
 
-User: yes
+[Uses AskUserQuestion tool with "Yes" and "Cancel" options]
 
-Claude: ✅ Created issue #53: The volume slider doesn't save its position when refreshing the page
-   Labels: category:bug, area:player, status:ready
+User: [Selects "Yes"]
+
+Claude: ✅ Created issue #53: Volume slider position not persisted across page refreshes
+   Labels: category:bug, area:player, area:settings, status:ready
+   Slug: volume-slider-position
    GitHub: https://github.com/jeffdt/homskillet-discography/issues/53
 
-You can now use /feature:init 53 to begin working on this issue.
+To start working on this issue:
+  ./scripts/init-feature.sh 53
 ```
 
 ### Example 3: Maintainability
@@ -259,32 +353,78 @@ Claude: What issue would you like to create?
 
 User: Add unit tests for the Sequencer class shuffle and repeat logic
 
-Claude: Analyzed issue:
+Claude: Crafted GitHub issue:
 
-Category: category:maintainability (detected keywords: "unit tests", "test")
-Area tags: area:build (detected keywords: "unit tests")
-Description: Add unit tests for the Sequencer class shuffle and repeat logic
+Title: Add unit tests for Sequencer shuffle and repeat logic
 
-This will create a GitHub issue with these labels.
+Body:
+Add comprehensive unit test coverage for the Sequencer class, focusing on:
+- Shuffle algorithm (proper randomization, no immediate repeats)
+- Repeat modes (none, one, all)
+- Edge cases (single-item playlist, empty playlist)
 
-Create this issue? (yes/no)
+Currently the Sequencer class has no test coverage, making refactoring risky.
 
-User: yes
+Category: category:maintainability
+Area tags: area:build
 
-Claude: ✅ Created issue #54: Add unit tests for the Sequencer class shuffle and repeat logic
+[Uses AskUserQuestion tool with "Yes" and "Cancel" options]
+
+User: [Selects "Yes"]
+
+Claude: ✅ Created issue #54: Add unit tests for Sequencer shuffle and repeat logic
    Labels: category:maintainability, area:build, status:ready
+   Slug: unit-tests-sequencer
    GitHub: https://github.com/jeffdt/homskillet-discography/issues/54
 
-You can now use /feature:init 54 to begin working on this issue.
+To start working on this issue:
+  ./scripts/init-feature.sh 54
 ```
+
+### Example 4: Context Filtering
+
+```
+User: /feature:record
+
+Claude: What issue would you like to create?
+
+User: The sparks look really cool but they're causing performance issues on my phone. I think they should be off by default, especially for mobile. This is just cosmetic so not urgent but would be nice to have.
+
+Claude: Crafted GitHub issue:
+
+Title: Set player sparks default to Off for better mobile performance
+
+Body:
+Change the default value for player sparks to Off to improve performance on mobile devices. While the sparks effect is visually appealing, it can cause performance issues on lower-powered devices.
+
+This is a cosmetic optimization and not urgent.
+
+Category: category:enhancement
+Area tags: area:visualizer, area:settings
+
+[Uses AskUserQuestion tool with "Yes" and "Cancel" options]
+
+User: [Selects "Yes"]
+
+Claude: ✅ Created issue #55: Set player sparks default to Off for better mobile performance
+   Labels: category:enhancement, area:visualizer, area:settings, status:ready
+   Slug: player-sparks-default
+   GitHub: https://github.com/jeffdt/homskillet-discography/issues/55
+
+To start working on this issue:
+  ./scripts/init-feature.sh 55
+```
+
+Note: The crafted issue extracts the core request (change default to Off for mobile performance) while omitting meta-commentary like "I think" and personal context like "on my phone".
 
 ## Best Practices
 
-1. **Be Descriptive**: Write clear, specific issue descriptions that explain what needs to be done
-2. **Trust the AI**: The category and area detection is quite accurate. Override only if clearly wrong
-3. **Single Responsibility**: Each issue should focus on one specific task
-4. **Reference Screenshots**: If relevant, mention screenshot paths (`.claude/screenshots/`)
-5. **Link Related Items**: If the issue depends on another, mention it with #number syntax in the description
+1. **Provide Context, Not Verbatim Text**: The user's input is context to help craft the issue. You should synthesize, clarify, and structure their input into a well-formed GitHub issue.
+2. **Focus on User Intent**: Extract the core intent from the user's input and craft a title/body that communicates it clearly.
+3. **Trust the AI Crafting**: The command will transform raw input into proper issue format. Override only if the crafted version misses important context.
+4. **Single Responsibility**: Each issue should focus on one specific task. If user provides multiple unrelated items, consider suggesting separate issues.
+5. **Reference Screenshots**: If relevant, mention screenshot paths (`.claude/screenshots/`)
+6. **Link Related Items**: If the issue depends on another, mention it with #number syntax in the description
 
 ## Important Notes
 

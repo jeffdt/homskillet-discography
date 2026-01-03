@@ -193,9 +193,7 @@ The `/feature:record` command uses AI to:
 - Detect appropriate category (bug, enhancement, maintainability, etc.)
 - Predict relevant area tags (visualizer, player, browser, etc.)
 - Generate a URL-friendly slug for worktree/branch naming
-- Store the slug in the GitHub issue's `worktree_slug` custom field
-
-**Prerequisites:** The repository must have a custom field named `worktree_slug` (text field) configured in GitHub Issues settings.
+- Store the slug in the GitHub issue body under "## Worktree Slug"
 
 **Worktree workflow:**
 
@@ -216,13 +214,18 @@ The `/feature:record` command uses AI to:
 
 **Recommended git aliases:**
 
-```bash
-# Set up convenient aliases
-git config alias.start '!./scripts/init-feature.sh'
-git config alias.finish '!./scripts/finish-feature.sh'
-git config alias.abandon '!./scripts/finish-feature.sh "$@" --abandon'
+Add these to your `.git/config` file under an `[alias]` section:
 
-# Then use them:
+```ini
+[alias]
+	start = !./scripts/init-feature.sh
+	finish = !./scripts/finish-feature.sh
+	abandon = !./scripts/finish-feature.sh "$@" --abandon
+```
+
+Then use them:
+
+```bash
 git start          # Interactive or auto-detect
 git start 73       # Start specific issue
 
@@ -232,6 +235,8 @@ git finish 73      # Finish specific issue
 git abandon        # Auto-detect or interactive
 git abandon 73     # Abandon specific issue
 ```
+
+Note: Setting these via command line may cause shell escaping issues with the `!` character. Editing `.git/config` directly is more reliable.
 
 **List worktrees:**
 
