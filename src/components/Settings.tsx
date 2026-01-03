@@ -119,15 +119,15 @@ function Settings(props: SettingsProps) {
             min="0"
             max="5"
             step="1"
-            value={Math.round(((persistedSettings.peakDecayRate ?? 0.995) - 0.92) / 0.015)}
+            value={Math.round(((persistedSettings.peakDecayRate ?? 0.98) - 0.92) / 0.015)}
             onChange={(e) =>
               userContext.updateSettings({
                 peakDecayRate: 0.92 + parseInt(e.target.value) * 0.015,
               })
             }
           />
-          <span>{Math.round(((persistedSettings.peakDecayRate ?? 0.995) - 0.92) / 0.015)}</span>
-          <InfoIcon tooltip="How fast spectrogram peaks fall (decay rate: 0.92-0.995)" />
+          <span>{Math.round(((persistedSettings.peakDecayRate ?? 0.98) - 0.92) / 0.015)}</span>
+          <InfoIcon tooltip="How fast spectrogram peaks fall" />
         </div>
 
         <div className="Settings-param">
@@ -153,7 +153,7 @@ function Settings(props: SettingsProps) {
               return q === 1 ? 'Off' : q === 2 ? 'Low' : q === 4 ? 'Med' : 'High';
             })()}
           </span>
-          <InfoIcon tooltip="Quantize peak heights for retro pixelated effect" />
+          <InfoIcon tooltip="Quantize peak heights for pixelated effect" />
         </div>
 
         <h4
@@ -219,7 +219,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{(220 - (persistedSettings.particleSpawnRate ?? 20)) / 20}</span>
-            <InfoIcon tooltip="Particle spawn frequency (1 = slow, 10 = fast)" />
+            <InfoIcon tooltip="How often sparks spawn" />
           </div>
 
           <div className="Settings-param">
@@ -228,7 +228,7 @@ function Settings(props: SettingsProps) {
               type="range"
               min="200"
               max="2400"
-              step="100"
+              step="200"
               value={persistedSettings.particleLifespan ?? 600}
               onChange={(e) =>
                 userContext.updateSettings({
@@ -236,8 +236,8 @@ function Settings(props: SettingsProps) {
                 })
               }
             />
-            <span>{persistedSettings.particleLifespan ?? 600}ms</span>
-            <InfoIcon tooltip="How long particles live before disappearing" />
+            <span>{(persistedSettings.particleLifespan ?? 600) / 200}</span>
+            <InfoIcon tooltip="How long sparks live before disappearing" />
           </div>
 
           <div className="Settings-param">
@@ -246,6 +246,7 @@ function Settings(props: SettingsProps) {
               type="range"
               min="0"
               max="360"
+              step="5"
               value={persistedSettings.particleBaseAngle ?? 180}
               onChange={(e) =>
                 userContext.updateSettings({
@@ -254,7 +255,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{persistedSettings.particleBaseAngle ?? 180}°</span>
-            <InfoIcon tooltip="Direction particles emit (0° = right, 90° = up, etc.)" />
+            <InfoIcon tooltip="Direction sparks fire (180°=left)" />
           </div>
 
           <div className="Settings-param">
@@ -289,7 +290,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{(persistedSettings.particleSpeed ?? 1.7).toFixed(1)}×</span>
-            <InfoIcon tooltip="Base velocity of particles (pixels per frame)" />
+            <InfoIcon tooltip="Base spark speed" />
           </div>
 
           <div className="Settings-param">
@@ -297,16 +298,17 @@ function Settings(props: SettingsProps) {
             <input
               type="range"
               min="0"
-              max="50"
-              value={persistedSettings.particleSpeedVariance ?? 20}
+              max="9"
+              step="1"
+              value={(persistedSettings.particleSpeedVariance ?? 20) / 10}
               onChange={(e) =>
                 userContext.updateSettings({
-                  particleSpeedVariance: parseInt(e.target.value),
+                  particleSpeedVariance: parseInt(e.target.value) * 10,
                 })
               }
             />
-            <span>{persistedSettings.particleSpeedVariance ?? 20}%</span>
-            <InfoIcon tooltip="Random speed variation per particle (percentage)" />
+            <span>{(persistedSettings.particleSpeedVariance ?? 20) / 10}</span>
+            <InfoIcon tooltip="Random speed variation applied per spark" />
           </div>
 
           <div className="Settings-param">
@@ -324,7 +326,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×</span>
-            <InfoIcon tooltip="Downward acceleration applied to particles" />
+            <InfoIcon tooltip="Downward spark acceleration" />
           </div>
 
           <div className="Settings-row">
@@ -340,7 +342,7 @@ function Settings(props: SettingsProps) {
               />
               <span>Alpha fade</span>
             </label>
-            <InfoIcon tooltip="Gradually fade out particles vs instant disappear" />
+            <InfoIcon tooltip="Gradually fade out particles vs. instantly disappear" />
           </div>
         </div>
       </div>

@@ -1282,15 +1282,15 @@ button.box-button.AppFooter-back {
   cursor: pointer;
 }
 
-.Settings-toggle span {
+.Settings-toggle span:not(.Settings-info-icon) {
   color: var(--clickable);
 }
 
-.Settings-toggle:hover span {
+.Settings-toggle:hover span:not(.Settings-info-icon) {
   color: #fefefe; /* White on hover */
 }
 
-.Settings-toggle:has(input:active) span {
+.Settings-toggle:has(input:active) span:not(.Settings-info-icon) {
   color: var(--accent); /* Green on click */
 }
 
@@ -1400,7 +1400,7 @@ button.box-button.AppFooter-back {
 .Settings-param span {
   width: calc(var(--charW1) * 6);
   text-align: right;
-  color: var(--accent);
+  color: var(--neutral3);
 }
 
 .Settings-info-icon {
