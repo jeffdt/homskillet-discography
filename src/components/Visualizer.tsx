@@ -138,6 +138,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
     this.spectrogram.setSpeed(2); // Medium speed
     this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
     this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.95);
+    this.spectrogram.setPeakQuantization(this.props.persistedSettings.peakQuantization ?? 4);
   }
 
   componentDidUpdate(prevProps: VisualizerProps, prevState: VisualizerState) {
@@ -156,6 +157,7 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       this.spectrogram.setSpeed(2); // Medium speed
       this.spectrogram.setColorPalette(COLOR_PALETTES[this.state.colorPalette].colors);
       this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.95);
+      this.spectrogram.setPeakQuantization(this.props.persistedSettings.peakQuantization ?? 4);
     }
 
     // Update theme if changed
@@ -169,6 +171,14 @@ export default class Visualizer extends PureComponent<VisualizerProps, Visualize
       prevProps.persistedSettings.peakDecayRate !== this.props.persistedSettings.peakDecayRate
     ) {
       this.spectrogram.setPeakDecayRate(this.props.persistedSettings.peakDecayRate ?? 0.95);
+    }
+
+    // Update peak quantization if changed
+    if (
+      this.spectrogram &&
+      prevProps.persistedSettings.peakQuantization !== this.props.persistedSettings.peakQuantization
+    ) {
+      this.spectrogram.setPeakQuantization(this.props.persistedSettings.peakQuantization ?? 4);
     }
 
     if (this.spectrogram) {

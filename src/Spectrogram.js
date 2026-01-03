@@ -92,6 +92,8 @@ export default class Spectrogram {
     // Peak hold for frequency analyzer
     this.peakData = [];
     this.peakDecayRate = 0.95; // How fast peaks fall (0.95 = slow decay)
+    this.peakQuantization = 4; // Quantization step for pixelated decay effect (4 = 256/4 = 64 discrete levels)
+    this.peakQuantizationInv = 1 / this.peakQuantization; // Pre-calculate reciprocal for faster multiplication
 
     this.updateFrame();
   }
@@ -138,6 +140,11 @@ export default class Spectrogram {
 
   setPeakDecayRate(rate) {
     this.peakDecayRate = rate;
+  }
+
+  setPeakQuantization(quantization) {
+    this.peakQuantization = quantization;
+    this.peakQuantizationInv = 1 / this.peakQuantization;
   }
 
   setHorizontal(horizontal) {
@@ -264,8 +271,10 @@ export default class Spectrogram {
         freqCtx.fillStyle = style;
         freqCtx.fillRect(x, fqHeight - h, 1, h);
 
-        // Draw peak hold indicator
-        const peakH = (this.peakData[x] * hCoeff) | 0;
+        // Draw peak hold indicator with pixelated decay
+        let peakH = (this.peakData[x] * hCoeff) | 0;
+        // Quantize pixel position for pixelated effect (multiply is faster than divide)
+        peakH = Math.floor(peakH * this.peakQuantizationInv) * this.peakQuantization;
         freqCtx.fillStyle = this.colorMap(this.peakData[x]).hex();
         freqCtx.fillRect(x, fqHeight - peakH, 1, 2);
 
@@ -339,8 +348,10 @@ export default class Spectrogram {
         freqCtx.fillStyle = style;
         freqCtx.fillRect(0, analyzerY, w, analyzerBinHeight);
 
-        // Draw analyzer peak hold indicator
-        const peakW = (this.peakData[i] * wCoeff) | 0;
+        // Draw analyzer peak hold indicator with pixelated decay
+        let peakW = (this.peakData[i] * wCoeff) | 0;
+        // Quantize pixel position for pixelated effect (multiply is faster than divide)
+        peakW = Math.floor(peakW * this.peakQuantizationInv) * this.peakQuantization;
         freqCtx.fillStyle = this.colorMap(this.peakData[i]).hex();
         freqCtx.fillRect(peakW - 2, analyzerY, 2, analyzerBinHeight);
 
