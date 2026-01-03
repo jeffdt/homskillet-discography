@@ -1,5 +1,6 @@
 import React from 'react';
 import autoBindReact from 'auto-bind/react';
+import Tooltip from './Tooltip';
 
 interface VoiceGroup {
   name: string;
@@ -55,6 +56,12 @@ interface PlayerParamsProps {
   onVoiceMaskChange?: (voiceMask: boolean[]) => void;
   persistedSettings?: PersistedSettings;
 }
+
+const InfoIcon = ({ tooltip }: { tooltip: string }) => (
+  <Tooltip content={tooltip} side="right">
+    <span className="Settings-info-icon">?</span>
+  </Tooltip>
+);
 
 export default class PlayerParams extends React.PureComponent<PlayerParamsProps> {
   constructor(props: PlayerParamsProps) {
@@ -175,6 +182,7 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
             onChange={onTempoChange}
           />{' '}
           {this.formatAsPercentage(tempo)}
+          <InfoIcon tooltip="Playback speed multiplier (30%-200%)" />
         </span>
         {voiceGroups.length > 0
           ? voiceGroups.map((voiceGroup, i) => {
@@ -283,7 +291,7 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
                 return (
                   <span key={param.id} className="PlayerParams-param">
                     {pinButton}
-                    <label htmlFor={param.id} title={param.hint} className="PlayerParams-label">
+                    <label htmlFor={param.id} className="PlayerParams-label">
                       {param.label}:{' '}
                     </label>
                     <input
@@ -297,6 +305,7 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
                       value={value}
                     ></input>{' '}
                     {this.formatAsPercentage(value)}
+                    {param.hint && <InfoIcon tooltip={param.hint} />}
                   </span>
                 );
               case 'toggle':

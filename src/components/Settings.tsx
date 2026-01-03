@@ -2,6 +2,7 @@ import React, { memo, useContext } from 'react';
 import PlayerParams, { ParamDef } from './PlayerParams';
 import { UserContext } from './UserProvider';
 import { UI_PALETTES } from '../config/uiPalettes';
+import Tooltip from './Tooltip';
 
 interface SettingsProps {
   ejected: boolean;
@@ -40,22 +41,31 @@ function Settings(props: SettingsProps) {
 
   const userContext = useContext(UserContext);
 
+  const InfoIcon = ({ tooltip }: { tooltip: string }) => (
+    <Tooltip content={tooltip} side="right">
+      <span className="Settings-info-icon">?</span>
+    </Tooltip>
+  );
+
   return (
     <div className="Settings">
       <div className="Settings-section">
         <h3>UI Effects</h3>
-        <label className="Settings-toggle">
-          <input
-            type="checkbox"
-            checked={persistedSettings.audioReactivePulse ?? true}
-            onChange={(e) => {
-              userContext.updateSettings({
-                audioReactivePulse: e.target.checked,
-              });
-            }}
-          />
-          <span>Reactive UI</span>
-        </label>
+        <div className="Settings-row">
+          <label className="Settings-toggle">
+            <input
+              type="checkbox"
+              checked={persistedSettings.audioReactivePulse ?? true}
+              onChange={(e) => {
+                userContext.updateSettings({
+                  audioReactivePulse: e.target.checked,
+                });
+              }}
+            />
+            <span>Reactive UI</span>
+          </label>
+          <InfoIcon tooltip="UI elements pulse and glow in response to audio" />
+        </div>
 
         <h4
           className="Settings-subsection Settings-subsection-collapsible"
@@ -109,14 +119,15 @@ function Settings(props: SettingsProps) {
             min="0"
             max="5"
             step="1"
-            value={Math.round(((persistedSettings.peakDecayRate ?? 0.95) - 0.92) / 0.015)}
+            value={Math.round(((persistedSettings.peakDecayRate ?? 0.995) - 0.92) / 0.015)}
             onChange={(e) =>
               userContext.updateSettings({
                 peakDecayRate: 0.92 + parseInt(e.target.value) * 0.015,
               })
             }
           />
-          <span>{Math.round(((persistedSettings.peakDecayRate ?? 0.95) - 0.92) / 0.015)}</span>
+          <span>{Math.round(((persistedSettings.peakDecayRate ?? 0.995) - 0.92) / 0.015)}</span>
+          <InfoIcon tooltip="How fast spectrogram peaks fall (decay rate: 0.92-0.995)" />
         </div>
 
         <div className="Settings-param">
@@ -142,6 +153,7 @@ function Settings(props: SettingsProps) {
               return q === 1 ? 'Off' : q === 2 ? 'Low' : q === 4 ? 'Med' : 'High';
             })()}
           </span>
+          <InfoIcon tooltip="Quantize peak heights for retro pixelated effect" />
         </div>
 
         <h4
@@ -193,19 +205,21 @@ function Settings(props: SettingsProps) {
           className={`Settings-collapsible-content ${persistedSettings.sliderSparksExpanded ? 'expanded' : ''}`}
         >
           <div className="Settings-param">
-            <label>Spawn Rate</label>
+            <label>Spawn Freq</label>
             <input
               type="range"
-              min="20"
-              max="200"
-              value={persistedSettings.particleSpawnRate ?? 20}
+              min="1"
+              max="10"
+              step="1"
+              value={(220 - (persistedSettings.particleSpawnRate ?? 20)) / 20}
               onChange={(e) =>
                 userContext.updateSettings({
-                  particleSpawnRate: parseInt(e.target.value),
+                  particleSpawnRate: 220 - parseInt(e.target.value) * 20,
                 })
               }
             />
-            <span>{persistedSettings.particleSpawnRate ?? 20}ms</span>
+            <span>{(220 - (persistedSettings.particleSpawnRate ?? 20)) / 20}</span>
+            <InfoIcon tooltip="Particle spawn frequency (1 = slow, 10 = fast)" />
           </div>
 
           <div className="Settings-param">
@@ -223,6 +237,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{persistedSettings.particleLifespan ?? 600}ms</span>
+            <InfoIcon tooltip="How long particles live before disappearing" />
           </div>
 
           <div className="Settings-param">
@@ -239,6 +254,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{persistedSettings.particleBaseAngle ?? 180}°</span>
+            <InfoIcon tooltip="Direction particles emit (0° = right, 90° = up, etc.)" />
           </div>
 
           <div className="Settings-param">
@@ -255,6 +271,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{persistedSettings.particleAngleSpread ?? 30}°</span>
+            <InfoIcon tooltip="Randomization range around spray angle (±degrees)" />
           </div>
 
           <div className="Settings-param">
@@ -272,6 +289,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{(persistedSettings.particleSpeed ?? 1.7).toFixed(1)}×</span>
+            <InfoIcon tooltip="Base velocity of particles (pixels per frame)" />
           </div>
 
           <div className="Settings-param">
@@ -288,6 +306,7 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{persistedSettings.particleSpeedVariance ?? 20}%</span>
+            <InfoIcon tooltip="Random speed variation per particle (percentage)" />
           </div>
 
           <div className="Settings-param">
@@ -305,20 +324,24 @@ function Settings(props: SettingsProps) {
               }
             />
             <span>{(persistedSettings.particleGravity ?? 0.0).toFixed(1)}×</span>
+            <InfoIcon tooltip="Downward acceleration applied to particles" />
           </div>
 
-          <label className="Settings-toggle">
-            <input
-              type="checkbox"
-              checked={persistedSettings.particleFadeMode === 'fade'}
-              onChange={(e) => {
-                userContext.updateSettings({
-                  particleFadeMode: e.target.checked ? 'fade' : 'instant',
-                });
-              }}
-            />
-            <span>Alpha fade</span>
-          </label>
+          <div className="Settings-row">
+            <label className="Settings-toggle">
+              <input
+                type="checkbox"
+                checked={persistedSettings.particleFadeMode === 'fade'}
+                onChange={(e) => {
+                  userContext.updateSettings({
+                    particleFadeMode: e.target.checked ? 'fade' : 'instant',
+                  });
+                }}
+              />
+              <span>Alpha fade</span>
+            </label>
+            <InfoIcon tooltip="Gradually fade out particles vs instant disappear" />
+          </div>
         </div>
       </div>
 

@@ -1257,6 +1257,7 @@ button.box-button.AppFooter-back {
   gap: var(--charW1);
   cursor: pointer;
   margin-bottom: calc(var(--charH) / 2);
+  flex-wrap: nowrap;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
@@ -1378,9 +1379,17 @@ button.box-button.AppFooter-back {
   margin-bottom: calc(var(--charH) / 2);
 }
 
+.Settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(var(--charH) / 2);
+}
+
 .Settings-param label {
   width: calc(var(--charW1) * 16);
   color: var(--clickable);
+  flex-shrink: 0;
 }
 
 .Settings-param input[type='range'] {
@@ -1392,6 +1401,108 @@ button.box-button.AppFooter-back {
   width: calc(var(--charW1) * 6);
   text-align: right;
   color: var(--accent);
+}
+
+.Settings-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--neutral2);
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  flex-shrink: 0;
+  transition: all 100ms steps(3);
+  position: relative;
+  white-space: nowrap;
+}
+
+.Settings-info-icon::before {
+  content: '[';
+  color: var(--neutral2);
+}
+
+.Settings-info-icon::after {
+  content: ']';
+  color: var(--neutral2);
+}
+
+.Settings-info-icon:hover {
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent);
+}
+
+.Settings-info-icon:hover::before,
+.Settings-info-icon:hover::after {
+  color: var(--accent);
+}
+
+.Tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.Tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: #000000;
+  border: 2px solid var(--accent);
+  padding: 8px 12px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow:
+    0 0 20px rgba(155, 254, 56, 0.4),
+    inset 0 0 30px rgba(155, 254, 56, 0.05),
+    0 4px 0 rgba(0, 0, 0, 0.8);
+  line-height: 1.5;
+  text-shadow: 0 0 4px rgba(155, 254, 56, 0.6);
+  animation: tooltipScanline 8s linear infinite, tooltipFlicker 0.15s infinite alternate;
+  transition: opacity 150ms ease-out;
+}
+
+.Tooltip::before {
+  content: '> ';
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  color: var(--accent);
+}
+
+.Tooltip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+@keyframes tooltipScanline {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes tooltipFlicker {
+  0% {
+    opacity: 0.98;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .PlayerParams h3 {
