@@ -116,7 +116,32 @@ function Settings(props: SettingsProps) {
               })
             }
           />
-          <span>Level {Math.round(((persistedSettings.peakDecayRate ?? 0.95) - 0.92) / 0.015)}</span>
+          <span>{Math.round(((persistedSettings.peakDecayRate ?? 0.95) - 0.92) / 0.015)}</span>
+        </div>
+
+        <div className="Settings-param">
+          <label>Decay Pixelation</label>
+          <input
+            type="range"
+            min="0"
+            max="3"
+            step="1"
+            value={(() => {
+              const q = persistedSettings.peakQuantization ?? 4;
+              return q === 1 ? 0 : q === 2 ? 1 : q === 4 ? 2 : 3;
+            })()}
+            onChange={(e) => {
+              const slider = parseInt(e.target.value);
+              const quantization = slider === 0 ? 1 : slider === 1 ? 2 : slider === 2 ? 4 : 8;
+              userContext.updateSettings({ peakQuantization: quantization });
+            }}
+          />
+          <span>
+            {(() => {
+              const q = persistedSettings.peakQuantization ?? 4;
+              return q === 1 ? 'Off' : q === 2 ? 'Low' : q === 4 ? 'Med' : 'High';
+            })()}
+          </span>
         </div>
 
         <h4
