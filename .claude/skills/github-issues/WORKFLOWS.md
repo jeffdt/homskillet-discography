@@ -148,15 +148,16 @@ This document describes detailed workflow patterns for managing GitHub Issues in
    - Merge feature branch
    - Push to remote
 
-3. **Close GitHub Issue**
+3. **Clean Up**
 
    ```bash
-   gh issue close {number} --comment "Merged to main"
+   ./scripts/finish-feature.sh {number}
    ```
 
-4. **Clean Up**
-   - Remove worktree via `scripts/remove-worktree.sh`
-   - Remove worktree directory
+   This will:
+   - Close the GitHub issue with "Completed and merged to main" comment
+   - Remove the worktree directory
+   - Delete local and remote branches
 
 ### Path B: Create Pull Request
 
@@ -180,22 +181,21 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 
 ### Path C: Abandon Work
 
-1. **Remove worktree:active Label**
+Use the `--abandon` flag when you want to clean up a worktree but keep the issue open for future work:
 
-   ```bash
-   gh issue edit {number} --remove-label "worktree:active"
-   ```
+```bash
+./scripts/finish-feature.sh {number} --abandon
+```
 
-2. **Add Comment**
+This will:
 
-   ```bash
-   gh issue comment {number} --body "Work abandoned. Issue returned to backlog."
-   ```
+1. Remove the `worktree:active` label from the issue
+2. Add a comment: "Work abandoned. Issue returned to backlog."
+3. Remove the worktree directory
+4. Delete local and remote branches
+5. Keep the issue open with `status:ready` for future work
 
-3. **Clean Up**
-   - Remove worktree
-   - Remove worktree directory
-   - Issue remains open for future work
+The issue remains available in the backlog and can be started again later with `./scripts/init-feature.sh {number}`
 
 ---
 
