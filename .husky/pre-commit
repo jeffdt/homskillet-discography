@@ -1,1 +1,17 @@
+#!/bin/bash
+
+# Prevent commits directly to main branch
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+if [ "$branch" = "main" ]; then
+  echo "❌ Cannot commit directly to main branch!"
+  echo "💡 Create a feature branch instead:"
+  echo "   git checkout -b feature/your-feature-name"
+  echo ""
+  echo "Or use the worktree workflow:"
+  echo "   git start           # Interactive issue selection"
+  echo "   git start 123       # Start work on issue #123"
+  exit 1
+fi
+
 bunx lint-staged
