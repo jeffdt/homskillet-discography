@@ -22,10 +22,7 @@ import {
 } from '../util';
 import requestCache from '../RequestCache';
 import { handleShufflePlayLogic } from '../handleShufflePlayLogic';
-import Sequencer, {
-  NUM_SHUFFLE_MODES,
-  SHUFFLE_OFF,
-} from '../Sequencer';
+import Sequencer, { NUM_SHUFFLE_MODES, SHUFFLE_OFF } from '../Sequencer';
 
 import GMEPlayer from '../players/GMEPlayer';
 import { UI_PALETTES } from '../config/uiPalettes';
@@ -812,9 +809,9 @@ class App extends React.Component<AppProps, AppState> {
           <div
             className={`App-main ${this.state.visualizerMaximized ? 'visualizer-maximized' : ''}`}
           >
-            {!this.state.visualizerMaximized && (
-              <div className="App-main-inner">
-                <div className="App-main-content-and-settings">
+            <div className="App-main-inner">
+              <div className="App-main-content-and-settings">
+                {!this.state.visualizerMaximized && (
                   <div
                     className={`App-main-content-area mobile-tab-content ${this.state.activeTab === 'browser' ? 'mobile-tab-active' : ''}`}
                     ref={this.contentAreaRef}
@@ -848,6 +845,32 @@ class App extends React.Component<AppProps, AppState> {
                       />
                     </Switch>
                   </div>
+                )}
+                {!this.state.loading && (
+                  <div
+                    className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}
+                  >
+                    <Visualizer
+                      audioCtx={this.audioCtx}
+                      sourceNode={this.playerNode}
+                      chipCore={this.chipCore}
+                      paused={this.state.ejected || this.state.paused}
+                      persistedSettings={this.props.userContext.settings}
+                      onThemeChange={(theme) =>
+                        this.props.userContext.updateSettings({ visualizerTheme: theme })
+                      }
+                      onThemesExpandedChange={(expanded) =>
+                        this.props.userContext.updateSettings({
+                          visualizerThemesExpanded: expanded,
+                        })
+                      }
+                      onMaximizedChange={(maximized) =>
+                        this.setState({ visualizerMaximized: maximized })
+                      }
+                    />
+                  </div>
+                )}
+                {!this.state.visualizerMaximized && (
                   <div
                     className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}
                   >
@@ -868,31 +891,9 @@ class App extends React.Component<AppProps, AppState> {
                       sequencer={this.sequencer}
                     />
                   </div>
-                </div>
+                )}
               </div>
-            )}
-            {!this.state.loading && (
-              <div
-                className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}
-              >
-                <Visualizer
-                  audioCtx={this.audioCtx}
-                  sourceNode={this.playerNode}
-                  chipCore={this.chipCore}
-                  paused={this.state.ejected || this.state.paused}
-                  persistedSettings={this.props.userContext.settings}
-                  onThemeChange={(theme) =>
-                    this.props.userContext.updateSettings({ visualizerTheme: theme })
-                  }
-                  onThemesExpandedChange={(expanded) =>
-                    this.props.userContext.updateSettings({ visualizerThemesExpanded: expanded })
-                  }
-                  onMaximizedChange={(maximized) =>
-                    this.setState({ visualizerMaximized: maximized })
-                  }
-                />
-              </div>
-            )}
+            </div>
           </div>
           <AppFooter
             currentSongDurationMs={this.state.currentSongDurationMs}
