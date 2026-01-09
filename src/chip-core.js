@@ -20,4 +20,5 @@ else if (typeof define === 'function' && define['amd'])
   define([], function() { return CHIP_CORE; });
 else if (typeof exports === 'object')
   exports["CHIP_CORE"] = CHIP_CORE;
+
 export default CHIP_CORE;

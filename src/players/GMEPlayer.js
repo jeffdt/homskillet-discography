@@ -260,7 +260,12 @@ export default class GMEPlayer extends Player {
   }
 
   getDurationMs() {
-    if (this.gmeCtx) return this.metadata.play_length;
+    if (this.gmeCtx) {
+      const defaultDuration = this.metadata.play_length;
+      // Override: extend default 2:30 to 3:00
+      if (defaultDuration === 150000) return 180000;
+      return defaultDuration;
+    }
     return 0;
   }
 
