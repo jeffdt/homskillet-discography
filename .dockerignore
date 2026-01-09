@@ -9,8 +9,11 @@
 *
 
 # But include what we need
+!scripts
 !scripts/build-chip-core.js
+!config
 !config/paths.js
+!src
 !src/showcqtbar.c
 !package.json
 !package-lock.json
