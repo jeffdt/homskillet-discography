@@ -711,11 +711,33 @@ body,
   outline: none;
 }
 
-.App-main-content-area.settings {
-  width: 368px;
-  min-width: 368px;
+.App-main-content-area.settings,
+.App-main-content-area.ui-settings,
+.App-main-content-area.player-settings {
+  width: 300px;
+  min-width: 300px;
   flex-grow: 0;
   padding: var(--charH) var(--charW2);
+  overflow-y: auto;
+}
+
+/* Mobile/Desktop visibility helpers */
+.mobile-only {
+  display: flex;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: flex;
+  }
 }
 
 @media (orientation: portrait), (max-width: 768px) {
@@ -724,7 +746,9 @@ body,
     /* Reduce from 44px to save vertical space */
   }
 
-  .App-main-content-area.settings {
+  .App-main-content-area.settings,
+  .App-main-content-area.ui-settings,
+  .App-main-content-area.player-settings {
     width: 100%;
     min-width: 0;
     border-right: none;
@@ -736,7 +760,7 @@ body,
     /* Fill available space */
   }
 
-  .App-main-content-area:not(.settings) {
+  .App-main-content-area:not(.settings):not(.ui-settings):not(.player-settings) {
     border-right: none;
     flex-grow: 1;
     /* Fill available space */
