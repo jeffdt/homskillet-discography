@@ -534,144 +534,151 @@
       "idx": 11
     },
     {
+      "path": "/MetallicWing/paralysis.nsf",
+      "size": 18791,
+      "type": "file",
+      "mtime": 1765157126,
+      "idx": 12
+    },
+    {
       "path": "/MetallicWing/peril.nsf",
       "size": 15418,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 12
+      "idx": 13
     },
     {
       "path": "/MetallicWing/peril+intro.nsf",
       "size": 18451,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 13
+      "idx": 14
     },
     {
       "path": "/MetallicWing/predation.nsf",
       "size": 17948,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 14
+      "idx": 15
     },
     {
       "path": "/MetallicWing/relief.nsf",
       "size": 17336,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 15
+      "idx": 16
     },
     {
       "path": "/MetallicWing/remorse.nsf",
       "size": 21052,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 16
+      "idx": 17
     },
     {
       "path": "/MetallicWing/resolve.nsf",
       "size": 8935,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 17
+      "idx": 18
     },
     {
       "path": "/MetallicWing/rust.nsf",
       "size": 16879,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 18
+      "idx": 19
     },
     {
       "path": "/MetallicWing/sad.nsf",
       "size": 7367,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 19
+      "idx": 20
     },
     {
       "path": "/MetallicWing/shadow_vapors.nsf",
       "size": 17865,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 20
+      "idx": 21
     },
     {
       "path": "/MetallicWing/solitude.nsf",
       "size": 7328,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 21
+      "idx": 22
     },
     {
       "path": "/MetallicWing/star_surfin.nsf",
       "size": 21461,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 22
+      "idx": 23
     },
     {
       "path": "/MetallicWing/strife_loop.nsf",
       "size": 6548,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 23
+      "idx": 24
     },
     {
       "path": "/MetallicWing/strife.nsf",
       "size": 18732,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 24
+      "idx": 25
     },
     {
       "path": "/MetallicWing/thuglas.nsf",
       "size": 17110,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 25
+      "idx": 26
     },
     {
       "path": "/MetallicWing/titanium.nsf",
       "size": 20169,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 26
+      "idx": 27
     },
     {
       "path": "/MetallicWing/triumph.nsf",
       "size": 7259,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 27
+      "idx": 28
     },
     {
       "path": "/MetallicWing/valor_nes.nsf",
       "size": 15730,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 28
+      "idx": 29
     },
     {
       "path": "/MetallicWing/valor_vrc6.nsf",
       "size": 17973,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 29
+      "idx": 30
     },
     {
       "path": "/MetallicWing/wonder.nsf",
       "size": 9854,
       "type": "file",
       "mtime": 1765145286,
-      "idx": 30
+      "idx": 31
     },
     {
       "path": "/MetallicWing/wrought_iron.nsf",
       "size": 13084,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 31
+      "idx": 32
     }
   ],
   "/RandomJams": [
@@ -753,39 +760,32 @@
       "idx": 10
     },
     {
-      "path": "/RandomJams/paralysis.nsf",
-      "size": 18791,
-      "type": "file",
-      "mtime": 1765157126,
-      "idx": 11
-    },
-    {
       "path": "/RandomJams/roasted.nsf",
       "size": 18894,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 12
+      "idx": 11
     },
     {
       "path": "/RandomJams/sensory_overload.nsf",
       "size": 16415,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 13
+      "idx": 12
     },
     {
       "path": "/RandomJams/sharked.nsf",
       "size": 12941,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 14
+      "idx": 13
     },
     {
       "path": "/RandomJams/viper.nsf",
       "size": 22393,
       "type": "file",
       "mtime": 1765157126,
-      "idx": 15
+      "idx": 14
     }
   ],
   "/Bazaar": [
@@ -877,17 +877,17 @@
     },
     {
       "path": "/MetallicWing",
-      "size": 441466,
+      "size": 460257,
       "type": "directory",
-      "numChildren": 32,
-      "mtime": 1765157126
+      "numChildren": 33,
+      "mtime": 1768059391
     },
     {
       "path": "/RandomJams",
-      "size": 262078,
+      "size": 243287,
       "type": "directory",
-      "numChildren": 16,
-      "mtime": 1765157126
+      "numChildren": 15,
+      "mtime": 1768059391
     },
     {
       "path": "/SuperFORE!",
