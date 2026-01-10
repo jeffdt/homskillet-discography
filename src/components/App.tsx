@@ -35,6 +35,8 @@ import Visualizer from './Visualizer';
 import Toast, { ToastLevels } from './Toast';
 import MessageBox from './MessageBox';
 import Settings from './Settings';
+import UISettings from './UISettings';
+import PlayerSettings from './PlayerSettings';
 import TabBar from './TabBar';
 import SongDisplay from './SongDisplay';
 import { UserContext } from './UserProvider';
@@ -871,26 +873,52 @@ class App extends React.Component<AppProps, AppState> {
                   </div>
                 )}
                 {!this.state.visualizerMaximized && (
-                  <div
-                    className={`App-main-content-area settings mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}
-                  >
-                    <Settings
-                      ejected={this.state.ejected}
-                      tempo={this.state.tempo}
-                      numVoices={this.state.currentSongNumVoices}
-                      voiceMask={this.state.voiceMask}
-                      voiceNames={this.state.voiceNames}
-                      voiceGroups={this.state.voiceGroups}
-                      onVoiceMaskChange={this.handleSetVoiceMask}
-                      onTempoChange={this.handleTempoChange}
-                      paramDefs={this.state.paramDefs}
-                      paramValues={this.state.paramValues}
-                      onParamChange={this.handleParamChange}
-                      onPinParam={this.handlePinParam}
-                      persistedSettings={this.props.userContext.settings}
-                      sequencer={this.sequencer}
-                    />
-                  </div>
+                  <>
+                    {/* Mobile: Combined settings panel */}
+                    <div
+                      className={`App-main-content-area settings mobile-only mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}
+                    >
+                      <Settings
+                        ejected={this.state.ejected}
+                        tempo={this.state.tempo}
+                        numVoices={this.state.currentSongNumVoices}
+                        voiceMask={this.state.voiceMask}
+                        voiceNames={this.state.voiceNames}
+                        voiceGroups={this.state.voiceGroups}
+                        onVoiceMaskChange={this.handleSetVoiceMask}
+                        onTempoChange={this.handleTempoChange}
+                        paramDefs={this.state.paramDefs}
+                        paramValues={this.state.paramValues}
+                        onParamChange={this.handleParamChange}
+                        onPinParam={this.handlePinParam}
+                        persistedSettings={this.props.userContext.settings}
+                        sequencer={this.sequencer}
+                      />
+                    </div>
+                    {/* Desktop: Separate UI settings panel */}
+                    <div className="App-main-content-area ui-settings desktop-only">
+                      <UISettings persistedSettings={this.props.userContext.settings} />
+                    </div>
+                    {/* Desktop: Separate player settings panel */}
+                    <div className="App-main-content-area player-settings desktop-only">
+                      <PlayerSettings
+                        ejected={this.state.ejected}
+                        tempo={this.state.tempo}
+                        numVoices={this.state.currentSongNumVoices}
+                        voiceMask={this.state.voiceMask}
+                        voiceNames={this.state.voiceNames}
+                        voiceGroups={this.state.voiceGroups}
+                        onVoiceMaskChange={this.handleSetVoiceMask}
+                        onTempoChange={this.handleTempoChange}
+                        paramDefs={this.state.paramDefs}
+                        paramValues={this.state.paramValues}
+                        onParamChange={this.handleParamChange}
+                        onPinParam={this.handlePinParam}
+                        persistedSettings={this.props.userContext.settings}
+                        sequencer={this.sequencer}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </div>
