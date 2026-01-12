@@ -34,7 +34,7 @@ This project is being developed in three phases:
 
 2. **Add custom features** - Build new features to transform this into an interactive audio-visual laboratory with custom branding, theming, and presentation. Focus on exposing interesting technical concepts in an accessible way.
 
-3. **Deploy to GitHub Pages** - Deploy as a fully static site. (See `.claude/deployment-plan.md` for details - AWS is not needed for this small discography).
+3. **Deploy to GitHub Pages** - Deploy as a fully static site (AWS is not needed for this small discography).
 
 ### Technical Foundation
 
@@ -46,7 +46,10 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 
 - `bun start` - Start Vite dev server on localhost:3000
 - `bun run server` - Start Node.js API server on port 8080 (DEV mode)
-- `bun test` - Run Vitest unit tests
+- `bun test` - Run Vitest in watch mode (auto-reruns tests on file changes)
+- `bun run test:run` - Run all tests once and exit
+- `bun run test:ui` - Open Vitest UI for interactive test exploration
+- `bun run coverage` - Generate test coverage report
 
 **Note:** During active development, assume the dev server is already running. Do not attempt to start it automatically.
 
@@ -60,8 +63,6 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 
 - `bun run deploy` - Full build and deploy to GitHub Pages
 - `bun run deploy-lite` - Build frontend and deploy (skip chip-core rebuild)
-
-See `.claude/deployment-plan.md` for the complete deployment strategy.
 
 ### Additional Scripts
 
@@ -133,8 +134,9 @@ Building requires Emscripten SDK 3.1.39. Use Docker (`bun run build-chip-core:do
 ### Configuration
 
 - **src/config/index.ts** - API endpoints, catalog paths, supported formats
-  - Local dev: localhost:3000 (webpack dev server)
+  - Local dev: localhost:3000 (Vite dev server)
   - Production: Static files served from build/ directory via GitHub Pages
+  - The Vite dev server includes special CORS headers (`Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`) required for WebAssembly SharedArrayBuffer support
 
 ### Music Catalog
 
@@ -197,19 +199,21 @@ The `/feature:record` command uses AI to:
 
 **Worktree workflow:**
 
+Note: The feature scripts use colons in their filenames (`feature:init.sh`, `feature:finish.sh`) which is intentional for the worktree workflow naming convention.
+
 ```bash
 # Initialize worktree from issue
-./scripts/init-feature.sh 77           # Start work on specific issue #77
-./scripts/init-feature.sh              # Interactive - shows available issues
+./scripts/feature:init.sh 77           # Start work on specific issue #77
+./scripts/feature:init.sh              # Interactive - shows available issues
 
 # Work on feature (edit files, commit, push, create PR, merge)
 
 # Clean up after merge
-./scripts/finish-feature.sh 77         # Close issue and clean up worktree
-./scripts/finish-feature.sh            # Auto-detect from current directory or show list
+./scripts/feature:finish.sh 77         # Close issue and clean up worktree
+./scripts/feature:finish.sh            # Auto-detect from current directory or show list
 
 # Abandon work (keep issue open, remove worktree)
-./scripts/finish-feature.sh 77 --abandon
+./scripts/feature:finish.sh 77 --abandon
 ```
 
 **Recommended git aliases:**
@@ -218,9 +222,9 @@ Add these to your `.git/config` file under an `[alias]` section:
 
 ```ini
 [alias]
-	start = !./scripts/init-feature.sh
-	finish = !./scripts/finish-feature.sh
-	abandon = !./scripts/finish-feature.sh "$@" --abandon
+	start = !./scripts/feature:init.sh
+	finish = !./scripts/feature:finish.sh
+	abandon = !./scripts/feature:finish.sh "$@" --abandon
 ```
 
 Then use them:
@@ -253,7 +257,7 @@ git worktree list          # List all worktrees (built-in git command)
 4. **Link related issues** - Use #77 syntax in issue descriptions to reference other issues
 5. **Update issue body** - Add implementation notes as you discover them using `gh issue edit`
 6. **Check for duplicates** - Search existing issues before creating new ones using `gh issue list --search`
-7. **Merge before finishing** - Use `./scripts/finish-feature.sh` after your PR is merged. Use `--abandon` flag if you want to clean up without closing the issue
+7. **Merge before finishing** - Use `./scripts/feature:finish.sh` after your PR is merged. Use `--abandon` flag if you want to clean up without closing the issue
 
 ### GitHub Issues Skill
 
@@ -306,7 +310,9 @@ See "Working with GitHub Issues" section above for current workflow.
 4. **Writing tests**:
    - Create test files in `src/__tests__/` with `.test.ts` or `.test.tsx` extension
    - Use Vitest and React Testing Library
-   - Run `bun test` to execute all tests
+   - Run `bun test` for watch mode (recommended during development)
+   - Run `bun run test:run` for single test run
+   - Run `bun run test:ui` for interactive test UI
 
 ## Design & Styling Guidelines
 
@@ -425,8 +431,8 @@ bun run build-chip-core
   2. Run `bun run build-catalog` to regenerate catalog indexes
   3. Commit both music files and updated catalog JSON files
 - **Sample Rate**: Limited to 48kHz max (MAX_SAMPLE_RATE) due to player compatibility.
-- **Testing**: Vitest configured for TypeScript unit tests. Run `bun test` to execute tests. Test files go in `src/__tests__/`.
-- **Deployment**: Configured for GitHub Pages static hosting. See `.claude/deployment-plan.md` for implementation details.
+- **Testing**: Vitest configured for TypeScript unit tests. Run `bun test` for watch mode or `bun run test:run` for single run. Test files go in `src/__tests__/`.
+- **Deployment**: Configured for GitHub Pages static hosting. Use `bun run deploy` for full build and deploy.
 
 ## Project Status
 

@@ -36,9 +36,9 @@ generate_slug_from_title() {
 
 # Function to list available issues
 list_available_issues() {
-  echo ""
-  echo "Available issues (not currently in worktrees):"
-  echo ""
+  echo "" >&2
+  echo "Available issues (not currently in worktrees):" >&2
+  echo "" >&2
 
   # Get all open issues without worktree:active label
   local issues
@@ -50,26 +50,26 @@ list_available_issues() {
     --jq '.[] | "\(.number)|\(.title)|\(.labels | map(.name) | join(","))"' 2>/dev/null)
 
   if [ -z "$issues" ]; then
-    echo "  No available issues found."
-    echo ""
+    echo "  No available issues found." >&2
+    echo "" >&2
     return
   fi
 
   local count=0
   while IFS='|' read -r num title labels; do
     count=$((count + 1))
-    echo "  $count. #$num - $title"
+    echo "  $count. #$num - $title" >&2
 
     # Show relevant labels
     if [[ "$labels" == *"category:"* ]] || [[ "$labels" == *"area:"* ]]; then
-      echo "     Labels: $labels"
+      echo "     Labels: $labels" >&2
     fi
-    echo ""
+    echo "" >&2
   done <<< "$issues"
 
-  echo "Usage: $0 <issue-number>"
-  echo "Example: $0 73"
-  echo ""
+  echo "Usage: $0 <issue-number>" >&2
+  echo "Example: $0 73" >&2
+  echo "" >&2
 }
 
 # Main script logic
@@ -78,28 +78,28 @@ main() {
 
   # Step 1: Determine issue number
   if [ -z "$issue_number" ]; then
-    echo "No issue number provided."
+    echo "No issue number provided." >&2
     list_available_issues
     exit 1
   fi
 
   # Validate issue number is numeric
   if ! [[ "$issue_number" =~ ^[0-9]+$ ]]; then
-    echo "Error: Issue number must be numeric (got: $issue_number)"
+    echo "Error: Issue number must be numeric (got: $issue_number)" >&2
     exit 1
   fi
 
-  echo ""
-  echo "Initializing worktree for issue #${issue_number}..."
-  echo ""
+  echo "" >&2
+  echo "Initializing worktree for issue #${issue_number}..." >&2
+  echo "" >&2
 
   # Step 2: Check if issue exists and fetch metadata
-  echo "→ Fetching issue details from GitHub..."
+  echo "→ Fetching issue details from GitHub..." >&2
 
   local issue_data
   if ! issue_data=$(gh issue view "$issue_number" --json title,state,labels,body 2>/dev/null); then
-    echo "Error: Could not fetch issue #${issue_number}"
-    echo "Make sure the issue exists and you have access to it."
+    echo "Error: Could not fetch issue #${issue_number}" >&2
+    echo "Make sure the issue exists and you have access to it." >&2
     list_available_issues
     exit 1
   fi
@@ -114,24 +114,24 @@ main() {
   state=$(echo "$issue_data" | jq -r '.state')
 
   if [ "$state" = "CLOSED" ]; then
-    echo "Error: Issue #${issue_number} is already closed"
-    echo "Title: $title"
+    echo "Error: Issue #${issue_number} is already closed" >&2
+    echo "Title: $title" >&2
     exit 1
   fi
 
-  echo "  Issue: $title"
+  echo "  Issue: $title" >&2
 
   # Step 3: Check if already has worktree:active label
   local has_worktree_label
   has_worktree_label=$(echo "$issue_data" | jq -r '.labels[] | select(.name=="worktree:active") | .name' || echo "")
 
   if [ -n "$has_worktree_label" ]; then
-    echo ""
-    echo "Error: Issue #${issue_number} already has an active worktree"
-    echo ""
-    echo "Existing worktrees:"
-    find "$WORKTREE_PARENT" -maxdepth 1 -type d -name "${issue_number}-*" 2>/dev/null || true
-    echo ""
+    echo "" >&2
+    echo "Error: Issue #${issue_number} already has an active worktree" >&2
+    echo "" >&2
+    echo "Existing worktrees:" >&2
+    find "$WORKTREE_PARENT" -maxdepth 1 -type d -name "${issue_number}-*" 2>/dev/null || true >&2
+    echo "" >&2
     exit 1
   fi
 
@@ -141,44 +141,44 @@ main() {
   slug=$(echo "$body" | grep -A 1 "## Worktree Slug" | tail -1 | sed 's/^[[:space:]]*`\(.*\)`[[:space:]]*$/\1/' | tr -d '\n' || echo "")
 
   if [ -z "$slug" ] || [ "$slug" = "null" ] || [[ "$slug" == *"Worktree Slug"* ]]; then
-    echo "  ⚠️  No slug found in issue body, generating from title..."
+    echo "  ⚠️  No slug found in issue body, generating from title..." >&2
     slug=$(generate_slug_from_title "$title")
-    echo "  Generated slug: $slug"
+    echo "  Generated slug: $slug" >&2
   else
-    echo "  Slug: $slug"
+    echo "  Slug: $slug" >&2
   fi
 
   # Step 5: Calculate port
   local port
   port=$((5000 + issue_number))
-  echo "  Port: $port"
+  echo "  Port: $port" >&2
 
   # Step 6: Check if worktree already exists
   if [ -d "${WORKTREE_PARENT}/${issue_number}-${slug}" ]; then
-    echo ""
-    echo "Error: Worktree already exists at ${WORKTREE_PARENT}/${issue_number}-${slug}"
-    echo "Remove it first with: git worktree remove ${WORKTREE_PARENT}/${issue_number}-${slug}"
+    echo "" >&2
+    echo "Error: Worktree already exists at ${WORKTREE_PARENT}/${issue_number}-${slug}" >&2
+    echo "Remove it first with: git worktree remove ${WORKTREE_PARENT}/${issue_number}-${slug}" >&2
     exit 1
   fi
 
   # Step 7: Call create-worktree.sh
-  echo ""
-  echo "→ Creating worktree..."
+  echo "" >&2
+  echo "→ Creating worktree..." >&2
 
   if ! "${MAIN_REPO_PATH}/scripts/create-worktree.sh" "$issue_number" "$slug" "$port"; then
-    echo ""
-    echo "Error: Failed to create worktree"
+    echo "" >&2
+    echo "Error: Failed to create worktree" >&2
     exit 1
   fi
 
   # Step 8: Update GitHub issue
-  echo ""
-  echo "→ Updating GitHub issue..."
+  echo "" >&2
+  echo "→ Updating GitHub issue..." >&2
 
   if gh issue edit "$issue_number" --add-label "worktree:active" 2>/dev/null; then
-    echo "  ✓ Added worktree:active label"
+    echo "  ✓ Added worktree:active label" >&2
   else
-    echo "  ⚠️  Warning: Could not add label (may need to add manually)"
+    echo "  ⚠️  Warning: Could not add label (may need to add manually)" >&2
   fi
 
   local worktree_path="${WORKTREE_PARENT}/${issue_number}-${slug}"
@@ -188,30 +188,32 @@ main() {
 - Branch: \`feature/${issue_number}-${slug}\`"
 
   if gh issue comment "$issue_number" --body "$comment" 2>/dev/null; then
-    echo "  ✓ Added comment to issue"
+    echo "  ✓ Added comment to issue" >&2
   fi
 
   # Step 9: Success summary
-  echo ""
-  echo -e "${GREEN}✅ Worktree created successfully!${NC}"
-  echo ""
-  echo "Worktree Details:"
-  echo "  Issue: #${issue_number} - ${title}"
-  echo "  Branch: feature/${issue_number}-${slug}"
-  echo "  Path: ${worktree_path}"
-  echo "  Port: ${port}"
-  echo "  GitHub: https://github.com/jeffdt/homskillet-discography/issues/${issue_number}"
-  echo ""
-  echo "To work on this feature:"
-  echo -e "  ${GREEN}cd ${worktree_path}${NC}"
-  echo -e "  ${GREEN}bun start --port ${port}${NC}"
-  echo ""
-  echo "Test your changes at: http://localhost:${port}"
-  echo ""
-  echo "When ready:"
-  echo "  - Create PR: /pr:draft (from within the worktree)"
-  echo "  - Complete work: ./scripts/finish-feature.sh ${issue_number}"
-  echo ""
+  echo "" >&2
+  echo -e "${GREEN}✅ Worktree created successfully!${NC}" >&2
+  echo "" >&2
+  echo "Worktree Details:" >&2
+  echo "  Issue: #${issue_number} - ${title}" >&2
+  echo "  Branch: feature/${issue_number}-${slug}" >&2
+  echo "  Path: ${worktree_path}" >&2
+  echo "  Port: ${port}" >&2
+  echo "  GitHub: https://github.com/jeffdt/homskillet-discography/issues/${issue_number}" >&2
+  echo "" >&2
+  echo "To work on this feature:" >&2
+  echo -e "  ${GREEN}cd ${worktree_path}${NC}" >&2
+  echo -e "  ${GREEN}claude${NC} (will auto-start if using eval)" >&2
+  echo "" >&2
+  echo "Usage:" >&2
+  echo "  Normal: cd ${worktree_path} && claude" >&2
+  echo "  With eval: eval \$(./scripts/feature:init.sh ${issue_number})" >&2
+  echo "" >&2
+
+  # Output commands for eval (to stdout)
+  echo "cd '${worktree_path}'"
+  echo "claude 'Start implementing issue #${issue_number}: ${title}'"
 }
 
 # Run main function
