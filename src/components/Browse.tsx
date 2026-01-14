@@ -37,10 +37,6 @@ export default class Browse extends React.PureComponent<BrowseProps> {
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.delete('q');
     const search = urlParams.toString();
-    // Check if previous page url is the parent directory of current page url.
-    const prevPath = trimEnd((history.location.state as any)?.prevPathname, '/');
-    const currPath = trimEnd(window.location.pathname, '/');
-    const prevPageIsParentDir = prevPath === currPath.slice(0, currPath.lastIndexOf('/'));
 
     const BrowseRow = (props: {
       item: any;
@@ -49,7 +45,10 @@ export default class Browse extends React.PureComponent<BrowseProps> {
       isPlaying?: boolean;
     }) => {
       const { item, onPlay, onCopyLink, isPlaying } = props;
-      item.isBackLink = item.name === '..' && prevPageIsParentDir;
+      // Since directories only nest one level (root -> album), any '..' link should navigate to root.
+      // The '..' item only exists when browsing an album (not at root), so marking it as isBackLink
+      // ensures it always navigates to '/' regardless of whether the user navigated here or deep-linked.
+      item.isBackLink = item.name === '..';
 
       if (item.type === 'directory') {
         return (

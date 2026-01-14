@@ -66,18 +66,6 @@ function VirtualizedList(props: VirtualizedListProps) {
     };
   }, [selectedRow, scrollContainerRef, history]);
 
-  useEffect(() => {
-    // history.block runs *before* navigation.
-    const unblock = history.block((location, action) => {
-      if (!updateHistoryRef.current) return;
-      // console.log(`History updating to location: ${location.pathname} with action: ${action}`);
-      if (action === 'PUSH') {
-        updateHistoryRef.current();
-      }
-    });
-    return () => unblock(); // Cleanup on unmount
-  }, [history, updateHistoryRef]);
-
   const onActivate = useCallback(
     (index: number) => {
       // Song index may differ from item index if there are directories
@@ -262,8 +250,10 @@ function VirtualizedList(props: VirtualizedListProps) {
                         el?.focus({
                           preventScroll: true,
                         });
-                        // Play the song on click
-                        onActivateWithIndex(e);
+                        // Only play songs on click - directories are handled by DirectoryLink
+                        if (item.type !== 'directory') {
+                          onActivateWithIndex(e);
+                        }
                       };
 
                       return (

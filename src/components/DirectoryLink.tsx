@@ -27,34 +27,25 @@ const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLi
   const encodedTo = to.replace('%25', '%2525');
   const finalSearch = search || getSearch();
 
+  // For back links, strip the 'play' and 't' parameters to avoid re-processing
+  const backLinkSearch = isBackLink ? (() => {
+    const urlParams = new URLSearchParams(finalSearch);
+    urlParams.delete('play');
+    urlParams.delete('t');
+    const cleanSearch = urlParams.toString();
+    return cleanSearch ? `?${cleanSearch}` : '';
+  })() : finalSearch;
+
   const toObj = {
-    pathname: encodedTo,
-    search: finalSearch,
+    pathname: isBackLink ? '/' : encodedTo,
+    search: isBackLink ? backLinkSearch : finalSearch,
     state: { prevPathname: window.location.pathname },
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isBackLink) {
-      // Navigate to root instead of using history.goBack()
-      // This is reliable since we never nest directories
-      e.preventDefault();
-      history.push({
-        pathname: '/',
-        search: finalSearch,
-        state: { prevPathname: window.location.pathname },
-      });
-      return;
-    }
-
-    e.preventDefault();
-    history.push(toObj);
   };
 
   return (
     <Link
       to={toObj}
       className={linkClassName}
-      onClick={handleClick}
       tabIndex={-1}
     >
       <span className={folderClassName} />
