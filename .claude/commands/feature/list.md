@@ -75,6 +75,7 @@ branch refs/heads/feature/96-reorganize-worktrees
 ```
 
 For each worktree directory, extract:
+
 - Full path
 - Branch name
 - Current commit
@@ -130,7 +131,7 @@ Active Worktrees: (2)
    Port:    5045
    Areas:   visualizer
    GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45
-   Labels:  category:enhancement, area:visualizer, worktree:active
+   Labels:  category:enhancement, area:visualizer, status:active
    State:   open
    Updated: 2 hours ago
 
@@ -146,7 +147,7 @@ Active Worktrees: (2)
    Port:    5052
    Areas:   player
    GitHub:  https://github.com/jeffdt/homskillet-discography/issues/52
-   Labels:  category:enhancement, area:player, worktree:active
+   Labels:  category:enhancement, area:player, status:active
    State:   open
    Updated: 1 day ago
 
@@ -174,11 +175,11 @@ To create a new worktree:
 These may have been created manually. Use git worktree list to investigate.
 ```
 
-**Missing GitHub label** (directory exists but issue doesn't have worktree:active label):
+**Missing GitHub label** (directory exists but issue doesn't have status:active label):
 
 ```
-⚠️  Note: Issue #45 worktree exists but doesn't have worktree:active label
-Consider adding it: gh issue edit 45 --add-label "worktree:active"
+⚠️  Note: Issue #45 worktree exists but doesn't have status:active label
+Consider adding it: gh issue edit 45 --add-label "status:active"
 ```
 
 ## Examples
@@ -196,7 +197,7 @@ Claude: Active Worktrees: (2)
    Port:    5045
    Areas:   visualizer
    GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45
-   Labels:  category:enhancement, area:visualizer, worktree:active
+   Labels:  category:enhancement, area:visualizer, status:active
    Updated: 2 hours ago
 
    To work on this:
@@ -211,7 +212,7 @@ Claude: Active Worktrees: (2)
    Port:    5047
    Areas:   visualizer
    GitHub:  https://github.com/jeffdt/homskillet-discography/issues/47
-   Labels:  category:enhancement, area:visualizer, worktree:active
+   Labels:  category:enhancement, area:visualizer, status:active
    Updated: 30 minutes ago
 
    To work on this:
@@ -258,7 +259,7 @@ Claude: Active Worktrees: (1)
    Port:    5096
    Areas:   build
    GitHub:  https://github.com/jeffdt/homskillet-discography/issues/96
-   Labels:  category:maintainability, area:build, worktree:active
+   Labels:  category:maintainability, area:build, status:active
    Updated: 10 minutes ago
 
    To work on this:
@@ -279,7 +280,7 @@ To create a new worktree:
 1. **Regular checks**: Run `/feature:list` periodically to see what's active
 2. **Before starting new work**: Check for conflicts with active worktrees
 3. **Use proper cleanup**: Always use `/feature:finish` instead of manual deletion
-4. **Monitor labels**: Ensure worktrees have the `worktree:active` label on their issues
+4. **Monitor labels**: Ensure worktrees have the `status:active` label on their issues
 
 ## Important Notes
 

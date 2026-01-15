@@ -166,7 +166,7 @@ This project uses GitHub Issues for task tracking, integrated with the git workt
 
 - **Category**: `category:bug`, `category:enhancement`, `category:maintainability`, `category:simplification`, `category:deployment`
 - **Area**: `area:visualizer`, `area:player`, `area:browser`, `area:settings`, `area:build`
-- **Status**: `status:wip`, `status:planning`, `status:ready`, `status:blocked`, `worktree:active`
+- **Status**: `status:planning` (not ready to work on), `status:ready` (ready to start), `status:active` (auto-managed by scripts when worktree created)
 
 **Title Format**: Simple description (no prefix needed)
 

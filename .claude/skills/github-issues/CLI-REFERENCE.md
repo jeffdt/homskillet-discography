@@ -88,10 +88,10 @@ gh issue list --label "area:visualizer"
 gh issue list --label "area:visualizer" --label "category:enhancement"
 
 # Exclude label (NOT condition)
-gh issue list --label "!worktree:active"
+gh issue list --label "!status:active"
 
 # Combine include and exclude
-gh issue list --label "area:visualizer" --label "!worktree:active" --label "!status:wip"
+gh issue list --label "area:visualizer" --label "!status:active"
 ```
 
 ### Limit Results
@@ -131,7 +131,7 @@ gh issue view 45 --json number,title,body,labels,state,comments
 gh issue view 45 --json labels --jq '.labels[].name'
 
 # Check if issue has specific label
-gh issue view 45 --json labels --jq '.labels[].name' | grep "worktree:active"
+gh issue view 45 --json labels --jq '.labels[].name' | grep "status:active"
 ```
 
 ## Editing Issues
@@ -139,21 +139,21 @@ gh issue view 45 --json labels --jq '.labels[].name' | grep "worktree:active"
 ### Add Labels
 
 ```bash
-gh issue edit 45 --add-label "worktree:active"
-gh issue edit 45 --add-label "status:wip"
+gh issue edit 45 --add-label "status:active"
+gh issue edit 45 --add-label "status:ready"
 
 # Multiple labels
-gh issue edit 45 --add-label "worktree:active,status:wip"
+gh issue edit 45 --add-label "category:enhancement,area:visualizer"
 ```
 
 ### Remove Labels
 
 ```bash
-gh issue edit 45 --remove-label "worktree:active"
-gh issue edit 45 --remove-label "status:wip"
+gh issue edit 45 --remove-label "status:active"
+gh issue edit 45 --remove-label "status:ready"
 
 # Multiple labels
-gh issue edit 45 --remove-label "worktree:active,status:wip"
+gh issue edit 45 --remove-label "category:enhancement,area:visualizer"
 ```
 
 ### Update Title
@@ -249,9 +249,7 @@ gh issue list --label "area:visualizer" --json number --jq 'length'
 
 ```bash
 gh issue list \
-  --label "!worktree:active" \
-  --label "!status:wip" \
-  --label "!status:blocked" \
+  --label "!status:active" \
   --json number,title,labels
 ```
 
@@ -270,8 +268,8 @@ gh issue view 45 --json labels --jq '.labels[] | select(.name | startswith("cate
 ### Check if Issue Has Label
 
 ```bash
-if gh issue view 45 --json labels --jq '.labels[].name' | grep -q "worktree:active"; then
-  echo "Issue has worktree:active label"
+if gh issue view 45 --json labels --jq '.labels[].name' | grep -q "status:active"; then
+  echo "Issue has status:active label"
 fi
 ```
 

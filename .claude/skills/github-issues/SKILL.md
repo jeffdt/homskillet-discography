@@ -28,11 +28,9 @@ This skill provides GitHub Issues operations for the Homskillet Discography proj
 
 **Status Labels:**
 
-- `status:wip` - Work in progress (direct work on main, no worktree)
-- `status:planning` - Requires exploration/research
-- `status:ready` - Ready to be worked on
-- `status:blocked` - Blocked by another issue
-- `worktree:active` - Has an active worktree
+- `status:planning` - Not ready to work on (requires exploration/research)
+- `status:ready` - Ready to be worked on (default for new issues)
+- `status:active` - Currently being worked on (auto-managed by worktree scripts)
 
 **Special Labels:**
 
@@ -58,10 +56,10 @@ gh issue list --label "category:bug"
 gh issue list --label "status:ready"
 
 # Exclude worktree-active issues
-gh issue list --label "!worktree:active"
+gh issue list --label "!status:active"
 
 # Combine filters (ready visualizer issues not in a worktree)
-gh issue list --label "area:visualizer" --label "status:ready" --label "!worktree:active"
+gh issue list --label "area:visualizer" --label "status:ready" --label "!status:active"
 
 # Get JSON output for programmatic use
 gh issue list --json number,title,labels,state --limit 100
@@ -97,10 +95,10 @@ Use `gh issue edit` to update issue labels:
 
 ```bash
 # Add labels
-gh issue edit 45 --add-label "worktree:active"
+gh issue edit 45 --add-label "status:active"
 
 # Remove labels
-gh issue edit 45 --remove-label "worktree:active"
+gh issue edit 45 --remove-label "status:active"
 
 # Add comment
 gh issue comment 45 --body "Worktree created at .worktrees/45-title"
@@ -117,18 +115,12 @@ gh issue close 45 --comment "Merged in PR #67"
 
 ### Filtering for Available Issues
 
-When selecting issues for `/feature:init`, filter out:
-
-1. Issues with `worktree:active` label (already have a worktree)
-2. Issues with `status:wip` label (being worked on directly)
-3. Issues with `status:blocked` label (blocked by dependencies)
+When selecting issues for `/feature:init`, filter out issues with `status:active` label (already being worked on):
 
 ```bash
 # Get available issues
 gh issue list \
-  --label "!worktree:active" \
-  --label "!status:wip" \
-  --label "!status:blocked" \
+  --label "!status:active" \
   --json number,title,labels
 ```
 
@@ -153,16 +145,16 @@ Extract area labels from issues and compare with active worktrees to detect conf
 
 ### /feature:init
 
-- Lists available issues (excluding worktree:active, status:wip, status:blocked)
+- Lists available issues (excluding status:active, status:wip, status:blocked)
 - Detects area conflicts with active worktrees
-- On selection, adds `worktree:active` label
+- On selection, adds `status:active` label
 - Adds worktree metadata to issue comments
 - Worktree tracked via directory name and GitHub label
 
 ### /feature:finish
 
 - On merge: closes issue with comment, removes worktree directory
-- On abandon: removes `worktree:active` label, keeps issue open
+- On abandon: removes `status:active` label, keeps issue open
 
 ### /feature:list
 

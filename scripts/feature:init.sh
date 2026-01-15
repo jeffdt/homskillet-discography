@@ -1,11 +1,29 @@
 #!/bin/bash
 # Helper script to initialize a worktree for a GitHub issue
-# Usage: ./scripts/init-feature.sh [issue-number]
+#
+# Usage:
+#   ./scripts/feature:init.sh [issue-number]
+#   ./scripts/feature:init.sh              # Interactive mode - shows available issues
+#
+# Using with eval (automatically cd and start Claude):
+#   eval $(./scripts/feature:init.sh 77)
+#
+# The eval pattern works because:
+# - All user-facing messages go to stderr (>&2)
+# - Commands for eval go to stdout (cd and claude commands)
+# - eval executes the stdout commands in your current shell
+#
+# Quick aliases (add to ~/.bashrc or ~/.zshrc):
+#   alias fstart='eval $(./scripts/feature:init.sh)'
+#   alias fs='eval $(./scripts/feature:init.sh)'
+#
+# Or use git aliases (add to .git/config under [alias]):
+#   start = !eval $(./scripts/feature:init.sh "$@")
 #
 # This script:
 # 1. Fetches the issue details from GitHub (including custom slug field)
 # 2. Creates a worktree using the slug from the issue
-# 3. Updates the issue with worktree:active label
+# 3. Updates the issue with status:active label
 # 4. Provides instructions for starting work
 
 set -e  # Exit on error
@@ -40,11 +58,10 @@ list_available_issues() {
   echo "Available issues (not currently in worktrees):" >&2
   echo "" >&2
 
-  # Get all open issues without worktree:active label
+  # Get all open issues without status:active label
   local issues
   issues=$(gh issue list \
-    --state open \
-    --label "!worktree:active" \
+    --search "is:open -label:status:active" \
     --limit 20 \
     --json number,title,labels \
     --jq '.[] | "\(.number)|\(.title)|\(.labels | map(.name) | join(","))"' 2>/dev/null)
@@ -121,13 +138,13 @@ main() {
 
   echo "  Issue: $title" >&2
 
-  # Step 3: Check if already has worktree:active label
-  local has_worktree_label
-  has_worktree_label=$(echo "$issue_data" | jq -r '.labels[] | select(.name=="worktree:active") | .name' || echo "")
+  # Step 3: Check if already has status:active label
+  local has_active_label
+  has_active_label=$(echo "$issue_data" | jq -r '.labels[] | select(.name=="status:active") | .name' || echo "")
 
-  if [ -n "$has_worktree_label" ]; then
+  if [ -n "$has_active_label" ]; then
     echo "" >&2
-    echo "Error: Issue #${issue_number} already has an active worktree" >&2
+    echo "Error: Issue #${issue_number} is already in progress" >&2
     echo "" >&2
     echo "Existing worktrees:" >&2
     find "$WORKTREE_PARENT" -maxdepth 1 -type d -name "${issue_number}-*" 2>/dev/null || true >&2
@@ -175,8 +192,9 @@ main() {
   echo "" >&2
   echo "→ Updating GitHub issue..." >&2
 
-  if gh issue edit "$issue_number" --add-label "worktree:active" 2>/dev/null; then
-    echo "  ✓ Added worktree:active label" >&2
+  # Add status:active and remove status:ready if present
+  if gh issue edit "$issue_number" --add-label "status:active" --remove-label "status:ready" 2>/dev/null; then
+    echo "  ✓ Added status:active label" >&2
   else
     echo "  ⚠️  Warning: Could not add label (may need to add manually)" >&2
   fi
