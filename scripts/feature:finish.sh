@@ -9,7 +9,7 @@
 #
 # Abandon usage (work not completed, return to backlog):
 #   ./scripts/finish-feature.sh [issue-number] --abandon
-#   - Keeps issue open, removes worktree:active label
+#   - Keeps issue open, returns to status:ready
 #   - Adds "Work abandoned" comment
 #   - Removes worktree and deletes branches
 
@@ -178,11 +178,11 @@ main() {
   # Step 6: Update GitHub issue
   if [ "$ABANDON_MODE" = true ]; then
     echo "→ Updating GitHub issue #${issue_number} (abandoning work)..."
-    # Remove worktree:active label and add comment
-    if gh issue edit "$issue_number" --remove-label "worktree:active" 2>/dev/null; then
-      echo "  ✓ Removed worktree:active label"
+    # Remove status:active and add status:ready back
+    if gh issue edit "$issue_number" --remove-label "status:active" --add-label "status:ready" 2>/dev/null; then
+      echo "  ✓ Returned issue to status:ready"
     else
-      echo "  ⚠️  Warning: Could not remove worktree:active label"
+      echo "  ⚠️  Warning: Could not update issue labels"
     fi
 
     if gh issue comment "$issue_number" --body "Work abandoned. Issue returned to backlog." 2>/dev/null; then
@@ -237,7 +237,7 @@ main() {
     echo -e "${GREEN}✅ Successfully abandoned issue #${issue_number}!${NC}"
     echo ""
     echo "Summary:"
-    echo "  ✓ Removed worktree:active label from Issue #${issue_number}"
+    echo "  ✓ Returned Issue #${issue_number} to status:ready"
     echo "  ✓ Issue remains open in backlog"
     echo "  ✓ Removed worktree from ${worktree_dir}"
     echo "  ✓ Deleted branch ${branch_name}"

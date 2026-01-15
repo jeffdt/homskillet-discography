@@ -69,9 +69,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
    ```bash
    gh issue list \
      --state open \
-     --label "!worktree:active" \
-     --label "!status:wip" \
-     --label "!status:blocked" \
+     --label "!status:active" \
      --json number,title,labels \
      --limit 100
    ```
@@ -107,8 +105,8 @@ This document describes detailed workflow patterns for managing GitHub Issues in
 7. **Update Issue State**
 
    ```bash
-   # Add worktree:active label
-   gh issue edit {number} --add-label "worktree:active"
+   # Add status:active label
+   gh issue edit {number} --add-label "status:active"
 
    # Add comment with worktree metadata
    gh issue comment {number} --body "Worktree created:
@@ -175,7 +173,7 @@ This document describes detailed workflow patterns for managing GitHub Issues in
    gh issue comment {number} --body "Pull request created: #{pr_number}"
    ```
 
-4. **Keep worktree:active Label**
+4. **Keep status:active Label**
    - Leave label until PR is merged
    - When PR merges, close issue and clean up
 
@@ -189,7 +187,7 @@ Use the `--abandon` flag when you want to clean up a worktree but keep the issue
 
 This will:
 
-1. Remove the `worktree:active` label from the issue
+1. Remove the `status:active` label from the issue
 2. Add a comment: "Work abandoned. Issue returned to backlog."
 3. Remove the worktree directory
 4. Delete local and remote branches
@@ -233,7 +231,7 @@ The issue remains available in the backlog and can be started again later with `
       Port:    5045
       Areas:   visualizer
       GitHub:  https://github.com/jeffdt/homskillet-discography/issues/45
-      Labels:  category:enhancement, area:visualizer, worktree:active
+      Labels:  category:enhancement, area:visualizer, status:active
       Updated: 2 hours ago
 
    2. Issue #47 - Create new settings pane structure
