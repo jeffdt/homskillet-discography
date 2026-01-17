@@ -164,7 +164,6 @@ class App extends React.Component<AppProps, AppState> {
   async initChipCore(audioCtx: AudioContext, playerNode: ScriptProcessorNode, bufferSize: number) {
     // Load the chip-core Emscripten runtime
 
-    let isStubMode = false;
     try {
       this.chipCore = await ChipCore({
         // Look for .wasm file in web root, not the same location as the app bundle (static/js).
@@ -183,7 +182,6 @@ class App extends React.Component<AppProps, AppState> {
       console.warn('Failed to load chip-core, falling back to stub mode:', e);
       try {
         this.chipCore = await ChipCoreStub();
-        isStubMode = true;
         this.props.toastContext.enqueueToast(
           'Running in STUB MODE - no actual audio playback. UI development only.',
           ToastLevels.WARNING
