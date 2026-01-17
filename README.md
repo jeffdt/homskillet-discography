@@ -17,8 +17,7 @@ The application uses C/C++ audio libraries ([game-music-emu](https://github.com/
 ### Prerequisites
 
 - Node.js and Bun
-- CMake
-- [Emscripten SDK (emsdk)](https://github.com/emscripten-core/emsdk)
+- Docker (for building WebAssembly module)
 
 ### Quick Start
 
@@ -34,14 +33,17 @@ The application will be available at `http://localhost:3000`.
 
 ### Building the WebAssembly Core
 
-The project uses game-music-emu compiled to WebAssembly for NSF playback. To rebuild the WebAssembly module:
+The project uses game-music-emu compiled to WebAssembly for NSF playback. The WebAssembly module is built using Docker:
 
 ```sh
-# Build chip-core.wasm
-bun run build-chip-core
+# First time: Build the Docker image (~10 minutes)
+docker compose build chip-core
+
+# Build chip-core.wasm and chip-core.js
+bun run build-chip-core:docker
 ```
 
-Note: The build script expects emsdk at `~/src/emsdk`. Update the `build-chip-core` script in `package.json` if your emsdk is in a different location.
+Note: The compiled artifacts (chip-core.wasm and chip-core.js) are committed to the repo, so most contributors won't need to rebuild them.
 
 ### Building for Production
 

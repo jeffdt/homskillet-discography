@@ -53,8 +53,7 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 
 **Note:** During active development, assume the dev server is already running. Do not attempt to start it automatically.
 
-- `bun run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
-- `bun run build-chip-core` - Build chip-core locally (requires Emscripten setup)
+- `bun run build-chip-core:docker` - Build chip-core using Docker (no Emscripten setup needed)
 - `bun run build-catalog` - Build music catalog index from public/music/ folder
 - `bun run build-lite` - Build frontend only (skip catalog/chip-core)
 - `bun run build` - Full build (catalog + chip-core + frontend)
@@ -129,7 +128,7 @@ Legacy dependencies (being removed):
 
 - libxmp, fluidlite, libvgm, psflib, lazyusf2, libADLMIDI, mdxmini, farbrausch-v2m
 
-Building requires Emscripten SDK 3.1.39. Use Docker (`bun run build-chip-core:docker`) to avoid local Emscripten setup.
+The build process uses Docker with Emscripten SDK 3.1.39. Run `bun run build-chip-core:docker` to build the WebAssembly module.
 
 ### Stub Mode (Development Without WebAssembly)
 
@@ -316,7 +315,7 @@ See "Working with GitHub Issues" section above for current workflow.
 
 3. **Modifying C/C++ audio engines** (rare):
    - Rebuild game-music-emu submodule if needed
-   - Run `bun run build-chip-core:docker` (or `bun run build-chip-core` if emsdk installed)
+   - Run `bun run build-chip-core:docker` to rebuild WebAssembly module
    - Restart `bun start` to load new chip-core.wasm
 
 4. **Writing tests**:
@@ -387,11 +386,7 @@ background: rgb(16, 16, 16);
 
 ## Building chip-core WebAssembly Module
 
-The chip-core module (game-music-emu compiled to WebAssembly) is required for audio playback. You have two options:
-
-### Option 1: Docker (Recommended)
-
-Use Docker as a build tool - no Emscripten setup needed:
+The chip-core module (game-music-emu compiled to WebAssembly) is required for audio playback. The project uses Docker for building chip-core, eliminating the need for local Emscripten setup:
 
 ```bash
 # First time: Build the Docker image (~10 minutes)
@@ -405,34 +400,6 @@ bun start
 ```
 
 The Docker container builds chip-core and copies the artifacts to your local machine. You continue using your local tools for everything else.
-
-### Option 2: Local Emscripten Setup
-
-For local building without Docker, install Emscripten at `../emsdk`:
-
-```bash
-cd ..
-git clone https://github.com/emscripten-core/emsdk.git
-cd emsdk
-./emsdk install 3.1.39
-./emsdk activate 3.1.39
-cd ../homskillet-discography
-
-# Clone game-music-emu
-cd ..
-git clone https://github.com/mmontag/game-music-emu.git
-cd game-music-emu
-mkdir build && cd build
-source ../../emsdk/emsdk_env.sh
-emcmake cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF ..
-emmake make -j4
-
-# Build chip-core
-cd ../../homskillet-discography
-bun run build-chip-core
-```
-
-**Note**: macOS Sequoia (24.x) has compatibility issues with Emscripten. Docker is recommended for macOS users.
 
 ## Important Notes
 
