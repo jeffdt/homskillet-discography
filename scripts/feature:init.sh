@@ -6,7 +6,7 @@
 #   ./scripts/feature:init.sh              # Interactive mode - shows available issues
 #
 # Using with eval (automatically cd and start Claude):
-#   eval $(./scripts/feature:init.sh 77)
+#   eval "$(./scripts/feature:init.sh 77)"
 #
 # The eval pattern works because:
 # - All user-facing messages go to stderr (>&2)
@@ -14,11 +14,11 @@
 # - eval executes the stdout commands in your current shell
 #
 # Quick aliases (add to ~/.bashrc or ~/.zshrc):
-#   alias fstart='eval $(./scripts/feature:init.sh)'
-#   alias fs='eval $(./scripts/feature:init.sh)'
+#   alias fstart='eval "$(./scripts/feature:init.sh)"'
+#   alias fs='eval "$(./scripts/feature:init.sh)"'
 #
 # Or use git aliases (add to .git/config under [alias]):
-#   start = !eval $(./scripts/feature:init.sh "$@")
+#   start = !eval "$(./scripts/feature:init.sh \"$@\")"
 #
 # This script:
 # 1. Fetches the issue details from GitHub (including custom slug field)
@@ -29,7 +29,8 @@
 set -e  # Exit on error
 
 # Configuration
-MAIN_REPO_PATH="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+# Get the main worktree (repo root), not the current worktree if we're in one
+MAIN_REPO_PATH="$(git worktree list --porcelain 2>/dev/null | grep '^worktree' | head -1 | cut -d' ' -f2 || pwd)"
 WORKTREE_PARENT="${MAIN_REPO_PATH}/.worktrees"
 
 # Colors for output
@@ -182,7 +183,7 @@ main() {
   echo "" >&2
   echo "→ Creating worktree..." >&2
 
-  if ! "${MAIN_REPO_PATH}/scripts/create-worktree.sh" "$issue_number" "$slug" "$port"; then
+  if ! "${MAIN_REPO_PATH}/scripts/create-worktree.sh" "$issue_number" "$slug" "$port" >&2; then
     echo "" >&2
     echo "Error: Failed to create worktree" >&2
     exit 1
@@ -193,7 +194,7 @@ main() {
   echo "→ Updating GitHub issue..." >&2
 
   # Add status:active and remove status:ready if present
-  if gh issue edit "$issue_number" --add-label "status:active" --remove-label "status:ready" 2>/dev/null; then
+  if gh issue edit "$issue_number" --add-label "status:active" --remove-label "status:ready" &>/dev/null; then
     echo "  ✓ Added status:active label" >&2
   else
     echo "  ⚠️  Warning: Could not add label (may need to add manually)" >&2
@@ -205,7 +206,7 @@ main() {
 - Port: ${port}
 - Branch: \`feature/${issue_number}-${slug}\`"
 
-  if gh issue comment "$issue_number" --body "$comment" 2>/dev/null; then
+  if gh issue comment "$issue_number" --body "$comment" &>/dev/null; then
     echo "  ✓ Added comment to issue" >&2
   fi
 
@@ -226,12 +227,12 @@ main() {
   echo "" >&2
   echo "Usage:" >&2
   echo "  Normal: cd ${worktree_path} && claude" >&2
-  echo "  With eval: eval \$(./scripts/feature:init.sh ${issue_number})" >&2
+  echo "  With eval: eval \"\$(./scripts/feature:init.sh ${issue_number})\"" >&2
   echo "" >&2
 
   # Output commands for eval (to stdout)
   echo "cd '${worktree_path}'"
-  echo "claude 'Start implementing issue #${issue_number}: ${title}'"
+  echo "claude 'Start working on issue ${issue_number}. Read the GitHub issue for full context and requirements before implementing. Use AskUserQuestion to clarify anything unclear.'"
 }
 
 # Run main function

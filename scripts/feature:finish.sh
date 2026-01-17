@@ -16,7 +16,8 @@
 set -e  # Exit on error
 
 # Configuration
-MAIN_REPO_PATH="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+# Get the main worktree (repo root), not the current worktree if we're in one
+MAIN_REPO_PATH="$(git worktree list --porcelain 2>/dev/null | grep '^worktree' | head -1 | cut -d' ' -f2 || pwd)"
 WORKTREE_PARENT="${MAIN_REPO_PATH}/.worktrees"
 ABANDON_MODE=false
 
@@ -51,9 +52,9 @@ auto_detect_issue_number() {
 
 # Function to list active worktrees
 list_available_worktrees() {
-  echo ""
-  echo "Active worktrees:"
-  echo ""
+  echo "" >&2
+  echo "Active worktrees:" >&2
+  echo "" >&2
 
   local count=0
   if [ -d "$WORKTREE_PARENT" ]; then
@@ -116,13 +117,13 @@ main() {
     exit 1
   fi
 
-  echo ""
+  echo "" >&2
   if [ "$ABANDON_MODE" = true ]; then
     echo "Abandoning issue #${issue_number}..."
   else
     echo "Finishing issue #${issue_number}..."
   fi
-  echo ""
+  echo "" >&2
 
   # Step 2: Find worktree directory
   local worktree_dir
@@ -138,7 +139,7 @@ main() {
   local worktree_name
   worktree_name=$(basename "$worktree_dir")
 
-  echo "→ Found worktree: $worktree_name"
+  echo "→ Found worktree: $worktree_name" >&2
 
   # Step 3: Get branch name
   local branch_name
@@ -149,7 +150,7 @@ main() {
     branch_name="feature/${worktree_name}"
   fi
 
-  echo "→ Branch: $branch_name"
+  echo "→ Branch: $branch_name" >&2
 
   # Step 4: Check if currently in worktree being finished
   local current_dir
@@ -179,20 +180,20 @@ main() {
   if [ "$ABANDON_MODE" = true ]; then
     echo "→ Updating GitHub issue #${issue_number} (abandoning work)..."
     # Remove status:active and add status:ready back
-    if gh issue edit "$issue_number" --remove-label "status:active" --add-label "status:ready" 2>/dev/null; then
+    if gh issue edit "$issue_number" --remove-label "status:active" --add-label "status:ready" &>/dev/null; then
       echo "  ✓ Returned issue to status:ready"
     else
       echo "  ⚠️  Warning: Could not update issue labels"
     fi
 
-    if gh issue comment "$issue_number" --body "Work abandoned. Issue returned to backlog." 2>/dev/null; then
+    if gh issue comment "$issue_number" --body "Work abandoned. Issue returned to backlog." &>/dev/null; then
       echo "  ✓ Added comment to issue"
     else
       echo "  ⚠️  Warning: Could not add comment to issue"
     fi
   else
     echo "→ Closing GitHub issue #${issue_number}..."
-    if gh issue close "$issue_number" --comment "Completed and merged to main." 2>/dev/null; then
+    if gh issue close "$issue_number" --comment "Completed and merged to main." &>/dev/null; then
       echo "  ✓ Issue closed"
     else
       # Check if already closed
@@ -207,7 +208,7 @@ main() {
   fi
 
   # Step 7: Remove worktree
-  echo "→ Removing worktree..."
+  echo "→ Removing worktree..." >&2
   if git worktree remove --force "$worktree_dir" 2>/dev/null; then
     echo "  ✓ Worktree removed"
   else
@@ -216,7 +217,7 @@ main() {
   fi
 
   # Step 8: Delete local branch
-  echo "→ Deleting local branch..."
+  echo "→ Deleting local branch..." >&2
   if git branch -D "$branch_name" 2>/dev/null; then
     echo "  ✓ Local branch deleted"
   else
@@ -224,7 +225,7 @@ main() {
   fi
 
   # Step 9: Delete remote branch (if exists)
-  echo "→ Deleting remote branch..."
+  echo "→ Deleting remote branch..." >&2
   if git push origin --delete "$branch_name" 2>/dev/null; then
     echo "  ✓ Remote branch deleted"
   else
@@ -232,29 +233,27 @@ main() {
   fi
 
   # Step 10: Success summary
-  echo ""
+  echo "" >&2
   if [ "$ABANDON_MODE" = true ]; then
-    echo -e "${GREEN}✅ Successfully abandoned issue #${issue_number}!${NC}"
-    echo ""
-    echo "Summary:"
-    echo "  ✓ Returned Issue #${issue_number} to status:ready"
-    echo "  ✓ Issue remains open in backlog"
-    echo "  ✓ Removed worktree from ${worktree_dir}"
-    echo "  ✓ Deleted branch ${branch_name}"
+    echo -e "${GREEN}✅ Successfully abandoned issue #${issue_number}!${NC}" >&2
+    echo "" >&2
+    echo "Summary:" >&2
+    echo "  ✓ Returned Issue #${issue_number} to status:ready" >&2
+    echo "  ✓ Issue remains open in backlog" >&2
+    echo "  ✓ Removed worktree from ${worktree_dir}" >&2
+    echo "  ✓ Deleted branch ${branch_name}" >&2
   else
-    echo -e "${GREEN}✅ Successfully finished issue #${issue_number}!${NC}"
-    echo ""
-    echo "Summary:"
-    echo "  ✓ Closed GitHub Issue #${issue_number}"
-    echo "  ✓ Removed worktree from ${worktree_dir}"
-    echo "  ✓ Deleted branch ${branch_name}"
+    echo -e "${GREEN}✅ Successfully finished issue #${issue_number}!${NC}" >&2
+    echo "" >&2
+    echo "Summary:" >&2
+    echo "  ✓ Closed GitHub Issue #${issue_number}" >&2
+    echo "  ✓ Removed worktree from ${worktree_dir}" >&2
+    echo "  ✓ Deleted branch ${branch_name}" >&2
   fi
-  echo ""
-  echo "You are now in: ${MAIN_REPO_PATH} (main branch)"
-  echo ""
-  echo "To start new work:"
-  echo "  ./scripts/init-feature.sh"
-  echo ""
+  echo "" >&2
+
+  # Output cd command for eval (to stdout)
+  echo "cd '${MAIN_REPO_PATH}'"
 }
 
 # Run main function
