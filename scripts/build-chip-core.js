@@ -157,5 +157,10 @@ build_proc.on('exit', function (code) {
     // Don't use --pre-js because it can get stripped out by closure.
     console.log('Prepending %s: \n%s\n', jsOutFile, preJs.trim());
     execSync(`cat <<EOF > ${jsOutFile}\n${preJs}\n$(cat ${jsOutFile})\nEOF`);
+
+    // Append ES module export for Vite compatibility
+    const esModuleExport = '\nexport default CHIP_CORE;';
+    console.log('Appending ES module export to %s', jsOutFile);
+    fs.appendFileSync(jsOutFile, esModuleExport);
   }
 });
