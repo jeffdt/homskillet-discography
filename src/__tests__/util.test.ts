@@ -175,9 +175,7 @@ describe('formatSongDisplayName', () => {
   });
 
   it('should replace underscores with spaces in filename', () => {
-    expect(formatSongDisplayName('/music/Album/my_song_name.nsf')).toBe(
-      'Album - my song name'
-    );
+    expect(formatSongDisplayName('/music/Album/my_song_name.nsf')).toBe('Album - my song name');
   });
 
   it('should handle catalog prefix pattern', () => {
@@ -195,15 +193,11 @@ describe('formatSongDisplayName', () => {
   });
 
   it('should handle deep nested paths', () => {
-    expect(formatSongDisplayName('/music/Artist/Album/song.nsf')).toBe(
-      'Album - song'
-    );
+    expect(formatSongDisplayName('/music/Artist/Album/song.nsf')).toBe('Album - song');
   });
 
   it('should decode URI encoded names', () => {
-    expect(formatSongDisplayName('/music/My%20Album/my%20song.nsf')).toBe(
-      'My Album - my song'
-    );
+    expect(formatSongDisplayName('/music/My%20Album/my%20song.nsf')).toBe('My Album - my song');
   });
 });
 

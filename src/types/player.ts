@@ -50,11 +50,7 @@ export interface BasePlayerState {
 export interface IPlayer extends EventEmitter {
   playerKey: string | null;
   canPlay(fileExtension: string): boolean;
-  loadData(
-    data: Uint8Array,
-    filepath: string,
-    persistedSettings: any
-  ): Promise<void>;
+  loadData(data: Uint8Array, filepath: string, persistedSettings: any): Promise<void>;
   suspend(): void;
   resume(): void;
   togglePause(): boolean;

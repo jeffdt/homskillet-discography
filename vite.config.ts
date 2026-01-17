@@ -10,10 +10,7 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       react({
         babel: {
-          plugins: [
-            '@babel/plugin-syntax-bigint',
-            '@babel/plugin-transform-optional-chaining',
-          ],
+          plugins: ['@babel/plugin-syntax-bigint', '@babel/plugin-transform-optional-chaining'],
         },
       }),
     ],
@@ -63,9 +60,7 @@ export default defineConfig(({ command, mode }) => {
 
     define: {
       'process.env.NODE_ENV': JSON.stringify(mode),
-      'process.env.PUBLIC_URL': JSON.stringify(
-        isProduction ? (env.PUBLIC_URL || '') : ''
-      ),
+      'process.env.PUBLIC_URL': JSON.stringify(isProduction ? env.PUBLIC_URL || '' : ''),
       'process.env.REACT_APP_GOOGLE_ANALYTICS_ID': JSON.stringify(
         env.VITE_GOOGLE_ANALYTICS_ID || ''
       ),

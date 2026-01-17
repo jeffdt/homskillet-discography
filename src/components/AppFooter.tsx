@@ -197,7 +197,11 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
             <span className="inline-icon icon-shuffle" />
           </button>
           <button
-            title={isLocked ? 'Unlock player (allow auto-advance)' : 'Loop current song (disable auto-advance)'}
+            title={
+              isLocked
+                ? 'Unlock player (allow auto-advance)'
+                : 'Loop current song (disable auto-advance)'
+            }
             className={`AppFooter-lock box-button ${isLocked ? 'AppFooter-lock-active' : ''}`}
             onClick={handleToggleLock}
           >

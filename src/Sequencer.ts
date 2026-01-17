@@ -14,12 +14,7 @@ import {
 } from './types/sequencer';
 
 // Re-export constants for backward compatibility
-export {
-  SHUFFLE_OFF,
-  SHUFFLE_ON,
-  NUM_SHUFFLE_MODES,
-  SHUFFLE_LABELS,
-} from './types/sequencer';
+export { SHUFFLE_OFF, SHUFFLE_ON, NUM_SHUFFLE_MODES, SHUFFLE_LABELS } from './types/sequencer';
 
 export default class Sequencer extends EventEmitter {
   private player: IPlayer | null = null;
@@ -67,7 +62,11 @@ export default class Sequencer extends EventEmitter {
 
   private handlePlayerStateUpdate(playerState: SequencerState): void {
     const { isStopped } = playerState;
-    console.debug('Sequencer.handlePlayerStateUpdate(isStopped=%s, isLocked=%s)', isStopped, this.isLocked);
+    console.debug(
+      'Sequencer.handlePlayerStateUpdate(isStopped=%s, isLocked=%s)',
+      isStopped,
+      this.isLocked
+    );
 
     if (isStopped) {
       this.currUrl = null;

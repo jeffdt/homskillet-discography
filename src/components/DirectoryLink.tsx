@@ -28,13 +28,15 @@ const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLi
   const finalSearch = search || getSearch();
 
   // For back links, strip the 'play' and 't' parameters to avoid re-processing
-  const backLinkSearch = isBackLink ? (() => {
-    const urlParams = new URLSearchParams(finalSearch);
-    urlParams.delete('play');
-    urlParams.delete('t');
-    const cleanSearch = urlParams.toString();
-    return cleanSearch ? `?${cleanSearch}` : '';
-  })() : finalSearch;
+  const backLinkSearch = isBackLink
+    ? (() => {
+        const urlParams = new URLSearchParams(finalSearch);
+        urlParams.delete('play');
+        urlParams.delete('t');
+        const cleanSearch = urlParams.toString();
+        return cleanSearch ? `?${cleanSearch}` : '';
+      })()
+    : finalSearch;
 
   const toObj = {
     pathname: isBackLink ? '/' : encodedTo,
@@ -43,11 +45,7 @@ const DirectoryLink: React.FC<DirectoryLinkProps> = ({ to, dim, search, isBackLi
   };
 
   return (
-    <Link
-      to={toObj}
-      className={linkClassName}
-      tabIndex={-1}
-    >
+    <Link to={toObj} className={linkClassName} tabIndex={-1}>
       <span className={folderClassName} />
       {children}
     </Link>

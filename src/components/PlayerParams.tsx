@@ -67,7 +67,10 @@ interface PlayerParamsState {
   flashingSetting: string | null;
 }
 
-export default class PlayerParams extends React.PureComponent<PlayerParamsProps, PlayerParamsState> {
+export default class PlayerParams extends React.PureComponent<
+  PlayerParamsProps,
+  PlayerParamsState
+> {
   private flashTimer: NodeJS.Timeout | null = null;
 
   constructor(props: PlayerParamsProps) {
@@ -291,7 +294,11 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps,
                       }}
                       value={value}
                     ></input>{' '}
-                    <span className={this.state.flashingSetting === param.id ? 'Settings-value-flash' : ''}>
+                    <span
+                      className={
+                        this.state.flashingSetting === param.id ? 'Settings-value-flash' : ''
+                      }
+                    >
                       {this.formatAsPercentage(value)}
                     </span>
                     {param.hint && <InfoIcon tooltip={param.hint} />}

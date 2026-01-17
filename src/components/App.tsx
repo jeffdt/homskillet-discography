@@ -5,6 +5,8 @@ import clamp from 'lodash/clamp';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
 import ChipCore from '../chip-core';
+import ChipCoreStub from '../chip-core-stub';
+import { MOCK_DIRECTORIES } from '../stub-data/mock-directories';
 import {
   API_BASE,
   CATALOG_PREFIX,
@@ -176,13 +178,23 @@ class App extends React.Component<AppProps, AppState> {
         printErr: (msg: string) => console.debug('[stderr] ' + msg),
       });
     } catch (e) {
-      // Browser doesn't support WASM (Safari in iOS Simulator)
-      this.setState({ loading: false });
-      this.props.toastContext.enqueueToast(
-        'Error loading player engine. Old browser?',
-        ToastLevels.ERROR
-      );
-      return;
+      // Fallback to stub mode if chip-core fails to load
+      console.warn('Failed to load chip-core, falling back to stub mode:', e);
+      try {
+        this.chipCore = await ChipCoreStub();
+        this.props.toastContext.enqueueToast(
+          'Running in STUB MODE - no actual audio playback. UI development only.',
+          ToastLevels.WARNING
+        );
+      } catch (stubError) {
+        // If even the stub fails, we're in trouble
+        this.setState({ loading: false });
+        this.props.toastContext.enqueueToast(
+          'Error loading player engine. Old browser?',
+          ToastLevels.ERROR
+        );
+        return;
+      }
     }
 
     // Get debug from location.search
@@ -643,7 +655,12 @@ class App extends React.Component<AppProps, AppState> {
     // Load from static directories.json (both dev and production)
     const fetchPromise = fetch(`${PUBLIC_URL}/directories.json`)
       .then((response) => response.json())
-      .then((directories: any) => directories[slashPath] || []);
+      .then((directories: any) => directories[slashPath] || [])
+      .catch((error) => {
+        // Fallback to mock data in stub mode
+        console.warn('Failed to load directories.json, using mock catalog data:', error);
+        return MOCK_DIRECTORIES[slashPath] || [];
+      });
 
     return fetchPromise.then((items: any[]) => {
       items.forEach((item) => {

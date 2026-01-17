@@ -4,6 +4,7 @@
  */
 
 import { PUBLIC_URL } from './config';
+import { MOCK_CATALOG } from './stub-data/mock-directories';
 
 export async function handleShufflePlayLogic(
   path: string,
@@ -14,8 +15,15 @@ export async function handleShufflePlayLogic(
   // Works in both development and production
   const catalogUrl = PUBLIC_URL ? `${PUBLIC_URL}/catalog.json` : '/catalog.json';
 
-  const response = await fetch(catalogUrl);
-  const allFiles: string[] = await response.json();
+  let allFiles: string[];
+  try {
+    const response = await fetch(catalogUrl);
+    allFiles = await response.json();
+  } catch (error) {
+    // Fallback to mock catalog in stub mode
+    console.warn('Failed to load catalog.json, using mock catalog data:', error);
+    allFiles = MOCK_CATALOG;
+  }
 
   // Filter files that start with the given path
   const matchingFiles = path
