@@ -9,12 +9,9 @@ export interface WeightingMode {
 }
 
 export interface VisualizerState {
-  vizMode: number;
-  weightingMode: number;
-  fftSize: number;
-  speed: number;
   enabled: boolean;
   colorPalette: number;
+  isMaximized: boolean;
 }
 
 export interface VisualizerProps {
@@ -22,4 +19,8 @@ export interface VisualizerProps {
   audioCtx: AudioContext;
   sourceNode: ScriptProcessorNode;
   paused: boolean;
+  persistedSettings: Record<string, any>;
+  onThemeChange: (theme: number) => void;
+  onThemesExpandedChange: (expanded: boolean) => void;
+  onMaximizedChange: (maximized: boolean) => void;
 }

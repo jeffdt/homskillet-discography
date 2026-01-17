@@ -3,7 +3,10 @@
 .vscode/
 
 # Dependencies
-node_modules/
+node_modules
+
+# Worktrees
+.worktrees/
 
 # Build outputs
 build/
@@ -33,6 +36,9 @@ _ignore/
 
 # Claude journals
 .claude/journals
+
+# Claude local config (machine-specific)
+.claude/settings.local.json
 
 # NOTE: The following are now COMMITTED (no longer ignored):
 # - src/chip-core.js

@@ -1,10 +1,12 @@
 # Homskillet Discography
 
-An interactive discography website for NSF (NES Sound Format) files created by Homskillet.
+A technical sandbox for exploring audio-visual and game development concepts, powered by NSF (NES Sound Format) music created by Homskillet.
 
-This music was developed over a period of 3-4 years for several video games I was building.
+This project is as much about experimentation and learning as it is about listening to music. It's a playground for testing audio visualization techniques, real-time audio processing, interactive UI patterns, and WebAssembly integration. Visitors are encouraged to tweak settings, explore controls, and see how different parameters affect the audio-visual experience.
 
-This is a fork of [Chip Player JS](https://github.com/mmontag/chip-player-js) by Matt Montag, customized into a personal music showcase.
+The music was developed over a period of 3-4 years for several video games I was building.
+
+This is a fork of [Chip Player JS](https://github.com/mmontag/chip-player-js) by Matt Montag, transformed into an interactive audio-visual laboratory.
 
 ## Technology Stack
 
@@ -13,6 +15,7 @@ The application uses C/C++ audio libraries ([game-music-emu](https://github.com/
 ## Development
 
 ### Prerequisites
+
 - Node.js and Bun
 - CMake
 - [Emscripten SDK (emsdk)](https://github.com/emscripten-core/emsdk)
@@ -78,6 +81,7 @@ This project is licensed under [GPLv3](LICENSE), inherited from the upstream Chi
 Forked from [Chip Player JS](https://github.com/mmontag/chip-player-js) by Matt Montag.
 
 Built upon several open-source projects including:
+
 - [game-music-emu](https://github.com/mmontag/game-music-emu) - Game console music format emulation
 - [Emscripten](https://emscripten.org/) - C/C++ to WebAssembly compiler
 - [React](https://react.dev/) - UI framework

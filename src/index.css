@@ -1,122 +1,125 @@
-@import "fonts/fonts.css";
+@import 'fonts/fonts.css';
 
 :root {
-    --charH: 19px;
-    --charW1: 8px;
-    --charW2: 16px;
-    --charW2neg: -16px;
-    --railH: 3px;
-    --knobW: 8px;
-    --knobH: 19px;
-    --buttonHeight: var(--charH);
-    --rowHeight: var(--charH);
+  --charH: 19px;
+  --charW1: 8px;
+  --charW2: 16px;
+  --charW2neg: -16px;
+  --railH: 3px;
+  --knobW: 8px;
+  --knobH: 19px;
+  --buttonHeight: var(--charH);
+  --rowHeight: var(--charH);
 
-    /* Theme: Metallic Wing Green */
-    /* Colors from: Grayscales (#101010, #202020, #7F7F7F, #C3C3C3, #FEFEFE) + Greens (#9BFE38, #66CB01) */
-    /* Strategy: Monochrome base with selective green accents for emphasis */
+  /* Theme: Metallic Wing Green */
+  /* Colors from: Grayscales (#101010, #202020, #7F7F7F, #C3C3C3, #FEFEFE) + Greens (#9BFE38, #66CB01) */
+  /* Strategy: Monochrome base with selective green accents for emphasis */
 
-    /* ACCENT COLORS - Change these two values to swap the entire theme's accent colors! */
-    --accent: #9bfe38; /* Light Green - main accent (playing songs, hover feedback, title) */
-    --accent-dark: #66cb01; /* Dark Green - darker accent for active/pressed states */
+  /* ACCENT COLORS - Change these two values to swap the entire theme's accent colors! */
+  --accent: #9bfe38;
+  /* Light Green - main accent (playing songs, hover feedback, title) */
+  --accent-dark: #66cb01;
+  /* Dark Green - darker accent for active/pressed states */
 
-    --clickable: #c3c3c3; /* Light Gray - most interactive elements */
-    --active: var(
-        --accent-dark
-    ); /* Use dark accent for active/pressed states */
-    --button: #202020; /* Dark Gray - button background */
-    --selected: var(--accent); /* Use accent for selected items */
-    --focus: #202020; /* Dark Gray - subtle focus indication */
-    --background: #101010; /* Black - main background */
-    --shadow: #000000; /* Pure black - shadows */
-    --neutral0: #101010; /* Black */
-    --neutral1: #202020; /* Dark Gray */
-    --neutral2: #7f7f7f; /* Medium Gray - body text */
-    --neutral3: #c3c3c3; /* Light Gray - emphasized text */
-    --neutral4: #fefefe; /* White - headings, high contrast */
+  --clickable: #c3c3c3;
+  /* Light Gray - most interactive elements */
+  --active: var(--accent-dark);
+  /* Use dark accent for active/pressed states */
+  --button: #202020;
+  /* Dark Gray - button background */
+  --selected: var(--accent);
+  /* Use accent for selected items */
+  --focus: #202020;
+  /* Dark Gray - subtle focus indication */
+  --background: #101010;
+  /* Black - main background */
+  --shadow: #000000;
+  /* Pure black - shadows */
+  --neutral0: #101010;
+  /* Black */
+  --neutral1: #202020;
+  /* Dark Gray */
+  --neutral2: #7f7f7f;
+  /* Medium Gray - body text */
+  --neutral3: #c3c3c3;
+  /* Light Gray - emphasized text */
+  --neutral4: #fefefe;
+  /* White - headings, high contrast */
 }
 
 .grid {
-    /* utility class for testing the character grid */
-    background-image:
-        repeating-linear-gradient(
-            to right,
-            #fff1 0px,
-            #fff1 1px,
-            #fff0 1px,
-            #fff0 var(--charW1)
-        ),
-        repeating-linear-gradient(
-            to bottom,
-            #fff2 0px,
-            #fff2 1px,
-            #fff0 1px,
-            #fff0 var(--charH)
-        );
+  /* utility class for testing the character grid */
+  background-image:
+    repeating-linear-gradient(to right, #fff1 0px, #fff1 1px, #fff0 1px, #fff0 var(--charW1)),
+    repeating-linear-gradient(to bottom, #fff2 0px, #fff2 1px, #fff0 1px, #fff0 var(--charH));
 }
 
 .App * {
-    font: var(--font);
-    -webkit-font-smoothing: antialiased; /* supports Japanese characters better than 'none' */
-    -moz-osx-font-smoothing: grayscale; /* Firefox */
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    text-decoration: none;
+  font: var(--font);
+  -webkit-font-smoothing: antialiased;
+  /* supports Japanese characters better than 'none' */
+  -moz-osx-font-smoothing: grayscale;
+  /* Firefox */
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-decoration: none;
 }
 
 :root {
-    --font: var(--fontMain);
-    --font-accent: var(--fontAccent);
-    --font-title: var(--fontTitle);
+  --font: var(--fontMain);
+  --font-accent: var(--fontAccent);
+  --font-title: var(--fontTitle);
 
-    --message-box-background: var(--button);
-    --message-box-color: var(--clickable);
-    --message-box-info-text-color: var(--clickable);
-    --message-box-inner-border: 1px solid var(--clickable);
-    --message-box-box-shadow: var(--charW1) var(--charW1) var(--shadow);
-    --box-shadow: var(--charW1) var(--charW1) var(--shadow);
-    --hide-mtime-column-below-width: 800px;
+  --message-box-background: var(--button);
+  --message-box-color: var(--clickable);
+  --message-box-info-text-color: var(--clickable);
+  --message-box-inner-border: 1px solid var(--clickable);
+  --message-box-box-shadow: var(--charW1) var(--charW1) var(--shadow);
+  --box-shadow: var(--charW1) var(--charW1) var(--shadow);
+  --hide-mtime-column-below-width: 800px;
 }
 
 /* chunky DOS animation */
 .message-box {
-    transition: all 250ms steps(5);
+  transition: all 250ms steps(5);
 }
+
 .toast-box-outer {
-    transition: all 150ms steps(4);
+  transition: all 150ms steps(4);
 }
 
 *::selection {
-    background: rgba(170, 170, 170, 0.99);
-    color: var(--background);
+  background: rgba(170, 170, 170, 0.99);
+  color: var(--background);
 }
 
 a:active {
-    background: var(--active);
+  background: var(--active);
 }
 
 a:focus,
 button:focus,
 select:focus,
 input:focus,
-input[type="checkbox"]:focus,
-input[type="radio"]:focus,
-input[type="range"]:focus {
-    outline: none;
-    background-color: var(--focus);
+input[type='checkbox']:focus,
+input[type='radio']:focus,
+input[type='range']:focus {
+  outline: none;
+  background-color: var(--focus);
 }
 
 input,
 button,
 select,
 textarea {
-    font: inherit;
+  font: inherit;
 }
 
 /* Basic elements */
 
 body {
-    background: var(--background);
-    overflow: hidden;
-    color: var(--neutral2);
+  background: var(--background);
+  overflow: hidden;
+  color: var(--neutral2);
 }
 
 /* Margins in one direction (bottom) */
@@ -126,1404 +129,2558 @@ h3,
 h4,
 h5,
 h6 {
-    &:first-child {
-        margin: 0 0 var(--charH) 0;
-    }
-    color: var(--neutral4);
-    margin: var(--charH) 0;
-    padding: 0;
-    font: var(--font-accent) !important;
+  &:first-child {
+    margin: 0 0 var(--charH) 0;
+  }
+
+  color: var(--neutral4);
+  margin: var(--charH) 0;
+  padding: 0;
+  font: var(--font-accent) !important;
 }
 
 p {
-    margin: 0 0 var(--charH) 0;
+  margin: 0 0 var(--charH) 0;
 }
 
 a {
-    text-decoration: none;
-    color: var(--clickable);
-    cursor: pointer;
+  text-decoration: none;
+  color: var(--clickable);
+  cursor: pointer;
 }
 
 a:visited {
-    color: var(--clickable);
+  color: var(--clickable);
 }
 
 /* Form elements */
 
 button {
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    text-wrap: nowrap;
-    align-self: start;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    color: var(--clickable);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  text-wrap: nowrap;
+  align-self: start;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  color: var(--clickable);
 }
+
 select {
-    border: none;
-    border-radius: 0;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    padding: 0 calc(var(--charW1) * 3) 0 var(--charW1);
-    color: var(--clickable);
-    background-color: var(--button);
-    background-image: /* A little down-arrow */
-        linear-gradient(60deg, transparent 50%, var(--clickable) 50%),
-        linear-gradient(120deg, var(--clickable) 50%, transparent 50%);
-    background-position:
-        calc(100% - var(--charW1) * 1.5) 5px,
-        calc(100% - var(--charW1)) 5px;
-    background-size:
-        calc(var(--charW1) * 0.5) 12px,
-        calc(var(--charW1) * 0.5) 12px;
-    background-repeat: no-repeat;
-    max-width: 224px;
+  border: none;
+  border-radius: 0;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  padding: 0 calc(var(--charW1) * 3) 0 var(--charW1);
+  color: var(--clickable);
+  background-color: var(--button);
+  background-image:
+    /* A little down-arrow */
+    linear-gradient(60deg, transparent 50%, var(--clickable) 50%),
+    linear-gradient(120deg, var(--clickable) 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--charW1) * 1.5) 5px,
+    calc(100% - var(--charW1)) 5px;
+  background-size:
+    calc(var(--charW1) * 0.5) 12px,
+    calc(var(--charW1) * 0.5) 12px;
+  background-repeat: no-repeat;
+  max-width: 224px;
 }
+
 select option {
-    font-size: 14px;
+  font-size: 14px;
 }
+
 .Song-now-playing .FavoriteButton:not(.isFavorite) {
-    color: var(--background);
+  color: var(--background);
 }
-@media screen and (max-width: 800px) {
-    .BrowseList-colMtime {
-        display: none;
-    }
-}
-@container (max-width: 800px) {
-    .BrowseList-colMtime {
-        display: none;
-    }
-}
+
 button:active {
-    background: var(--active);
+  background: var(--active);
 }
+
 button:disabled {
-    background: var(--neutral1);
-    color: var(--neutral3);
+  background: var(--neutral1);
+  color: var(--neutral3);
 }
+
 .box-button {
-    background: var(--button);
-    box-shadow: var(--box-shadow);
-    white-space: pre;
-    padding: 0 var(--charW2);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--charW1);
+  background: var(--button);
+  box-shadow: var(--box-shadow);
+  white-space: pre;
+  padding: 0 var(--charW2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--charW1);
 }
+
+@media (orientation: portrait), (max-width: 768px) {
+  .box-button {
+    min-height: 44px;
+    padding: var(--charW1) var(--charW2);
+    font-size: 18px;
+  }
+}
+
 .box-button:hover {
-    background: #fefefe;
-    color: #101010; /* White bg, black text - hover guidance */
+  background: #fefefe;
+  color: #101010;
+  /* White bg, black text - hover guidance */
 }
+
 .box-button:hover .inline-icon {
-    background-color: #101010; /* Black icon on white bg */
+  background-color: #101010;
+  /* Black icon on white bg */
 }
+
 .box-button:active {
-    box-shadow: none;
-    background: var(--accent);
-    color: #101010; /* Accent bg, black text - electrify! */
+  box-shadow: none;
+  background: var(--accent);
+  color: #101010;
+  /* Accent bg, black text - electrify! */
 }
+
 .box-button:active .inline-icon {
-    background-color: #101010; /* Black icon on accent bg */
+  background-color: #101010;
+  /* Black icon on accent bg */
 }
 
 .tab {
-    padding: 0 15px 0 15px;
-    background: transparent;
-    border: 1px solid var(--clickable);
-    border-bottom: none;
-    border-radius: 3px 3px 0 0;
-    box-sizing: border-box;
-    height: var(--charH);
+  padding: 0 15px 0 15px;
+  background: transparent;
+  border: 1px solid var(--clickable);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  box-sizing: border-box;
+  height: var(--charH);
 }
 
 .tab-selected {
-    border-bottom: 1px solid var(--background);
-    background: var(--background);
-    margin-bottom: -1px;
-    height: calc(var(--charH) + 1px);
-}
-input[type="checkbox"],
-input[type="radio"] {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    margin: 0 var(--charW1) 0 0;
-    color: #7f7f7f; /* Medium Gray - darker when unchecked */
-    white-space: pre; /* prevent iOS Safari text wrapping */
+  border-bottom: 1px solid var(--background);
+  background: var(--background);
+  margin-bottom: -1px;
+  height: calc(var(--charH) + 1px);
 }
 
-input[type="checkbox"]:before {
-    content: "";
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border: 2px solid #7f7f7f; /* Medium Gray - darker when unchecked */
-    box-sizing: border-box;
-    vertical-align: middle;
-}
-input[type="checkbox"]:checked:before {
-    background-color: #c3c3c3; /* Light Gray - filled when checked */
-    border-color: #c3c3c3;
-}
-input[type="checkbox"]:hover:before {
-    border-color: #fefefe; /* White - hover guidance */
-}
-input[type="checkbox"]:checked:hover:before {
-    background-color: #fefefe;
-    border-color: #fefefe;
-}
-input[type="checkbox"]:active:before {
-    border-color: var(--accent); /* Accent - electrify on click */
-}
-input[type="checkbox"]:checked:active:before {
-    background-color: var(--accent);
-    border-color: var(--accent);
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  margin: 0 var(--charW1) 0 0;
+  color: #7f7f7f;
+  /* Medium Gray - darker when unchecked */
+  white-space: pre;
+  /* prevent iOS Safari text wrapping */
 }
 
-input[type="radio"]:before {
-    content: "( )";
-}
-input[type="radio"]:checked:before {
-    content: "(•)";
-    color: #c3c3c3; /* Light Gray - active but not prominent */
-}
-input[type="radio"]:hover:before {
-    color: #fefefe; /* White - hover guidance */
-}
-input[type="radio"]:active:before {
-    color: var(--accent); /* Accent - electrify on click */
-}
-input[type="text"]::selection {
-    background-color: #ffffff;
-}
-input[type="text"]::-webkit-input-placeholder {
-    color: var(--neutral1);
+input[type='checkbox']:before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #7f7f7f;
+  /* Medium Gray - darker when unchecked */
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 
-input[type="text"] {
-    border: 0;
-    border-radius: 0;
-    background-color: var(--neutral2);
-    color: var(--background);
-    padding: 0 var(--charW1);
-    width: 256px;
-    height: var(--charH); /* Firefox */
+@media (orientation: portrait), (max-width: 768px) {
+  input[type='checkbox']:before {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #7f7f7f;
+  }
+}
+
+input[type='checkbox']:checked:before {
+  background-color: #c3c3c3;
+  /* Light Gray - filled when checked */
+  border-color: #c3c3c3;
+}
+
+input[type='checkbox']:hover:before {
+  border-color: #fefefe;
+  /* White - hover guidance */
+}
+
+input[type='checkbox']:checked:hover:before {
+  background-color: #fefefe;
+  border-color: #fefefe;
+}
+
+input[type='checkbox']:active:before {
+  border-color: var(--accent);
+  /* Accent - electrify on click */
+}
+
+input[type='checkbox']:checked:active:before {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+input[type='radio']:before {
+  content: '( )';
+}
+
+input[type='radio']:checked:before {
+  content: '(•)';
+  color: #c3c3c3;
+  /* Light Gray - active but not prominent */
+}
+
+input[type='radio']:hover:before {
+  color: #fefefe;
+  /* White - hover guidance */
+}
+
+input[type='radio']:active:before {
+  color: var(--accent);
+  /* Accent - electrify on click */
+}
+
+input[type='text']::selection {
+  background-color: #ffffff;
+}
+
+input[type='text']::-webkit-input-placeholder {
+  color: var(--neutral1);
+}
+
+input[type='text'] {
+  border: 0;
+  border-radius: 0;
+  background-color: var(--neutral2);
+  color: var(--background);
+  padding: 0 var(--charW1);
+  width: 256px;
+  height: var(--charH);
+  /* Firefox */
 }
 
 .inline {
-    display: inline-block;
-    margin-right: var(--charW1);
+  display: inline-block;
+  margin-right: var(--charW1);
 }
+
 .inline:last-child {
-    margin-right: 0;
+  margin-right: 0;
 }
 
-input[type="range"] {
-    margin: 0;
-    -webkit-appearance: none;
-    background: transparent;
-    vertical-align: bottom;
-    height: var(--charH); /* Firefox */
-    width: 128px; /* Firefox */
-}
-input[type="range"]::-webkit-slider-runnable-track {
-    height: var(--railH);
-    border: 1px solid #7f7f7f; /* Medium Gray - darker rail */
-    margin: var(--charW1) 0;
-}
-input[type="range"]::-moz-range-track {
-    /* Firefox */
-    height: var(--railH);
-    border: 1px solid #7f7f7f; /* Medium Gray - darker rail */
-    margin: var(--charW1) 0;
-    box-sizing: border-box;
+input[type='range'] {
+  margin: 0;
+  -webkit-appearance: none;
+  background: transparent;
+  vertical-align: bottom;
+  height: var(--charH);
+  /* Firefox */
+  width: 128px;
+  /* Firefox */
 }
 
-input[type="range"]:disabled::-webkit-slider-runnable-track {
-    border-color: var(--neutral2);
+input[type='range']::-webkit-slider-runnable-track {
+  height: var(--railH);
+  border: 1px solid #7f7f7f;
+  /* Medium Gray - darker rail */
+  margin: var(--charW1) 0;
 }
-input[type="range"]:disabled::-moz-range-track {
-    border-color: var(--neutral2);
-} /* Firefox */
-input[type="range"]:disabled::-webkit-slider-thumb {
-    background: var(--neutral2);
+
+input[type='range']::-moz-range-track {
+  /* Firefox */
+  height: var(--railH);
+  border: 1px solid #7f7f7f;
+  /* Medium Gray - darker rail */
+  margin: var(--charW1) 0;
+  box-sizing: border-box;
 }
-input[type="range"]:disabled::-moz-range-thumb {
-    background: var(--neutral2);
-} /* Firefox */
-input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    background: var(--clickable);
-    height: var(--knobH);
-    margin-top: calc(var(--knobH) / -2);
-    width: var(--knobW);
+
+input[type='range']:disabled::-webkit-slider-runnable-track {
+  border-color: var(--neutral2);
 }
-input[type="range"]:hover::-webkit-slider-thumb {
-    background: #fefefe; /* White - hover guidance */
+
+input[type='range']:disabled::-moz-range-track {
+  border-color: var(--neutral2);
 }
-input[type="range"]:active::-webkit-slider-thumb {
-    background: var(--accent); /* Accent - electrify on click */
+
+/* Firefox */
+input[type='range']:disabled::-webkit-slider-thumb {
+  background: var(--neutral2);
 }
-input[type="range"]::-moz-range-thumb {
-    /* Firefox */
-    appearance: none;
-    background: var(--clickable);
-    border: 0;
-    border-radius: 0;
-    height: var(--knobH);
-    margin-top: calc(var(--knobH) / -2);
-    width: var(--knobW);
+
+input[type='range']:disabled::-moz-range-thumb {
+  background: var(--neutral2);
 }
-input[type="range"]:hover::-moz-range-thumb {
-    background: #fefefe; /* White - hover guidance */
+
+/* Firefox */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background: var(--clickable);
+  height: var(--knobH);
+  margin-top: calc(var(--knobH) / -2);
+  width: var(--knobW);
 }
-input[type="range"]:active::-moz-range-thumb {
-    background: var(--accent); /* Accent - electrify on click */
+
+input[type='range']:hover::-webkit-slider-thumb {
+  background: #fefefe;
+  /* White - hover guidance */
+}
+
+input[type='range']:active::-webkit-slider-thumb {
+  background: var(--accent);
+  /* Accent - electrify on click */
+}
+
+input[type='range']::-moz-range-thumb {
+  /* Firefox */
+  appearance: none;
+  background: var(--clickable);
+  border: 0;
+  border-radius: 0;
+  height: var(--knobH);
+  margin-top: calc(var(--knobH) / -2);
+  width: var(--knobW);
+}
+
+input[type='range']:hover::-moz-range-thumb {
+  background: #fefefe;
+  /* White - hover guidance */
+}
+
+input[type='range']:active::-moz-range-thumb {
+  background: var(--accent);
+  /* Accent - electrify on click */
 }
 
 /* Component overrides */
 
 body,
 #root {
-    margin: 0;
+  margin: 0;
 }
 
 .App {
-    padding: 0 var(--charW2);
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    font-variant-numeric: tabular-nums;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  padding: 0 var(--charW2);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 /* CRT Scanline Sweep Effect */
 .App::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        transparent 49.7%,
-        rgba(255, 255, 255, 0.05) 49.85%,
-        rgba(255, 255, 255, 0.12) 50%,
-        rgba(255, 255, 255, 0.05) 50.15%,
-        transparent 50.3%,
-        transparent 100%
-    );
-    pointer-events: none;
-    z-index: 1;
-    animation: scanline-sweep 12s linear infinite;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 49.7%,
+    rgba(255, 255, 255, 0.05) 49.85%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.05) 50.15%,
+    transparent 50.3%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  animation: scanline-sweep 12s linear infinite;
 }
 
 /* Second scanline - faster, less frequent */
 .App::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to bottom,
-        transparent 0%,
-        transparent 49.7%,
-        rgba(255, 255, 255, 0.04) 49.85%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0.04) 50.15%,
-        transparent 50.3%,
-        transparent 100%
-    );
-    pointer-events: none;
-    z-index: 1;
-    animation: scanline-sweep 5s linear infinite;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 49.7%,
+    rgba(255, 255, 255, 0.04) 49.85%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 50.15%,
+    transparent 50.3%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  animation: scanline-sweep 5s linear infinite;
 }
 
 @keyframes scanline-sweep {
-    from {
-        transform: translateY(-100%);
-    }
-    to {
-        transform: translateY(100%);
-    }
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .App::before,
-    .App::after {
-        animation: none;
-        opacity: 0;
-    }
+  .App::before,
+  .App::after {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* CRT Noise/Grain Filter */
 .crt-noise-overlay {
-    position: fixed; /* Fixed instead of absolute to break out of stacking contexts */
-    inset: 0;
-    filter: url(#crt-noise);
-    opacity: 0.2;
-    pointer-events: none;
-    z-index: 99999; /* Maximum z-index to cover everything */
-    mix-blend-mode: overlay;
-    background: white; /* Need a background for the filter to affect */
+  position: fixed;
+  /* Fixed instead of absolute to break out of stacking contexts */
+  inset: 0;
+  filter: url(#crt-noise);
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 99999;
+  /* Maximum z-index to cover everything */
+  mix-blend-mode: overlay;
+  background: white;
+  /* Need a background for the filter to affect */
 }
 
 @media (prefers-reduced-motion: reduce) {
-    /* Disable noise animation for users who prefer reduced motion */
-    #crt-noise feTurbulence animate {
-        display: none;
-    }
-    .crt-noise-overlay {
-        /* Keep static noise but at slightly lower opacity */
-        opacity: 0.025;
-    }
+  /* Disable noise animation for users who prefer reduced motion */
+  #crt-noise feTurbulence animate {
+    display: none;
+  }
+
+  .crt-noise-overlay {
+    /* Keep static noise but at slightly lower opacity */
+    opacity: 0.025;
+  }
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .App {
-        padding: 0 var(--charW1);
-    }
+  :root {
+    /* Increase character dimensions for mobile touch targets */
+    --charH: 44px;
+    /* Apple recommends 44px minimum touch target */
+    --charW1: 12px;
+    --charW2: 24px;
+    --rowHeight: 44px;
+    --buttonHeight: 44px;
+    --railH: 6px;
+    /* Thicker rail for easier touch interaction */
+    --knobW: 16px;
+    /* Wider knob for easier grabbing */
+    --knobH: 44px;
+    /* Taller knob for easier grabbing */
 
-    /* Adjust negative margins to match reduced padding */
-    .AppHeader,
-    .App-main,
-    .AppFooter {
-        margin-left: calc(var(--charW1) * -1);
-        margin-right: calc(var(--charW1) * -1);
-    }
+    /* Increase font sizes for mobile readability */
+    --font: 18px/44px 'Silkscreen', monospace;
+    --font-accent: 18px/44px 'Silkscreen', monospace;
+    --font-title: 24px/44px 'Nixdorf_M15', monospace;
+  }
+
+  .App {
+    padding: 0 var(--charW1);
+  }
+
+  /* Adjust negative margins to match reduced padding */
+  .AppHeader,
+  .App-main,
+  .AppFooter {
+    margin-left: calc(var(--charW1) * -1);
+    margin-right: calc(var(--charW1) * -1);
+  }
 }
 
 .AppHeader {
-    padding: var(--charH) var(--charW2);
-    margin: 0 var(--charW2neg) 0 var(--charW2neg);
-    border-bottom: 1px solid var(--clickable);
-    flex-grow: 0;
+  padding: var(--charH) var(--charW2);
+  margin: 0 var(--charW2neg) 0 var(--charW2neg);
+  border-bottom: 1px solid var(--clickable);
+  flex-grow: 0;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .AppHeader {
-        padding: calc(var(--charH) / 2) var(--charW2);
-        margin-bottom: calc(var(--charH) / 2);
-    }
+  .AppHeader {
+    display: none;
+    /* Hide header on mobile to maximize content space */
+  }
 }
 
 .AppHeader-subtitle {
-    margin: var(--charH) 0 0 0;
+  margin: var(--charH) 0 0 0;
 }
 
 .AppHeader-title,
 .AppHeader-title:visited,
 .AppHeader-title:link {
-    color: var(--accent); /* Accent - bright pop for main title */
-    font: var(--font-title) !important;
+  color: var(--accent);
+  /* Accent - bright pop for main title */
+  font: var(--font-title) !important;
 }
 
 .AppHeader-byline {
-    float: right;
+  float: right;
 }
 
 .App-main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-    height: 100%;
-    margin: 0 var(--charW2neg);
-    margin-top: -1px; /* shrink by 1px for top border of tabs */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  height: 100%;
+  margin: 0 var(--charW2neg);
+  margin-top: -1px;
+  /* shrink by 1px for top border of tabs */
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .App-main {
-        flex-direction: column;
-        flex-grow: 1; /* Take remaining space */
-        flex-shrink: 1; /* Allow shrinking to make room for footer */
-        min-height: 0; /* Allow flex shrinking below content size */
-        overflow: hidden; /* Contain tab content */
-    }
+  .App-main {
+    flex-direction: column;
+    flex-grow: 1;
+    /* Take remaining space */
+    flex-shrink: 1;
+    /* Allow shrinking to make room for footer */
+    min-height: 0;
+    /* Allow flex shrinking below content size */
+    overflow: hidden;
+    /* Contain tab content */
+  }
 }
 
 .App-main-inner {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 1px; /* prevents content width priority */
-    margin-right: -1px; /* hide the right border of the content area */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 1px;
+  /* prevents content width priority */
+  margin-right: -1px;
+  /* hide the right border of the content area */
 }
 
 .App-main-content-and-settings {
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-    flex-grow: 1;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  flex-grow: 1;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .App-main-inner {
-        flex-grow: 1; /* Fill available space */
-        flex-shrink: 1; /* Allow shrinking */
-        min-height: 0; /* Allow flex shrinking below content size */
-        overflow: hidden; /* Contain scrollable content */
-    }
+  .App-main-inner {
+    flex-grow: 1;
+    /* Fill available space */
+    flex-shrink: 1;
+    /* Allow shrinking */
+    min-height: 0;
+    /* Allow flex shrinking below content size */
+    overflow: hidden;
+    /* Contain scrollable content */
+  }
 
-    .App-main-content-and-settings {
-        flex-direction: column;
-        flex-grow: 1; /* Fill available space */
-        flex-shrink: 1; /* Allow shrinking */
-        min-height: 0; /* Allow flex shrinking below content size */
-        overflow: hidden; /* Contain scrollable content */
-    }
+  .App-main-content-and-settings {
+    flex-direction: column;
+    flex-grow: 1;
+    /* Fill available space */
+    flex-shrink: 1;
+    /* Allow shrinking */
+    min-height: 0;
+    /* Allow flex shrinking below content size */
+    overflow: hidden;
+    /* Contain scrollable content */
+  }
 }
 
 .App-main-content-area {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    padding: var(--charH) var(--charW2) 0 var(--charW2);
-    overflow: hidden; /* No scrolling - Browse component handles its own scrolling */
-    border-right: 1px solid var(--clickable);
-    container-type: size;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--charH) var(--charW2) 0 var(--charW2);
+  overflow: hidden;
+  /* No scrolling - Browse component handles its own scrolling */
+  border-right: 1px solid var(--clickable);
+  container-type: size;
 }
+
 .App-main-content-area:focus {
-    /* I have no idea why this became focusable */
-    background-color: initial;
+  /* I have no idea why this became focusable */
+  background-color: initial;
 }
 
 .ReactVirtualized__Grid:focus {
-    outline: none;
+  outline: none;
 }
 
-.App-main-content-area.settings {
-    width: 368px;
-    min-width: 368px;
-    flex-grow: 0;
-    padding: var(--charH) var(--charW2);
+.App-main-content-area.settings,
+.App-main-content-area.ui-settings,
+.App-main-content-area.player-settings {
+  width: 300px;
+  min-width: 300px;
+  flex-grow: 0;
+  padding: var(--charH) var(--charW2);
+  overflow-y: auto;
+}
+
+/* Mobile/Desktop visibility helpers */
+.mobile-only {
+  display: flex;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: flex;
+  }
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .App-main-content-area.settings {
-        width: 100%;
-        min-width: 0;
-        border-right: none;
-        max-height: none; /* Remove height limit - let it show all controls */
-        overflow-y: auto; /* Scroll if content overflows */
-        height: 100%; /* Fill available space */
-    }
+  .App-main-content-area {
+    padding-top: 12px;
+    /* Reduce from 44px to save vertical space */
+  }
 
-    .App-main-content-area:not(.settings) {
-        border-right: none;
-        flex-grow: 1; /* Fill available space */
-        overflow-y: auto; /* Scroll if needed */
-        height: 100%; /* Fill available space */
-    }
+  .App-main-content-area.settings,
+  .App-main-content-area.ui-settings,
+  .App-main-content-area.player-settings {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    max-height: none;
+    /* Remove height limit - let it show all controls */
+    overflow-y: auto;
+    /* Scroll if content overflows */
+    height: 100%;
+    /* Fill available space */
+  }
+
+  .App-main-content-area:not(.settings):not(.ui-settings):not(.player-settings) {
+    border-right: none;
+    flex-grow: 1;
+    /* Fill available space */
+    overflow-y: auto;
+    /* Scroll if needed */
+    height: 100%;
+    /* Fill available space */
+  }
 }
 
 .SongDisplay {
-    padding: var(--charH) var(--charW2);
-    color: var(
-        --accent
-    ); /* Accent - pop of color for currently playing song title */
-    font: var(--font-accent) !important;
-    border-top: 1px solid var(--clickable);
-    margin: 0 var(--charW2neg);
-    flex-shrink: 0;
+  color: var(--accent);
+  /* Accent - pop of color for currently playing song title */
+  font: var(--font-accent) !important;
+  text-align: center;
+  flex-shrink: 0;
 }
 
-.AppFooter {
-    border-top: 1px solid var(--clickable);
-    margin: 0 var(--charW2neg);
-    flex-shrink: 0;
-    height: auto; /* Let content determine height */
-    display: flex;
-    flex-direction: row; /* Horizontal layout for main content and art */
-    flex-wrap: wrap; /* Allow wrapping to put attribution on its own line */
-    align-content: flex-start; /* Align wrapped content to top */
-    position: relative;
+.song-title-link:hover {
+  color: var(--neutral4);
+  text-decoration: underline;
+}
+
+.icon-copy:hover {
+  opacity: 0.7;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .AppFooter {
-        height: auto;
-        min-height: 200px; /* Taller to fit everything */
-        flex-direction: column; /* Stack children vertically */
-    }
+  .SongDisplay {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+}
 
-    .AppFooter-attribution {
-        padding: calc(var(--charH) / 2) var(--charW1);
-        margin-top: var(--charH); /* Space above */
-        font-size: 0.7em;
-    }
+.AppFooter {
+  border-top: 1px solid var(--clickable);
+  margin: 0 var(--charW2neg);
+  flex-shrink: 0;
+  height: auto;
+  /* Let content determine height */
+  display: flex;
+  flex-direction: row;
+  /* Horizontal layout for main content and art */
+  flex-wrap: wrap;
+  /* Allow wrapping to put attribution on its own line */
+  align-content: flex-start;
+  /* Align wrapped content to top */
+  position: relative;
+}
 
-    .AppFooter-main {
-        order: 0; /* Controls first */
-        flex-shrink: 0; /* Don't shrink controls */
-    }
+@media (orientation: portrait), (max-width: 768px) {
+  .AppFooter {
+    height: auto;
+    min-height: 140px;
+    /* Ensure footer fits controls */
+    max-height: 150px;
+    /* Tighter cap to fit in viewport */
+    flex-direction: column;
+    /* Stack children vertically */
+    overflow: hidden;
+    /* Prevent controls from overflowing below viewport */
+  }
 
-    .AppFooter-art {
-        display: none; /* Hide album art on mobile to save space */
-    }
+  .AppFooter-attribution {
+    display: none;
+    /* Hide attribution on mobile - can be moved to Settings/About */
+  }
+
+  .AppFooter-main {
+    order: 0;
+    /* Controls first */
+    flex-shrink: 0;
+    /* Don't shrink controls */
+    padding: var(--charW1) var(--charW2);
+    /* Compact vertical padding */
+    min-height: unset;
+    /* Remove min-height constraint */
+  }
+
+  .AppFooter-art {
+    display: none;
+    /* Hide album art on mobile to save space */
+  }
 }
 
 .AppFooter-attribution {
-    width: 100%;
-    text-align: center;
-    padding: calc(var(--charH) / 4) var(--charW1);
-    font-size: 0.8em;
-    color: var(--neutral2);
-    background: var(--background);
-    font: var(--font-accent) !important;
-    border-top: 1px solid var(--clickable); /* Divider line */
-    order: 999; /* Always at bottom */
+  width: 100%;
+  text-align: center;
+  padding: calc(var(--charH) / 4) var(--charW1);
+  font-size: 0.8em;
+  color: var(--neutral2);
+  background: var(--background);
+  font: var(--font-accent) !important;
+  border-top: 1px solid var(--clickable);
+  /* Divider line */
+  order: 999;
+  /* Always at bottom */
 }
 
 .AppFooter-attribution a {
-    pointer-events: auto; /* Re-enable clicks on links */
-    color: var(--accent); /* Accent - pop of color for attribution links */
-    font: var(--font-title) !important;
+  pointer-events: auto;
+  /* Re-enable clicks on links */
+  color: var(--accent);
+  /* Accent - pop of color for attribution links */
+  font: var(--font-title) !important;
 }
 
 .AppFooter-attribution a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+
+.AppFooter-about-button {
+  display: none;
+  /* Hidden on desktop */
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+  .AppFooter-about-button {
+    display: block;
+    position: fixed;
+    bottom: var(--charH);
+    right: var(--charW2);
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--neutral2);
+    background: var(--button);
+    color: var(--neutral4);
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 100;
+    border-radius: 50%;
+  }
+
+  .AppFooter-about-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+.AppFooter-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.AppFooter-modal {
+  background: var(--background);
+  border: 1px solid var(--neutral3);
+  padding: var(--charW2);
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+}
+
+.AppFooter-modal h3 {
+  margin-top: 0;
+  color: var(--neutral4);
+}
+
+.AppFooter-modal p {
+  color: var(--neutral2);
+  margin: var(--charH) 0;
+}
+
+.AppFooter-modal a {
+  color: var(--accent);
+  font: var(--font-title) !important;
+}
+
+.AppFooter-modal a:hover {
+  text-decoration: underline;
+}
+
+.AppFooter-modal button {
+  margin-top: var(--charH);
 }
 
 .AppFooter-art {
-    width: 210px;
-    height: 210px;
-    background-color: var(--neutral0);
-    object-fit: scale-down;
-    image-rendering: unset;
-    border-left: 1px solid var(--clickable);
-    flex-shrink: 0;
+  width: 210px;
+  height: 210px;
+  background-color: var(--neutral0);
+  object-fit: scale-down;
+  image-rendering: unset;
+  border-left: 1px solid var(--clickable);
+  flex-shrink: 0;
+}
+
+.AppFooter-lock-active,
+.AppFooter-shuffle-active,
+.AppFooter-play-pause-active {
+  background: var(--active) !important;
+  color: var(--background) !important;
+}
+
+.AppFooter-lock-active .inline-icon,
+.AppFooter-shuffle-active .inline-icon,
+.AppFooter-play-pause-active .inline-icon {
+  background-color: var(--background) !important;
+}
+
+.AppFooter-lock-active:hover,
+.AppFooter-shuffle-active:hover,
+.AppFooter-play-pause-active:hover {
+  background: var(--selected) !important;
 }
 
 @media screen and (max-width: 600px) {
-    .AppFooter-art,
-    .AppFooter-shuffle,
-    .AppFooter-repeat {
-        display: none;
-    }
+  .AppFooter-art,
+  .AppFooter-shuffle,
+  .AppFooter-lock {
+    display: none;
+  }
 }
 
 button.box-button.AppFooter-forward,
 button.box-button.AppFooter-back {
-    padding: 0 var(--charW1);
+  padding: 0 var(--charW1);
 }
 
 .AppFooter-main {
-    flex-grow: 1;
-    flex-basis: 0; /* Allow it to shrink/grow from 0 */
-    min-height: 210px; /* Ensure controls have space */
-    overflow: hidden;
-    padding: var(--charH) var(--charW2);
-    box-sizing: border-box;
-    container-type: size;
+  flex-grow: 1;
+  flex-basis: 0;
+  /* Allow it to shrink/grow from 0 */
+  min-height: 210px;
+  /* Ensure controls have space */
+  overflow: hidden;
+  padding: var(--charH) var(--charW2);
+  box-sizing: border-box;
+  container-type: size;
+}
+
+.AppFooter-playback-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: var(--charH);
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .AppFooter-main {
-        overflow: visible; /* Allow content to be visible on mobile */
-        padding: calc(var(--charH) / 2) var(--charW1);
-    }
+  .AppFooter-main {
+    overflow: hidden;
+    /* Prevent content overflow */
+    padding: 8px var(--charW2);
+    /* Minimal vertical padding */
+    min-height: unset;
+    /* Remove min-height constraint to prevent black gaps */
+    width: 100%;
+    /* Ensure full width on mobile */
+    flex-basis: auto;
+    /* Override flex-basis: 0 */
+    container-type: normal;
+    /* Disable container query on mobile */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    /* Distribute space evenly with minimal gaps */
+  }
+
+  .AppFooter-playback-info {
+    margin-bottom: var(--charW1);
+  }
 }
 
 .AppFooter-settings {
-    border-left: 1px solid var(--clickable);
-    padding: var(--charH) var(--charW2);
-    max-width: 360px;
-    overflow-y: scroll;
-    overflow-x: hidden;
+  border-left: 1px solid var(--clickable);
+  padding: var(--charH) var(--charW2);
+  max-width: 360px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .App-voice-label {
-    width: calc(var(--charW1) * 18);
-    white-space: nowrap;
+  width: calc(var(--charW1) * 18);
+  white-space: nowrap;
 }
+
 .App-voice-label:hover label {
-    color: #fefefe; /* White - hover guidance for label */
+  color: #fefefe;
+  /* White - hover guidance for label */
 }
+
 .App-voice-label:has(input:active) label {
-    color: var(--accent); /* Accent - electrify label on click */
+  color: var(--accent);
+  /* Accent - electrify label on click */
 }
 
 .AppFooter-controls-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--charW1);
-    white-space: nowrap;
-    margin: var(--charH) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--charW1);
+  white-space: nowrap;
+  margin: var(--charH) 0;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .AppFooter-controls-row {
-        margin: calc(var(--charH) / 2) 0;
-    }
+  .AppFooter-controls-row {
+    margin: 0;
+    /* No margin for ultra-compact layout */
+    gap: var(--charW1);
+  }
+
+  .AppFooter-controls-row .box-button {
+    height: 44px !important;
+    /* Override desktop height for compact layout */
+    min-height: 44px;
+    padding: 0 var(--charW2);
+    /* Minimal vertical padding */
+  }
+
+  .AppFooter-secondary-controls {
+    display: none;
+    /* Hide repeat/shuffle buttons on mobile to save space */
+  }
 }
 
 .AppFooter-controls-row .box-button {
-    height: calc(var(--charH) * 1.5);
-    display: flex;
-    align-items: center;
+  height: calc(var(--charH) * 1.5);
+  display: flex;
+  align-items: center;
 }
 
 .AppFooter-secondary-controls {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .AppFooter-secondary-controls .box-button {
-    height: var(--charH);
+  height: var(--charH);
 }
 
 .AppFooter-play-pause {
-    --pulse-spread: calc(0px + var(--pulse-intensity, 0) * 12px);
-    --pulse-opacity: calc(0.15 + var(--pulse-intensity, 0) * 0.85);
-    box-shadow:
-        0 0 var(--pulse-spread) calc(var(--pulse-spread) * 0.5)
-        rgba(155, 254, 56, var(--pulse-opacity)),
-        var(--box-shadow);
-    transition: box-shadow 50ms ease-out;
+  --pulse-spread: calc(0px + var(--pulse-intensity, 0) * 12px);
+  --pulse-opacity: calc(0.15 + var(--pulse-intensity, 0) * 0.85);
+  box-shadow:
+    0 0 var(--pulse-spread) calc(var(--pulse-spread) * 0.5)
+      color-mix(
+        in srgb,
+        var(--pulse-color, var(--accent)) calc(var(--pulse-opacity) * 100%),
+        transparent
+      ),
+    var(--box-shadow);
+  transition: box-shadow 50ms ease-out;
 }
 
 .AppFooter-play-pause .inline-icon {
-    width: 32px !important;
-    height: calc(var(--charH) * 1.5);
+  width: 32px !important;
+  height: calc(var(--charH) * 1.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .AppFooter-play-pause {
-        --pulse-spread: 2px;
-        --pulse-opacity: 0.5;
-        transition: none;
-    }
+  .AppFooter-play-pause {
+    --pulse-spread: 2px;
+    --pulse-opacity: 0.5;
+    transition: none;
+  }
 }
 
 .Slider {
-    height: var(--charH);
-    padding: 0;
-    cursor: pointer;
-    position: relative;
-    width: calc(100% - var(--knobW));
-    box-sizing: border-box;
-    border: 0;
+  height: var(--charH);
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  width: calc(100% - var(--knobW));
+  box-sizing: border-box;
+  border: 0;
 }
 
 .Slider-rail {
-    width: calc(100% + var(--knobW));
-    height: var(--railH);
-    background-color: #7f7f7f; /* Medium Gray - unplayed portion */
-    position: absolute;
-    top: calc((var(--charH) - var(--railH)) / 2);
-    box-sizing: border-box;
-    border: 1px solid #7f7f7f;
+  width: calc(100% + var(--knobW));
+  height: var(--railH);
+  background-color: #7f7f7f;
+  /* Medium Gray - unplayed portion */
+  position: absolute;
+  top: calc((var(--charH) - var(--railH)) / 2);
+  box-sizing: border-box;
+  border: 1px solid #7f7f7f;
 }
 
 .Slider-fill {
-    height: var(--railH);
-    background-color: var(--accent-dark); /* Dark Green - played portion */
-    position: absolute;
-    top: calc((var(--charH) - var(--railH)) / 2);
-    left: 0;
-    box-sizing: border-box;
-    border: 1px solid var(--accent-dark);
-    z-index: 1;
+  height: var(--railH);
+  background-color: var(--accent-dark);
+  /* Dark Green - played portion */
+  position: absolute;
+  top: calc((var(--charH) - var(--railH)) / 2);
+  left: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--accent-dark);
+  z-index: 1;
 }
 
 .Slider-chisel {
-    width: 0;
-    height: 0;
-    top: calc((var(--charH) - var(--railH)) / 2); /* Align with rail */
-    position: absolute;
-    /* Create right-pointing chevron/arrowhead using borders - matches rail height */
-    border-top: calc(var(--railH) / 2) solid transparent;
-    border-bottom: calc(var(--railH) / 2) solid transparent;
-    border-left: 4px solid var(--accent); /* Bright Green - carving edge */
-    box-sizing: border-box;
-    z-index: 2;
+  width: 0;
+  height: 0;
+  top: calc((var(--charH) - var(--railH)) / 2);
+  /* Align with rail */
+  position: absolute;
+  /* Create right-pointing chevron/arrowhead using borders - matches rail height */
+  border-top: calc(var(--railH) / 2) solid transparent;
+  border-bottom: calc(var(--railH) / 2) solid transparent;
+  border-left: 4px solid var(--accent);
+  /* Bright Green - carving edge */
+  box-sizing: border-box;
+  z-index: 2;
 }
 
 .Slider-knob {
-    height: var(--knobH);
-    width: var(--knobW);
-    top: calc((var(--charH) - var(--knobH)) / 2);
-    margin: 0;
-    border-radius: 0px;
-    background-color: transparent; /* Hidden - only used for interaction */
-    position: absolute;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    box-sizing: border-box;
-    z-index: 3;
+  height: var(--knobH);
+  width: var(--knobW);
+  top: calc((var(--charH) - var(--knobH)) / 2);
+  margin: 0;
+  border-radius: 0px;
+  background-color: transparent;
+  /* Hidden - only used for interaction */
+  position: absolute;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  box-sizing: border-box;
+  z-index: 3;
 }
+
 .Slider:hover .Slider-knob {
-    background-color: transparent;
+  background-color: transparent;
 }
+
 .Slider:active .Slider-knob {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 /* Slider Particle System */
 .SliderParticles {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9998;
-    overflow: hidden;
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  overflow: hidden;
 }
 
 .SliderParticle {
-    position: fixed;
-    width: 2px;
-    height: 2px;
-    background-color: var(--accent);
-    filter: hue-rotate(calc(var(--particle-hue) * 1deg));
-    animation: particle-fly 600ms steps(20) forwards;
-    pointer-events: none;
-}
-
-@keyframes particle-fly {
-    0% {
-        transform: translate(0, 0);
-    }
-    50% {
-        transform: translate(
-            calc(var(--particle-vx) * 40px),
-            calc(var(--particle-vy) * 40px + 10px)
-        );
-    }
-    100% {
-        transform: translate(
-            calc(var(--particle-vx) * 80px),
-            calc(var(--particle-vy) * 80px + 40px)
-        );
-    }
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background-color: var(--accent);
+  pointer-events: none;
 }
 
 /* Disable particles for users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .SliderParticle {
-        display: none;
-    }
+  .SliderParticle {
+    display: none;
+  }
 }
 
 /* Browse component layout - fixed header with scrollable list */
 .Browse-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden; /* Prevent this container from scrolling */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  /* Prevent this container from scrolling */
 }
 
 .Browse-topRow {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--charW2);
-    min-height: var(--buttonHeight);
-    padding-bottom: var(--charH);
-    border-bottom: 1px solid var(--clickable);
-    margin-bottom: 0;
-    flex-shrink: 0; /* Don't shrink when space is tight */
+  display: flex;
+  justify-content: space-between;
+  gap: var(--charW2);
+  min-height: var(--buttonHeight);
+  padding-bottom: var(--charH);
+  border-bottom: 1px solid var(--clickable);
+  margin-bottom: 0;
+  flex-shrink: 0;
+  /* Don't shrink when space is tight */
+}
+
+@media (orientation: portrait), (max-width: 768px) {
+  .Browse-topRow {
+    flex-wrap: wrap;
+    gap: var(--charW1);
+    padding-bottom: 8px;
+    /* Minimal padding below album name */
+    margin-bottom: 12px !important;
+    /* Small spacing before file list - override h3 default */
+  }
+
+  .Browse-topRow h3 {
+    font-size: 16px;
+    /* Slightly smaller */
+    line-height: 1.2;
+    word-break: break-word;
+    flex-basis: 100%;
+    margin: 0;
+    /* Remove margin */
+  }
+
+  .Browse-topRow button {
+    min-height: 32px;
+    /* Much smaller button */
+    height: 32px;
+    font-size: 11px;
+    /* Tiny font for compact button */
+    padding: 4px 12px;
+    /* Minimal padding */
+    white-space: nowrap;
+  }
 }
 
 .Browse-list-scroll {
-    flex-grow: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .BrowseList-row {
-    display: flex;
-    align-items: center;
-    height: var(--rowHeight);
+  display: flex;
+  align-items: center;
+  height: var(--rowHeight);
 }
+
+@media (orientation: portrait), (max-width: 768px) {
+  .BrowseList-row {
+    padding: 0 var(--charW1);
+    min-height: 44px;
+  }
+
+  .BrowseList-row a,
+  .BrowseList-colName {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  /* Hide metadata on mobile - show only names and <DIR> indicator */
+  .BrowseList-colSize,
+  .BrowseList-colCount {
+    display: none;
+  }
+
+  .BrowseList-colDir {
+    font-size: 14px;
+    margin-left: var(--charW1);
+  }
+}
+
 /* Selected */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected {
-    background-color: #202020; /* Dark Gray - subtle selection, no bright green backgrounds */
+  background-color: #202020;
+  /* Dark Gray - subtle selection, no bright green backgrounds */
 }
+
 /* Playing */
 .App-main .App-main-content-area .Song-now-playing {
-    box-shadow: 0 0 0 1px var(--accent); /* Green border for playing song - using box-shadow to prevent overlap issues */
-    position: relative; /* Ensure proper stacking */
-    z-index: 1; /* Lift above adjacent rows */
-    color: var(--accent); /* Accent text color for currently playing */
+  box-shadow: 0 0 0 1px var(--accent);
+  /* Green border for playing song - using box-shadow to prevent overlap issues */
+  position: relative;
+  /* Ensure proper stacking */
+  z-index: 1;
+  /* Lift above adjacent rows */
+  color: var(--accent);
+  /* Accent text color for currently playing */
 }
+
 .Song-now-playing a {
-    color: var(--accent); /* Accent - links inside currently playing song */
+  color: var(--accent);
+  /* Accent - links inside currently playing song */
 }
+
 /* Selected AND Playing */
 .ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
-    background-color: #202020; /* Dark Gray background from selection */
-    box-shadow: 0 0 0 1px var(--accent); /* Green border from playing */
-    z-index: 1; /* Lift above adjacent rows */
+  background-color: #202020;
+  /* Dark Gray background from selection */
+  box-shadow: 0 0 0 1px var(--accent);
+  /* Green border from playing */
+  z-index: 1;
+  /* Lift above adjacent rows */
 }
+
 .BrowseList-row:hover {
-    color: var(--neutral4);
-    background-color: #202020; /* Dark Gray - subtle background on hover */
+  color: var(--neutral4);
+  background-color: #202020;
+  /* Dark Gray - subtle background on hover */
 }
+
 .BrowseList-row:hover a {
-    color: var(--neutral4);
-} /* Song title highlights on hover */
+  color: var(--neutral4);
+}
+
+/* Song title highlights on hover */
 .BrowseList-row a {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 .BrowseList-colName {
-    overflow: hidden;
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    gap: calc(var(--charW1) / 2);
+  overflow: hidden;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--charW1) / 2);
 }
+
 .BrowseList-colName a {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
+
 .BrowseList-colDir,
 .BrowseList-colSize {
-    flex-shrink: 0;
-    margin-left: calc(var(--charW1) * 2);
+  flex-shrink: 0;
+  margin-left: calc(var(--charW1) * 2);
 }
+
 .BrowseList-colCount {
-    flex-shrink: 0;
-    margin-left: var(--charW1);
-    width: calc(var(--charW1) * 5);
-    text-align: right;
+  flex-shrink: 0;
+  margin-left: var(--charW1);
+  width: calc(var(--charW1) * 5);
+  text-align: right;
 }
+
 .BrowseList-colMtime {
-    text-align: right;
-    text-transform: uppercase;
-    white-space: nowrap;
-    min-width: calc(var(--charW1) * 12);
+  display: none;
+  /* Hide dates on all screens - unnecessary clutter */
 }
+
 .BrowseList-colSize {
-    text-align: right;
-    text-transform: uppercase;
-    white-space: nowrap;
-    min-width: calc(var(--charW1) * 10);
+  text-align: right;
+  text-transform: uppercase;
+  white-space: nowrap;
+  min-width: calc(var(--charW1) * 10);
+}
+
+/* Copy icon column */
+.BrowseList-colCopy {
+  flex-shrink: 0;
+  margin-left: calc(var(--charW1) * 2);
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Copy icon - hidden by default */
+.BrowseList-copy-icon {
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  background-color: var(--clickable);
+}
+
+/* Desktop: Show on row hover */
+@media (min-width: 769px) and (hover: hover) {
+  .BrowseList-row:hover .BrowseList-copy-icon {
+    opacity: 1;
+  }
+
+  .BrowseList-copy-icon:hover {
+    opacity: 0.7;
+  }
+}
+
+/* Always show for currently playing song */
+.BrowseList-copy-icon.is-playing {
+  opacity: 1;
+  background-color: var(--accent);
+}
+
+/* Mobile: Only show when playing */
+@media (orientation: portrait), (max-width: 768px) {
+  .BrowseList-copy-icon {
+    opacity: 0;
+  }
+
+  .BrowseList-copy-icon.is-playing {
+    opacity: 1;
+  }
 }
 
 .DirectoryLink-dim {
-    color: var(--neutral2);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  color: var(--neutral2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .Settings-section {
-    margin-bottom: calc(var(--charH) * 2);
-    padding-bottom: var(--charH);
-    border-bottom: 1px solid var(--neutral3);
+  margin-bottom: calc(var(--charH) * 2);
+  padding-bottom: var(--charH);
+  border-bottom: 1px solid var(--neutral3);
 }
 
 .Settings-section h3 {
-    margin-top: 0;
-    margin-bottom: var(--charH);
+  margin-top: 0;
+  margin-bottom: var(--charH);
 }
 
 .Settings-toggle {
-    display: flex;
-    align-items: center;
-    gap: var(--charW1);
-    cursor: pointer;
-    margin-bottom: calc(var(--charH) / 2);
+  display: flex;
+  align-items: center;
+  gap: var(--charW1);
+  cursor: pointer;
+  margin-bottom: calc(var(--charH) / 2);
+  flex-wrap: nowrap;
 }
 
-.Settings-toggle input[type="checkbox"] {
-    margin: 0;
-    cursor: pointer;
+@media (orientation: portrait), (max-width: 768px) {
+  .Settings-toggle {
+    min-height: 44px;
+    margin-bottom: var(--charH);
+  }
+
+  .Settings-toggle span {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  .Settings-section h3 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
 }
 
-.Settings-toggle span {
-    color: var(--clickable);
+.Settings-toggle input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
 }
 
-.Settings-toggle:hover span {
-    color: #fefefe; /* White on hover */
+.Settings-toggle span:not(.Settings-info-icon) {
+  color: var(--clickable);
 }
 
-.Settings-toggle:has(input:active) span {
-    color: var(--accent); /* Green on click */
+.Settings-toggle:hover span:not(.Settings-info-icon) {
+  color: #fefefe;
+  /* White on hover */
+}
+
+.Settings-toggle:has(input:active) span:not(.Settings-info-icon) {
+  color: var(--accent);
+  /* Green on click */
 }
 
 .Settings-hint {
-    margin: 0;
-    padding-left: calc(var(--charW1) * 2);
-    font-size: 0.9em;
-    color: var(--neutral3);
-    font-style: italic;
+  margin: 0;
+  padding-left: calc(var(--charW1) * 2);
+  font-size: 0.9em;
+  color: var(--neutral3);
+  font-style: italic;
+}
+
+.Settings-subsection {
+  margin-top: calc(var(--charH) * 1.5);
+  margin-bottom: var(--charH);
+  font-size: 0.9em;
+  color: var(--neutral3);
+}
+
+.Settings-subsection-collapsible {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--charW1) / 2);
+}
+
+.Settings-subsection-collapsible:hover {
+  color: var(--clickable);
+}
+
+.Settings-subsection-with-toggle input[type='checkbox'] {
+  margin: 0;
+  margin-right: calc(var(--charW1) / 2);
+  cursor: pointer;
+}
+
+.Settings-subsection-arrow {
+  display: inline-block;
+  transition: transform 150ms ease-out;
+  font-size: 0.8em;
+}
+
+.Settings-subsection-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.Settings-reset-button {
+  margin-left: auto;
+  padding: 0 calc(var(--charW1) / 2);
+  background: transparent;
+  border: 1px solid var(--neutral2);
+  color: var(--neutral2);
+  cursor: pointer;
+  font-size: 1.2em;
+  line-height: 1;
+  border-radius: 2px;
+  transition: all 100ms ease-out;
+}
+
+.Settings-reset-button:hover {
+  border-color: var(--clickable);
+  color: var(--clickable);
+  background: var(--neutral1);
+}
+
+.Settings-reset-button:active {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(0.95);
+}
+
+.Settings-collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-out;
+}
+
+.Settings-collapsible-content.expanded {
+  max-height: 1000px;
+}
+
+.Settings-param {
+  display: flex;
+  align-items: center;
+  gap: var(--charW1);
+  margin-bottom: calc(var(--charH) / 2);
+}
+
+.Settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(var(--charH) / 2);
+}
+
+.Settings-row span {
+  transition: color 400ms ease-out;
+}
+
+.Settings-param label {
+  width: calc(var(--charW1) * 16);
+  color: var(--clickable);
+  flex-shrink: 0;
+}
+
+.Settings-param input[type='range'] {
+  flex: 1;
+  cursor: pointer;
+}
+
+.Settings-param span {
+  width: calc(var(--charW1) * 6);
+  text-align: right;
+  color: var(--neutral3);
+  transition: color 400ms ease-out;
+}
+
+/* Flash effect for setting values on change */
+.Settings-value-flash {
+  color: var(--accent) !important;
+}
+
+.Settings-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--neutral2);
+  font-family: 'Silkscreen', monospace;
+  font-size: 11px;
+  font-weight: bold;
+  flex-shrink: 0;
+  transition: all 100ms steps(3);
+  position: relative;
+  white-space: nowrap;
+}
+
+.Settings-info-icon::before {
+  content: '[';
+  color: var(--neutral2);
+}
+
+.Settings-info-icon::after {
+  content: ']';
+  color: var(--neutral2);
+}
+
+.Settings-info-icon:hover {
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent);
+}
+
+.Settings-info-icon:hover::before,
+.Settings-info-icon:hover::after {
+  color: var(--accent);
+}
+
+.Tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  cursor: help;
+}
+
+.Tooltip {
+  position: fixed;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+.Tooltip-wrapper {
+  animation: tooltipFlickerLoop var(--flicker-dur, 4s) linear infinite var(--flicker-del, 0s);
+  position: relative;
+}
+
+.Tooltip-box {
+  background: var(--background);
+  border: 2px solid var(--accent);
+  padding: 8px 12px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+  box-shadow:
+    0 0 20px rgba(155, 254, 56, 0.4),
+    inset 0 0 30px rgba(155, 254, 56, 0.05),
+    0 4px 0 rgba(0, 0, 0, 0.8);
+  line-height: 1.5;
+  text-shadow: 0 0 4px rgba(155, 254, 56, 0.6);
+  /* Base animation: Scanline + Flicker + (New) Base Glitch to cut bottom */
+  animation:
+    tooltipScanline 8s linear infinite,
+    tooltipFlicker 0.15s infinite alternate,
+    tooltipBaseGlitchAnim var(--glitch-dur, 3s) linear infinite;
+  /* Match duration with GlitchAnim */
+  position: relative;
+  z-index: 2;
+  /* Default clip: show everything */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.Tooltip-glitch {
+  position: absolute;
+  inset: 0;
+  background: var(--background);
+  border: 2px solid var(--accent);
+  padding: 8px 12px;
+  font-family: 'Silkscreen', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  white-space: nowrap;
+  line-height: 1.5;
+  text-shadow: 0 0 4px rgba(155, 254, 56, 0.6);
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  /* The glitch layer handles the bottom shifted part */
+  animation: tooltipGlitchAnim var(--glitch-dur, 3s) linear infinite;
+}
+
+.Tooltip-box::before {
+  content: '> ';
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  color: var(--accent);
+}
+
+.Tooltip-glitch::before {
+  content: '> ';
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  color: var(--accent);
+}
+
+.Tooltip-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+@keyframes tooltipScanline {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes tooltipFlicker {
+  0% {
+    opacity: 0.98;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Base box animation: Cuts off the bottom during glitch */
+@keyframes tooltipBaseGlitchAnim {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  30% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  /* Sync with GlitchAnim: Cut bottom at var(--g1) */
+  32% {
+    clip-path: polygon(0 0, 100% 0, 100% var(--g1, 60%), 0 var(--g1, 60%));
+  }
+
+  34% {
+    clip-path: polygon(0 0, 100% 0, 100% var(--g1, 60%), 0 var(--g1, 60%));
+  }
+
+  36% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  /* Second micro-glitch */
+  70% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  71% {
+    clip-path: polygon(0 0, 100% 0, 100% var(--g2, 15%), 0 var(--g2, 15%));
+  }
+
+  72% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+/* Glitch layer animation: Shows skewed bottom during glitch */
+@keyframes tooltipGlitchAnim {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+
+  30% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+
+  32% {
+    opacity: 1;
+    /* Show ONLY from var(--g1) to bottom */
+    clip-path: polygon(0 var(--g1, 60%), 100% var(--g1, 60%), 100% 100%, 0 100%);
+    transform: translate(-5px, 0);
+    /* Shift left */
+  }
+
+  34% {
+    opacity: 1;
+    clip-path: polygon(0 var(--g1, 60%), 100% var(--g1, 60%), 100% 100%, 0 100%);
+    transform: translate(5px, 0);
+    /* Shift right */
+  }
+
+  36% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+
+  /* Second micro-glitch */
+  70% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+
+  71% {
+    opacity: 1;
+    /* Second random slice, thinner (15%) */
+    clip-path: polygon(0 var(--g2, 15%), 100% var(--g2, 15%), 100% 100%, 0 100%);
+    transform: translate(3px, 0);
+  }
+
+  72% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tooltipFlickerLoop {
+  0% {
+    opacity: 1;
+  }
+
+  3% {
+    opacity: 0.8;
+  }
+
+  6% {
+    opacity: 1;
+  }
+
+  7% {
+    opacity: 0.1;
+  }
+
+  /* Deep dropout */
+  9% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .PlayerParams h3 {
-    margin-top: 0;
+  margin-top: 0;
 }
+
 .PlayerParams-param {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
 }
+
 .PlayerParams-param:hover .PlayerParams-label {
-    color: #fefefe; /* White - hover guidance for label */
+  color: #fefefe;
+  /* White - hover guidance for label */
 }
+
 .PlayerParams-param:has(input:active) .PlayerParams-label {
-    color: var(--accent); /* Accent - electrify label on click */
+  color: var(--accent);
+  /* Accent - electrify label on click */
 }
+
 .PlayerParams-param input {
-    margin-right: var(--charW1);
-    flex-shrink: 0;
+  margin-right: var(--charW1);
+  flex-shrink: 0;
 }
+
+.PlayerParams-param > span {
+  transition: color 400ms ease-out;
+}
+
 .PlayerParams-group-title {
-    width: 100%;
-    font: var(--font-accent) !important;
-    color: #c3c3c3; /* Light Gray - section headers */
+  width: 100%;
+  font: var(--font-accent) !important;
+  color: #c3c3c3;
+  /* Light Gray - section headers */
 }
+
 .PlayerParams-voiceList {
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: var(--charW1);
-    margin-right: calc(var(--charW1) * -1);
-    max-width: calc(var(--charW1) * 60);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--charW1);
+  margin-right: calc(var(--charW1) * -1);
+  max-width: calc(var(--charW1) * 60);
 }
+
 .PlayerParams-label {
-    flex-shrink: 0;
-    width: calc(var(--charW1) * 14);
-    margin-right: var(--charW1);
-    color: #c3c3c3; /* Light Gray - setting labels */
+  flex-shrink: 0;
+  width: calc(var(--charW1) * 14);
+  margin-right: var(--charW1);
+  color: #c3c3c3;
+  /* Light Gray - setting labels */
 }
+
 .PlayerParams-group {
-    margin-bottom: var(--charH);
+  margin-bottom: var(--charH);
 }
 
 button.FavoriteButton:active {
-    color: var(--clickable);
+  color: var(--clickable);
 }
+
 button.FavoriteButton.isFavorite {
-    color: var(--clickable);
+  color: var(--clickable);
 }
+
 button.FavoriteButton {
-    cursor: pointer;
-    color: var(--button);
-    background: initial;
-    padding: 0 var(--charW1);
+  cursor: pointer;
+  color: var(--button);
+  background: initial;
+  padding: 0 var(--charW1);
 }
+
 button.IconButton {
-    cursor: pointer;
-    color: var(--neutral2);
-    background: initial;
-    padding: 0;
-    margin-left: -8px;
+  cursor: pointer;
+  color: var(--neutral2);
+  background: initial;
+  padding: 0;
+  margin-left: -8px;
 }
 
 /*.Song-now-playing .Trash-button { background: var(--button); }*/
 .Trash-button {
-    cursor: pointer;
-    background: initial;
+  cursor: pointer;
+  background: initial;
 }
 
 .Visualizer {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    flex-shrink: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  border-right: 1px solid var(--clickable);
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .App-main-inner {
-        order: 1;
-        flex-shrink: 0;
-    }
-
-    .Visualizer {
-        order: 2; /* Place after main-inner (Browse/Settings) */
-        width: 100%;
-        border-left: none;
-        margin: 0 calc(var(--charW1) * -1);
-        align-items: stretch; /* Full width on mobile */
-        flex-grow: 1; /* Fill available space */
-        height: 100%; /* Fill available space */
-        overflow: hidden;
-    }
-
-    .Visualizer-analyzer,
-    .Visualizer-spectrogram {
-        width: 100% !important;
-        margin-left: 0;
-        min-height: 0 !important; /* Override the 800px min-height */
-        flex-grow: 1; /* Fill available space */
-        height: 100%; /* Fill available space */
-    }
-
-    .Visualizer-options {
-        text-align: center;
-        padding: calc(var(--charH) / 2) var(--charW2) 0;
-    }
-}
-.Visualizer-overlay {
-    position: absolute;
-    top: calc(
-        4 * var(--charH) + 30px
-    ); /* Slide down 30px to clear UI elements */
-    filter: brightness(0.5) contrast(0.8); /* Medium gray to match theme */
-}
-.Visualizer-options {
-    padding: var(--charH) var(--charW2) 0;
-    text-align: right;
-    position: relative;
-    z-index: 2;
-    /* background-color removed to allow CRT noise overlay to show through */
-}
-.Visualizer-toggle {
-    position: fixed;
-    top: var(--charH);
-    right: var(--charW2);
-    z-index: 3;
-}
-@media screen and (max-width: 600px) {
-    .Visualizer-toggle {
-        display: none;
-    }
-}
-.Visualizer-analyzer {
-    display: block;
-    image-rendering: pixelated;
-}
-.Visualizer-spectrogram {
-    display: block;
-    flex-grow: 1;
+  .App-main-inner {
+    order: 1;
     flex-shrink: 0;
-    min-height: 800px;
-    image-rendering: pixelated;
+  }
+
+  .Visualizer {
+    order: 2;
+    /* Place after main-inner (Browse/Settings) */
+    width: 100%;
+    border-right: none;
+    margin: 0 calc(var(--charW1) * -1);
+    align-items: stretch;
+    /* Full width on mobile */
+    flex-grow: 1;
+    /* Fill available space */
+    height: 100%;
+    /* Fill available space */
+    overflow: hidden;
+  }
+
+  .Visualizer-analyzer,
+  .Visualizer-spectrogram {
+    width: 100% !important;
+    margin-left: 0;
+    min-height: 0 !important;
+    /* Override the 800px min-height */
+    flex-grow: 1;
+    /* Fill available space */
+    height: 100%;
+    /* Fill available space */
+  }
+
+  .Visualizer-options {
+    text-align: center;
+    padding: calc(var(--charH) / 2) var(--charW2) 0;
+  }
+
+  .Visualizer-theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns on mobile */
+    gap: var(--charW2);
+  }
+
+  .Visualizer-theme-card {
+    padding: calc(var(--charW2) / 2);
+  }
+
+  .Visualizer-theme-pixel {
+    height: 12px;
+    /* Slightly taller for easier tapping on mobile */
+  }
 }
-.Visualizer-analyzer,
+
+.Visualizer-overlay {
+  position: absolute;
+  top: calc(4 * var(--charH) + 30px);
+  /* Slide down 30px to clear UI elements */
+  filter: brightness(0.5) contrast(0.8);
+  /* Medium gray to match theme */
+}
+
+.Visualizer-options {
+  padding: calc(var(--charH) / 2) var(--charW2) 0;
+  text-align: right;
+  position: relative;
+  z-index: 2;
+  /* background-color removed to allow CRT noise overlay to show through */
+}
+
+/* Theme selector styles */
+.Visualizer-themes {
+  margin-bottom: calc(var(--charH) / 2);
+}
+
+.Visualizer-themes h4 {
+  margin: 0;
+  color: var(--neutral4);
+  cursor: pointer;
+  user-select: none;
+}
+
+.Visualizer-themes-arrow {
+  display: inline-block;
+  transition: transform 200ms ease-out;
+  margin-right: calc(var(--charW1) / 2);
+}
+
+.Visualizer-themes-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.Visualizer-themes-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-out;
+}
+
+.Visualizer-themes-content.expanded {
+  max-height: 600px;
+}
+
+.Visualizer-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--charW1);
+}
+
+.Visualizer-theme-card {
+  cursor: pointer;
+  border: 1px solid var(--neutral2);
+  padding: calc(var(--charW1) / 2);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.Visualizer-theme-card-new-row {
+  grid-column: 1;
+}
+
+.Visualizer-theme-card:hover {
+  border-color: var(--neutral4);
+}
+
+.Visualizer-theme-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.Visualizer-theme-swatch {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-bottom: calc(var(--charW1) / 2);
+  border: 1px solid var(--neutral4);
+}
+
+.Visualizer-theme-pixel {
+  flex: 1;
+  height: 8px;
+}
+
+.Visualizer-theme-label {
+  display: block;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--neutral3);
+}
+
+.Visualizer-theme-card.selected .Visualizer-theme-label {
+  color: var(--accent);
+}
+
+/* UI Palette selector styles */
+.UIPalette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--charW1);
+  margin-top: calc(var(--charH) / 2);
+}
+
+.UIPalette-card {
+  cursor: pointer;
+  border: 1px solid var(--neutral2);
+  padding: calc(var(--charW1) / 2);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.UIPalette-card:hover {
+  border-color: var(--neutral4);
+}
+
+.UIPalette-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.UIPalette-swatch {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-bottom: calc(var(--charW1) / 2);
+  border: 1px solid var(--neutral4);
+}
+
+.UIPalette-color {
+  flex: 1;
+  height: 8px;
+}
+
+.UIPalette-label {
+  display: block;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--neutral3);
+}
+
+.UIPalette-card.selected .UIPalette-label {
+  color: var(--accent);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 800px) {
+  .UIPalette-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--charW2);
+  }
+
+  .UIPalette-card {
+    padding: calc(var(--charW2) / 2);
+  }
+
+  .UIPalette-color {
+    height: 12px;
+  }
+}
+
+/* Maximize button */
+.Visualizer-maximize-btn {
+  background: none;
+  border: 1px solid var(--neutral2);
+  color: var(--neutral4);
+  cursor: pointer;
+  font-size: 1.2em;
+  padding: 2px 8px;
+  margin-left: var(--charW1);
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.Visualizer-maximize-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Maximized mode - visualizer expands to fill main area */
+.Visualizer.maximized {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--background);
+  z-index: 5;
+}
+
+.Visualizer.maximized .Visualizer-canvases {
+  width: 100%;
+  height: 100%;
+}
+
+.Visualizer.maximized .Visualizer-canvases-inner {
+  display: flex;
+  align-items: flex-start;
+  /* Don't stretch children vertically */
+  width: 100%;
+  height: 100%;
+}
+
+.Visualizer.maximized .Visualizer-analyzer,
+.Visualizer.maximized .Visualizer-spectrogram {
+  border: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  flex-grow: 0;
+  /* Prevent CSS from scaling canvas - use exact pixel dimensions */
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+/* Hide options panel in maximized mode */
+.Visualizer.maximized .Visualizer-options {
+  display: none;
+}
+
+/* App layout when visualizer is maximized */
+.App-main.visualizer-maximized {
+  flex-direction: column;
+  position: relative;
+  /* Positioning context for absolute visualizer */
+}
+
+.Visualizer-toggle {
+  position: fixed;
+  top: var(--charH);
+  right: var(--charW2);
+  z-index: 3;
+}
+
+@media screen and (max-width: 600px) {
+  .Visualizer-toggle {
+    display: none;
+  }
+}
+
+.Visualizer-analyzer {
+  display: block;
+  image-rendering: pixelated;
+  border-top: 1px solid var(--neutral3);
+  border-bottom: 1px solid var(--neutral3);
+  box-sizing: border-box;
+}
+
 .Visualizer-spectrogram {
-    margin-left: 1px; /* Don't cover the right border of App-main-inner */
+  display: block;
+  flex-grow: 1;
+  flex-shrink: 0;
+  min-height: 800px;
+  image-rendering: pixelated;
 }
 
 .TimeSlider {
-    flex-grow: 1;
-    margin: var(--charH) 0;
+  flex-grow: 1;
+  margin: var(--charH) 0;
 }
+
 .TimeSlider-labels,
 .VolumeSlider-labels {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--charW2);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--charW2);
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .TimeSlider {
-        margin: calc(var(--charH) / 2) 0;
-    }
+  .TimeSlider {
+    margin: 0;
+    /* No margin for ultra-compact layout */
+  }
+
+  .TimeSlider-labels,
+  .VolumeSlider-labels {
+    font-size: 12px;
+    /* Smaller for compactness */
+    line-height: 1.2;
+  }
 }
 
 .VolumeSlider {
-    flex-shrink: 0;
-    margin: var(--charH) 0;
+  flex-shrink: 0;
+  margin: var(--charH) 0;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .VolumeSlider {
-        margin: calc(var(--charH) / 2) 0;
-    }
+  .VolumeSlider {
+    margin: var(--charH) 0;
+  }
 }
 
 @media screen and (max-width: 600px) {
-    .VolumeSlider {
-        display: none;
-    }
+  .VolumeSlider {
+    display: none;
+  }
 }
 
 .inline-icon {
-    display: inline-block;
-    background-color: var(--clickable);
-    mask-repeat: no-repeat;
-    mask-position: center;
-    /* the icon PNGs are 19px tall, so the container needs odd height for vertical centering. */
-    height: calc(round(up, var(--charH), 2px) - 1px);
-    flex-shrink: 0;
-    vertical-align: middle;
+  display: inline-block;
+  background-color: var(--clickable);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  /* the icon PNGs are 19px tall, so the container needs odd height for vertical centering. */
+  height: calc(round(up, var(--charH), 2px) - 1px);
+  flex-shrink: 0;
+  vertical-align: middle;
 }
+
 [disabled] .inline-icon {
-    background-color: var(--neutral2);
+  background-color: var(--neutral2);
 }
+
 .dim-icon {
-    background-color: var(--neutral2);
+  background-color: var(--neutral2);
 }
+
 .icon-play {
-    width: 24px;
-    mask-image: url(images/play.png);
+  width: 24px;
+  mask-image: url(images/play.png);
 }
+
 .icon-pause {
-    width: 24px;
-    mask-image: url(images/pause.png);
+  width: 24px;
+  mask-image: url(images/pause.png);
 }
+
 .icon-prev {
-    width: 24px;
-    mask-image: url(images/prev.png);
+  width: 24px;
+  mask-image: url(images/prev.png);
 }
+
 .icon-next {
-    width: 24px;
-    mask-image: url(images/next.png);
+  width: 24px;
+  mask-image: url(images/next.png);
 }
+
 .icon-back {
-    width: 24px;
-    mask-image: url(images/back.png);
+  width: 24px;
+  mask-image: url(images/back.png);
 }
+
 .icon-forward {
-    width: 24px;
-    mask-image: url(images/forward.png);
+  width: 24px;
+  mask-image: url(images/forward.png);
 }
+
 .icon-folder {
-    width: 24px;
-    mask-image: url(images/folder.png);
+  width: 24px;
+  mask-image: url(images/folder.png);
 }
+
 .icon-trash {
-    width: 24px;
-    mask-image: url(images/trash.png);
+  width: 24px;
+  mask-image: url(images/trash.png);
 }
+
 .icon-copy {
-    width: 24px;
-    mask-image: url(images/copy.png);
+  width: 24px;
+  mask-image: url(images/copy.png);
 }
+
 .icon-download {
-    width: 16px;
-    mask-image: url(images/download.png);
+  width: 16px;
+  mask-image: url(images/download.png);
 }
+
 .icon-repeat {
-    width: 16px;
-    mask-image: url(images/repeat.png);
+  width: 16px;
+  mask-image: url(images/repeat.png);
 }
+
 .icon-shuffle {
-    width: 16px;
-    mask-image: url(images/shuffle.png);
+  width: 16px;
+  mask-image: url(images/shuffle.png);
 }
+
+.icon-infinity {
+  width: 16px;
+  mask-image: url(images/infinity.png);
+}
+
 .icon-chip {
-    width: 24px;
-    mask-image: url(images/chip.png);
+  width: 24px;
+  mask-image: url(images/chip.png);
 }
+
 .icon-pin-up {
-    width: 24px;
-    mask-image: url(images/pin-up.png);
-    background-color: var(--neutral2);
+  width: 24px;
+  mask-image: url(images/pin-up.png);
+  background-color: var(--neutral2);
 }
+
 .icon-pin-down {
-    width: 24px;
-    mask-image: url(images/pin-filled.png);
-    background-color: var(--neutral2);
+  width: 24px;
+  mask-image: url(images/pin-filled.png);
+  background-color: var(--neutral2);
 }
 
 .tab-container {
-    border-bottom: 1px solid var(--clickable);
-    padding: 0 var(--charW2);
-    display: flex;
-    gap: var(--charW1);
+  border-bottom: 1px solid var(--clickable);
+  padding: 0 var(--charW2);
+  display: flex;
+  gap: var(--charW1);
 }
 
 .tab-settings {
-    margin-left: auto;
-    margin-right: 0;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 /* Mobile tab bar - only visible on mobile/portrait */
 .mobile-tab-bar {
-    display: none; /* Hidden by default (desktop) */
+  display: none;
+  /* Hidden by default (desktop) */
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-    .mobile-tab-bar {
-        display: flex;
-        gap: var(--charW1);
-        padding: 0 var(--charW1);
-        border-bottom: 1px solid var(--clickable);
-        background: var(--background);
-        margin: 0 calc(var(--charW1) * -1);
-        flex-shrink: 0; /* Don't shrink the tab bar */
-    }
+  .mobile-tab-bar {
+    display: flex;
+    gap: var(--charW1);
+    padding: 0 var(--charW1);
+    border-bottom: 1px solid var(--clickable);
+    background: var(--background);
+    margin: 0 calc(var(--charW1) * -1);
+    flex-shrink: 0;
+    /* Don't shrink the tab bar */
+  }
 
-    /* Hide all tab content by default on mobile */
-    .mobile-tab-content {
-        display: none !important;
-    }
+  .mobile-tab-bar .tab {
+    min-height: 44px;
+    font-size: 18px;
+    padding: var(--charW1) var(--charW2);
+    display: flex;
+    align-items: center;
+  }
 
-    /* Show only the active tab on mobile - fill remaining space */
-    .mobile-tab-content.mobile-tab-active {
-        display: flex !important;
-        flex-grow: 1; /* Fill available space */
-        flex-direction: column;
-        overflow: hidden; /* Contain scrollable content */
-        min-height: 0; /* Allow flex shrinking */
-    }
+  /* Hide all tab content by default on mobile */
+  .mobile-tab-content {
+    display: none !important;
+  }
+
+  /* Show only the active tab on mobile - fill remaining space */
+  .mobile-tab-content.mobile-tab-active {
+    display: flex !important;
+    flex-grow: 1;
+    /* Fill available space */
+    flex-direction: column;
+    overflow: hidden;
+    /* Contain scrollable content */
+    min-height: 0;
+    /* Allow flex shrinking */
+  }
 }
 
 .toast-box-outer {
-    position: absolute;
-    z-index: 100;
-    display: flex;
-    align-items: start;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    pointer-events: none;
-    top: 0;
-    left: 0;
-    padding: 0 var(--charW2);
-    box-sizing: border-box;
+  position: absolute;
+  z-index: 100;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  padding: 0 var(--charW2);
+  box-sizing: border-box;
 }
+
 .toast-box {
-    padding: var(--charH) var(--charW2);
-    box-shadow: var(--box-shadow);
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    overflow: hidden;
-    max-height: 100%;
-    pointer-events: all;
-    width: 100%;
-    height: calc(4 * var(--charH));
+  padding: var(--charH) var(--charW2);
+  box-shadow: var(--box-shadow);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  overflow: hidden;
+  max-height: 100%;
+  pointer-events: all;
+  width: 100%;
+  height: calc(4 * var(--charH));
 }
+
 .toast-box-outer[hidden] {
-    top: calc(-4 * var(--charH));
-    visibility: hidden;
+  top: calc(-4 * var(--charH));
+  visibility: hidden;
 }
+
 .toast-box .message {
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    display: -webkit-box;
-    max-height: 100%;
-    overflow: hidden;
-    padding-right: var(--charW1);
-    text-overflow: ellipsis;
-    white-space: initial;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  max-height: 100%;
+  overflow: hidden;
+  padding-right: var(--charW1);
+  text-overflow: ellipsis;
+  white-space: initial;
 }
+
 .toast-error {
-    background-color: var(--active);
-    color: var(--neutral4);
+  background-color: var(--active);
+  color: var(--neutral4);
 }
+
 .toast-info {
-    background-color: var(--button);
-    color: var(--neutral3);
+  background-color: var(--button);
+  color: var(--neutral3);
 }
 
 /* message-box is used by Info box and DropMessage component. */
 .message-box-outer {
-    position: absolute;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: round(calc(100% + 0px), 2px);
-    pointer-events: none;
-    top: 0;
-    left: 0;
-    padding: var(--charH) var(--charW2);
-    box-sizing: border-box;
+  position: absolute;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: round(calc(100% + 0px), 2px);
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  padding: var(--charH) var(--charW2);
+  box-sizing: border-box;
 }
 
 .message-box-outer[hidden] {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .message-box {
-    background: var(--message-box-background);
-    padding: var(--charH) var(--charW2);
-    box-shadow: var(--message-box-box-shadow);
-    outline: var(--message-box-border);
-    box-sizing: border-box;
-    display: flex;
-    visibility: visible;
-    overflow: hidden;
-    max-height: 100%;
-    pointer-events: all;
-    flex-direction: column;
-    width: calc(90 * var(--charW1));
-    height: calc(40 * var(--charH));
+  background: var(--message-box-background);
+  padding: var(--charH) var(--charW2);
+  box-shadow: var(--message-box-box-shadow);
+  outline: var(--message-box-border);
+  box-sizing: border-box;
+  display: flex;
+  visibility: visible;
+  overflow: hidden;
+  max-height: 100%;
+  pointer-events: all;
+  flex-direction: column;
+  width: calc(90 * var(--charW1));
+  height: calc(40 * var(--charH));
 }
 
 .message-box[hidden] {
-    width: 0;
-    height: 0;
-    visibility: hidden;
+  width: 0;
+  height: 0;
+  visibility: hidden;
 }
 
 .message-box[hidden] .message-box-inner {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 .message-box-inner {
-    color: var(--message-box-color);
-    outline: var(--message-box-inner-border);
-    padding: var(--charH) var(--charW2);
-    overflow: auto;
+  color: var(--message-box-color);
+  outline: var(--message-box-inner-border);
+  padding: var(--charH) var(--charW2);
+  overflow: auto;
 }
 
 .message-box-inner.info-text {
-    white-space: pre;
-    font: var(--message-box-info-text-font);
-    color: var(--message-box-info-text-color);
-    background: var(--message-box-info-text-background);
+  white-space: pre;
+  font: var(--message-box-info-text-font);
+  color: var(--message-box-info-text-color);
+  background: var(--message-box-info-text-background);
 }
 
 .message-box-footer {
-    display: flex;
-    flex-direction: row-reverse;
-    align-content: end;
-    justify-content: space-between;
-    padding-top: var(--charH);
+  display: flex;
+  flex-direction: row-reverse;
+  align-content: end;
+  justify-content: space-between;
+  padding-top: var(--charH);
 }
 
 .drop-message {
-    height: calc(9 * var(--charH) + 1px);
-    width: calc(60 * var(--charW1));
-    text-align: center;
+  height: calc(9 * var(--charH) + 1px);
+  width: calc(60 * var(--charW1));
+  text-align: center;
 }
 
 .drop-message .message-box-inner {
-    overflow: hidden;
-    display: flex;
-    flex-grow: 1;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .message-box-button {
-    background: var(--background);
-    padding: 0 var(--charW2);
-    box-shadow: none;
+  background: var(--background);
+  padding: 0 var(--charW2);
+  box-shadow: none;
 }
 
 @media (max-resolution: 1dppx) {
-    /* ensure crisp icons at 1:1 native resolution, smooth images otherwise */
-    img,
-    .Visualizer-overlay,
-    .Visualizer-analyzer,
-    .Visualizer-spectrogram,
-    .inline-icon {
-        image-rendering: pixelated;
-    }
+  /* ensure crisp icons at 1:1 native resolution, smooth images otherwise */
+  img,
+  .Visualizer-overlay,
+  .Visualizer-analyzer,
+  .Visualizer-spectrogram,
+  .inline-icon {
+    image-rendering: pixelated;
+  }
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-    height: var(--charW1);
-    width: var(--charW1);
-    background-color: var(--button);
+  height: var(--charW1);
+  width: var(--charW1);
+  background-color: var(--button);
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: var(--clickable);
-    -webkit-border-radius: 0;
+  background-color: var(--clickable);
+  -webkit-border-radius: 0;
 }
+
 ::-webkit-scrollbar-corner {
-    background-color: var(--neutral2);
+  background-color: var(--neutral2);
 }

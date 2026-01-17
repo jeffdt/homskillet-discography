@@ -4,31 +4,31 @@ import { formatSongDisplayName } from '../util';
 interface SongDisplayProps {
   songUrl: string | null;
   ejected: boolean;
-  getCurrentSongLink: (withSubtune?: boolean) => string | null;
-  handleCopyLink: (link: string) => void;
+  navigateToCurrentSong: () => void;
 }
 
-const SongDisplay: React.FC<SongDisplayProps> = ({ songUrl, ejected, getCurrentSongLink, handleCopyLink }) => {
+const SongDisplay: React.FC<SongDisplayProps> = ({ songUrl, ejected, navigateToCurrentSong }) => {
   if (ejected || !songUrl) {
     return null;
   }
 
   const displayName = formatSongDisplayName(songUrl);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleTitleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const link = getCurrentSongLink(false);
-    if (link) {
-      handleCopyLink(link);
-    }
+    navigateToCurrentSong();
   };
 
   return (
     <div className="SongDisplay">
-      <a href="#" onClick={handleClick} title="Copy song link to clipboard">
+      <span
+        className="song-title-link"
+        onClick={handleTitleClick}
+        title="Go to file in browser"
+        style={{ cursor: 'pointer' }}
+      >
         {displayName}
-        <span className="inline-icon icon-copy" style={{ marginLeft: 'var(--charW1)' }}/>
-      </a>
+      </span>
     </div>
   );
 };

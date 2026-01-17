@@ -6,7 +6,6 @@ import trimEnd from 'lodash/trimEnd';
 import { BrowseProps } from '../types/app';
 import { formatFileSize } from '../util';
 
-
 export default class Browse extends React.PureComponent<BrowseProps> {
   constructor(props: BrowseProps) {
     super(props);
@@ -17,7 +16,7 @@ export default class Browse extends React.PureComponent<BrowseProps> {
     this.navigate();
   }
 
-  componentDidUpdate(prevProps: BrowseProps, prevState: any) {
+  componentDidUpdate(prevProps: BrowseProps) {
     this.navigate();
   }
 
@@ -26,77 +25,81 @@ export default class Browse extends React.PureComponent<BrowseProps> {
   }
 
   navigate() {
-    const {
-      browsePath,
-      listing,
-      fetchDirectory,
-    } = this.props;
+    const { browsePath, listing, fetchDirectory } = this.props;
     if (!listing) {
       fetchDirectory(browsePath);
     }
   }
 
   render() {
-    const {
-      listing,
-      browsePath,
-      playContext,
-      history,
-    } = this.props;
+    const { listing, browsePath, playContext, history } = this.props;
 
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.delete('q');
     const search = urlParams.toString();
-    // Check if previous page url is the parent directory of current page url.
-    const prevPath = trimEnd((history.location.state as any)?.prevPathname, '/');
-    const currPath = trimEnd(window.location.pathname, '/');
-    const prevPageIsParentDir = prevPath === currPath.slice(0, currPath.lastIndexOf('/'));
 
-    const BrowseRow = (props: { item: any; onPlay: () => void }) => {
-      const { item, onPlay } = props;
-      item.isBackLink = item.name === '..' && prevPageIsParentDir;
+    const BrowseRow = (props: {
+      item: any;
+      onPlay: () => void;
+      onCopyLink?: (href: string) => void;
+      isPlaying?: boolean;
+    }) => {
+      const { item, onPlay, onCopyLink, isPlaying } = props;
+      // Since directories only nest one level (root -> album), any '..' link should navigate to root.
+      // The '..' item only exists when browsing an album (not at root), so marking it as isBackLink
+      // ensures it always navigates to '/' regardless of whether the user navigated here or deep-linked.
+      item.isBackLink = item.name === '..';
 
       if (item.type === 'directory') {
         return (
           <>
             <div className="BrowseList-colName">
-              <DirectoryLink to={item.href} search={search}
-                             isBackLink={item.isBackLink}>{item.name}</DirectoryLink>
+              <DirectoryLink to={item.href} search={search} isBackLink={item.isBackLink}>
+                {item.name}
+              </DirectoryLink>
             </div>
-            <div className="BrowseList-colDir">
-              &lt;DIR&gt;
-            </div>
-            <div className="BrowseList-colCount" title={`Contains ${item.numChildren} direct child items`}>
+            <div className="BrowseList-colDir">&lt;DIR&gt;</div>
+            <div
+              className="BrowseList-colCount"
+              title={`Contains ${item.numChildren} direct child items`}
+            >
               {item.numChildren}
             </div>
-            <div className="BrowseList-colMtime">
-              {item.mtime}
-            </div>
-            <div className="BrowseList-colSize" title={`Directory size is ${item.size} bytes (recursive)`}>
+            <div className="BrowseList-colMtime">{item.mtime}</div>
+            <div
+              className="BrowseList-colSize"
+              title={`Directory size is ${item.size} bytes (recursive)`}
+            >
               {item.size != null && formatFileSize(item.size)}
             </div>
+            <div className="BrowseList-colCopy"></div>
           </>
         );
       } else {
         return (
           <>
             <div className="BrowseList-colName">
-              <a onClick={onPlay}
-                 href={item.href}
-                 tabIndex={-1}>
+              <a onClick={onPlay} href={item.href} tabIndex={-1}>
                 {item.name}
               </a>
             </div>
-            <div className="BrowseList-colMtime">
-              {item.mtime}
-            </div>
-            <div className="BrowseList-colSize">
-              {formatFileSize(item.size)}
+            <div className="BrowseList-colMtime">{item.mtime}</div>
+            <div className="BrowseList-colSize">{formatFileSize(item.size)}</div>
+            <div className="BrowseList-colCopy">
+              <span
+                className={`inline-icon icon-copy BrowseList-copy-icon ${isPlaying ? 'is-playing' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (onCopyLink) onCopyLink(item.href);
+                }}
+                title="Copy song link to clipboard"
+              />
             </div>
           </>
         );
       }
-    }
+    };
 
     return (
       <div className="Browse-container">
@@ -105,7 +108,8 @@ export default class Browse extends React.PureComponent<BrowseProps> {
           <button
             className="box-button"
             title="Play a random song from this album"
-            onClick={this.handleShufflePlay}>
+            onClick={this.handleShufflePlay}
+          >
             Randomize
           </button>
         </h3>
@@ -115,6 +119,13 @@ export default class Browse extends React.PureComponent<BrowseProps> {
             currContext={this.props.currContext}
             currIdx={this.props.currIdx}
             onSongClick={this.props.onSongClick}
+            onCopyLink={this.props.onCopyLink}
+            isPlaying={(href) =>
+              this.props.currContext !== null &&
+              this.props.currContext !== undefined &&
+              this.props.currIdx !== undefined &&
+              this.props.currContext[this.props.currIdx] === href
+            }
             itemList={listing || []}
             songContext={playContext}
             rowRenderer={BrowseRow}

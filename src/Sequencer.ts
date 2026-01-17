@@ -1,34 +1,20 @@
-import promisify from "./promisify-xhr";
-import {CATALOG_PREFIX} from "./config";
+import promisify from './promisify-xhr';
+import { CATALOG_PREFIX } from './config';
 import shuffle from 'lodash/shuffle';
 import EventEmitter from 'events';
 import autoBind from 'auto-bind';
 import { pathJoin } from './util';
 import { IPlayer } from './types/player';
 import {
-  REPEAT_OFF,
-  REPEAT_ALL,
-  REPEAT_ONE,
   SHUFFLE_OFF,
   SHUFFLE_ON,
-  RepeatMode,
   ShuffleMode,
   SequencerState,
   LocalFilesManager,
 } from './types/sequencer';
 
 // Re-export constants for backward compatibility
-export {
-  REPEAT_OFF,
-  REPEAT_ALL,
-  REPEAT_ONE,
-  NUM_REPEAT_MODES,
-  REPEAT_LABELS,
-  SHUFFLE_OFF,
-  SHUFFLE_ON,
-  NUM_SHUFFLE_MODES,
-  SHUFFLE_LABELS,
-} from './types/sequencer';
+export { SHUFFLE_OFF, SHUFFLE_ON, NUM_SHUFFLE_MODES, SHUFFLE_LABELS } from './types/sequencer';
 
 export default class Sequencer extends EventEmitter {
   private player: IPlayer | null = null;
@@ -41,7 +27,7 @@ export default class Sequencer extends EventEmitter {
   private shuffle: ShuffleMode = SHUFFLE_OFF;
   private shuffleOrder: number[] = [];
   private songRequest: XMLHttpRequest | null = null;
-  private repeat: RepeatMode = REPEAT_OFF;
+  private isLocked: boolean = false;
 
   constructor(players: IPlayer[], localFilesManager: LocalFilesManager, getSettings: () => any) {
     super();
@@ -58,9 +44,8 @@ export default class Sequencer extends EventEmitter {
     this.shuffle = SHUFFLE_OFF;
     this.shuffleOrder = [];
     this.songRequest = null;
-    this.repeat = REPEAT_OFF;
 
-    this.players.forEach(player => {
+    this.players.forEach((player) => {
       player.on('playerStateUpdate', this.handlePlayerStateUpdate);
       player.on('playerError', this.handlePlayerError);
     });
@@ -77,11 +62,16 @@ export default class Sequencer extends EventEmitter {
 
   private handlePlayerStateUpdate(playerState: SequencerState): void {
     const { isStopped } = playerState;
-    console.debug('Sequencer.handlePlayerStateUpdate(isStopped=%s)', isStopped);
+    console.debug(
+      'Sequencer.handlePlayerStateUpdate(isStopped=%s, isLocked=%s)',
+      isStopped,
+      this.isLocked
+    );
 
     if (isStopped) {
       this.currUrl = null;
-      if (this.context) {
+      // Only advance if NOT locked
+      if (this.context && !this.isLocked) {
         this.nextSong();
       }
     } else {
@@ -95,22 +85,22 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  playContext(context: string[], index: number = 0, subtune: number = 0): void {
+  playContext(context: string[], index: number = 0): void {
     this.currIdx = index;
     this.context = context;
     if (this.shuffle === SHUFFLE_ON) {
       this.setShuffle(this.shuffle);
     }
-    this.playCurrentSong(subtune);
+    this.playCurrentSong();
   }
 
-  private playCurrentSong(subtune: number = 0): void {
+  private playCurrentSong(): void {
     let idx = this.currIdx;
     if (this.shuffle === SHUFFLE_ON) {
       idx = this.shuffleOrder[idx];
       console.log('Shuffle (%s): %s', this.currIdx, idx);
     }
-    this.playSong(this.context![idx], subtune);
+    this.playSong(this.context![idx]);
   }
 
   playSonglist(urls: string[]): void {
@@ -126,7 +116,10 @@ export default class Sequencer extends EventEmitter {
     if (this.shuffle === SHUFFLE_ON && this.context) {
       // Generate a new shuffle order.
       // Insert current play index at the beginning.
-      this.shuffleOrder = [this.currIdx, ...shuffle(this.context.map((_, i) => i).filter(i => i !== this.currIdx))];
+      this.shuffleOrder = [
+        this.currIdx,
+        ...shuffle(this.context.map((_, i) => i).filter((i) => i !== this.currIdx)),
+      ];
       this.currIdx = 0;
     } else if (this.shuffleOrder) {
       // Restore linear play sequence at current shuffle position.
@@ -136,30 +129,31 @@ export default class Sequencer extends EventEmitter {
     }
   }
 
-  setRepeat(repeat: RepeatMode): void {
-    this.repeat = repeat;
+  setLocked(locked: boolean): void {
+    this.isLocked = locked;
+    // Inform the current player about lock state
+    if (this.player) {
+      this.player.setLocked(locked);
+    }
   }
 
   private advanceSong(direction: number): void {
     if (this.context == null) return;
 
-    if (this.repeat !== REPEAT_ONE) {
-      this.currIdx += direction;
-    }
+    this.currIdx += direction;
 
     if (this.currIdx < 0 || this.currIdx >= this.context.length) {
-      if (this.repeat === REPEAT_ALL) {
-        this.currIdx = (this.currIdx + this.context.length) % this.context.length;
-        this.playCurrentSong();
-      } else {
-        console.debug('Sequencer.advanceSong(direction=%s) %s passed end of context length %s',
-          direction, this.currIdx, this.context.length);
-        this.currIdx = 0;
-        this.context = null;
-        this.player!.stop();
-        this.player = null;
-        this.emit('sequencerStateUpdate', { isEjected: true });
-      }
+      console.debug(
+        'Sequencer.advanceSong(direction=%s) %s passed end of context length %s',
+        direction,
+        this.currIdx,
+        this.context.length
+      );
+      this.currIdx = 0;
+      this.context = null;
+      this.player!.stop();
+      this.player = null;
+      this.emit('sequencerStateUpdate', { isEjected: true });
     } else {
       this.playCurrentSong();
     }
@@ -171,22 +165,6 @@ export default class Sequencer extends EventEmitter {
 
   prevSong(): void {
     this.advanceSong(-1);
-  }
-
-  playSubtune(subtune: number): void {
-    this.player!.playSubtune(subtune);
-  }
-
-  prevSubtune(): void {
-    const subtune = this.player!.getSubtune() - 1;
-    if (subtune < 0) return;
-    this.playSubtune(subtune);
-  }
-
-  nextSubtune(): void {
-    const subtune = this.player!.getSubtune() + 1;
-    if (subtune >= this.player!.getNumSubtunes()) return;
-    this.playSubtune(subtune);
   }
 
   getPlayer(): IPlayer | null {
@@ -205,11 +183,7 @@ export default class Sequencer extends EventEmitter {
     return this.currUrl;
   }
 
-  getSubtune(): number {
-    return this.player!.getSubtune();
-  }
-
-  playSong(url: string, subtune: number = 0): void {
+  playSong(url: string): void {
     if (this.player !== null) {
       this.player.suspend();
     }
@@ -230,7 +204,7 @@ export default class Sequencer extends EventEmitter {
     if (url.startsWith('local/')) {
       const buffer = this.localFilesManager.read(url);
       this.currUrl = null;
-      this.playSongBuffer(url, buffer, subtune);
+      this.playSongBuffer(url, buffer);
     } else {
       // Normalize url - paths are assumed to live under CATALOG_PREFIX
       // Don't add prefix if URL is already absolute (starts with http or /)
@@ -244,12 +218,13 @@ export default class Sequencer extends EventEmitter {
       this.songRequest = promisify(new XMLHttpRequest());
       this.songRequest.responseType = 'arraybuffer';
       this.songRequest.open('GET', url);
-      this.songRequest.send()
-        .then(xhr => xhr.response)
-        .then(buffer => {
+      this.songRequest
+        .send()
+        .then((xhr) => xhr.response)
+        .then((buffer) => {
           this.currUrl = url;
           const filepath = url.replace(CATALOG_PREFIX, '');
-          this.playSongBuffer(filepath, buffer, subtune)
+          this.playSongBuffer(filepath, buffer);
         })
         .catch((e: any) => {
           this.handlePlayerError(e.message || `HTTP ${e.status} ${e.statusText} ${url}`);
@@ -265,7 +240,7 @@ export default class Sequencer extends EventEmitter {
     const ext = filepath.split('.').pop()!.toLowerCase();
 
     // Find a player that can play this filetype
-    const player = this.players.find(player => player.canPlay(ext));
+    const player = this.players.find((player) => player.canPlay(ext));
     if (player == null) {
       this.emit('playerError', `The file format ".${ext}" was not recognized.`);
       return;
@@ -278,12 +253,12 @@ export default class Sequencer extends EventEmitter {
     this.playSongBuffer(filepath, songData);
   }
 
-  private async playSongBuffer(filepath: string, buffer: ArrayBuffer, subtune: number = 0): Promise<void> {
+  private async playSongBuffer(filepath: string, buffer: ArrayBuffer): Promise<void> {
     let uint8Array: Uint8Array;
     uint8Array = new Uint8Array(buffer);
     const persistedSettings = this.getSettings();
     try {
-      await this.player!.loadData(uint8Array, filepath, persistedSettings, subtune);
+      await this.player!.loadData(uint8Array, filepath, persistedSettings);
     } catch (e: any) {
       this.handlePlayerError(`Unable to play ${filepath} (${e.message}).`);
     }

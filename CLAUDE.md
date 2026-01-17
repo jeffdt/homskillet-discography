@@ -4,7 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Homskillet Discography** is an interactive discography website for NSF (NES Sound Format) files created by the musician Homskillet. This is a fork of the general-purpose chip-player-js by mmontag, being customized into a personal music showcase site.
+**Homskillet Discography** is a technical sandbox for exploring audio-visual and game development concepts, powered by NSF (NES Sound Format) files created by the musician Homskillet. This is a fork of the general-purpose chip-player-js by mmontag, being transformed into an interactive audio-visual laboratory and experimentation platform.
+
+### Core Philosophy: Exploration and Interactivity
+
+**This project is as much about learning and experimentation as it is about listening to music.** The goal is to create an engaging technical playground where visitors can:
+
+- Explore how audio visualization techniques work
+- Tweak parameters and see real-time effects
+- Understand the connection between audio data and visual representation
+- Experiment with audio processing controls (tempo, stereo width, bass boost, etc.)
+- Learn about WebAssembly, Web Audio API, and game music emulation
+
+**When implementing features, always consider:**
+
+1. **Expose configuration where appropriate** - If you're adding a new visual effect, algorithm parameter, or audio processing feature, consider exposing controls so visitors can experiment with it. Make the invisible visible.
+
+2. **Add audio-reactivity opportunities** - Look for places where existing or new visual elements could respond to audio data (frequency bands, amplitude, beats, etc.). The visualizer isn't the only place that can react to music.
+
+3. **Make experimentation inviting** - Use clear labels, helpful tooltips, and logical groupings. The goal is to make technical concepts accessible and explorable, not intimidating.
+
+4. **Document the "why" and "how"** - When exposing controls, consider adding brief explanations of what the parameter does or what technique is being demonstrated.
 
 ### Project Goals
 
@@ -12,9 +32,9 @@ This project is being developed in three phases:
 
 1. **Strip down to minimum** - Remove all components of the general-purpose player that aren't needed (MIDI, XMP, VGM players, Firebase auth, favorites, search, local file uploads, etc.). Simplify to just NSF playback via game-music-emu.
 
-2. **Add custom features** - Build new features to transform this into a personal discography site with custom branding, theming, and presentation tailored for showcasing Homskillet's musical works.
+2. **Add custom features** - Build new features to transform this into an interactive audio-visual laboratory with custom branding, theming, and presentation. Focus on exposing interesting technical concepts in an accessible way.
 
-3. **Deploy to GitHub Pages** - Deploy as a fully static site. (See `.claude/deployment-plan.md` for details - AWS is not needed for this small discography).
+3. **Deploy to GitHub Pages** - Deploy as a fully static site (AWS is not needed for this small discography).
 
 ### Technical Foundation
 
@@ -23,9 +43,16 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 ## Key Commands
 
 ### Development
+
 - `bun start` - Start Vite dev server on localhost:3000
 - `bun run server` - Start Node.js API server on port 8080 (DEV mode)
-- `bun test` - Run Vitest unit tests
+- `bun test` - Run Vitest in watch mode (auto-reruns tests on file changes)
+- `bun run test:run` - Run all tests once and exit
+- `bun run test:ui` - Open Vitest UI for interactive test exploration
+- `bun run coverage` - Generate test coverage report
+
+**Note:** During active development, assume the dev server is already running. Do not attempt to start it automatically.
+
 - `bun run build-chip-core:docker` - **Recommended**: Build chip-core using Docker (no Emscripten setup needed)
 - `bun run build-chip-core` - Build chip-core locally (requires Emscripten setup)
 - `bun run build-catalog` - Build music catalog index from public/music/ folder
@@ -33,18 +60,20 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 - `bun run build` - Full build (catalog + chip-core + frontend)
 
 ### Deployment
+
 - `bun run deploy` - Full build and deploy to GitHub Pages
 - `bun run deploy-lite` - Build frontend and deploy (skip chip-core rebuild)
 
-See `.claude/deployment-plan.md` for the complete deployment strategy.
-
 ### Additional Scripts
+
 - `bun run fixvgm` - Fix VGM files utility (legacy, being removed)
 
 ## Architecture
 
 ### Audio Pipeline
+
 The application uses Web Audio API with this graph structure:
+
 ```
 ┌────────────┐      ┌────────────┐      ┌─────────────┐
 │ playerNode ├─────>│  gainNode  ├─────>│ destination │
@@ -52,7 +81,9 @@ The application uses Web Audio API with this graph structure:
 ```
 
 ### Player State Machine
+
 Players follow a state machine pattern with 3 states and 5 transitions:
+
 ```
                         ╭– (seek) –╮
                         ^          v
@@ -65,6 +96,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 ```
 
 ### Component Structure
+
 - **src/components/App.tsx** - Main application component, manages audio context, player lifecycle, and routing
 - **src/components/** - React UI components (mostly TypeScript)
   - Browse.tsx - Directory browser for music catalog
@@ -82,21 +114,27 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
 
 ### Emscripten Build System
+
 The C/C++ audio engines are compiled to WebAssembly:
+
 - **scripts/build-chip-core.js** - Main build script that links all static libraries
 - **public/chip-core.wasm** - Output WebAssembly module (committed to repo)
 - **src/chip-core.js** - Generated JavaScript interface (committed to repo)
 
 Primary dependency:
+
 - **game-music-emu/** - Included as git submodule, provides NSF/NSFE player core
 
 Legacy dependencies (being removed):
+
 - libxmp, fluidlite, libvgm, psflib, lazyusf2, libADLMIDI, mdxmini, farbrausch-v2m
 
 Building requires Emscripten SDK 3.1.39. Use Docker (`bun run build-chip-core:docker`) to avoid local Emscripten setup.
 
 ### Stub Mode (Development Without WebAssembly)
+
 The application includes a **stub mode** that allows UI development without chip-core:
+
 - **src/chip-core-stub.js** - Mock implementation of the game-music-emu API
 - **src/stub-data/mock-directories.ts** - Mock catalog data for development
 - **Automatic fallback** - If chip-core.wasm fails to load, the app automatically uses the stub
@@ -106,12 +144,16 @@ The application includes a **stub mode** that allows UI development without chip
 To enable stub mode, simply remove or rename `public/chip-core.wasm`. The app will detect the missing WASM and use mock implementations. All UI features work normally, but no actual audio is played.
 
 ### Configuration
+
 - **src/config/index.ts** - API endpoints, catalog paths, supported formats
-  - Local dev: localhost:3000 (webpack dev server)
+  - Local dev: localhost:3000 (Vite dev server)
   - Production: Static files served from build/ directory via GitHub Pages
+  - The Vite dev server includes special CORS headers (`Cross-Origin-Opener-Policy`, `Cross-Origin-Embedder-Policy`) required for WebAssembly SharedArrayBuffer support
 
 ### Music Catalog
+
 The catalog system indexes music files for browsing and playback:
+
 - **scripts/build-catalog.js** - Scans public/music/ and generates catalog indexes
 - **public/catalog.json** - Flat list of all music file paths (for playlist generation)
 - **public/directories.json** - Nested directory structure with metadata (size, type, index)
@@ -120,15 +162,140 @@ The catalog system indexes music files for browsing and playback:
 - Run `bun run build-catalog` after adding/removing music files to regenerate indexes
 
 ### Routing
+
 React Router handles navigation:
+
 - `/*` - Browse catalog (simplified single-route structure)
 - Query params: `?play=path` to auto-play a file
 
-## Working with TODO.md
+## Working with GitHub Issues
 
-- **Always check git history before starting tasks** - Use `git log` to verify if a task from `.claude/TODO.md` has already been completed before beginning work on it.
-- **Remove completed tasks** - When you find that a TODO item has been implemented (check commit messages and git history), remove it from the TODO file.
-- **Check for completion evidence** - Look for related commits, file changes, and PR merges that indicate the work is done.
+This project uses GitHub Issues for task tracking, integrated with the git worktree workflow.
+
+### Issue Structure
+
+**Labels:**
+
+- **Category**: `category:bug`, `category:enhancement`, `category:maintainability`, `category:simplification`, `category:deployment`
+- **Area**: `area:visualizer`, `area:player`, `area:browser`, `area:settings`, `area:build`
+- **Status**: `status:planning` (not ready to work on), `status:ready` (ready to start), `status:active` (auto-managed by scripts when worktree created)
+
+**Title Format**: Simple description (no prefix needed)
+
+- Example: `Slider sparks can change color over lifespan through gradient`
+- GitHub issue numbers (#70, #94, etc.) are the primary identifiers
+
+### Workflow
+
+**List issues:**
+
+```bash
+gh issue list                              # All open issues
+gh issue list --label "area:visualizer"    # By area
+gh issue list --label "category:bug"       # By category
+gh issue list --state all                  # Include closed issues
+```
+
+**Create issue:**
+
+```bash
+/feature:record    # Interactive issue creation with AI-powered label detection and slug generation
+```
+
+The `/feature:record` command uses AI to:
+
+- Detect appropriate category (bug, enhancement, maintainability, etc.)
+- Predict relevant area tags (visualizer, player, browser, etc.)
+- Generate a URL-friendly slug for worktree/branch naming
+- Store the slug in the GitHub issue body under "## Worktree Slug"
+
+**Worktree workflow:**
+
+Note: The feature scripts use colons in their filenames (`feature:init.sh`, `feature:finish.sh`) which is intentional for the worktree workflow naming convention.
+
+```bash
+# Initialize worktree from issue
+./scripts/feature:init.sh 77           # Start work on specific issue #77
+./scripts/feature:init.sh              # Interactive - shows available issues
+
+# Work on feature (edit files, commit, push, create PR, merge)
+
+# Clean up after merge
+./scripts/feature:finish.sh 77         # Close issue and clean up worktree
+./scripts/feature:finish.sh            # Auto-detect from current directory or show list
+
+# Abandon work (keep issue open, remove worktree)
+./scripts/feature:finish.sh 77 --abandon
+```
+
+**Recommended git aliases:**
+
+Add these to your `.git/config` file under an `[alias]` section:
+
+```ini
+[alias]
+	start = !./scripts/feature:init.sh
+	finish = !./scripts/feature:finish.sh
+	abandon = !./scripts/feature:finish.sh "$@" --abandon
+```
+
+Then use them:
+
+```bash
+git start          # Interactive or auto-detect
+git start 73       # Start specific issue
+
+git finish         # Auto-detect or interactive
+git finish 73      # Finish specific issue
+
+git abandon        # Auto-detect or interactive
+git abandon 73     # Abandon specific issue
+```
+
+Note: Setting these via command line may cause shell escaping issues with the `!` character. Editing `.git/config` directly is more reliable.
+
+**List worktrees:**
+
+```bash
+/feature:list              # List active worktrees with GitHub issue info
+git worktree list          # List all worktrees (built-in git command)
+```
+
+### Best Practices
+
+1. **Always use feature scripts** - They automatically manage issue labels and worktree state
+2. **Create issues with /feature:record** - Ensures proper labeling and slug generation
+3. **Add comments to issues** - Document decisions, research findings, blockers using `gh issue comment`
+4. **Link related issues** - Use #77 syntax in issue descriptions to reference other issues
+5. **Update issue body** - Add implementation notes as you discover them using `gh issue edit`
+6. **Check for duplicates** - Search existing issues before creating new ones using `gh issue list --search`
+7. **Merge before finishing** - Use `./scripts/feature:finish.sh` after your PR is merged. Use `--abandon` flag if you want to clean up without closing the issue
+
+### GitHub Issues Skill
+
+The `.claude/skills/github-issues/` skill provides guidance for all GitHub Issues operations. It's automatically invoked when working with issues and includes:
+
+- `SKILL.md` - Core operations and label system
+- `WORKFLOWS.md` - Detailed workflow patterns
+- `CLI-REFERENCE.md` - gh command reference and examples
+
+## Working with TODO.md (DEPRECATED)
+
+**TODO.md has been migrated to GitHub Issues as of 2026-01-02.**
+
+See "Working with GitHub Issues" section above for current workflow.
+
+**Why GitHub Issues?**
+
+- Better collaboration (comments, mentions, reactions)
+- Integrated with PRs and commits
+- Rich formatting and media support
+- API access for automation
+- Historical tracking and search
+- Project boards for visualization
+- No git conflicts when multiple agents/worktrees add tasks
+
+**Migration:** All TODO items converted to GitHub issues (issues #70-94). The feature workflow commands (`/feature:record`, `/feature:init`, `/feature:finish`, `/feature:list`) work exactly the same from a user perspective but now use GitHub Issues under the hood.
 
 ## Working with tmp directory
 
@@ -155,7 +322,68 @@ React Router handles navigation:
 4. **Writing tests**:
    - Create test files in `src/__tests__/` with `.test.ts` or `.test.tsx` extension
    - Use Vitest and React Testing Library
-   - Run `bun test` to execute all tests
+   - Run `bun test` for watch mode (recommended during development)
+   - Run `bun run test:run` for single test run
+   - Run `bun run test:ui` for interactive test UI
+
+## Design & Styling Guidelines
+
+### Color Palette
+
+The project uses a custom "Metallic Wing Green" color palette defined in `src/index.css` (lines 14-34). **Always use CSS variables from this palette for all UI elements.**
+
+#### Available Color Variables:
+
+**Accent Colors:**
+
+- `--accent` (#9bfe38) - Light green, main accent (playing songs, hover feedback, title)
+- `--accent-dark` (#66cb01) - Dark green, darker accent for active/pressed states
+
+**Functional Colors:**
+
+- `--clickable` (#c3c3c3) - Light gray for interactive elements
+- `--active` (var(--accent-dark)) - Active/pressed states
+- `--button` (#202020) - Button backgrounds
+- `--selected` (var(--accent)) - Selected items
+- `--focus` (#202020) - Focus indication
+- `--background` (#101010) - Main background
+- `--shadow` (#000000) - Shadows
+
+**Grayscale Neutrals:**
+
+- `--neutral0` (#101010) - Black
+- `--neutral1` (#202020) - Dark gray
+- `--neutral2` (#7f7f7f) - Medium gray (body text)
+- `--neutral3` (#c3c3c3) - Light gray (emphasized text)
+- `--neutral4` (#fefefe) - Metallic Wing White (headings, high contrast)
+
+#### Important Rules:
+
+1. **Always use CSS variables first** - Use `var(--neutral4)` instead of hardcoded colors like `#fefefe` or `rgba(255, 255, 255, 1)`
+2. **Never use pure white** - Use `var(--neutral4)` instead of `#ffffff` or `rgb(255, 255, 255)`
+3. **If unclear which color to use** - Stop and use the `AskUserQuestion` tool to ask which palette variable should be used
+4. **If user requests a color not in the palette** - Stop and use the `AskUserQuestion` tool to confirm whether to:
+   - Add a new variable to the palette
+   - Use the requested color directly (for special cases like gradients)
+   - Map to an existing palette color
+
+#### Examples:
+
+✅ **Good:**
+
+```css
+border: 1px solid var(--neutral4);
+color: var(--accent);
+background: var(--background);
+```
+
+❌ **Bad:**
+
+```css
+border: 1px solid #fefefe;
+color: #9bfe38;
+background: rgb(16, 16, 16);
+```
 
 ## Building chip-core WebAssembly Module
 
@@ -215,14 +443,15 @@ bun run build-chip-core
   2. Run `bun run build-catalog` to regenerate catalog indexes
   3. Commit both music files and updated catalog JSON files
 - **Sample Rate**: Limited to 48kHz max (MAX_SAMPLE_RATE) due to player compatibility.
-- **Testing**: Vitest configured for TypeScript unit tests. Run `bun test` to execute tests. Test files go in `src/__tests__/`.
-- **Deployment**: Configured for GitHub Pages static hosting. See `.claude/deployment-plan.md` for implementation details.
+- **Testing**: Vitest configured for TypeScript unit tests. Run `bun test` for watch mode or `bun run test:run` for single run. Test files go in `src/__tests__/`.
+- **Deployment**: Configured for GitHub Pages static hosting. Use `bun run deploy` for full build and deploy.
 
 ## Project Status
 
-See `.claude/TODO.md` for the complete task list and active work items.
+See GitHub Issues for the complete task list and active work items: `gh issue list` or https://github.com/jeffdt/homskillet-discography/issues
 
 **Phase 1 (Stripping Down)**: Mostly complete
+
 - ✅ Removed Firebase authentication, favorites, login UI
 - ✅ Removed tabbed navigation (Search, Local file uploads)
 - ✅ Removed file drop functionality
@@ -231,9 +460,11 @@ See `.claude/TODO.md` for the complete task list and active work items.
 - 🚧 Update branding and styling
 
 **Phase 2 (Custom Features)**: In progress
-- See TODO.md sections for Simplification and Enhancement tasks
+
+- See GitHub Issues with `category:enhancement` and `category:simplification` labels
 
 **Phase 3 (Deployment)**: Configured but not deployed yet
+
 - GitHub Pages deployment scripts ready (`bun run deploy`)
 
 ## Target Format Support

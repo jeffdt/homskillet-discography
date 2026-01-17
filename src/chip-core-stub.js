@@ -11,8 +11,13 @@
  */
 
 // Mock heap for memory operations
-const mockHeap = new Uint8Array(1024 * 1024); // 1MB mock heap
-let heapPointer = 1000; // Start allocations at offset 1000
+const mockHeapBuffer = new ArrayBuffer(4 * 1024 * 1024); // 4MB mock heap buffer
+const mockHeap = new Uint8Array(mockHeapBuffer);
+const mockHeapF32 = new Float32Array(mockHeapBuffer);
+const mockHeapU16 = new Uint16Array(mockHeapBuffer);
+const HEAP_START = 1000;
+const HEAP_MAX = mockHeapBuffer.byteLength - 1024; // Leave 1KB at the end
+let heapPointer = HEAP_START; // Start allocations at offset 1000
 
 // Mock emulator state
 const mockEmulators = new Map();
@@ -20,9 +25,9 @@ let emuIdCounter = 1;
 
 // Mock track info for a typical NSF file
 const MOCK_TRACK_INFO = {
-  length: 180000,        // 3 minutes
+  length: 180000, // 3 minutes
   intro_length: 0,
-  loop_length: 120000,   // 2 minute loop
+  loop_length: 120000, // 2 minute loop
   play_length: 180000,
   system: 'Nintendo NES',
   game: 'Mock Game',
@@ -31,17 +36,11 @@ const MOCK_TRACK_INFO = {
   copyright: '2024',
   comment: 'This is a mock track for stub mode development',
   dumper: '',
-  voice_count: 5,        // NES has 5 channels
+  voice_count: 5, // NES has 5 channels
 };
 
 // Mock voice names for NES
-const MOCK_VOICE_NAMES = [
-  'Square 1',
-  'Square 2',
-  'Triangle',
-  'Noise',
-  'DMC',
-];
+const MOCK_VOICE_NAMES = ['Square 1', 'Square 2', 'Triangle', 'Noise', 'DMC'];
 
 function ChipCoreStub() {
   console.warn('[STUB MODE] Using mock chip-core implementation - no actual audio playback');
@@ -51,6 +50,16 @@ function ChipCoreStub() {
     _malloc: (size) => {
       const ptr = heapPointer;
       heapPointer += size;
+
+      // Reset heap if we're getting too full (simple garbage collection)
+      if (heapPointer > HEAP_MAX) {
+        console.warn(
+          '[STUB] Heap full, resetting. This may cause issues with multiple concurrent emulators.'
+        );
+        heapPointer = HEAP_START;
+        return HEAP_START;
+      }
+
       return ptr;
     },
 
@@ -59,19 +68,37 @@ function ChipCoreStub() {
     },
 
     HEAPU8: mockHeap,
+    HEAPF32: mockHeapF32,
+    HEAPU16: mockHeapU16,
 
     getValue: (ptr, type) => {
-      // Return appropriate default values based on type
-      if (type === 'i8' || type === 'i16') return 0;
-      if (type === 'i32') return 0;
-      if (type === 'i64') return 0;
-      if (type === 'float' || type === 'double') return 0.0;
-      if (type === '*') return 0; // pointer
+      // Read values from the mock heap with bounds checking
+      const view = new DataView(mockHeapBuffer);
+      try {
+        if (type === 'i8') return view.getInt8(ptr);
+        if (type === 'i16') return view.getInt16(ptr, true);
+        if (type === 'i32' || type === 'i8*' || type === '*') return view.getInt32(ptr, true);
+        if (type === 'float') return view.getFloat32(ptr, true);
+        if (type === 'double') return view.getFloat64(ptr, true);
+      } catch (e) {
+        console.warn('[STUB] getValue out of bounds:', ptr, type);
+        return 0;
+      }
       return 0;
     },
 
     setValue: (ptr, value, type) => {
-      // No-op in stub mode
+      // Write values to the mock heap with bounds checking
+      const view = new DataView(mockHeapBuffer);
+      try {
+        if (type === 'i8') view.setInt8(ptr, value);
+        else if (type === 'i16') view.setInt16(ptr, value, true);
+        else if (type === 'i32' || type === '*') view.setInt32(ptr, value, true);
+        else if (type === 'float') view.setFloat32(ptr, value, true);
+        else if (type === 'double') view.setFloat64(ptr, value, true);
+      } catch (e) {
+        console.warn('[STUB] setValue out of bounds:', ptr, value, type);
+      }
     },
 
     UTF8ToString: (ptr) => {
@@ -238,7 +265,8 @@ function ChipCoreStub() {
 
     // Constant-Q Transform stubs (for visualization)
     _cqt_init: (sampleRate, bins, db, fMin, fMax, supersample) => {
-      return 1; // Return a mock CQT context ID
+      // Return 0 to disable CQT in stub mode (returning non-zero would be used as FFT size)
+      return 0;
     },
 
     _cqt_bin_to_freq: (binIndex) => {

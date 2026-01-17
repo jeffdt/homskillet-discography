@@ -23,11 +23,34 @@ const UserContext = createContext<UserContextValue>({
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
   audioReactivePulse: true,
+  sliderSparksEnabled: true, // enable/disable slider sparks
+  sliderSparksExpanded: false, // collapsed by default
+
+  // Slider particle settings
+  particleSpawnRate: 20, // min spawn interval (lower = faster)
+  particleLifespan: 600, // milliseconds
+  particleBaseAngle: 180, // base angle in degrees (0=right, 90=down, 180=left, 270=up)
+  particleAngleSpread: 30, // angle spread in degrees (cone width)
+  particleSpeed: 1.7, // speed multiplier
+  particleSpeedVariance: 20, // speed variance percentage (0-100)
+  particleGravity: 0.0, // gravity strength (0=none, 1=normal, 2=strong)
+  particleHueVariation: 30, // hue degrees
+  particleFadeMode: 'fade', // 'fade' or 'instant'
+
+  // Visualizer settings
+  visualizerTheme: 0, // default to MW Green theme
+  visualizerThemesExpanded: false, // collapsed by default for cleaner view
+  peakDecayRate: 0.98, // peak hold decay rate (0.50=fast, 0.99=slow)
+  peakQuantization: 4, // peak decay pixelation (1=off/smooth, 2=low, 4=med, 8=high)
+
+  // UI Palette settings
+  uiPalette: 0, // default to MW Green (index 0)
+  uiPaletteSelectorExpanded: false, // collapsed by default
 };
 
 function migrateSettings(settings: Partial<UserSettings>): UserSettings {
   const migratedSettings: UserSettings = { ...settings } as UserSettings;
-  Object.keys(DEFAULT_SETTINGS).forEach(key => {
+  Object.keys(DEFAULT_SETTINGS).forEach((key) => {
     if (settings[key] === undefined) {
       migratedSettings[key] = DEFAULT_SETTINGS[key];
     }
@@ -64,16 +87,22 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }, 1000);
   }, []);
 
-  const updateSettings = useCallback((partialSettings: Partial<UserSettings>) => {
-    const newSettings = { ...settings, ...partialSettings };
-    setSettings(newSettings);
-    saveSettings(newSettings);
-  }, [settings, saveSettings]);
+  const updateSettings = useCallback(
+    (partialSettings: Partial<UserSettings>) => {
+      const newSettings = { ...settings, ...partialSettings };
+      setSettings(newSettings);
+      saveSettings(newSettings);
+    },
+    [settings, saveSettings]
+  );
 
-  const replaceSettings = useCallback((newSettings: UserSettings) => {
-    setSettings(newSettings);
-    saveSettings(newSettings);
-  }, [saveSettings]);
+  const replaceSettings = useCallback(
+    (newSettings: UserSettings) => {
+      setSettings(newSettings);
+      saveSettings(newSettings);
+    },
+    [saveSettings]
+  );
 
   return (
     <UserContext.Provider
@@ -81,7 +110,8 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         settings,
         updateSettings,
         replaceSettings,
-      }}>
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

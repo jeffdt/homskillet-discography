@@ -8,6 +8,17 @@ interface SliderProps {
   onChange: (pos: number) => void;
   shouldSpawnParticles?: boolean; // Whether to spawn particles (during playback)
   pulseIntensity?: number; // Audio-reactive pulse intensity (0-1)
+
+  // Particle settings (optional, passed to SliderParticles)
+  particleSpawnRate?: number;
+  particleLifespan?: number;
+  particleBaseAngle?: number;
+  particleAngleSpread?: number;
+  particleSpeed?: number;
+  particleSpeedVariance?: number;
+  particleGravity?: number;
+  particleHueVariation?: number;
+  particleFadeMode?: string;
 }
 
 interface SliderState {
@@ -70,7 +81,10 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   }
 
   render(): React.ReactNode {
-    const posValue = Math.max(Math.min((this.state.dragging ? this.state.draggedPos ?? this.props.pos : this.props.pos), 1), 0);
+    const posValue = Math.max(
+      Math.min(this.state.dragging ? (this.state.draggedPos ?? this.props.pos) : this.props.pos, 1),
+      0
+    );
     const pos = posValue * 100 + '%';
 
     // Calculate chisel position in pixels for particles
@@ -89,21 +103,25 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     const shouldSpawn = this.props.shouldSpawnParticles && !this.state.dragging;
 
     return (
-      <div ref={this.node}
-           className="Slider"
-           onMouseDown={this.onMouseDown}>
-        <div className="Slider-rail"/>
-        <div className="Slider-fill" style={{width: pos}}/>
-        <div className="Slider-chisel"
-             ref={this.chisel}
-             style={{left: pos}}/>
-        <div className="Slider-knob"
-             ref={this.knob}
-             style={{left: pos}}/>
+      <div ref={this.node} className="Slider" onMouseDown={this.onMouseDown}>
+        <div className="Slider-rail" />
+        <div className="Slider-fill" style={{ width: pos }} />
+        <div className="Slider-chisel" ref={this.chisel} style={{ left: pos }} />
+        <div className="Slider-knob" ref={this.knob} style={{ left: pos }} />
         <SliderParticles
           knobX={knobX}
           knobY={knobY}
           shouldSpawn={shouldSpawn}
+          intensity={this.props.pulseIntensity ?? 0}
+          spawnRate={this.props.particleSpawnRate}
+          lifespan={this.props.particleLifespan}
+          baseAngle={this.props.particleBaseAngle}
+          angleSpread={this.props.particleAngleSpread}
+          speed={this.props.particleSpeed}
+          speedVariance={this.props.particleSpeedVariance}
+          gravity={this.props.particleGravity}
+          hueVariation={this.props.particleHueVariation}
+          fadeMode={this.props.particleFadeMode}
         />
       </div>
     );

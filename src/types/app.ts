@@ -35,8 +35,6 @@ export interface AppState {
   ejected: boolean;
   currentSongMetadata: PlayerMetadata;
   currentSongNumVoices: number;
-  currentSongNumSubtunes: number;
-  currentSongSubtune: number;
   currentSongDurationMs: number;
   currentSongPositionMs: number;
   tempo: number;
@@ -48,13 +46,14 @@ export interface AppState {
   showInfo: boolean;
   songUrl: string | null;
   volume: number;
-  repeat: RepeatMode;
   shuffle: ShuffleMode;
+  isLocked: boolean;
   directories: Directories;
   hasPlayer: boolean;
   paramDefs: PlayerParamDef[];
   paramValues: Record<string, any>;
   activeTab: TabType;
+  visualizerMaximized: boolean;
 }
 
 export interface BrowseProps {
@@ -66,6 +65,7 @@ export interface BrowseProps {
   fetchDirectory: (path: string) => void;
   handleShufflePlay: (path: string) => void;
   onSongClick: (href: string, index: number) => void;
+  onCopyLink: (href: string) => void;
   scrollContainerRef: React.RefObject<HTMLDivElement>;
   listRef: React.RefObject<any>;
   history: any;
@@ -76,9 +76,16 @@ export interface VirtualizedListProps {
   currContext?: PlayContext;
   currIdx?: number;
   onSongClick: (href: string, index: number) => void;
+  onCopyLink: (href: string) => void;
+  isPlaying: (href: string) => boolean;
   itemList: any[];
   songContext?: PlayContext;
-  rowRenderer: (props: { item: any; onPlay: () => void }) => JSX.Element;
+  rowRenderer: (props: {
+    item: any;
+    onPlay: () => void;
+    onCopyLink?: (href: string) => void;
+    isPlaying?: boolean;
+  }) => JSX.Element;
   listRef: React.RefObject<any>;
   isSorted: boolean;
   children?: React.ReactNode;

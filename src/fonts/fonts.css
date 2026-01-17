@@ -1,153 +1,29 @@
-@font-face {
-    font-family: PxPlusChipPlayer;
-    src: url(pxplus_chipplayer.ttf) format('truetype');
-}
-
-:root { --fontPxPlusChipPlayer: 24px/19px PxPlusChipPlayer; }
-
-/* Caveras fonts commented out - missing from repository
-@font-face {
-    src: url(caveras/Arcology.woff) format('woff');
-    font-family: Arcology;
-}
-
-:root { --fontArcology: 8px Arcology; }
-
-@font-face {
-    src: url(caveras/ChronoType.woff) format('woff');
-    font-family: ChronoType;
-}
-
-:root { --fontChronoType: 16px ChronoType; }
-
-@font-face {
-    src: url(caveras/Ishmeria.woff) format('woff');
-    font-family: Ishmeria;
-}
-
-:root { --fontIshmeria: 16px Ishmeria; }
-
-@font-face {
-    src: url(caveras/MMRock9.woff) format('woff');
-    font-family: MMRock9;
-}
-
-:root { --fontMMRock9: 8px MMRock9; }
-
-@font-face {
-    src: url(caveras/NDS12.woff) format('woff');
-    font-family: NDS12;
-}
-
-:root { --fontNDS12: 10px NDS12; }
-
-@font-face {
-    src: url(caveras/Quarlow.woff) format('woff');
-    font-family: Quarlow;
-}
-
-:root { --fontQuarlow: 16px Quarlow; }
-
-@font-face {
-    src: url(caveras/Reactor7.woff) format('woff');
-    font-family: Reactor7;
-}
-
-:root { --fontReactor7: 16px Reactor7; }
-*/
-
-/* int10h and pentacom fonts commented out - missing from repository
-@font-face {
-    src: url(int10h/WebPlus_ToshibaSat_9x14.woff) format('woff');
-    font-family: Stingray;
-}
-
-:root { --fontStingray: 14px/16px Stingray; }
-
-@font-face {
-    src: url(pentacom/DeckardsRegular.ttf) format('truetype');
-    font-family: DeckardsRegular;
-}
-
-:root { --fontDeckardsRegular: 16px DeckardsRegular; }
-
-@font-face {
-    src: url(pentacom/FutureKid.ttf) format('truetype');
-    font-family: FutureKid;
-}
-
-:root { --fontFutureKid: 16px FutureKid; }
-
-@font-face {
-    src: url(pentacom/ldcBlackRound.ttf) format('truetype');
-    font-family: ldcBlackRound;
-}
-
-:root { --fontldcBlackRound: 16px ldcBlackRound; }
-
-@font-face {
-    src: url(pentacom/RobotoBitmap.ttf) format('truetype');
-    font-family: RobotoBitmap;
-}
-
-:root { --fontRobotoBitmap: 16px RobotoBitmap; }
-*/
-
-/* CUSTOM FONTS - Easy to swap by changing these declarations */
+/* CUSTOM FONTS */
 
 /* Main body font - used for most UI elements */
 /* Using Google Fonts Silkscreen (loaded from index.html) */
-:root { --fontMain: 14px/16px 'Silkscreen', monospace; }
+:root {
+  --fontMain: 14px/16px 'Silkscreen', monospace;
+}
 
 /* Accent font - used for section headers, song titles, settings labels */
 /* Using Google Fonts Silkscreen (loaded from index.html) */
-:root { --fontAccent: 14px/16px 'Silkscreen', monospace; }
+:root {
+  --fontAccent: 14px/16px 'Silkscreen', monospace;
+}
 
 /* Title font - used for main site header "Homskillet Discography" */
 /* Nixdorf 8810 M15 from The Ultimate Oldschool PC Font Pack by VileR */
 /* Licensed under CC BY-SA 4.0 - See OLDSCHOOL_PC_FONTS_LICENSE.txt */
 /* https://int10h.org/oldschool-pc-fonts/ */
 @font-face {
-    src: url(Web437_Nix8810_M15.woff) format('woff');
-    font-family: 'Nixdorf_M15';
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
+  src: url(Web437_Nix8810_M15.woff) format('woff');
+  font-family: 'Nixdorf_M15';
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
-:root { --fontTitle: 20px/24px 'Nixdorf_M15', monospace; }
-
-/* OTHER AVAILABLE FONTS - Uncomment and swap into main/accent above to use:
-
-   IBM XGA-AI 12x20 - Tall, clean IBM font
-   @font-face {
-       src: url(Web437_IBM_XGA-AI_12x20.woff) format('woff');
-       font-family: 'IBM_XGA';
-   }
-   Usage: --fontMain: 14px/16px 'IBM_XGA', monospace;
-
-   Robotron A7100 - Bold retro PC terminal style
-   @font-face {
-       src: url(Web437_Robotron_A7100.woff) format('woff');
-       font-family: 'Robotron';
-   }
-   Usage: --fontMain: 14px/16px 'Robotron', monospace;
-
-   All fonts from The Ultimate Oldschool PC Font Pack by VileR
-   Licensed under CC BY-SA 4.0 - See OLDSCHOOL_PC_FONTS_LICENSE.txt
-   https://int10h.org/oldschool-pc-fonts/
-*/
-
-@font-face {
-    src: url(mm-tahoma-8px.ttf) format('truetype');
-    font-family: TahomaPixel;
+:root {
+  --fontTitle: 20px/24px 'Nixdorf_M15', monospace;
 }
-
-:root { --fontTahomaPixel: 16px/16px TahomaPixel, Tahoma; }
-
-@font-face {
-    src: url(Tahoma.woff) format('woff');
-    font-family: Tahoma;
-}
-
-:root { --fontTahoma: 11px/16px Tahoma, Arial, sans-serif; }

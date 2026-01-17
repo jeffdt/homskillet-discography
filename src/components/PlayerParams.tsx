@@ -1,5 +1,6 @@
 import React from 'react';
 import autoBindReact from 'auto-bind/react';
+import Tooltip from './Tooltip';
 
 interface VoiceGroup {
   name: string;
@@ -56,10 +57,48 @@ interface PlayerParamsProps {
   persistedSettings?: PersistedSettings;
 }
 
-export default class PlayerParams extends React.PureComponent<PlayerParamsProps> {
+const InfoIcon = ({ tooltip }: { tooltip: string }) => (
+  <Tooltip content={tooltip} side="right">
+    <span className="Settings-info-icon">?</span>
+  </Tooltip>
+);
+
+interface PlayerParamsState {
+  flashingSetting: string | null;
+}
+
+export default class PlayerParams extends React.PureComponent<
+  PlayerParamsProps,
+  PlayerParamsState
+> {
+  private flashTimer: NodeJS.Timeout | null = null;
+
   constructor(props: PlayerParamsProps) {
     super(props);
     autoBindReact(this);
+    this.state = {
+      flashingSetting: null,
+    };
+  }
+
+  componentWillUnmount() {
+    if (this.flashTimer) {
+      clearTimeout(this.flashTimer);
+    }
+  }
+
+  flashValue(settingKey: string): void {
+    if (this.flashTimer) {
+      clearTimeout(this.flashTimer);
+    }
+    this.setState({ flashingSetting: settingKey });
+    this.flashTimer = setTimeout(() => {
+      this.setState({ flashingSetting: null });
+    }, 500);
+  }
+
+  formatAsPercentage(value: number): string {
+    return Math.round(value * 100) + '%';
   }
 
   // Voicename polling implementation left here for reference.
@@ -141,158 +180,207 @@ export default class PlayerParams extends React.PureComponent<PlayerParamsProps>
     const { isPinned } = this;
 
     return (
-      <div className='PlayerParams'>
-        <span className='PlayerParams-param PlayerParams-group'>
+      <div className="PlayerParams">
+        <span className="PlayerParams-param PlayerParams-group">
           <button
             className="IconButton"
-            title={isPinned('tempo') ? 'Un-pin this parameter' : 'Pin this parameter (retains value between songs)'}
-            onClick={() => onPinParam?.('tempo', tempo)}>
-            <span className={`inline-icon ${isPinned('tempo') ? 'icon-pin-down' : 'icon-pin-up'}`}/>
+            title={
+              isPinned('tempo')
+                ? 'Un-pin this parameter'
+                : 'Pin this parameter (retains value between songs)'
+            }
+            onClick={() => onPinParam?.('tempo', tempo)}
+          >
+            <span
+              className={`inline-icon ${isPinned('tempo') ? 'icon-pin-down' : 'icon-pin-up'}`}
+            />
           </button>
-          <label htmlFor='tempo' className="PlayerParams-label">
+          <label htmlFor="tempo" className="PlayerParams-label">
             Speed:{' '}
           </label>
           <input
-            id='tempo'
+            id="tempo"
             disabled={ejected}
-            type='range' value={tempo}
-            min='0.3' max='2.0' step='0.05'
-            onInput={onTempoChange}
-            onChange={onTempoChange}/>{' '}
-          {tempo.toFixed(2)}
+            type="range"
+            value={tempo}
+            min="0.3"
+            max="2.0"
+            step="0.05"
+            onInput={(e) => {
+              onTempoChange(e);
+              this.flashValue('tempo');
+            }}
+            onChange={onTempoChange}
+          />{' '}
+          <span className={this.state.flashingSetting === 'tempo' ? 'Settings-value-flash' : ''}>
+            {this.formatAsPercentage(tempo)}
+          </span>
+          <InfoIcon tooltip="Playback speed multiplier (30%-200%)" />
         </span>
-        {voiceGroups.length > 0 ?
-          voiceGroups.map((voiceGroup, i) => {
-            return (
-              <span className='PlayerParams-param PlayerParams-group' key={voiceGroup.name}>
+        {paramDefs &&
+          paramValues &&
+          paramDefs.map((param) => {
+            const value = paramValues[param.id];
+            const dependsOn = param.dependsOn;
+            if (dependsOn && paramValues[dependsOn.param] !== dependsOn.value) {
+              return null;
+            }
+
+            const persistedKey = `${playerKey}.${param.id}`;
+            const pinButton = (
+              <button
+                className="IconButton"
+                title={
+                  isPinned(persistedKey)
+                    ? 'Un-pin this parameter'
+                    : 'Pin this parameter (retains value between songs)'
+                }
+                onClick={() => onPinParam?.(persistedKey, value)}
+              >
+                <span
+                  className={`inline-icon ${isPinned(persistedKey) ? 'icon-pin-down' : 'icon-pin-up'}`}
+                />
+              </button>
+            );
+
+            switch (param.type) {
+              case 'enum':
+                return (
+                  <span key={param.id} className="PlayerParams-param">
+                    {pinButton}
+                    <label htmlFor={param.id} title={param.hint} className="PlayerParams-label">
+                      {param.label}:{' '}
+                    </label>
+                    <select
+                      id={param.id}
+                      onChange={(e) => {
+                        // TODO: make this explicit in the param def
+                        const intVal = Number(e.target.value);
+                        const value = isNaN(intVal) ? e.target.value : intVal;
+                        onParamChange?.(param.id, value);
+                      }}
+                      value={value}
+                    >
+                      {param.options?.map((optgroup) => (
+                        <optgroup key={optgroup.label} label={optgroup.label}>
+                          {optgroup.items.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                    {param.hint && <InfoIcon tooltip={param.hint} />}
+                  </span>
+                );
+              case 'number':
+                return (
+                  <span key={param.id} className="PlayerParams-param">
+                    {pinButton}
+                    <label htmlFor={param.id} className="PlayerParams-label">
+                      {param.label}:{' '}
+                    </label>
+                    <input
+                      id={param.id}
+                      type="range"
+                      title={param.hint}
+                      min={param.min}
+                      max={param.max}
+                      step={param.step}
+                      onChange={(e) => {
+                        onParamChange?.(param.id, parseFloat(e.target.value));
+                        this.flashValue(param.id);
+                      }}
+                      value={value}
+                    ></input>{' '}
+                    <span
+                      className={
+                        this.state.flashingSetting === param.id ? 'Settings-value-flash' : ''
+                      }
+                    >
+                      {this.formatAsPercentage(value)}
+                    </span>
+                    {param.hint && <InfoIcon tooltip={param.hint} />}
+                  </span>
+                );
+              case 'toggle':
+                return (
+                  <span key={param.id} className="PlayerParams-param">
+                    {pinButton}
+                    <input
+                      type="checkbox"
+                      id={param.id}
+                      onChange={(e) => onParamChange?.(param.id, e.target.checked)}
+                      checked={value}
+                    />
+                    <label htmlFor={param.id} title={param.hint}>
+                      {param.label}
+                    </label>
+                    {param.hint && <InfoIcon tooltip={param.hint} />}
+                  </span>
+                );
+              case 'button':
+                return (
+                  <button
+                    key={param.id}
+                    title={param.hint}
+                    className="box-button"
+                    onClick={() => onParamChange?.(param.id, true)}
+                  >
+                    {param.label}
+                  </button>
+                );
+              default:
+                return null;
+            }
+          })}
+        {voiceGroups.length > 0
+          ? voiceGroups.map((voiceGroup, i) => {
+              return (
+                <span className="PlayerParams-param PlayerParams-group" key={voiceGroup.name}>
                   <label className="PlayerParams-group-title" title="Sound chip">
-                    {voiceGroup.icon && <span className='inline-icon dim-icon icon-chip'/>}{' '}
+                    {voiceGroup.icon && <span className="inline-icon dim-icon icon-chip" />}{' '}
                     {voiceGroup.name}:
                   </label>
                   <div className="PlayerParams-voiceList">
                     {voiceGroup.voices.map((voice, j) => (
-                      <div key={voice.idx} className='App-voice-label'><input
-                        title='Alt+click to solo. Alt+click again to unmute all.'
-                        type='checkbox'
-                        id={'v_'+i+j}
-                        onChange={(e) => this.handleVoiceToggle(e, voice.idx)}
-                        checked={voiceMask[voice.idx]}/>
-                      <label htmlFor={'v_'+i+j}>
-                        {voice.name}
-                      </label></div>
+                      <div key={voice.idx} className="App-voice-label">
+                        <input
+                          title="Alt+click to solo. Alt+click again to unmute all."
+                          type="checkbox"
+                          id={'v_' + i + j}
+                          onChange={(e) => this.handleVoiceToggle(e, voice.idx)}
+                          checked={voiceMask[voice.idx]}
+                        />
+                        <label htmlFor={'v_' + i + j}>{voice.name}</label>
+                      </div>
                     ))}
                   </div>
+                </span>
+              );
+            })
+          : numVoices > 0 && (
+              <span className="PlayerParams-param PlayerParams-group">
+                <label className="PlayerParams-group-title">Voices:</label>
+                <div className="PlayerParams-voiceList">
+                  {[...Array(numVoices)].map((_, i) => {
+                    return (
+                      <div key={i} className="App-voice-label">
+                        <input
+                          title="Alt+click to solo. Alt+click again to unmute all."
+                          type="checkbox"
+                          id={'v_' + i}
+                          onChange={(e) => this.handleVoiceToggle(e, i)}
+                          checked={voiceMask[i]}
+                        />
+                        <label htmlFor={'v_' + i}>{voiceNames[i]}</label>
+                      </div>
+                    );
+                  })}
+                </div>
               </span>
-            )
-          })
-          :
-          numVoices > 0 &&
-          <span className='PlayerParams-param PlayerParams-group'>
-            <label className="PlayerParams-group-title">
-              Voices:
-            </label>
-            <div className="PlayerParams-voiceList">
-              {[...Array(numVoices)].map((_, i) => {
-                return (
-                  <div key={i} className='App-voice-label'><input
-                    title='Alt+click to solo. Alt+click again to unmute all.'
-                    type='checkbox'
-                    id={'v_'+i}
-                    onChange={(e) => this.handleVoiceToggle(e, i)}
-                    checked={voiceMask[i]}/>
-                  <label htmlFor={'v_'+i}>
-                    {voiceNames[i]}
-                  </label></div>
-                )
-              })}
-            </div>
-          </span>
-        }
-
-        {paramDefs && paramValues && paramDefs.map(param => {
-          const value = paramValues[param.id];
-          const dependsOn = param.dependsOn;
-          if (dependsOn && paramValues[dependsOn.param] !== dependsOn.value) {
-            return null;
-          }
-
-          const persistedKey = `${playerKey}.${param.id}`;
-          const pinButton = (
-            <button
-              className="IconButton"
-              title={isPinned(persistedKey) ? 'Un-pin this parameter' : 'Pin this parameter (retains value between songs)'}
-              onClick={() => onPinParam?.(persistedKey, value)}>
-              <span className={`inline-icon ${isPinned(persistedKey) ? 'icon-pin-down' : 'icon-pin-up'}`}/>
-            </button>
-          );
-
-          switch (param.type) {
-            case 'enum':
-              return (
-                <span key={param.id} className='PlayerParams-param'>
-                  {pinButton}
-                  <label htmlFor={param.id} title={param.hint} className="PlayerParams-label">
-                  {param.label}:{' '}
-                </label>
-                  <select
-                    id={param.id}
-                    onChange={(e) => {
-                      // TODO: make this explicit in the param def
-                      const intVal = Number(e.target.value);
-                      const value = isNaN(intVal) ? e.target.value : intVal;
-                      onParamChange?.(param.id, value)
-                    }}
-                    value={value}>
-                    {param.options?.map(optgroup =>
-                      <optgroup key={optgroup.label} label={optgroup.label}>
-                        {optgroup.items.map(option =>
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        )}
-                      </optgroup>
-                    )}
-                  </select>
-                </span>
-              );
-            case 'number':
-              return (
-                <span key={param.id} className='PlayerParams-param'>
-                  {pinButton}
-                  <label htmlFor={param.id} title={param.hint} className="PlayerParams-label">
-                    {param.label}:{' '}
-                  </label>
-                  <input id={param.id}
-                         type='range'
-                         title={param.hint}
-                         min={param.min} max={param.max} step={param.step}
-                         onChange={(e) => onParamChange?.(param.id, parseFloat(e.target.value))}
-                         value={value}>
-                  </input>{' '}
-                  {value !== undefined && (param.step ?? 0) >= 1 ? value : value.toFixed(2)}
-                </span>
-              );
-            case 'toggle':
-              return (
-                <span key={param.id} className='PlayerParams-param'>
-                  {pinButton}
-                  <input type='checkbox'
-                         id={param.id}
-                         onChange={(e) => onParamChange?.(param.id, e.target.checked)}
-                         checked={value}/>
-                  <label htmlFor={param.id} title={param.hint}>
-                    {param.label}
-                  </label>
-                </span>
-              );
-            case 'button':
-              return (
-                <button key={param.id} title={param.hint} className="box-button" onClick={() => onParamChange?.(param.id, true)}>
-                  {param.label}
-                </button>
-              );
-            default:
-              return null;
-          }
-        })}
+            )}
       </div>
     );
   }

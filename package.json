@@ -28,8 +28,6 @@
     "immutability-helper": "^2.7.1",
     "ismobilejs": "^0.4.1",
     "lodash": "^4.17.21",
-    "midievents": "latest",
-    "midifile": "^2.0.0",
     "node-unrar-js": "^0.8.1",
     "object-assign": "4.1.1",
     "path-parse": "^1.0.7",
@@ -38,11 +36,8 @@
     "raf": "3.4.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
-    "react-dropzone": "7.0.0",
     "react-router-dom": "^5.2.0",
-    "react-virtual-list": "git+https://github.com/glebcha/react-virtual-list.git#544bc7",
     "react-virtualized": "^9.22.5",
-    "react-window": "^1.8.10",
     "resolve": "1.6.0",
     "roman-numerals": "^0.3.2",
     "typescript": "^3.5.2",
@@ -55,15 +50,17 @@
     "child_process": "^1.0.2",
     "gh-pages": "^6.3.0",
     "glob": "^7.1.2",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
+    "lint-staged": "^16.2.7",
     "node-stream-zip": "^1.7.0",
     "patch-package": "^5.1.1",
     "postinstall-prepare": "^1.0.1",
+    "prettier": "^3.7.4",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "sanitize-filename": "^1.6.1",
-    "sqlite": "^3.0.0",
-    "sqlite3": "^5.1.4",
+    "sharp": "^0.34.5",
     "tmp": "^0.0.33",
     "trie-search": "1.2.8",
     "unzipper": "^0.9.3",
@@ -86,10 +83,9 @@
     "predeploy": "bun run build",
     "deploy": "bun run predeploy && bun run gh-pages -d build --nojekyll",
     "deploy-lite": "bun run build-lite && bun run gh-pages -d build --nojekyll",
-    "prepare": "bun run patch-package",
+    "prepare": "husky",
     "server": "DEV=1 bun run server/index.js",
-    "stop": "bash scripts/kill-servers.sh",
-    "fixvgm": "bun run scripts/fixvgm.js"
+    "stop": "bash scripts/kill-servers.sh"
   },
   "eslintConfig": {
     "extends": "react-app",
@@ -103,5 +99,13 @@
       "import/no-anonymous-default-export": "off",
       "react/jsx-no-target-blank": "off"
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix",
+      "vitest related --run"
+    ],
+    "*.{json,css,md}": "prettier --write"
   }
 }
