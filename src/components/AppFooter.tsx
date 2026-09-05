@@ -84,6 +84,14 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
   return (
     <div className="AppFooter">
       <div className="AppFooter-attribution">
+        <a
+          href="https://github.com/jeffdt/homskillet-discography"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+        {' • '}
         based on{' '}
         <a href="https://chiptune.app/" target="_blank" rel="noopener noreferrer">
           chiptune.app
@@ -107,6 +115,15 @@ function AppFooter(props: AppFooterProps): React.ReactElement {
         <div className="AppFooter-modal-overlay" onClick={() => setShowAboutModal(false)}>
           <div className="AppFooter-modal" onClick={(e) => e.stopPropagation()}>
             <h3>About</h3>
+            <p>
+              <a
+                href="https://github.com/jeffdt/homskillet-discography"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View source on GitHub
+              </a>
+            </p>
             <p>
               based on{' '}
               <a href="https://chiptune.app/" target="_blank" rel="noopener noreferrer">
