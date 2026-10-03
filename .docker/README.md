@@ -43,7 +43,7 @@ Visit http://localhost:3000 - your local tools work normally!
 You only need to rebuild chip-core if you:
 - Clone the repo fresh (artifacts are committed, so usually not needed)
 - Modify `src/showcqtbar.c` (visualizer C code)
-- Update game-music-emu library
+- Change the pinned game-music-emu commit (`GME_COMMIT` in the Dockerfile)
 
 **Most development doesn't require rebuilding chip-core.**
 
@@ -114,7 +114,7 @@ docker compose run --rm chip-core /bin/bash
 
 # Then explore:
 ls -la /build/src/
-ls -la /build/game-music-emu/
+ls -la /game-music-emu/
 ```
 
 ## Alternative: Skip Docker Entirely

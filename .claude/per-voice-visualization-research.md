@@ -4,6 +4,8 @@
 **Date**: 2026-01-02
 **Researched by**: Claude (Agent ae87aae)
 
+> **Note (2026-10-03):** This research was based on a vendored `game-music-emu/` folder that the build never used and that has since been removed. The production build uses mmontag/game-music-emu (see `GME_COMMIT` in the Dockerfile), whose `Effects_Buffer` and buffer layout differ from what is described below. The general approach (routing each voice to its own buffer via `Classic_Emu::set_voice`) still applies.
+
 ## Executive Summary
 
 Game-music-emu provides complete infrastructure for extracting individual voice/channel audio separately. It is **technically possible** to render each NES voice (Square 1, Square 2, Triangle, Noise, DMC) to separate audio buffers, enabling color-coded visualization where each voice has its own color in the spectrogram.
