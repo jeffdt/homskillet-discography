@@ -49,3 +49,8 @@ _ignore/
 # - public/directories.json
 # These allow the app to run without rebuilding chip-core or catalog
 .claude/journal/
+
+# Brainstorming specs, implementation plans, and mockups (local only)
+specs/
+plans/
+.superpowers/

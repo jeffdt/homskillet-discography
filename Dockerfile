@@ -7,10 +7,14 @@ FROM emscripten/emsdk:3.1.39
 # Install cmake and python (required for game-music-emu and node-gyp)
 RUN apt-get update && apt-get install -y cmake python-is-python3 && rm -rf /var/lib/apt/lists/*
 
-# Clone and build game-music-emu in parent directory (as expected by build script)
+# Clone and build game-music-emu in parent directory (as expected by build script).
+# Pinned so every machine builds the same emulator; bump deliberately to pick up upstream changes.
+ARG GME_REPO=https://github.com/mmontag/game-music-emu.git
+ARG GME_COMMIT=1bab5aba4e6280451ef3ceb3c88b3ba5951dfd3a
 WORKDIR /
-RUN git clone https://github.com/mmontag/game-music-emu.git && \
+RUN git clone "$GME_REPO" game-music-emu && \
     cd game-music-emu && \
+    git checkout "$GME_COMMIT" && \
     mkdir build && \
     cd build && \
     emcmake cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF .. && \

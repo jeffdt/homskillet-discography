@@ -122,7 +122,7 @@ The C/C++ audio engines are compiled to WebAssembly:
 
 Primary dependency:
 
-- **game-music-emu/** - Included as git submodule, provides NSF/NSFE player core
+- **game-music-emu** - Not stored in this repo. The Dockerfile clones [mmontag/game-music-emu](https://github.com/mmontag/game-music-emu) at a pinned commit (`GME_COMMIT`), which provides the NSF/NSFE player core
 
 Legacy dependencies (being removed):
 
@@ -314,7 +314,7 @@ See "Working with GitHub Issues" section above for current workflow.
    - Refresh browser to see new files in catalog
 
 3. **Modifying C/C++ audio engines** (rare):
-   - Rebuild game-music-emu submodule if needed
+   - To change the emulator, update `GME_REPO` / `GME_COMMIT` in the Dockerfile
    - Run `bun run build-chip-core:docker` to rebuild WebAssembly module
    - Restart `bun start` to load new chip-core.wasm
 
