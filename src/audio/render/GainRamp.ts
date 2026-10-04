@@ -43,8 +43,9 @@ export class GainRamp {
           this.step = 0;
         }
       }
-      left[i] *= this.current;
-      right[i] *= this.current;
+      // Adding 0 turns the -0 of a negative sample times a zero gain into +0.
+      left[i] = left[i] * this.current + 0;
+      right[i] = right[i] * this.current + 0;
     }
   }
 }
