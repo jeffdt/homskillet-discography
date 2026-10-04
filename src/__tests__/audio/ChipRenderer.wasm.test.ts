@@ -65,6 +65,12 @@ function openStereo(bytes: Uint8Array, depth: number): number {
   return emu;
 }
 
+/** GME reads the ignore_silence flag at start_track, so restart the track after changing it. */
+function restartIgnoringSilence(emu: number, ignoreSilence: number): void {
+  core._gme_ignore_silence(emu, ignoreSilence);
+  core._gme_start_track(emu, 0);
+}
+
 describe('ChipRenderer on real chip-core', () => {
   it('reads VRC6 voice names and the extended duration', () => {
     const info = makeRenderer().load(
@@ -86,34 +92,51 @@ describe('ChipRenderer on real chip-core', () => {
     expect(info.durationMs).toBeGreaterThan(0);
   });
 
-  // FINDING: multi-channel GME output does not sum to stereo mode (max error 23632 LSB on echo.nsf,
-  // 43589 on parkour.nsf; tone fixture sums to about 0.4x of stereo). it.fails until resolved.
-  it.fails.each(['MetallicWing/echo.nsf', 'SuperFORE!/parkour.nsf'])(
-    'sums %s to within 32 LSB of GME stereo mode (null test)',
-    (path) => {
-      const bytes = readTrack(path);
-      const renderer = makeRenderer();
-      renderer.load(bytes, '/' + path, SETTINGS);
-      const stereo = openStereo(bytes, 1);
-      const buffer = core._malloc(RENDER_CHUNK_FRAMES * 2 * 2);
-      const left = new Float32Array(RENDER_CHUNK_FRAMES);
-      const right = new Float32Array(RENDER_CHUNK_FRAMES);
-      let maxLsb = 0;
-      for (let q = 0; q < (10 * RATE) / RENDER_CHUNK_FRAMES; q++) {
-        renderer.render(left, right);
-        core._gme_play(stereo, RENDER_CHUNK_FRAMES * 2, buffer);
-        const heap = core.HEAP16;
-        const base = buffer >> 1;
-        for (let i = 0; i < RENDER_CHUNK_FRAMES; i++) {
-          maxLsb = Math.max(
-            maxLsb,
-            Math.abs(left[i] - heap[base + 2 * i] * OUTPUT_SCALE) / OUTPUT_SCALE,
-            Math.abs(right[i] - heap[base + 2 * i + 1] * OUTPUT_SCALE) / OUTPUT_SCALE
-          );
-        }
+  /** Max |renderer - GME stereo mode| in LSB over 10 s; `ignoreSilence` is applied to both emulators. */
+  function nullTestMaxLsb(path: string, ignoreSilence: number): number {
+    const bytes = readTrack(path);
+    const renderer = makeRenderer();
+    renderer.load(bytes, '/' + path, SETTINGS);
+    const stereo = openStereo(bytes, 1);
+    restartIgnoringSilence(stereo, ignoreSilence);
+    restartIgnoringSilence((renderer as unknown as { emu: number }).emu, ignoreSilence);
+    const buffer = core._malloc(RENDER_CHUNK_FRAMES * 2 * 2);
+    const left = new Float32Array(RENDER_CHUNK_FRAMES);
+    const right = new Float32Array(RENDER_CHUNK_FRAMES);
+    let maxLsb = 0;
+    for (let q = 0; q < (10 * RATE) / RENDER_CHUNK_FRAMES; q++) {
+      renderer.render(left, right);
+      core._gme_play(stereo, RENDER_CHUNK_FRAMES * 2, buffer);
+      const heap = core.HEAP16;
+      const base = buffer >> 1;
+      for (let i = 0; i < RENDER_CHUNK_FRAMES; i++) {
+        maxLsb = Math.max(
+          maxLsb,
+          Math.abs(left[i] - heap[base + 2 * i] * OUTPUT_SCALE) / OUTPUT_SCALE,
+          Math.abs(right[i] - heap[base + 2 * i + 1] * OUTPUT_SCALE) / OUTPUT_SCALE
+        );
       }
-      core._gme_delete(stereo);
-      expect(maxLsb).toBeLessThanOrEqual(32);
+    }
+    core._free(buffer);
+    core._gme_delete(stereo);
+    return maxLsb;
+  }
+
+  it.each(['MetallicWing/echo.nsf', 'SuperFORE!/parkour.nsf'])(
+    'sums %s to within 32 LSB of GME stereo mode with silence detection off (null test)',
+    (path) => {
+      expect(nullTestMaxLsb(path, 1)).toBeLessThanOrEqual(32);
+    }
+  );
+
+  // FINDING: with gme_ignore_silence(0), as ChipRenderer.load sets it, multi-channel GME corrupts the
+  // output (echo.nsf: 23632 LSB off, about 0.5x as loud) while stereo mode is unaffected. The null
+  // test above passes with ignore_silence(1) on both emulators. it.fails until the renderer's
+  // silence handling is decided.
+  it.fails.each(['MetallicWing/echo.nsf', 'SuperFORE!/parkour.nsf'])(
+    'sums %s to within 32 LSB of GME stereo mode with the renderer defaults',
+    (path) => {
+      expect(nullTestMaxLsb(path, 0)).toBeLessThanOrEqual(32);
     }
   );
 
@@ -202,12 +225,13 @@ describe('ChipRenderer on real chip-core', () => {
     expect(renderer.positionMs).toBeLessThan(10000);
   });
 
-  // FINDING: the tone fixture peaks at 0.0668 in multi-channel mode (brief expects > 0.1).
-  it.fails('renders the tone fixture at stereo-mode loudness', () => {
+  it('renders an audible tone from the fixture', () => {
     const renderer = makeRenderer();
     renderer.load(buildToneThenSilenceNsf(), '/Fixtures/tone.nsf', SETTINGS);
-    const [firstSecond] = capture(renderer, RATE);
-    expect(Math.max(...Array.from(firstSecond, Math.abs))).toBeGreaterThan(0.1);
+    const [left, right] = capture(renderer, RATE);
+    // At stereo depth 1 GME pans pulse 1 mostly right (peaks: left 0.067, right 0.267).
+    const peak = Math.max(...Array.from(left, Math.abs), ...Array.from(right, Math.abs));
+    expect(peak).toBeGreaterThan(0.1);
   });
 
   it('ends the same fixture in GME stereo mode too (parity with today)', () => {
