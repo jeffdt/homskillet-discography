@@ -6,7 +6,14 @@ import { useIdleFade } from '../hooks/useIdleFade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { usePerfMode } from '../hooks/usePerfMode';
 import { isFullscreenSupported, toggleFullscreen } from '../shell/fullscreen';
-import { INITIAL_PANELS, PanelId, isPanelOpen, panelsReducer, topmostPanel } from '../shell/panels';
+import {
+  INITIAL_PANELS,
+  PanelId,
+  PanelState,
+  isPanelOpen,
+  panelsReducer,
+  topmostPanel,
+} from '../shell/panels';
 import {
   BASE_PATH,
   InitialLocation,
@@ -36,6 +43,12 @@ interface AppShellProps {
   audioGraph: AudioGraph | null;
 }
 
+/** Panel state reduced to its topmost panel, matching what a compact sheet shows. */
+function topOnly(panels: PanelState): PanelState {
+  const top = topmostPanel(panels);
+  return { open: top ? [top] : [] };
+}
+
 /** The immersive stage UI: everything visual, driven by App's playback state and controls. */
 export default function AppShell({ playback, controls, audioGraph }: AppShellProps) {
   const { settings } = useContext(UserContext);
@@ -49,13 +62,14 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
   const [showFullscreen] = useState(() => isFullscreenSupported());
   const pendingSeekRef = useRef<{ trackId: string; ms: number } | null>(null);
   const wasEjectedRef = useRef(playback.ejected);
+  const [hasStarted, setHasStarted] = useState(!playback.ejected);
 
   const currentTrack =
     (catalog && playback.songUrl && catalog.trackByHref.get(playback.songUrl)) || null;
   const currentAlbum =
     (catalog && currentTrack && catalog.albumById.get(currentTrack.albumId)) || null;
   const currentTrackId = currentTrack ? currentTrack.id : null;
-  const showTitle = playback.ejected;
+  const showTitle = playback.ejected && !hasStarted;
   const playing = !playback.ejected && !playback.paused;
   const idle = useIdleFade({ enabled: playing });
   const sharedTrack = initialLocation ? initialLocation.sharedTrack : null;
@@ -77,6 +91,10 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
     if (currentTrackId)
       window.history.replaceState(null, '', buildPlayUrl(currentTrackId, window.location.search));
   }, [currentTrackId]);
+
+  useEffect(() => {
+    if (!playback.ejected) setHasStarted(true);
+  }, [playback.ejected]);
 
   useEffect(() => {
     if (!playback.ejected && initialLocation && initialLocation.sharedTrack) {
@@ -141,6 +159,10 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
       if (id === 'albums' && !isPanelOpen(panels, 'albums')) {
         setAlbumsFocusTrackId(null);
         if (currentTrack) setAlbumsAlbumId(currentTrack.albumId);
+      }
+      if (compact && isPanelOpen(panels, id) && topmostPanel(panels) !== id) {
+        dispatch({ type: 'open', id, compact });
+        return;
       }
       dispatch({ type: 'toggle', id, compact });
     },
@@ -269,6 +291,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
               : null
           }
           onStart={sharedTrack ? playSharedTrack : startListening}
+          onGesture={controls.resumeAudio}
           onBrowse={browseAlbums}
         />
       )}
@@ -282,7 +305,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
         />
       )}
 
-      <TopBar panels={panels} onToggle={togglePanel} />
+      <TopBar panels={compact ? topOnly(panels) : panels} onToggle={togglePanel} />
 
       {!showTitle && (
         <Dock

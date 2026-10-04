@@ -25,8 +25,6 @@ export interface AppProps {
   toastContext: ToastContextValue;
 }
 
-export type TabType = 'browser' | 'settings' | 'visualizer';
-
 export interface AppState {
   loading: boolean;
   paused: boolean;

@@ -249,6 +249,23 @@ describe('AppShell', () => {
     expect(controls.seekToMs).not.toHaveBeenCalled();
   });
 
+  it('keeps the dock instead of returning to the title screen when the sequencer ejects mid-session', async () => {
+    const { rerenderWith } = renderShell();
+    await screen.findByText('or browse 2 albums');
+    rerenderWith({ ...IDLE, ejected: false, paused: false, songUrl: '/music/Bazaar/groove.nsf' });
+    rerenderWith({ ...IDLE, ejected: true, paused: true, songUrl: null });
+    expect(screen.queryByRole('button', { name: /start listening/i })).toBeNull();
+    expect(screen.getByRole('region', { name: 'Player' })).toBeTruthy();
+  });
+
+  it('resumes audio synchronously in the press even before the engine is ready', async () => {
+    const { controls } = renderShell({ ...IDLE, ready: false });
+    await screen.findByText('or browse 2 albums');
+    fireEvent.click(screen.getByRole('button', { name: /start listening/i }));
+    expect(controls.resumeAudio).toHaveBeenCalledTimes(1);
+    expect(controls.playTracks).not.toHaveBeenCalled();
+  });
+
   describe('responsive panels', () => {
     /** Installs a matchMedia whose compact query result can be flipped, notifying listeners. */
     function mockMatchMedia() {
@@ -300,6 +317,22 @@ describe('AppShell', () => {
       setCompact(false);
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
       expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+    });
+
+    it('marks only the visible panel in the top bar and raises a hidden one instead of closing it', async () => {
+      const setCompact = mockMatchMedia();
+      renderShell();
+      await screen.findByText('or browse 2 albums');
+      fireEvent.keyDown(document.body, { key: 'm' });
+      fireEvent.keyDown(document.body, { key: 'a' });
+      setCompact(true);
+      const albumsButton = screen.getByRole('button', { name: 'Albums' });
+      const mixerButton = screen.getByRole('button', { name: 'Mixer' });
+      expect(albumsButton.getAttribute('aria-pressed')).toBe('true');
+      expect(mixerButton.getAttribute('aria-pressed')).toBe('false');
+      fireEvent.click(mixerButton);
+      expect(screen.getByRole('dialog', { name: 'Mixer' })).toBeTruthy();
+      expect(mixerButton.getAttribute('aria-pressed')).toBe('true');
     });
   });
 });

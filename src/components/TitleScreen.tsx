@@ -10,6 +10,8 @@ interface TitleScreenProps {
   /** Set when the visitor arrived via a ?play= link. */
   sharedTrack: { title: string; albumTitle: string } | null;
   onStart: () => void;
+  /** Called synchronously inside the press, so audio can resume within the user gesture. */
+  onGesture?: () => void;
   onBrowse: () => void;
 }
 
@@ -20,6 +22,7 @@ export default function TitleScreen({
   albumCount,
   sharedTrack,
   onStart,
+  onGesture,
   onBrowse,
 }: TitleScreenProps) {
   const [pending, setPending] = useState(false);
@@ -50,6 +53,7 @@ export default function TitleScreen({
     // Ref guard: state alone would let two clicks in one batch both pass.
     if (startLockedRef.current) return;
     startLockedRef.current = true;
+    if (onGesture) onGesture();
     if (ready) {
       setStarting(true);
       onStart();

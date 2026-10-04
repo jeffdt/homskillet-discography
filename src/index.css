@@ -79,10 +79,6 @@
 }
 
 /* chunky DOS animation */
-.message-box {
-  transition: all 250ms steps(5);
-}
-
 .toast-box-outer {
   transition: all 150ms steps(4);
 }
@@ -566,16 +562,6 @@ body,
   /* Adjust negative margins to match reduced padding */
 }
 
-.ReactVirtualized__Grid:focus {
-  outline: none;
-}
-
-/* Mobile/Desktop visibility helpers */
-
-.icon-copy:hover {
-  opacity: 0.7;
-}
-
 .App-voice-label {
   width: calc(var(--charW1) * 18);
   white-space: nowrap;
@@ -685,30 +671,6 @@ body,
     display: none;
   }
 }
-
-/* Browse component layout - fixed header with scrollable list */
-
-@media (orientation: portrait), (max-width: 768px) {
-  /* Hide metadata on mobile - show only names and <DIR> indicator */
-}
-
-/* Selected */
-
-/* Playing */
-
-/* Selected AND Playing */
-
-/* Song title highlights on hover */
-
-/* Copy icon column */
-
-/* Copy icon - hidden by default */
-
-/* Desktop: Show on row hover */
-
-/* Always show for currently playing song */
-
-/* Mobile: Only show when playing */
 
 .Settings-section {
   margin-bottom: calc(var(--charH) * 2);
@@ -1236,12 +1198,6 @@ button.IconButton {
   margin-left: -8px;
 }
 
-/*.Song-now-playing .Trash-button { background: var(--button); }*/
-.Trash-button {
-  cursor: pointer;
-  background: initial;
-}
-
 /* UI Palette selector styles */
 .UIPalette-grid {
   display: grid;
@@ -1398,36 +1354,6 @@ button.IconButton {
   mask-image: url(images/next.png);
 }
 
-.icon-back {
-  width: 24px;
-  mask-image: url(images/back.png);
-}
-
-.icon-forward {
-  width: 24px;
-  mask-image: url(images/forward.png);
-}
-
-.icon-folder {
-  width: 24px;
-  mask-image: url(images/folder.png);
-}
-
-.icon-trash {
-  width: 24px;
-  mask-image: url(images/trash.png);
-}
-
-.icon-copy {
-  width: 24px;
-  mask-image: url(images/copy.png);
-}
-
-.icon-download {
-  width: 16px;
-  mask-image: url(images/download.png);
-}
-
 .icon-repeat {
   width: 16px;
   mask-image: url(images/repeat.png);
@@ -1458,18 +1384,6 @@ button.IconButton {
   width: 24px;
   mask-image: url(images/pin-filled.png);
   background-color: var(--neutral2);
-}
-
-.tab-container {
-  border-bottom: 1px solid var(--clickable);
-  padding: 0 var(--charW2);
-  display: flex;
-  gap: var(--charW1);
-}
-
-.tab-settings {
-  margin-left: auto;
-  margin-right: 0;
 }
 
 /* Mobile tab bar - only visible on mobile/portrait */
@@ -1533,36 +1447,6 @@ button.IconButton {
 .toast-info {
   background-color: var(--button);
   color: var(--neutral3);
-}
-
-/* message-box is used by Info box and DropMessage component. */
-
-.message-box {
-  background: var(--message-box-background);
-  padding: var(--charH) var(--charW2);
-  box-shadow: var(--message-box-box-shadow);
-  outline: var(--message-box-border);
-  box-sizing: border-box;
-  display: flex;
-  visibility: visible;
-  overflow: hidden;
-  max-height: 100%;
-  pointer-events: all;
-  flex-direction: column;
-  width: calc(90 * var(--charW1));
-  height: calc(40 * var(--charH));
-}
-
-.message-box[hidden] {
-  width: 0;
-  height: 0;
-  visibility: hidden;
-}
-
-.drop-message {
-  height: calc(9 * var(--charH) + 1px);
-  width: calc(60 * var(--charW1));
-  text-align: center;
 }
 
 .message-box-button {

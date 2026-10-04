@@ -67,14 +67,17 @@ export interface PlayPlan {
 
 const NAME_COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
+/** True for non-null objects. */
 function isObject(value: unknown): value is Record<string, any> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** The value when it is a string, else null. */
 function text(value: unknown): string | null {
   return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
 }
 
+/** The last segment of a slash-separated path. */
 function basename(path: string): string {
   return path.split('/').filter(Boolean).pop() || '';
 }

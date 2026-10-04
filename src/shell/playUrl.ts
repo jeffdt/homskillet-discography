@@ -11,6 +11,7 @@ export interface InitialLocation {
   albumId: string | null;
 }
 
+/** Percent-decodes a value, or null when it is malformed. */
 function safeDecode(value: string): string | null {
   try {
     return decodeURIComponent(value);
