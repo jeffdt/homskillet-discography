@@ -49,6 +49,9 @@ export class ChipEngine implements AudioEngine {
   private tempo = 1;
   private seekId = 0;
   private pendingSeek: { seekId: number; positionMs: number; startedAt: number } | null = null;
+  /** Where the last seek landed, used until a snapshot newer than the seek's arrives. */
+  private seekLanding: { positionMs: number; staleContextTime: number; landedAt: number } | null =
+    null;
   private mix: VoiceMix = { muted: padTo([]), soloed: padTo([]) };
 
   constructor(parts: ChipEngineParts) {
@@ -69,6 +72,7 @@ export class ChipEngine implements AudioEngine {
     this.loaded = false;
     this.paused = false;
     this.pendingSeek = null;
+    this.seekLanding = null;
     this.tempo = settings.tempo;
     const bytes = data.slice().buffer;
     return new Promise((resolve, reject) => {
@@ -85,6 +89,7 @@ export class ChipEngine implements AudioEngine {
     this.loadId++;
     this.loaded = false;
     this.pendingSeek = null;
+    this.seekLanding = null;
     this.link.send({ type: 'unload' });
   }
 
@@ -97,6 +102,7 @@ export class ChipEngine implements AudioEngine {
     if (!this.loaded) return;
     const seekId = ++this.seekId;
     const target = Math.max(0, positionMs);
+    this.seekLanding = null;
     this.pendingSeek = { seekId, positionMs: target, startedAt: performance.now() };
     this.link.send({ type: 'seek', seekId, positionMs: target });
   }
@@ -110,6 +116,18 @@ export class ChipEngine implements AudioEngine {
     if (this.pendingSeek) return this.pendingSeek.positionMs;
     const snapshot = this.taps.read();
     if (snapshot.loadId !== this.loadId) return 0;
+    const landing = this.seekLanding;
+    if (landing && snapshot.contextTime <= landing.staleContextTime) {
+      // Pooled snapshots can lag the seek, so the newest one may still show the pre-seek position.
+      const elapsed = this.paused
+        ? 0
+        : Math.min(
+            Math.max(this.context.currentTime - landing.landedAt, 0),
+            MAX_POSITION_EXTRAPOLATION_S
+          );
+      return landing.positionMs + elapsed * 1000 * this.tempo;
+    }
+    this.seekLanding = null;
     let position = snapshot.positionMs;
     if (!this.paused && !snapshot.paused && !snapshot.seeking) {
       const elapsed = Math.min(
@@ -171,7 +189,7 @@ export class ChipEngine implements AudioEngine {
     this.taps.dispose();
     this.outputNode.disconnect();
     this.volumeNode.disconnect();
-    void this.context.close();
+    this.context.close().catch(() => {});
   }
 
   private gains(): number[] {
@@ -221,6 +239,11 @@ export class ChipEngine implements AudioEngine {
             );
           }
           this.pendingSeek = null;
+          this.seekLanding = {
+            positionMs: event.positionMs,
+            staleContextTime: this.taps.read().contextTime,
+            landedAt: this.context.currentTime,
+          };
           this.emit('seeked', event.positionMs);
         }
         break;

@@ -211,4 +211,57 @@ describe('ChipEngine', () => {
     link.listener({ type: 'error', message: 'boom' });
     expect(error).toHaveBeenCalledWith('boom');
   });
+
+  it('ignores a stale loadFailed from a superseded load', async () => {
+    const { engine, link } = makeEngine();
+    const error = vi.fn();
+    engine.on('error', error);
+    const first = engine.load(new Uint8Array(1), '/A/1.nsf', SETTINGS);
+    const firstId = link.last('load')!.loadId;
+    const second = engine.load(new Uint8Array(1), '/A/2.nsf', SETTINGS);
+    await expect(first).rejects.toBeInstanceOf(LoadSupersededError);
+    link.listener({ type: 'loadFailed', loadId: firstId, message: 'stale' });
+    link.listener({ type: 'loaded', loadId: link.last('load')!.loadId, info: INFO });
+    await expect(second).resolves.toEqual(INFO);
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  it('clears a pending seek on stop and on load', async () => {
+    const stopped = await loaded();
+    stopped.engine.seek(1000);
+    expect(stopped.engine.isSeeking()).toBe(true);
+    stopped.engine.stop();
+    expect(stopped.engine.isSeeking()).toBe(false);
+
+    const reloaded = await loaded();
+    reloaded.engine.seek(1000);
+    void reloaded.engine.load(new Uint8Array(1), '/A/2.nsf', SETTINGS).catch(() => {});
+    expect(reloaded.engine.isSeeking()).toBe(false);
+  });
+
+  it('emits ended at most once per track', async () => {
+    const { engine, link, loadId } = await loaded();
+    const ended = vi.fn();
+    engine.on('ended', ended);
+    link.listener({ type: 'ended', loadId });
+    link.listener({ type: 'ended', loadId });
+    expect(ended).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops delivering events after unsubscribe', async () => {
+    const { engine, link, loadId } = await loaded();
+    const ended = vi.fn();
+    const off = engine.on('ended', ended);
+    off();
+    link.listener({ type: 'ended', loadId });
+    expect(ended).not.toHaveBeenCalled();
+  });
+
+  it('survives a second dispose without an unhandled rejection', async () => {
+    const { engine, context } = makeEngine();
+    context.close.mockImplementation(() => Promise.reject(new Error('already closed')));
+    engine.dispose();
+    engine.dispose();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
 });

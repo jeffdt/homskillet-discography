@@ -110,4 +110,75 @@ describe('engine end to end on the stub core', () => {
     expect(sender.droppedPosts).toBe(0);
     expect(sender.availableBuffers).toBe(TAP_POOL_SIZE);
   });
+
+  it('reports the landed position, not the pre-seek one, right after seeked over pooled taps', async () => {
+    const core = (await ChipCoreStub()) as ChipCore;
+    const { port1, port2 } = new MessageChannel();
+    ports.push(port1, port2);
+    const ring = new TapRing();
+    const sender = new PooledTapSender((buffer) => port1.postMessage(buffer, [buffer]));
+    const processor = new ProcessorCore({
+      core,
+      sampleRate: RATE,
+      emit: (event) => port1.postMessage(event),
+      ring,
+      sender,
+    });
+    port1.onmessage = (e: MessageEvent) =>
+      e.data instanceof ArrayBuffer
+        ? processor.handleReturnedBuffer(e.data)
+        : processor.handleCommand(e.data);
+    const taps = new PooledTapReader((buffer) => port2.postMessage(buffer, [buffer]));
+    const { context, outputNode, volumeNode } = fakeNodes();
+    const engine = new ChipEngine({
+      kind: 'worklet',
+      context: context as unknown as AudioContext,
+      outputNode,
+      volumeNode,
+      mainThreadCore: core,
+      link: new WorkletLink(port2, taps),
+      taps,
+    });
+    const loading = engine.load(new Uint8Array(16), '/Album/track.nsf', SETTINGS);
+    await settle();
+    await loading;
+
+    const left = new Float32Array(128);
+    const right = new Float32Array(128);
+    let quantum = 0;
+    const run = (count: number) => {
+      for (let q = 0; q < count; q++, quantum++) {
+        processor.process(left, right, (quantum * 128) / RATE);
+        context.currentTime = ((quantum + 1) * 128) / RATE;
+      }
+    };
+    for (let round = 0; round < 8; round++) {
+      run(400);
+      await settle();
+    }
+    expect(engine.getPositionMs()).toBeGreaterThan(7000);
+
+    const seekAndSettle = async (positionMs: number) => {
+      engine.seek(positionMs);
+      await settle();
+      for (let round = 0; round < 200 && engine.isSeeking(); round++) {
+        run(1);
+        await settle();
+      }
+      expect(engine.isSeeking()).toBe(false);
+    };
+    const duringSeeked: number[] = [];
+    engine.on('seeked', () => duringSeeked.push(engine.getPositionMs()));
+    // Snapshots go out every 6 quanta, so vary where in that cycle the seek back to 0 lands.
+    for (let offset = 0; offset < 7; offset++) {
+      await seekAndSettle(6000);
+      run(offset + 6);
+      await settle();
+      duringSeeked.length = 0;
+      await seekAndSettle(0);
+      expect(duringSeeked).toHaveLength(1);
+      expect(duringSeeked[0]).toBeLessThan(100);
+      expect(engine.getPositionMs()).toBeLessThan(100);
+    }
+  });
 });
