@@ -221,6 +221,18 @@ describe('ChipRenderer (stub core)', () => {
     expect(renderQuanta(renderer, 2)).toBe(0);
   });
 
+  it('answers a seek when the track ends during the declick fade-out', async () => {
+    const { events, renderer } = await setup();
+    renderer.seek(179500, 1);
+    renderUntil(renderer, () => seeked(events).length > 0);
+    renderUntil(renderer, () => renderer.positionMs >= 180000 + END_FADE_MS - 3);
+    renderer.seek(1000, 2);
+    renderUntil(renderer, () => ended(events).length > 0 || !renderer.isSeeking);
+    renderQuanta(renderer, 4);
+    expect(seeked(events).map((e) => (e as { seekId: number }).seekId)).toEqual([1, 2]);
+    expect(renderer.isSeeking).toBe(false);
+  });
+
   it('adds SubBass on top of the mix only when enabled', async () => {
     const plain = await setup();
     const boosted = await setup({ subBass: 2 });

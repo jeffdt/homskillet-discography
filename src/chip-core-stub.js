@@ -200,7 +200,7 @@ function ChipCoreStub() {
       return 0;
     },
 
-    _gme_tell_scaled: (id) => Math.floor(emulators.get(id)?.positionMs ?? 0),
+    _gme_tell_scaled: (id) => Math.floor((emulators.get(id)?.positionMs ?? 0) + 1e-6),
     _gme_track_ended: (id) => (emulators.get(id)?.ended === false ? 0 : 1),
     _gme_track_count: () => 1,
 

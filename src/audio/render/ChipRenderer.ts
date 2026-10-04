@@ -80,7 +80,7 @@ export class ChipRenderer {
     return this.emu ? this.core._gme_tell_scaled(this.emu) : 0;
   }
 
-  /** Opens and starts a track, replacing any loaded one. Throws if GME rejects the file. */
+  /** Opens and starts a track, replacing any loaded one (and dropping a pending seek without a `seeked` event). Throws if GME rejects the file. */
   load(bytes: Uint8Array, filepath: string, settings: RendererSettings): TrackInfo {
     this.unload();
     const core = this.core;
@@ -110,7 +110,7 @@ export class ChipRenderer {
     return info;
   }
 
-  /** Deletes the emulator; output becomes silence. */
+  /** Deletes the emulator; output becomes silence. Any pending seek is dropped without a `seeked` event. */
   unload(): void {
     if (this.emu) this.core._gme_delete(this.emu);
     this.emu = 0;
@@ -272,6 +272,8 @@ export class ChipRenderer {
 
   private markEnded(): void {
     if (this.ended) return;
+    // The track can end during the declick fade-out of a seek; answer the seek before ending.
+    if (this.seekTargetMs !== null) this.finishSeek();
     this.ended = true;
     this.onEvent({ type: 'ended' });
   }
