@@ -127,6 +127,11 @@
   cursor: pointer;
 }
 
+.Panel--sheet .Panel-close {
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+}
+
 .Panel-close:hover {
   color: var(--neutral4);
 }
