@@ -1,3 +1,5 @@
+import { PlayerMetadata } from '../types/player';
+
 /** The subset of the Emscripten chip-core module the audio engine uses. chip-core-stub.js implements the same surface. */
 export interface ChipCore {
   HEAPU8: Uint8Array;
@@ -35,3 +37,40 @@ export interface WasmSource {
   module?: WebAssembly.Module;
   bytes?: ArrayBuffer;
 }
+
+/** One mixable voice pair of the loaded track. */
+export interface EngineVoice {
+  index: number;
+  name: string;
+}
+
+/** Static facts about a loaded track. */
+export interface TrackInfo {
+  metadata: PlayerMetadata;
+  durationMs: number;
+  /** One entry per voice pair, at most VOICE_PAIRS. */
+  voices: EngineVoice[];
+  /** Voice count reported by GME; above VOICE_PAIRS, extra voices fold into earlier pairs. */
+  gmeVoiceCount: number;
+}
+
+/** Playback settings applied when a track loads; each also has a live setter. */
+export interface RendererSettings {
+  tempo: number;
+  stereoWidth: number;
+  subBass: number;
+  /** True disables the fade-out at the track's duration (the lock button). */
+  loopForever: boolean;
+}
+
+/** Per-voice mute and solo state, indexed by voice pair. */
+export interface VoiceMix {
+  muted: boolean[];
+  soloed: boolean[];
+}
+
+/** Where the engine renders: AudioWorklet, main-thread ScriptProcessor, or silent stub. */
+export type EngineKind = 'worklet' | 'script-processor' | 'stub';
+
+/** How analysis taps reach the main thread from the worklet. */
+export type TapTransport = 'pooled' | 'shared';
