@@ -23,7 +23,7 @@ const UserContext = createContext<UserContextValue>({
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
   audioReactivePulse: true,
-  sliderSparksEnabled: true, // enable/disable slider sparks
+  sliderSparksEnabled: false, // enable/disable slider sparks
   sliderSparksExpanded: false, // collapsed by default
 
   // Slider particle settings

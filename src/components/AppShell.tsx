@@ -4,6 +4,7 @@ import { useCatalog } from '../catalog/useCatalog';
 import { COMPACT_LAYOUT_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { useIdleFade } from '../hooks/useIdleFade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { usePerfMode } from '../hooks/usePerfMode';
 import { isFullscreenSupported, toggleFullscreen } from '../shell/fullscreen';
 import { INITIAL_PANELS, PanelId, isPanelOpen, panelsReducer, topmostPanel } from '../shell/panels';
 import {
@@ -40,6 +41,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
   const { settings } = useContext(UserContext);
   const catalog = useCatalog();
   const compact = useMediaQuery(COMPACT_LAYOUT_QUERY);
+  const perf = usePerfMode(compact);
   const [panels, dispatch] = useReducer(panelsReducer, INITIAL_PANELS);
   const [albumsAlbumId, setAlbumsAlbumId] = useState<string | null>(null);
   const [albumsFocusTrackId, setAlbumsFocusTrackId] = useState<string | null>(null);
@@ -227,6 +229,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
       className={`App AppShell${playing ? ' is-playing' : ''}`}
       data-idle={idle ? 'true' : 'false'}
       data-layout={compact ? 'compact' : 'wide'}
+      data-perf={perf}
     >
       <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
         <defs>
@@ -248,7 +251,12 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
       </svg>
       <div className="crt-noise-overlay" aria-hidden="true" />
 
-      <Stage audioGraph={audioGraph} paused={!playing} settings={settings} renderScale={1} />
+      <Stage
+        audioGraph={audioGraph}
+        paused={!playing}
+        settings={settings}
+        renderScale={perf === 'low' ? 0.5 : 1}
+      />
 
       {showTitle && (
         <TitleScreen

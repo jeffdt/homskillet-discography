@@ -148,7 +148,7 @@ function UISettings({ persistedSettings }: UISettingsProps) {
         >
           <input
             type="checkbox"
-            checked={persistedSettings.sliderSparksEnabled ?? true}
+            checked={persistedSettings.sliderSparksEnabled ?? false}
             onChange={(e) => {
               e.stopPropagation();
               userContext.updateSettings({
