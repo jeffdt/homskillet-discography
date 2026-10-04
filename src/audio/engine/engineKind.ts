@@ -35,7 +35,11 @@ export function parseEngineOverrides(search: string): {
   const engine = params.get('engine');
   const taps = params.get('taps');
   return {
-    forcedKind: (engine && Object.hasOwn(KIND_PARAMS, engine) && KIND_PARAMS[engine]) || null,
+    forcedKind:
+      (engine &&
+        Object.prototype.hasOwnProperty.call(KIND_PARAMS, engine) &&
+        KIND_PARAMS[engine]) ||
+      null,
     forcedTapTransport: taps === 'pooled' || taps === 'shared' ? taps : null,
   };
 }

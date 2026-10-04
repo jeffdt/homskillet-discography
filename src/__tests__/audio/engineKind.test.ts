@@ -58,6 +58,11 @@ describe('parseEngineOverrides', () => {
     });
   });
 
+  it('ignores inherited object keys as engine names', () => {
+    expect(parseEngineOverrides('?engine=constructor').forcedKind).toBeNull();
+    expect(parseEngineOverrides('?engine=__proto__').forcedKind).toBeNull();
+  });
+
   it('ignores unknown values', () => {
     expect(parseEngineOverrides('?engine=fast&taps=carrier-pigeon')).toEqual({
       forcedKind: null,

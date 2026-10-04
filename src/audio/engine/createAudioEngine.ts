@@ -48,7 +48,15 @@ export async function createAudioEngine(options: CreateAudioEngineOptions): Prom
       wasm = null;
     }
   }
-  if (!mainThreadCore) mainThreadCore = (await ChipCoreStub()) as unknown as ChipCore;
+  if (!mainThreadCore) {
+    try {
+      mainThreadCore = (await ChipCoreStub()) as unknown as ChipCore;
+    } catch (e) {
+      volumeNode.disconnect();
+      void context.close();
+      throw e;
+    }
+  }
 
   const kind = chooseEngineKind({
     forcedKind: options.forcedKind ?? null,
@@ -120,7 +128,7 @@ async function createWorkletEngine(
     console.warn('Could not transfer WebAssembly.Module to the worklet, sending bytes:', e);
     node = new AudioWorkletNode(context, CHIP_PROCESSOR_NAME, nodeOptions({ bytes: wasm.bytes }));
   }
-  await waitForProcessorReady(context, node, WORKLET_READY_TIMEOUT_MS);
+  await waitForProcessorReadyOrDiscard(context, node, WORKLET_READY_TIMEOUT_MS);
   node.connect(volumeNode);
   const pooled = sharedTaps
     ? null
@@ -140,6 +148,36 @@ async function createWorkletEngine(
     taps,
     debug,
   });
+}
+
+/** Silences and releases a worklet node that failed or timed out, so it cannot keep running. */
+export function discardWorkletNode(node: AudioWorkletNode): void {
+  node.onprocessorerror = null;
+  try {
+    node.port.onmessage = null;
+    node.port.close();
+  } catch (e) {
+    console.warn('Could not close worklet port:', e);
+  }
+  try {
+    node.disconnect();
+  } catch (e) {
+    console.warn('Could not disconnect worklet node:', e);
+  }
+}
+
+/** Waits for the processor to report ready; on any failure the node is discarded before rethrowing. */
+export async function waitForProcessorReadyOrDiscard(
+  context: AudioContext,
+  node: AudioWorkletNode,
+  timeoutMs: number
+): Promise<void> {
+  try {
+    await waitForProcessorReady(context, node, timeoutMs);
+  } catch (e) {
+    discardWorkletNode(node);
+    throw e;
+  }
 }
 
 // The timeout only runs while the context is running: a suspended context (no user gesture yet)
