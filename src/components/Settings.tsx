@@ -17,7 +17,8 @@ interface SettingsProps {
   onParamChange: (paramKey: string, value: number) => void;
   onPinParam: (paramKey: string) => void;
   persistedSettings: Record<string, any>;
-  sequencer: any; // TODO: Type Sequencer when migrated to TS
+  hasPlayer: boolean;
+  playerKey: string | null;
 }
 
 function Settings(props: SettingsProps) {

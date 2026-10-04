@@ -869,3 +869,59 @@
     animation: none;
   }
 }
+
+/* ===== About ===== */
+
+.App .AboutPanel-intro {
+  margin: 0 0 12px;
+  font: var(--font-body);
+  color: var(--neutral4);
+}
+
+.AboutPanel-credits {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}
+
+.App .AboutPanel-credits li,
+.App .AboutPanel-credits a {
+  font: var(--font-small);
+  color: var(--neutral3);
+}
+
+.App .AboutPanel-credits a,
+.App .AboutPanel-source {
+  text-decoration: underline;
+}
+
+.App .AboutPanel-source {
+  font: var(--font-body);
+  color: var(--accent);
+}
+
+/* ===== Interim lab slots (contents replaced in sub-projects 6 and 7) ===== */
+
+.LabSlot .Settings {
+  padding: 0;
+}
+
+.LabSlot button.Visualizer-theme-card {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Compact: About links and palette cards keep 44px targets. */
+@media (max-width: 768px) and (orientation: portrait) {
+  .App .AboutPanel-credits a,
+  .App .AboutPanel-source {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+
+  .LabSlot button.Visualizer-theme-card {
+    min-height: var(--touch-target);
+  }
+}

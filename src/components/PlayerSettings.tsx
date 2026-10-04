@@ -15,7 +15,8 @@ interface PlayerSettingsProps {
   onParamChange: (paramKey: string, value: number) => void;
   onPinParam: (paramKey: string, currentValue: any) => void;
   persistedSettings: Record<string, any>;
-  sequencer: any;
+  hasPlayer: boolean;
+  playerKey: string | null;
 }
 
 function PlayerSettings(props: PlayerSettingsProps) {
@@ -33,14 +34,15 @@ function PlayerSettings(props: PlayerSettingsProps) {
     onParamChange,
     onPinParam,
     persistedSettings,
-    sequencer,
+    hasPlayer,
+    playerKey,
   } = props;
 
   return (
     <div className="Settings">
       <div className="Settings-section">
         <h3>Music Player</h3>
-        {sequencer?.getPlayer() ? (
+        {hasPlayer ? (
           <PlayerParams
             ejected={ejected}
             tempo={tempo}
@@ -55,10 +57,10 @@ function PlayerSettings(props: PlayerSettingsProps) {
             onParamChange={onParamChange}
             onPinParam={onPinParam}
             persistedSettings={persistedSettings}
-            playerKey={sequencer?.getPlayer()?.playerKey}
+            playerKey={playerKey || ''}
           />
         ) : (
-          <div>(No active player)</div>
+          <div className="Settings-hint">Play something to see channels</div>
         )}
       </div>
     </div>

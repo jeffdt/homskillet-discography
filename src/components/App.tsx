@@ -909,7 +909,8 @@ class App extends React.Component<AppProps, AppState> {
                         onParamChange={this.handleParamChange}
                         onPinParam={this.handlePinParam}
                         persistedSettings={this.props.userContext.settings}
-                        sequencer={this.sequencer}
+                        hasPlayer={!!this.sequencer?.getPlayer()}
+                        playerKey={this.sequencer?.getPlayer()?.playerKey ?? null}
                       />
                     </div>
                     {/* Desktop: Separate UI settings panel */}
@@ -932,7 +933,8 @@ class App extends React.Component<AppProps, AppState> {
                         onParamChange={this.handleParamChange}
                         onPinParam={this.handlePinParam}
                         persistedSettings={this.props.userContext.settings}
-                        sequencer={this.sequencer}
+                        hasPlayer={!!this.sequencer?.getPlayer()}
+                        playerKey={this.sequencer?.getPlayer()?.playerKey ?? null}
                       />
                     </div>
                   </>
@@ -956,7 +958,8 @@ class App extends React.Component<AppProps, AppState> {
             shuffle={this.state.shuffle}
             isLocked={this.state.isLocked}
             handleToggleLock={this.handleToggleLock}
-            sequencer={this.sequencer}
+            hasPlayer={!!this.sequencer?.getPlayer()}
+            playerKey={this.sequencer?.getPlayer()?.playerKey ?? null}
             songUrl={this.state.songUrl}
             togglePause={this.togglePause}
             volume={this.state.volume}
