@@ -41,9 +41,3 @@ export const MOCK_DIRECTORIES: RawDirectories = {
     },
   ],
 };
-
-export const MOCK_CATALOG: string[] = [
-  'Demo Album/Track 01 - Intro.nsf',
-  'Demo Album/Track 02 - Main Theme.nsf',
-  'Demo Album/Track 03 - Finale.nsf',
-];

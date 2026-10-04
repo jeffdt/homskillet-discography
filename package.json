@@ -37,8 +37,6 @@
     "raf": "3.4.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
-    "react-router-dom": "^5.2.0",
-    "react-virtualized": "^9.22.5",
     "resolve": "1.6.0",
     "roman-numerals": "^0.3.2",
     "typescript": "^3.5.2",

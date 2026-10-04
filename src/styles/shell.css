@@ -912,6 +912,78 @@
   cursor: pointer;
 }
 
+/* Theme selector styles */
+
+.Visualizer-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--charW1);
+}
+
+.Visualizer-theme-card {
+  cursor: pointer;
+  border: 1px solid var(--neutral2);
+  padding: calc(var(--charW1) / 2);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.Visualizer-theme-card-new-row {
+  grid-column: 1;
+}
+
+.Visualizer-theme-card:hover {
+  border-color: var(--neutral4);
+}
+
+.Visualizer-theme-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.Visualizer-theme-swatch {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-bottom: calc(var(--charW1) / 2);
+  border: 1px solid var(--neutral4);
+}
+
+.Visualizer-theme-pixel {
+  flex: 1;
+  height: 8px;
+}
+
+.Visualizer-theme-label {
+  display: block;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--neutral3);
+}
+
+.Visualizer-theme-card.selected .Visualizer-theme-label {
+  color: var(--accent);
+}
+
+/* Compact: 2-column palette grid (after the base rules so it wins the cascade). */
+@media (max-width: 768px) and (orientation: portrait) {
+  .Visualizer-theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns on mobile */
+    gap: var(--charW2);
+  }
+
+  .Visualizer-theme-card {
+    padding: calc(var(--charW2) / 2);
+  }
+
+  .Visualizer-theme-pixel {
+    height: 12px;
+    /* Slightly taller for easier tapping on mobile */
+  }
+}
+
 /* Compact: About links and palette cards keep 44px targets. */
 @media (max-width: 768px) and (orientation: portrait) {
   .App .AboutPanel-credits a,

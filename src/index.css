@@ -192,10 +192,6 @@ select option {
   font-size: 14px;
 }
 
-.Song-now-playing .FavoriteButton:not(.isFavorite) {
-  color: var(--background);
-}
-
 button:active {
   background: var(--active);
 }
@@ -244,23 +240,6 @@ button:disabled {
 .box-button:active .inline-icon {
   background-color: #101010;
   /* Black icon on accent bg */
-}
-
-.tab {
-  padding: 0 15px 0 15px;
-  background: transparent;
-  border: 1px solid var(--clickable);
-  border-bottom: none;
-  border-radius: 3px 3px 0 0;
-  box-sizing: border-box;
-  height: var(--charH);
-}
-
-.tab-selected {
-  border-bottom: 1px solid var(--background);
-  background: var(--background);
-  margin-bottom: -1px;
-  height: calc(var(--charH) + 1px);
 }
 
 input[type='checkbox'],
@@ -585,459 +564,16 @@ body,
   }
 
   /* Adjust negative margins to match reduced padding */
-  .AppHeader,
-  .App-main,
-  .AppFooter {
-    margin-left: calc(var(--charW1) * -1);
-    margin-right: calc(var(--charW1) * -1);
-  }
-}
-
-.AppHeader {
-  padding: var(--charH) var(--charW2);
-  margin: 0 var(--charW2neg) 0 var(--charW2neg);
-  border-bottom: 1px solid var(--clickable);
-  flex-grow: 0;
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .AppHeader {
-    display: none;
-    /* Hide header on mobile to maximize content space */
-  }
-}
-
-.AppHeader-subtitle {
-  margin: var(--charH) 0 0 0;
-}
-
-.AppHeader-title,
-.AppHeader-title:visited,
-.AppHeader-title:link {
-  color: var(--accent);
-  /* Accent - bright pop for main title */
-  font: var(--font-title) !important;
-}
-
-.AppHeader-byline {
-  float: right;
-}
-
-.App-main {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  height: 100%;
-  margin: 0 var(--charW2neg);
-  margin-top: -1px;
-  /* shrink by 1px for top border of tabs */
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .App-main {
-    flex-direction: column;
-    flex-grow: 1;
-    /* Take remaining space */
-    flex-shrink: 1;
-    /* Allow shrinking to make room for footer */
-    min-height: 0;
-    /* Allow flex shrinking below content size */
-    overflow: hidden;
-    /* Contain tab content */
-  }
-}
-
-.App-main-inner {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 1px;
-  /* prevents content width priority */
-  margin-right: -1px;
-  /* hide the right border of the content area */
-}
-
-.App-main-content-and-settings {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  flex-grow: 1;
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .App-main-inner {
-    flex-grow: 1;
-    /* Fill available space */
-    flex-shrink: 1;
-    /* Allow shrinking */
-    min-height: 0;
-    /* Allow flex shrinking below content size */
-    overflow: hidden;
-    /* Contain scrollable content */
-  }
-
-  .App-main-content-and-settings {
-    flex-direction: column;
-    flex-grow: 1;
-    /* Fill available space */
-    flex-shrink: 1;
-    /* Allow shrinking */
-    min-height: 0;
-    /* Allow flex shrinking below content size */
-    overflow: hidden;
-    /* Contain scrollable content */
-  }
-}
-
-.App-main-content-area {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding: var(--charH) var(--charW2) 0 var(--charW2);
-  overflow: hidden;
-  /* No scrolling - Browse component handles its own scrolling */
-  border-right: 1px solid var(--clickable);
-  container-type: size;
-}
-
-.App-main-content-area:focus {
-  /* I have no idea why this became focusable */
-  background-color: initial;
 }
 
 .ReactVirtualized__Grid:focus {
   outline: none;
 }
 
-.App-main-content-area.settings,
-.App-main-content-area.ui-settings,
-.App-main-content-area.player-settings {
-  width: 300px;
-  min-width: 300px;
-  flex-grow: 0;
-  padding: var(--charH) var(--charW2);
-  overflow-y: auto;
-}
-
 /* Mobile/Desktop visibility helpers */
-.mobile-only {
-  display: flex;
-}
-
-.desktop-only {
-  display: none;
-}
-
-@media (min-width: 769px) {
-  .mobile-only {
-    display: none;
-  }
-
-  .desktop-only {
-    display: flex;
-  }
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .App-main-content-area {
-    padding-top: 12px;
-    /* Reduce from 44px to save vertical space */
-  }
-
-  .App-main-content-area.settings,
-  .App-main-content-area.ui-settings,
-  .App-main-content-area.player-settings {
-    width: 100%;
-    min-width: 0;
-    border-right: none;
-    max-height: none;
-    /* Remove height limit - let it show all controls */
-    overflow-y: auto;
-    /* Scroll if content overflows */
-    height: 100%;
-    /* Fill available space */
-  }
-
-  .App-main-content-area:not(.settings):not(.ui-settings):not(.player-settings) {
-    border-right: none;
-    flex-grow: 1;
-    /* Fill available space */
-    overflow-y: auto;
-    /* Scroll if needed */
-    height: 100%;
-    /* Fill available space */
-  }
-}
-
-.SongDisplay {
-  color: var(--accent);
-  /* Accent - pop of color for currently playing song title */
-  font: var(--font-accent) !important;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.song-title-link:hover {
-  color: var(--neutral4);
-  text-decoration: underline;
-}
 
 .icon-copy:hover {
   opacity: 0.7;
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .SongDisplay {
-    font-size: 18px;
-    line-height: 1.4;
-  }
-}
-
-.AppFooter {
-  border-top: 1px solid var(--clickable);
-  margin: 0 var(--charW2neg);
-  flex-shrink: 0;
-  height: auto;
-  /* Let content determine height */
-  display: flex;
-  flex-direction: row;
-  /* Horizontal layout for main content and art */
-  flex-wrap: wrap;
-  /* Allow wrapping to put attribution on its own line */
-  align-content: flex-start;
-  /* Align wrapped content to top */
-  position: relative;
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .AppFooter {
-    height: auto;
-    min-height: 140px;
-    /* Ensure footer fits controls */
-    max-height: 150px;
-    /* Tighter cap to fit in viewport */
-    flex-direction: column;
-    /* Stack children vertically */
-    overflow: hidden;
-    /* Prevent controls from overflowing below viewport */
-  }
-
-  .AppFooter-attribution {
-    display: none;
-    /* Hide attribution on mobile - can be moved to Settings/About */
-  }
-
-  .AppFooter-main {
-    order: 0;
-    /* Controls first */
-    flex-shrink: 0;
-    /* Don't shrink controls */
-    padding: var(--charW1) var(--charW2);
-    /* Compact vertical padding */
-    min-height: unset;
-    /* Remove min-height constraint */
-  }
-
-  .AppFooter-art {
-    display: none;
-    /* Hide album art on mobile to save space */
-  }
-}
-
-.AppFooter-attribution {
-  width: 100%;
-  text-align: center;
-  padding: calc(var(--charH) / 4) var(--charW1);
-  font-size: 0.8em;
-  color: var(--neutral2);
-  background: var(--background);
-  font: var(--font-accent) !important;
-  border-top: 1px solid var(--clickable);
-  /* Divider line */
-  order: 999;
-  /* Always at bottom */
-}
-
-.AppFooter-attribution a {
-  pointer-events: auto;
-  /* Re-enable clicks on links */
-  color: var(--accent);
-  /* Accent - pop of color for attribution links */
-  font: var(--font-title) !important;
-}
-
-.AppFooter-attribution a:hover {
-  text-decoration: underline;
-}
-
-.AppFooter-about-button {
-  display: none;
-  /* Hidden on desktop */
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .AppFooter-about-button {
-    display: block;
-    position: fixed;
-    bottom: var(--charH);
-    right: var(--charW2);
-    width: 44px;
-    height: 44px;
-    border: 1px solid var(--neutral2);
-    background: var(--button);
-    color: var(--neutral4);
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 100;
-    border-radius: 50%;
-  }
-
-  .AppFooter-about-button:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-}
-
-.AppFooter-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.AppFooter-modal {
-  background: var(--background);
-  border: 1px solid var(--neutral3);
-  padding: var(--charW2);
-  max-width: 90%;
-  max-height: 90%;
-  overflow: auto;
-}
-
-.AppFooter-modal h3 {
-  margin-top: 0;
-  color: var(--neutral4);
-}
-
-.AppFooter-modal p {
-  color: var(--neutral2);
-  margin: var(--charH) 0;
-}
-
-.AppFooter-modal a {
-  color: var(--accent);
-  font: var(--font-title) !important;
-}
-
-.AppFooter-modal a:hover {
-  text-decoration: underline;
-}
-
-.AppFooter-modal button {
-  margin-top: var(--charH);
-}
-
-.AppFooter-art {
-  width: 210px;
-  height: 210px;
-  background-color: var(--neutral0);
-  object-fit: scale-down;
-  image-rendering: unset;
-  border-left: 1px solid var(--clickable);
-  flex-shrink: 0;
-}
-
-.AppFooter-lock-active,
-.AppFooter-shuffle-active,
-.AppFooter-play-pause-active {
-  background: var(--active) !important;
-  color: var(--background) !important;
-}
-
-.AppFooter-lock-active .inline-icon,
-.AppFooter-shuffle-active .inline-icon,
-.AppFooter-play-pause-active .inline-icon {
-  background-color: var(--background) !important;
-}
-
-.AppFooter-lock-active:hover,
-.AppFooter-shuffle-active:hover,
-.AppFooter-play-pause-active:hover {
-  background: var(--selected) !important;
-}
-
-@media screen and (max-width: 600px) {
-  .AppFooter-art,
-  .AppFooter-shuffle,
-  .AppFooter-lock {
-    display: none;
-  }
-}
-
-button.box-button.AppFooter-forward,
-button.box-button.AppFooter-back {
-  padding: 0 var(--charW1);
-}
-
-.AppFooter-main {
-  flex-grow: 1;
-  flex-basis: 0;
-  /* Allow it to shrink/grow from 0 */
-  min-height: 210px;
-  /* Ensure controls have space */
-  overflow: hidden;
-  padding: var(--charH) var(--charW2);
-  box-sizing: border-box;
-  container-type: size;
-}
-
-.AppFooter-playback-info {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-bottom: var(--charH);
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .AppFooter-main {
-    overflow: hidden;
-    /* Prevent content overflow */
-    padding: 8px var(--charW2);
-    /* Minimal vertical padding */
-    min-height: unset;
-    /* Remove min-height constraint to prevent black gaps */
-    width: 100%;
-    /* Ensure full width on mobile */
-    flex-basis: auto;
-    /* Override flex-basis: 0 */
-    container-type: normal;
-    /* Disable container query on mobile */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    /* Distribute space evenly with minimal gaps */
-  }
-
-  .AppFooter-playback-info {
-    margin-bottom: var(--charW1);
-  }
-}
-
-.AppFooter-settings {
-  border-left: 1px solid var(--clickable);
-  padding: var(--charH) var(--charW2);
-  max-width: 360px;
-  overflow-y: scroll;
-  overflow-x: hidden;
 }
 
 .App-voice-label {
@@ -1053,77 +589,6 @@ button.box-button.AppFooter-back {
 .App-voice-label:has(input:active) label {
   color: var(--accent);
   /* Accent - electrify label on click */
-}
-
-.AppFooter-controls-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--charW1);
-  white-space: nowrap;
-  margin: var(--charH) 0;
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .AppFooter-controls-row {
-    margin: 0;
-    /* No margin for ultra-compact layout */
-    gap: var(--charW1);
-  }
-
-  .AppFooter-controls-row .box-button {
-    height: 44px !important;
-    /* Override desktop height for compact layout */
-    min-height: 44px;
-    padding: 0 var(--charW2);
-    /* Minimal vertical padding */
-  }
-
-  .AppFooter-secondary-controls {
-    display: none;
-    /* Hide repeat/shuffle buttons on mobile to save space */
-  }
-}
-
-.AppFooter-controls-row .box-button {
-  height: calc(var(--charH) * 1.5);
-  display: flex;
-  align-items: center;
-}
-
-.AppFooter-secondary-controls {
-  margin-top: 0;
-}
-
-.AppFooter-secondary-controls .box-button {
-  height: var(--charH);
-}
-
-.AppFooter-play-pause {
-  --pulse-spread: calc(0px + var(--pulse-intensity, 0) * 12px);
-  --pulse-opacity: calc(0.15 + var(--pulse-intensity, 0) * 0.85);
-  box-shadow:
-    0 0 var(--pulse-spread) calc(var(--pulse-spread) * 0.5)
-      color-mix(
-        in srgb,
-        var(--pulse-color, var(--accent)) calc(var(--pulse-opacity) * 100%),
-        transparent
-      ),
-    var(--box-shadow);
-  transition: box-shadow 50ms ease-out;
-}
-
-.AppFooter-play-pause .inline-icon {
-  width: 32px !important;
-  height: calc(var(--charH) * 1.5);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .AppFooter-play-pause {
-    --pulse-spread: 2px;
-    --pulse-opacity: 0.5;
-    transition: none;
-  }
 }
 
 .Slider {
@@ -1222,236 +687,28 @@ button.box-button.AppFooter-back {
 }
 
 /* Browse component layout - fixed header with scrollable list */
-.Browse-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  /* Prevent this container from scrolling */
-}
-
-.Browse-topRow {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--charW2);
-  min-height: var(--buttonHeight);
-  padding-bottom: var(--charH);
-  border-bottom: 1px solid var(--clickable);
-  margin-bottom: 0;
-  flex-shrink: 0;
-  /* Don't shrink when space is tight */
-}
 
 @media (orientation: portrait), (max-width: 768px) {
-  .Browse-topRow {
-    flex-wrap: wrap;
-    gap: var(--charW1);
-    padding-bottom: 8px;
-    /* Minimal padding below album name */
-    margin-bottom: 12px !important;
-    /* Small spacing before file list - override h3 default */
-  }
-
-  .Browse-topRow h3 {
-    font-size: 16px;
-    /* Slightly smaller */
-    line-height: 1.2;
-    word-break: break-word;
-    flex-basis: 100%;
-    margin: 0;
-    /* Remove margin */
-  }
-
-  .Browse-topRow button {
-    min-height: 32px;
-    /* Much smaller button */
-    height: 32px;
-    font-size: 11px;
-    /* Tiny font for compact button */
-    padding: 4px 12px;
-    /* Minimal padding */
-    white-space: nowrap;
-  }
-}
-
-.Browse-list-scroll {
-  flex-grow: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.BrowseList-row {
-  display: flex;
-  align-items: center;
-  height: var(--rowHeight);
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .BrowseList-row {
-    padding: 0 var(--charW1);
-    min-height: 44px;
-  }
-
-  .BrowseList-row a,
-  .BrowseList-colName {
-    font-size: 18px;
-    line-height: 1.3;
-  }
-
   /* Hide metadata on mobile - show only names and <DIR> indicator */
-  .BrowseList-colSize,
-  .BrowseList-colCount {
-    display: none;
-  }
-
-  .BrowseList-colDir {
-    font-size: 14px;
-    margin-left: var(--charW1);
-  }
 }
 
 /* Selected */
-.ReactVirtualized__Grid:focus .BrowseList-row-selected {
-  background-color: #202020;
-  /* Dark Gray - subtle selection, no bright green backgrounds */
-}
 
 /* Playing */
-.App-main .App-main-content-area .Song-now-playing {
-  box-shadow: 0 0 0 1px var(--accent);
-  /* Green border for playing song - using box-shadow to prevent overlap issues */
-  position: relative;
-  /* Ensure proper stacking */
-  z-index: 1;
-  /* Lift above adjacent rows */
-  color: var(--accent);
-  /* Accent text color for currently playing */
-}
-
-.Song-now-playing a {
-  color: var(--accent);
-  /* Accent - links inside currently playing song */
-}
 
 /* Selected AND Playing */
-.ReactVirtualized__Grid:focus .BrowseList-row-selected.Song-now-playing {
-  background-color: #202020;
-  /* Dark Gray background from selection */
-  box-shadow: 0 0 0 1px var(--accent);
-  /* Green border from playing */
-  z-index: 1;
-  /* Lift above adjacent rows */
-}
-
-.BrowseList-row:hover {
-  color: var(--neutral4);
-  background-color: #202020;
-  /* Dark Gray - subtle background on hover */
-}
-
-.BrowseList-row:hover a {
-  color: var(--neutral4);
-}
 
 /* Song title highlights on hover */
-.BrowseList-row a {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.BrowseList-colName {
-  overflow: hidden;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  gap: calc(var(--charW1) / 2);
-}
-
-.BrowseList-colName a {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.BrowseList-colDir,
-.BrowseList-colSize {
-  flex-shrink: 0;
-  margin-left: calc(var(--charW1) * 2);
-}
-
-.BrowseList-colCount {
-  flex-shrink: 0;
-  margin-left: var(--charW1);
-  width: calc(var(--charW1) * 5);
-  text-align: right;
-}
-
-.BrowseList-colMtime {
-  display: none;
-  /* Hide dates on all screens - unnecessary clutter */
-}
-
-.BrowseList-colSize {
-  text-align: right;
-  text-transform: uppercase;
-  white-space: nowrap;
-  min-width: calc(var(--charW1) * 10);
-}
 
 /* Copy icon column */
-.BrowseList-colCopy {
-  flex-shrink: 0;
-  margin-left: calc(var(--charW1) * 2);
-  width: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* Copy icon - hidden by default */
-.BrowseList-copy-icon {
-  opacity: 0;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  background-color: var(--clickable);
-}
 
 /* Desktop: Show on row hover */
-@media (min-width: 769px) and (hover: hover) {
-  .BrowseList-row:hover .BrowseList-copy-icon {
-    opacity: 1;
-  }
-
-  .BrowseList-copy-icon:hover {
-    opacity: 0.7;
-  }
-}
 
 /* Always show for currently playing song */
-.BrowseList-copy-icon.is-playing {
-  opacity: 1;
-  background-color: var(--accent);
-}
 
 /* Mobile: Only show when playing */
-@media (orientation: portrait), (max-width: 768px) {
-  .BrowseList-copy-icon {
-    opacity: 0;
-  }
-
-  .BrowseList-copy-icon.is-playing {
-    opacity: 1;
-  }
-}
-
-.DirectoryLink-dim {
-  color: var(--neutral2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 .Settings-section {
   margin-bottom: calc(var(--charH) * 2);
@@ -1985,169 +1242,6 @@ button.IconButton {
   background: initial;
 }
 
-.Visualizer {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex-shrink: 0;
-  border-right: 1px solid var(--clickable);
-}
-
-@media (orientation: portrait), (max-width: 768px) {
-  .App-main-inner {
-    order: 1;
-    flex-shrink: 0;
-  }
-
-  .Visualizer {
-    order: 2;
-    /* Place after main-inner (Browse/Settings) */
-    width: 100%;
-    border-right: none;
-    margin: 0 calc(var(--charW1) * -1);
-    align-items: stretch;
-    /* Full width on mobile */
-    flex-grow: 1;
-    /* Fill available space */
-    height: 100%;
-    /* Fill available space */
-    overflow: hidden;
-  }
-
-  .Visualizer-analyzer,
-  .Visualizer-spectrogram {
-    width: 100% !important;
-    margin-left: 0;
-    min-height: 0 !important;
-    /* Override the 800px min-height */
-    flex-grow: 1;
-    /* Fill available space */
-    height: 100%;
-    /* Fill available space */
-  }
-
-  .Visualizer-options {
-    text-align: center;
-    padding: calc(var(--charH) / 2) var(--charW2) 0;
-  }
-
-  .Visualizer-theme-grid {
-    grid-template-columns: repeat(2, 1fr);
-    /* 2 columns on mobile */
-    gap: var(--charW2);
-  }
-
-  .Visualizer-theme-card {
-    padding: calc(var(--charW2) / 2);
-  }
-
-  .Visualizer-theme-pixel {
-    height: 12px;
-    /* Slightly taller for easier tapping on mobile */
-  }
-}
-
-.Visualizer-overlay {
-  position: absolute;
-  top: calc(4 * var(--charH) + 30px);
-  /* Slide down 30px to clear UI elements */
-  filter: brightness(0.5) contrast(0.8);
-  /* Medium gray to match theme */
-}
-
-.Visualizer-options {
-  padding: calc(var(--charH) / 2) var(--charW2) 0;
-  text-align: right;
-  position: relative;
-  z-index: 2;
-  /* background-color removed to allow CRT noise overlay to show through */
-}
-
-/* Theme selector styles */
-.Visualizer-themes {
-  margin-bottom: calc(var(--charH) / 2);
-}
-
-.Visualizer-themes h4 {
-  margin: 0;
-  color: var(--neutral4);
-  cursor: pointer;
-  user-select: none;
-}
-
-.Visualizer-themes-arrow {
-  display: inline-block;
-  transition: transform 200ms ease-out;
-  margin-right: calc(var(--charW1) / 2);
-}
-
-.Visualizer-themes-arrow.expanded {
-  transform: rotate(90deg);
-}
-
-.Visualizer-themes-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 300ms ease-out;
-}
-
-.Visualizer-themes-content.expanded {
-  max-height: 600px;
-}
-
-.Visualizer-theme-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: var(--charW1);
-}
-
-.Visualizer-theme-card {
-  cursor: pointer;
-  border: 1px solid var(--neutral2);
-  padding: calc(var(--charW1) / 2);
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.Visualizer-theme-card-new-row {
-  grid-column: 1;
-}
-
-.Visualizer-theme-card:hover {
-  border-color: var(--neutral4);
-}
-
-.Visualizer-theme-card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.Visualizer-theme-swatch {
-  display: flex;
-  gap: 0;
-  width: 100%;
-  margin-bottom: calc(var(--charW1) / 2);
-  border: 1px solid var(--neutral4);
-}
-
-.Visualizer-theme-pixel {
-  flex: 1;
-  height: 8px;
-}
-
-.Visualizer-theme-label {
-  display: block;
-  text-align: center;
-  font-size: 0.8em;
-  color: var(--neutral3);
-}
-
-.Visualizer-theme-card.selected .Visualizer-theme-label {
-  color: var(--accent);
-}
-
 /* UI Palette selector styles */
 .UIPalette-grid {
   display: grid;
@@ -2215,104 +1309,12 @@ button.IconButton {
 }
 
 /* Maximize button */
-.Visualizer-maximize-btn {
-  background: none;
-  border: 1px solid var(--neutral2);
-  color: var(--neutral4);
-  cursor: pointer;
-  font-size: 1.2em;
-  padding: 2px 8px;
-  margin-left: var(--charW1);
-  transition:
-    border-color 0.2s,
-    color 0.2s;
-}
-
-.Visualizer-maximize-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
 
 /* Maximized mode - visualizer expands to fill main area */
-.Visualizer.maximized {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--background);
-  z-index: 5;
-}
-
-.Visualizer.maximized .Visualizer-canvases {
-  width: 100%;
-  height: 100%;
-}
-
-.Visualizer.maximized .Visualizer-canvases-inner {
-  display: flex;
-  align-items: flex-start;
-  /* Don't stretch children vertically */
-  width: 100%;
-  height: 100%;
-}
-
-.Visualizer.maximized .Visualizer-analyzer,
-.Visualizer.maximized .Visualizer-spectrogram {
-  border: none;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-  flex-grow: 0;
-  /* Prevent CSS from scaling canvas - use exact pixel dimensions */
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-}
 
 /* Hide options panel in maximized mode */
-.Visualizer.maximized .Visualizer-options {
-  display: none;
-}
 
 /* App layout when visualizer is maximized */
-.App-main.visualizer-maximized {
-  flex-direction: column;
-  position: relative;
-  /* Positioning context for absolute visualizer */
-}
-
-.Visualizer-toggle {
-  position: fixed;
-  top: var(--charH);
-  right: var(--charW2);
-  z-index: 3;
-}
-
-@media screen and (max-width: 600px) {
-  .Visualizer-toggle {
-    display: none;
-  }
-}
-
-.Visualizer-analyzer {
-  display: block;
-  image-rendering: pixelated;
-  border-top: 1px solid var(--neutral3);
-  border-bottom: 1px solid var(--neutral3);
-  box-sizing: border-box;
-}
-
-.Visualizer-spectrogram {
-  display: block;
-  flex-grow: 1;
-  flex-shrink: 0;
-  min-height: 800px;
-  image-rendering: pixelated;
-}
 
 .TimeSlider {
   flex-grow: 1;
@@ -2471,47 +1473,11 @@ button.IconButton {
 }
 
 /* Mobile tab bar - only visible on mobile/portrait */
-.mobile-tab-bar {
-  display: none;
-  /* Hidden by default (desktop) */
-}
 
 @media (orientation: portrait), (max-width: 768px) {
-  .mobile-tab-bar {
-    display: flex;
-    gap: var(--charW1);
-    padding: 0 var(--charW1);
-    border-bottom: 1px solid var(--clickable);
-    background: var(--background);
-    margin: 0 calc(var(--charW1) * -1);
-    flex-shrink: 0;
-    /* Don't shrink the tab bar */
-  }
-
-  .mobile-tab-bar .tab {
-    min-height: 44px;
-    font-size: 18px;
-    padding: var(--charW1) var(--charW2);
-    display: flex;
-    align-items: center;
-  }
-
   /* Hide all tab content by default on mobile */
-  .mobile-tab-content {
-    display: none !important;
-  }
 
   /* Show only the active tab on mobile - fill remaining space */
-  .mobile-tab-content.mobile-tab-active {
-    display: flex !important;
-    flex-grow: 1;
-    /* Fill available space */
-    flex-direction: column;
-    overflow: hidden;
-    /* Contain scrollable content */
-    min-height: 0;
-    /* Allow flex shrinking */
-  }
 }
 
 .toast-box-outer {
@@ -2570,24 +1536,6 @@ button.IconButton {
 }
 
 /* message-box is used by Info box and DropMessage component. */
-.message-box-outer {
-  position: absolute;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: round(calc(100% + 0px), 2px);
-  pointer-events: none;
-  top: 0;
-  left: 0;
-  padding: var(--charH) var(--charW2);
-  box-sizing: border-box;
-}
-
-.message-box-outer[hidden] {
-  visibility: hidden;
-}
 
 .message-box {
   background: var(--message-box-background);
@@ -2611,45 +1559,10 @@ button.IconButton {
   visibility: hidden;
 }
 
-.message-box[hidden] .message-box-inner {
-  overflow: hidden;
-}
-
-.message-box-inner {
-  color: var(--message-box-color);
-  outline: var(--message-box-inner-border);
-  padding: var(--charH) var(--charW2);
-  overflow: auto;
-}
-
-.message-box-inner.info-text {
-  white-space: pre;
-  font: var(--message-box-info-text-font);
-  color: var(--message-box-info-text-color);
-  background: var(--message-box-info-text-background);
-}
-
-.message-box-footer {
-  display: flex;
-  flex-direction: row-reverse;
-  align-content: end;
-  justify-content: space-between;
-  padding-top: var(--charH);
-}
-
 .drop-message {
   height: calc(9 * var(--charH) + 1px);
   width: calc(60 * var(--charW1));
   text-align: center;
-}
-
-.drop-message .message-box-inner {
-  overflow: hidden;
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
 }
 
 .message-box-button {
@@ -2661,9 +1574,6 @@ button.IconButton {
 @media (max-resolution: 1dppx) {
   /* ensure crisp icons at 1:1 native resolution, smooth images otherwise */
   img,
-  .Visualizer-overlay,
-  .Visualizer-analyzer,
-  .Visualizer-spectrogram,
   .inline-icon {
     image-rendering: pixelated;
   }
