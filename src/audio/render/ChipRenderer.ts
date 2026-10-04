@@ -233,9 +233,6 @@ export class ChipRenderer {
       remaining -= n;
       budget -= n;
     }
-    // Accumulated float error in GME's position can leave it a hair short of the target.
-    if (remaining === 0 && core._gme_tell_scaled(this.emu) < (this.seekTargetMs as number))
-      remaining = 1;
     this.seekFramesRemaining = remaining;
     if (core._gme_track_ended(this.emu)) {
       this.finishSeek();
