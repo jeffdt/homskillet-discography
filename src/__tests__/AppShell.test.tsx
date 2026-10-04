@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import AppShell from '../components/AppShell';
@@ -226,5 +226,80 @@ describe('AppShell', () => {
     expect(screen.queryByText('Dusty market theme', { selector: '.Tracklist-blurb' })).toBeNull();
     fireEvent.click(screen.getByText('Mt', { selector: '.Dock-title' }));
     expect(screen.getByText('Dusty market theme', { selector: '.Tracklist-blurb' })).toBeTruthy();
+  });
+
+  it('keeps a queued shared-link start on the shared track when the catalog arrives late', async () => {
+    window.history.replaceState(null, '', '/?play=Bazaar%2Fmt.nsf');
+    const { controls } = renderShell();
+    fireEvent.click(screen.getByRole('button', { name: /start listening/i }));
+    await waitFor(() => expect(controls.playTracks).toHaveBeenCalledTimes(1));
+    expect(controls.playTracks).toHaveBeenCalledWith(
+      ['/music/Bazaar/groove.nsf', '/music/Bazaar/mt.nsf'],
+      1
+    );
+    expect(controls.setShuffle).not.toHaveBeenCalled();
+  });
+
+  it('drops a pending seek when the shared track never loads', async () => {
+    window.history.replaceState(null, '', '/?play=Bazaar%2Fmt.nsf&t=5000');
+    const { controls, rerenderWith } = renderShell();
+    fireEvent.click(await screen.findByRole('button', { name: '▶ Play Mt' }));
+    rerenderWith({ ...IDLE, ejected: false, paused: false, songUrl: '/music/Bazaar/groove.nsf' });
+    rerenderWith({ ...IDLE, ejected: false, paused: false, songUrl: '/music/Bazaar/mt.nsf' });
+    expect(controls.seekToMs).not.toHaveBeenCalled();
+  });
+
+  describe('responsive panels', () => {
+    /** Installs a matchMedia whose compact query result can be flipped, notifying listeners. */
+    function mockMatchMedia() {
+      let compact = false;
+      const listeners = new Set<() => void>();
+      window.matchMedia = ((query: string) => ({
+        get matches() {
+          return query.includes('max-width') ? compact : false;
+        },
+        media: query,
+        addListener: (fn: () => void) => listeners.add(fn),
+        removeListener: (fn: () => void) => listeners.delete(fn),
+      })) as any;
+      return (next: boolean) => {
+        compact = next;
+        act(() => listeners.forEach((fn) => fn()));
+      };
+    }
+
+    afterEach(() => {
+      delete (window as any).matchMedia;
+    });
+
+    it('shows only the topmost panel after rotating to compact, and both again when back to wide', async () => {
+      const setCompact = mockMatchMedia();
+      renderShell();
+      await screen.findByText('or browse 2 albums');
+      fireEvent.keyDown(document.body, { key: 'a' });
+      fireEvent.keyDown(document.body, { key: 's' });
+      expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+
+      setCompact(true);
+      expect(screen.queryByRole('dialog', { name: 'Albums' })).toBeNull();
+      expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+
+      fireEvent.keyDown(document.body, { key: 'Escape' });
+      expect(screen.queryByRole('dialog', { name: 'Stage' })).toBeNull();
+      expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+    });
+
+    it('restores both panels when flipping back to wide', async () => {
+      const setCompact = mockMatchMedia();
+      renderShell();
+      await screen.findByText('or browse 2 albums');
+      fireEvent.keyDown(document.body, { key: 'a' });
+      fireEvent.keyDown(document.body, { key: 's' });
+      setCompact(true);
+      setCompact(false);
+      expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+    });
   });
 });

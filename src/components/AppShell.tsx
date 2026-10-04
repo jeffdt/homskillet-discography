@@ -46,6 +46,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
   const [initialLocation, setInitialLocation] = useState<InitialLocation | null>(null);
   const [showFullscreen] = useState(() => isFullscreenSupported());
   const pendingSeekRef = useRef<{ trackId: string; ms: number } | null>(null);
+  const wasEjectedRef = useRef(playback.ejected);
 
   const currentTrack =
     (catalog && playback.songUrl && catalog.trackByHref.get(playback.songUrl)) || null;
@@ -83,9 +84,17 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
 
   useEffect(() => {
     const pending = pendingSeekRef.current;
-    if (pending && !playback.ejected && currentTrackId === pending.trackId) {
+    const wasEjected = wasEjectedRef.current;
+    wasEjectedRef.current = playback.ejected;
+    if (!pending) return;
+    if (!playback.ejected && currentTrackId === pending.trackId) {
       pendingSeekRef.current = null;
       controls.seekToMs(pending.ms);
+    } else if (
+      (playback.ejected && !wasEjected) ||
+      (currentTrackId && currentTrackId !== pending.trackId)
+    ) {
+      pendingSeekRef.current = null;
     }
   }, [currentTrackId, playback.ejected, controls]);
 
@@ -102,6 +111,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
   /** Turns shuffle on (persisted) and plays the whole catalog from a random track. */
   const startListening = useCallback(() => {
     if (!catalog) return;
+    pendingSeekRef.current = null;
     controls.setShuffle(true);
     playPlan(shuffleAllPlan(catalog));
   }, [catalog, controls, playPlan]);
@@ -242,7 +252,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
 
       {showTitle && (
         <TitleScreen
-          ready={playback.ready && catalog !== null}
+          ready={playback.ready && catalog !== null && initialLocation !== null}
           tagline={(catalog && catalog.tagline) || DEFAULT_TAGLINE}
           albumCount={catalog ? catalog.albums.length : 0}
           sharedTrack={
