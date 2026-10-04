@@ -5,9 +5,9 @@
  * is not available (e.g., lightweight dev environments, remote deployments)
  */
 
-import type { Directories } from '../types/catalog';
+import type { RawDirectories } from '../catalog/catalog';
 
-export const MOCK_DIRECTORIES: Directories = {
+export const MOCK_DIRECTORIES: RawDirectories = {
   '/': [
     {
       path: '/Demo Album',
