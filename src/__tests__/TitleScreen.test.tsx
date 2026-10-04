@@ -40,18 +40,66 @@ describe('TitleScreen', () => {
     fireEvent.click(button);
     fireEvent.click(button);
     expect(onStart).toHaveBeenCalledTimes(1);
+    expect((button as HTMLButtonElement).disabled).toBe(true);
     act(() => {
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(2999);
+    });
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    act(() => {
+      vi.advanceTimersByTime(1);
     });
     expect((button as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('plays once when two clicks land before React re-renders', () => {
+    const { onStart } = renderTitle();
+    const button = screen.getByRole('button', { name: /start listening/i });
+    act(() => {
+      fireEvent.click(button);
+      fireEvent.click(button);
+    });
+    expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('queues a single start when clicked twice before ready', () => {
+    const { onStart, rerender, onBrowse } = renderTitle({ ready: false });
+    const button = screen.getByRole('button', { name: /start listening/i });
+    act(() => {
+      fireEvent.click(button);
+      fireEvent.click(button);
+    });
+    rerender(
+      <TitleScreen
+        ready
+        tagline="t"
+        albumCount={7}
+        sharedTrack={null}
+        onStart={onStart}
+        onBrowse={onBrowse}
+      />
+    );
+    expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
+  it('falls back to the generic label and omits a dangling separator', () => {
+    renderTitle({ sharedTrack: { title: '', albumTitle: 'Bazaar' } });
+    expect(screen.getByRole('button', { name: '▶ Start listening' })).toBeTruthy();
+    expect(screen.getByText('Bazaar')).toBeTruthy();
+  });
+
+  it('omits the separator when the album title is missing', () => {
+    renderTitle({ sharedTrack: { title: 'Groove', albumTitle: '' } });
+    expect(screen.getByText('Groove')).toBeTruthy();
   });
 
   it('shows a loading state when pressed early, then starts once ready', () => {
     const { onStart, rerender, onBrowse } = renderTitle({ ready: false });
     fireEvent.click(screen.getByRole('button', { name: /start listening/i }));
     expect(onStart).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Loading…' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Loading…' }));
+    const loading = screen.getByRole('button', { name: 'Loading…' });
+    expect(loading.getAttribute('aria-busy')).toBe('true');
+    fireEvent.click(loading);
+    expect(onStart).not.toHaveBeenCalled();
     rerender(
       <TitleScreen
         ready

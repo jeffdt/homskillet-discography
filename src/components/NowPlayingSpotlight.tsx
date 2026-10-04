@@ -25,6 +25,8 @@ export default function NowPlayingSpotlight({
     return () => clearTimeout(timer);
   }, [trackId]);
 
+  if (trackId && !title) return null;
+
   const visible = trackId !== null && shownId === trackId;
 
   return (

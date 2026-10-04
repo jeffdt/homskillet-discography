@@ -33,4 +33,11 @@ describe('NowPlayingSpotlight', () => {
     );
     expect(container.querySelector('.Spotlight-blurb')).toBeNull();
   });
+
+  it('renders nothing when the track has no title', () => {
+    const { container } = render(
+      <NowPlayingSpotlight trackId="A/a.nsf" title="" albumTitle="Album" blurb={null} />
+    );
+    expect(container.querySelector('.Spotlight')).toBeNull();
+  });
 });

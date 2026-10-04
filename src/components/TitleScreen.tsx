@@ -24,6 +24,7 @@ export default function TitleScreen({
 }: TitleScreenProps) {
   const [pending, setPending] = useState(false);
   const [starting, setStarting] = useState(false);
+  const startLockedRef = useRef(false);
   const onStartRef = useRef(onStart);
   onStartRef.current = onStart;
 
@@ -31,18 +32,24 @@ export default function TitleScreen({
     if (!pending || !ready) return;
     setPending(false);
     setStarting(true);
+    startLockedRef.current = true;
     onStartRef.current();
   }, [pending, ready]);
 
   useEffect(() => {
     if (!starting) return undefined;
-    const timer = setTimeout(() => setStarting(false), START_COOLDOWN_MS);
+    const timer = setTimeout(() => {
+      startLockedRef.current = false;
+      setStarting(false);
+    }, START_COOLDOWN_MS);
     return () => clearTimeout(timer);
   }, [starting]);
 
   /** Starts playback now, or queues one start for when everything is ready; repeat presses are ignored. */
   const handleStart = () => {
-    if (pending || starting) return;
+    // Ref guard: state alone would let two clicks in one batch both pass.
+    if (startLockedRef.current) return;
+    startLockedRef.current = true;
     if (ready) {
       setStarting(true);
       onStart();
@@ -53,20 +60,19 @@ export default function TitleScreen({
 
   const label = pending
     ? 'Loading…'
-    : sharedTrack
+    : sharedTrack?.title
       ? `▶ Play ${sharedTrack.title}`
       : '▶ Start listening';
+  const sharedLine = sharedTrack
+    ? [sharedTrack.title, sharedTrack.albumTitle].filter(Boolean).join(' · ')
+    : '';
 
   return (
     <div className="TitleScreen">
       <div className="TitleScreen-glow" aria-hidden="true" />
       <h1 className="TitleScreen-logo">HOMSKILLET</h1>
       <p className="TitleScreen-tagline">{tagline}</p>
-      {sharedTrack && (
-        <p className="TitleScreen-shared">
-          {sharedTrack.title} · {sharedTrack.albumTitle}
-        </p>
-      )}
+      {sharedLine && <p className="TitleScreen-shared">{sharedLine}</p>}
       <button
         className="TitleScreen-start"
         onClick={handleStart}
