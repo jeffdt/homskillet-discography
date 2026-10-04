@@ -18,6 +18,7 @@ export interface ShortcutTarget {
   tagName: string;
   type?: string;
   isContentEditable?: boolean;
+  role?: string;
 }
 
 export interface ShortcutKey {
@@ -27,9 +28,21 @@ export interface ShortcutKey {
   metaKey: boolean;
   altKey: boolean;
   target: ShortcutTarget | null;
+  repeat?: boolean;
+  isComposing?: boolean;
+  defaultPrevented?: boolean;
 }
 
 const TEXT_INPUT_TYPES = new Set(['text', 'search', 'email', 'url', 'tel', 'password', 'number']);
+const SPACE_ROLES = new Set(['button', 'checkbox', 'radio', 'switch', 'menuitem', 'tab', 'link']);
+const CONTINUOUS_ACTIONS = new Set<ShortcutAction>([
+  'seekBack',
+  'seekForward',
+  'speedDown',
+  'speedDownFine',
+  'speedUp',
+  'speedUpFine',
+]);
 const SPACE_INPUT_TYPES = new Set(['checkbox', 'radio', 'button', 'submit', 'reset']);
 
 /** Uppercased tag name of the target, or empty when there is none. */
@@ -51,13 +64,15 @@ function isTextEntry(target: ShortcutTarget | null): boolean {
   return tag === 'INPUT' && TEXT_INPUT_TYPES.has(inputType(target));
 }
 
-/** True for a range slider, which owns the arrow keys. */
+/** True for a range input or role=slider element, which owns the arrow keys. */
 function isRangeInput(target: ShortcutTarget | null): boolean {
+  if (target && target.role === 'slider') return true;
   return tagOf(target) === 'INPUT' && inputType(target) === 'range';
 }
 
 /** True when Space activates the focused control instead of toggling playback. */
 function activatesOnSpace(target: ShortcutTarget | null): boolean {
+  if (target && target.role && SPACE_ROLES.has(target.role)) return true;
   const tag = tagOf(target);
   if (tag === 'BUTTON' || tag === 'A' || tag === 'SUMMARY') return true;
   return tag === 'INPUT' && SPACE_INPUT_TYPES.has(inputType(target));
@@ -65,6 +80,14 @@ function activatesOnSpace(target: ShortcutTarget | null): boolean {
 
 /** Maps a keydown to a shell action, leaving keys the focused control needs untouched. */
 export function resolveShortcut(e: ShortcutKey): ShortcutAction | null {
+  if (e.isComposing || e.defaultPrevented) return null;
+  const action = resolveUnguarded(e);
+  if (action && e.repeat && !CONTINUOUS_ACTIONS.has(action)) return null;
+  return action;
+}
+
+/** Maps a key to an action ignoring repeat, composition and prior handling. */
+function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
   if (e.ctrlKey || e.metaKey || e.altKey) return null;
   if (e.key === 'Escape') return 'closeTopmost';
   if (isTextEntry(e.target)) return null;

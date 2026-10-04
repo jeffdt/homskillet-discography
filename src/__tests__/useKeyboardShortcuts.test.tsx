@@ -41,4 +41,34 @@ describe('useKeyboardShortcuts', () => {
     expect(first).not.toHaveBeenCalled();
     expect(second).toHaveBeenCalledTimes(1);
   });
+
+  it('skips repeats of toggle keys and already prevented events', () => {
+    const togglePause = vi.fn();
+    const seekForward = vi.fn();
+    render(<Harness handlers={{ togglePause, seekForward }} />);
+    fireEvent.keyDown(document.body, { key: ' ', repeat: true });
+    fireEvent.keyDown(document.body, { key: 'ArrowRight', shiftKey: true, repeat: true });
+    expect(togglePause).not.toHaveBeenCalled();
+    expect(seekForward).toHaveBeenCalledTimes(1);
+
+    const handled = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+    document.body.addEventListener('keydown', (ev) => ev.preventDefault(), { once: true });
+    document.body.dispatchEvent(handled);
+    expect(togglePause).not.toHaveBeenCalled();
+  });
+
+  it('ignores composing keys and role=slider arrows', () => {
+    const nextTrack = vi.fn();
+    const closeTopmost = vi.fn();
+    const { container } = render(
+      <>
+        <Harness handlers={{ nextTrack, closeTopmost }} />
+        <div role="slider" tabIndex={0} data-testid="s" />
+      </>
+    );
+    fireEvent.keyDown(document.body, { key: 'Escape', isComposing: true });
+    fireEvent.keyDown(container.querySelector('[role=slider]') as Element, { key: 'ArrowRight' });
+    expect(closeTopmost).not.toHaveBeenCalled();
+    expect(nextTrack).not.toHaveBeenCalled();
+  });
 });

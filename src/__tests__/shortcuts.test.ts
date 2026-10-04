@@ -77,4 +77,33 @@ describe('resolveShortcut', () => {
     expect(resolveShortcut(key('q'))).toBeNull();
     expect(resolveShortcut(key(' ', { target: null }))).toBe('togglePause');
   });
+
+  it('ignores auto-repeat on toggle keys but not on seek and speed keys', () => {
+    expect(resolveShortcut(key(' ', { repeat: true }))).toBeNull();
+    expect(resolveShortcut(key('f', { repeat: true }))).toBeNull();
+    expect(resolveShortcut(key('ArrowRight', { repeat: true }))).toBeNull();
+    expect(resolveShortcut(key('Escape', { repeat: true }))).toBeNull();
+    expect(resolveShortcut(key('ArrowRight', { shiftKey: true, repeat: true }))).toBe(
+      'seekForward'
+    );
+    expect(resolveShortcut(key('-', { repeat: true }))).toBe('speedDown');
+  });
+
+  it('ignores composing and already handled events', () => {
+    expect(resolveShortcut(key('Escape', { isComposing: true }))).toBeNull();
+    expect(resolveShortcut(key('a', { isComposing: true }))).toBeNull();
+    expect(resolveShortcut(key('Escape', { defaultPrevented: true }))).toBeNull();
+    expect(resolveShortcut(key(' ', { defaultPrevented: true }))).toBeNull();
+  });
+
+  it('respects ARIA roles on custom controls', () => {
+    expect(
+      resolveShortcut(key('ArrowLeft', { target: { tagName: 'DIV', role: 'slider' } }))
+    ).toBeNull();
+    expect(resolveShortcut(key(' ', { target: { tagName: 'DIV', role: 'button' } }))).toBeNull();
+    expect(resolveShortcut(key(' ', { target: { tagName: 'DIV', role: 'checkbox' } }))).toBeNull();
+    expect(resolveShortcut(key('ArrowRight', { target: { tagName: 'DIV', role: 'button' } }))).toBe(
+      'nextTrack'
+    );
+  });
 });

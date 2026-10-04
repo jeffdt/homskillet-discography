@@ -18,11 +18,15 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
         ctrlKey: e.ctrlKey,
         metaKey: e.metaKey,
         altKey: e.altKey,
+        repeat: e.repeat,
+        isComposing: e.isComposing,
+        defaultPrevented: e.defaultPrevented,
         target: el
           ? {
               tagName: el.tagName,
               type: (el as HTMLInputElement).type,
               isContentEditable: el.isContentEditable,
+              role: el.getAttribute('role') ?? undefined,
             }
           : null,
       });
