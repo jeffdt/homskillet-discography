@@ -170,3 +170,254 @@
 .Stage-analyzer {
   z-index: 1;
 }
+
+/* ===== Chrome and idle fade ===== */
+
+.Chrome {
+  transition: opacity var(--fade-duration) ease;
+}
+
+.AppShell[data-idle='true'] .Chrome {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.AppShell[data-idle='true'] {
+  cursor: none;
+}
+
+.Icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ===== Top bar ===== */
+
+.TopBar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px var(--chrome-gap) 24px;
+  background: linear-gradient(to bottom, var(--chrome-bg), transparent);
+}
+
+.App .TopBar-logo {
+  font: var(--font-title);
+  color: var(--neutral4);
+  letter-spacing: 3px;
+  white-space: nowrap;
+}
+
+.TopBar-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.TopBar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--chrome-bg);
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.TopBar-button:hover {
+  color: var(--neutral4);
+}
+
+.TopBar-button.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--neutral0);
+}
+
+.App .TopBar-label {
+  font: var(--font-accent);
+}
+
+/* ===== Dock ===== */
+
+.Dock {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  z-index: 3;
+  width: min(900px, max(60vw, 600px), calc(100vw - 2 * var(--chrome-gap)));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  transform: translateX(-50%);
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: var(--panel-blur);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  box-shadow: 0 8px 32px var(--shadow);
+  box-sizing: border-box;
+}
+
+.Dock-transport,
+.Dock-modes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.Dock-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.Dock-button:hover:not(:disabled) {
+  color: var(--neutral4);
+}
+
+.Dock-button:disabled {
+  color: var(--neutral2);
+  cursor: default;
+}
+
+.Dock-play {
+  width: 44px;
+  height: 44px;
+  background: var(--accent);
+  color: var(--neutral0);
+  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 16px) var(--accent-dark);
+}
+
+.Dock-play:hover:not(:disabled) {
+  background: var(--accent-dark);
+  color: var(--neutral0);
+}
+
+.Dock-toggle.is-on {
+  background: var(--accent);
+  color: var(--neutral0);
+}
+
+.Dock-toggle.is-on::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--neutral0);
+}
+
+.Dock-meta {
+  display: flex;
+  flex: 0 1 220px;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.Dock-meta:disabled {
+  cursor: default;
+}
+
+.App .Dock-title {
+  overflow: hidden;
+  font: var(--font-strong);
+  color: var(--neutral4);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.App .Dock-album {
+  overflow: hidden;
+  font: var(--font-small);
+  color: var(--neutral2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Dock-progress {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.Dock .TimeSlider {
+  margin: 0;
+}
+
+.Dock-volume {
+  width: 96px;
+}
+
+/* Compact (portrait phone): every control gets a 44px target and the dock wraps into rows. */
+@media (max-width: 768px) and (orientation: portrait) {
+  .TopBar-button {
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    justify-content: center;
+  }
+
+  .TopBar-label {
+    display: none;
+  }
+
+  .Dock {
+    bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    border-radius: var(--radius);
+  }
+
+  .Dock-button {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+
+  .Dock-meta {
+    flex: 1 1 100px;
+    min-height: var(--touch-target);
+    justify-content: center;
+  }
+
+  .Dock-progress {
+    flex: 1 1 100%;
+    order: 5;
+  }
+
+  .Dock-volume {
+    flex: 1 1 96px;
+    min-height: var(--touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Chrome {
+    transition: none;
+  }
+}

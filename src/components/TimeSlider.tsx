@@ -45,24 +45,40 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
     };
   }
 
+  /** Starts the position timer if the song is already playing when the slider mounts. */
+  componentDidMount(): void {
+    if (!this.props.paused) this.startTimer();
+  }
+
+  /** Starts or stops the position timer when playback pauses or resumes. */
   componentDidUpdate(prevProps: TimeSliderProps): void {
     if (prevProps.paused === true && this.props.paused === false) {
-      this.timer = setInterval(() => {
-        const { getCurrentPositionMs, currentSongDurationMs } = this.props;
-        this.setState({
-          currentSongPositionMs: Math.min(getCurrentPositionMs(), currentSongDurationMs),
-        });
-      }, UPDATE_INTERVAL_MS);
+      this.startTimer();
     } else if (prevProps.paused === false && this.props.paused === true) {
-      if (this.timer) {
-        clearInterval(this.timer);
-      }
+      this.stopTimer();
     }
   }
 
   componentWillUnmount(): void {
+    this.stopTimer();
+  }
+
+  /** Polls the player position every UPDATE_INTERVAL_MS, replacing any running timer. */
+  startTimer(): void {
+    this.stopTimer();
+    this.timer = setInterval(() => {
+      const { getCurrentPositionMs, currentSongDurationMs } = this.props;
+      this.setState({
+        currentSongPositionMs: Math.min(getCurrentPositionMs(), currentSongDurationMs),
+      });
+    }, UPDATE_INTERVAL_MS);
+  }
+
+  /** Stops the position timer if one is running. */
+  stopTimer(): void {
     if (this.timer) {
       clearInterval(this.timer);
+      this.timer = null;
     }
   }
 
