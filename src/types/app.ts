@@ -1,7 +1,6 @@
-import { RouteComponentProps } from 'react-router-dom';
 import { PlayerMetadata, PlayerParamDef } from './player';
-import { RepeatMode, ShuffleMode } from './sequencer';
-import { Directories, PlayContext } from './catalog';
+import { ShuffleMode } from './sequencer';
+import { PlayContext } from './catalog';
 
 export interface UserSettings {
   [key: string]: any;
@@ -22,7 +21,7 @@ export interface ToastContextValue {
   enqueueToast: (message: string | ToastMessage, level?: string) => void;
 }
 
-export interface AppProps extends RouteComponentProps {
+export interface AppProps {
   userContext: UserContextValue;
   toastContext: ToastContextValue;
 }
@@ -41,19 +40,13 @@ export interface AppState {
   voiceMask: boolean[];
   voiceNames: string[];
   voiceGroups: any[];
-  imageUrl: string | null;
-  infoTexts: string[];
-  showInfo: boolean;
   songUrl: string | null;
   volume: number;
   shuffle: ShuffleMode;
   isLocked: boolean;
-  directories: Directories;
   hasPlayer: boolean;
   paramDefs: PlayerParamDef[];
   paramValues: Record<string, any>;
-  activeTab: TabType;
-  visualizerMaximized: boolean;
 }
 
 export interface BrowseProps {

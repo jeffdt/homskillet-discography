@@ -32,7 +32,10 @@ export default function AlbumsPanel({
   return (
     <div className="Albums">
       {album ? (
-        <div key={album.id} className="Albums-level Albums-level--forward">
+        <div
+          key={`${album.id}:${focusTrackId ?? ''}`}
+          className="Albums-level Albums-level--forward"
+        >
           <Tracklist
             album={album}
             playingTrackId={playingTrackId}

@@ -2,82 +2,51 @@ import React, { useContext } from 'react';
 import autoBindReact from 'auto-bind/react';
 import isMobile from 'ismobilejs';
 import clamp from 'lodash/clamp';
-import { Route, Switch, withRouter } from 'react-router-dom';
 
 import ChipCore from '../chip-core';
 import ChipCoreStub from '../chip-core-stub';
-import { MOCK_DIRECTORIES } from '../stub-data/mock-directories';
-import {
-  API_BASE,
-  CATALOG_PREFIX,
-  IS_PRODUCTION,
-  MAX_VOICES,
-  MAX_SAMPLE_RATE,
-  PUBLIC_URL,
-  REPLACE_STATE_ON_SEEK,
-} from '../config';
-import {
-  getMetadataUrlForCatalogUrl,
-  pathJoin,
-  titlesFromMetadata,
-  unlockAudioContext,
-} from '../util';
-import requestCache from '../RequestCache';
-import { handleShufflePlayLogic } from '../handleShufflePlayLogic';
-import Sequencer, { NUM_SHUFFLE_MODES, SHUFFLE_OFF } from '../Sequencer';
+import { MAX_VOICES, MAX_SAMPLE_RATE, REPLACE_STATE_ON_SEEK } from '../config';
+import { unlockAudioContext } from '../util';
+import Sequencer, { SHUFFLE_OFF, SHUFFLE_ON } from '../Sequencer';
 
 import GMEPlayer from '../players/GMEPlayer';
 import { UI_PALETTES } from '../config/uiPalettes';
 import { updateAccentColors } from '../util/cssVariables';
 
-import AppFooter from './AppFooter';
-import AppHeader from './AppHeader';
-import Browse from './Browse';
-import Visualizer from './Visualizer';
-import Toast, { ToastLevels } from './Toast';
-import MessageBox from './MessageBox';
-import Settings from './Settings';
-import UISettings from './UISettings';
-import PlayerSettings from './PlayerSettings';
-import TabBar from './TabBar';
-import SongDisplay from './SongDisplay';
+import AppShell from './AppShell';
+import { ToastLevels } from './Toast';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
 import { AudioPulseProvider } from '../contexts/AudioPulseContext';
-import { AppProps, AppState, TabType } from '../types/app';
+import { AppProps, AppState } from '../types/app';
 import { SequencerState } from '../types/sequencer';
-import { PlayContext } from '../types/catalog';
+import { AudioGraph, PlaybackControls, PlaybackState } from '../types/playback';
 
 const publicUrl = import.meta.env.BASE_URL;
 const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.origin;
 
-// Browser-compatible path.dirname replacement
-function dirname(filepath: string): string {
-  const lastSlash = filepath.lastIndexOf('/');
-  return lastSlash === -1 ? '.' : filepath.substring(0, lastSlash) || '/';
-}
-
+/**
+ * Owns the audio graph, chip-core, the Sequencer and playback state, and hands AppShell
+ * a PlaybackState snapshot plus stable PlaybackControls.
+ */
 class App extends React.Component<AppProps, AppState> {
   private chipCore: any;
   private audioCtx: AudioContext;
   private gainNode: GainNode;
   private playerNode: ScriptProcessorNode;
   private sequencer!: Sequencer;
-  private contentAreaRef: React.RefObject<HTMLDivElement>;
-  private listRef: React.RefObject<any>;
-  private playContexts: Record<string, PlayContext>;
   private mediaSessionAudio?: HTMLAudioElement;
+  private audioGraph: AudioGraph | null = null;
+  private controls: PlaybackControls;
 
   constructor(props: AppProps) {
     super(props);
     autoBindReact(this);
 
     this.attachMediaKeyHandlers();
-    this.contentAreaRef = React.createRef();
-    this.listRef = React.createRef(); // react-virtualized List component ref
-    this.playContexts = {};
     (window as any).ChipPlayer = this;
 
+    // ===== Audio wiring: sub-project 2 replaces this region with AudioEngine =====
     // Initialize audio graph
     // ┌────────────┐      ┌────────────┐      ┌─────────────┐
     // │ playerNode ├─────>│  gainNode  ├─────>│ destination │
@@ -130,7 +99,9 @@ class App extends React.Component<AppProps, AppState> {
       audioCtx.baseLatency * audioCtx.sampleRate,
       bufferSize
     );
+    // ===== End audio wiring =====
 
+    const { shuffle, repeat } = props.userContext.settings;
     this.state = {
       loading: true,
       paused: true,
@@ -143,23 +114,39 @@ class App extends React.Component<AppProps, AppState> {
       voiceMask: Array(MAX_VOICES).fill(true),
       voiceNames: Array(MAX_VOICES).fill(''),
       voiceGroups: [],
-      imageUrl: null,
-      infoTexts: [],
-      showInfo: false,
       songUrl: null,
       volume: 100,
-      shuffle: SHUFFLE_OFF,
-      isLocked: false,
-      directories: {},
+      shuffle: shuffle ? SHUFFLE_ON : SHUFFLE_OFF,
+      isLocked: !!repeat,
       hasPlayer: false,
       paramDefs: [],
       paramValues: {},
-      activeTab: 'browser' as TabType,
-      visualizerMaximized: false,
+    };
+
+    this.controls = {
+      playTracks: this.playTracks,
+      togglePause: this.togglePause,
+      prevTrack: this.prevSong,
+      nextTrack: this.nextSong,
+      seekToFraction: this.handleTimeSliderChange,
+      seekToMs: this.seekToMs,
+      seekRelative: this.seekRelative,
+      getPositionMs: this.getPositionMs,
+      setTempo: this.handleTempoChange,
+      setSpeedRelative: this.setSpeedRelative,
+      setVoiceMask: this.handleSetVoiceMask,
+      setParam: this.handleParamChange,
+      pinParam: this.handlePinParam,
+      setVolume: this.handleVolumeChange,
+      setShuffle: this.handleSetShuffle,
+      setRepeat: this.handleSetRepeat,
+      resumeAudio: this.resumeAudio,
     };
 
     this.initChipCore(audioCtx, playerNode, bufferSize);
   }
+
+  // ===== Audio wiring (continued): engine startup, media session, sequencer state =====
 
   async initChipCore(audioCtx: AudioContext, playerNode: ScriptProcessorNode, bufferSize: number) {
     // Load the chip-core Emscripten runtime
@@ -234,38 +221,9 @@ class App extends React.Component<AppProps, AppState> {
       this.props.toastContext.enqueueToast(message, ToastLevels.ERROR)
     );
 
-    // TODO: Move to separate processUrlParams method.
-    const urlSearchParams = new URLSearchParams(window.location.search);
-    const playParam = urlSearchParams.get('play');
-    if (playParam) {
-      // Treat play params as "transient command" and strip them after starting playback.
-      // See comment in Browse.js for more about why a sticky play param is not a good idea.
-      const playPath = playParam;
-      const time = urlSearchParams.get('t') ? parseInt(urlSearchParams.get('t')!, 10) : 0;
-      urlSearchParams.delete('play');
-      urlSearchParams.delete('t');
-      const qs = urlSearchParams.toString();
-      const search = qs ? `?${qs}` : '';
-      // Navigate to song's containing folder. History comes from withRouter().
-      const dirPath = dirname(playPath);
-      this.fetchDirectory(dirPath).then(() => {
-        this.props.history.replace(`${pathJoin('/', dirPath)}${search}`);
-        // Convert play path to href (context contains full hrefs)
-        const playHref = pathJoin(CATALOG_PREFIX, playPath);
-        const index = this.playContexts[dirPath].indexOf(playHref);
-
-        this.playContext(this.playContexts[dirPath], index);
-
-        if (time) {
-          setTimeout(() => {
-            if (this.sequencer.getPlayer()) {
-              this.sequencer.getPlayer()!.seekMs(time);
-            }
-          }, 100);
-        }
-      });
-    }
-
+    this.sequencer.setShuffle(this.state.shuffle);
+    this.sequencer.setLocked(this.state.isLocked);
+    this.audioGraph = { audioCtx, sourceNode: playerNode, chipCore: this.chipCore };
     this.setState({ loading: false });
   }
 
@@ -286,7 +244,6 @@ class App extends React.Component<AppProps, AppState> {
       // TODO: Move to a separate paramStateUpdate?
       paramDefs: 'paramDefs',
       paramValues: 'paramValues',
-      infoTexts: 'infoTexts',
     };
     const appState: any = {};
     for (let prop in map) {
@@ -321,83 +278,6 @@ class App extends React.Component<AppProps, AppState> {
         this.seekRelative(5000)
       );
     }
-
-    document.addEventListener('keydown', (e) => {
-      // Keyboard shortcuts: tricky to get it just right and keep the browser behavior intact.
-      // The order of switch-cases matters. More privileged keys appear at the top.
-      // More restricted keys appear at the bottom, after various input focus states are filtered out.
-      if (e.ctrlKey || e.metaKey) return; // avoid browser keyboard shortcuts
-
-      switch (e.key) {
-        case 'Escape':
-          this.setState({ showInfo: false });
-          (e.target as HTMLElement).blur();
-          break;
-        default:
-      }
-
-      if (
-        (e.target as HTMLElement).tagName === 'INPUT' &&
-        (e.target as HTMLInputElement).type === 'text'
-      )
-        return; // text input has focus
-
-      switch (e.key) {
-        case ' ':
-          this.togglePause();
-          e.preventDefault();
-          break;
-        case '-':
-          this.setSpeedRelative(-0.1);
-          break;
-        case '_':
-          this.setSpeedRelative(-0.01);
-          break;
-        case '=':
-          this.setSpeedRelative(0.1);
-          break;
-        case '+':
-          this.setSpeedRelative(0.01);
-          break;
-        default:
-      }
-
-      if (
-        (e.target as HTMLElement).tagName === 'INPUT' &&
-        (e.target as HTMLInputElement).type === 'range'
-      )
-        return; // a range slider has focus
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          this.seekRelative(-5000);
-          e.preventDefault();
-          break;
-        case 'ArrowRight':
-          this.seekRelative(5000);
-          e.preventDefault();
-          break;
-        default:
-      }
-    });
-  }
-
-  playContext(context: PlayContext, index = 0) {
-    if (!this.sequencer) {
-      console.warn('Sequencer not ready yet, cannot play');
-      return;
-    }
-    this.sequencer.playContext(context, index);
-  }
-
-  prevSong() {
-    if (!this.sequencer) return;
-    this.sequencer.prevSong();
-  }
-
-  nextSong() {
-    if (!this.sequencer) return;
-    this.sequencer.nextSong();
   }
 
   handleSequencerStateUpdate(sequencerState: SequencerState) {
@@ -411,7 +291,6 @@ class App extends React.Component<AppProps, AppState> {
         currentSongNumVoices: 0,
         currentSongPositionMs: 0,
         currentSongDurationMs: 1,
-        imageUrl: null,
         songUrl: null,
       });
       // TODO: Disabled to support scroll restoration.
@@ -427,44 +306,6 @@ class App extends React.Component<AppProps, AppState> {
       }
     } else {
       const player = this.sequencer.getPlayer();
-      const url = this.sequencer.getCurrUrl();
-      // TODO: this is messy. imageUrl comes asynchronously from the /metadata request.
-      //       Title, artist, etc. come synchronously from player.getMetadata().
-      //       ...but these are also emitted with playerStateUpdate.
-      //       It would be better to incorporate imageUrl into playerStateUpdate.
-      if (!url) {
-        this.setState({ imageUrl: null });
-      } else if (url !== this.state.songUrl) {
-        const metadataUrl = getMetadataUrlForCatalogUrl(url);
-        // TODO: Disabled to support scroll restoration.
-        // const filepath = url.replace(CATALOG_PREFIX, '');
-        // updateQueryString({ play: filepath, t: undefined });
-        // TODO: move fetch metadata to Player when it becomes event emitter
-        requestCache
-          .fetchCached(metadataUrl)
-          .then((response: any) => {
-            const { imageUrl, infoTexts, md5 } = response;
-            const newInfoTexts = [...this.state.infoTexts, ...infoTexts];
-            const newShowInfo = this.state.showInfo && newInfoTexts.length > 0;
-            this.setState({ imageUrl, infoTexts: newInfoTexts, md5, showInfo: newShowInfo } as any);
-
-            if ('mediaSession' in navigator) {
-              // Clear artwork if imageUrl is null.
-              (navigator as any).mediaSession.metadata.artwork =
-                imageUrl == null
-                  ? []
-                  : [
-                      {
-                        src: imageUrl,
-                        sizes: '512x512',
-                      },
-                    ];
-            }
-          })
-          .catch((e: any) => {
-            this.setState({ imageUrl: null });
-          });
-      }
 
       const metadata = player!.getMetadata();
 
@@ -487,6 +328,31 @@ class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  // ===== End audio wiring =====
+
+  // ===== Playback commands (exposed to the shell as PlaybackControls) =====
+
+  /** Plays the given track hrefs starting at index, as one play context. */
+  playTracks(hrefs: string[], index = 0) {
+    if (!this.sequencer) {
+      console.warn('Sequencer not ready yet, cannot play');
+      return;
+    }
+    this.sequencer.playContext(hrefs, index);
+  }
+
+  /** Skips to the previous track. */
+  prevSong() {
+    if (!this.sequencer) return;
+    this.sequencer.prevSong();
+  }
+
+  /** Skips to the next track. */
+  nextSong() {
+    if (!this.sequencer) return;
+    this.sequencer.nextSong();
+  }
+
   togglePause() {
     if (this.state.ejected || !this.sequencer.getPlayer()) return;
 
@@ -502,7 +368,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   handleTimeSliderChange(event: any) {
-    if (!this.sequencer.getPlayer()) return;
+    if (!this.sequencer?.getPlayer()) return;
 
     const pos = event.target ? event.target.value : event;
     const seekMs = Math.floor(pos * this.state.currentSongDurationMs);
@@ -518,12 +384,18 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   seekRelative(ms: number) {
-    if (!this.sequencer.getPlayer()) return;
+    if (!this.sequencer?.getPlayer()) return;
 
     const durationMs = this.state.currentSongDurationMs;
     const seekMs = clamp(this.sequencer.getPlayer()!.getPositionMs() + ms, 0, durationMs);
 
     this.seekRelativeInner(seekMs);
+  }
+
+  /** Seeks to an absolute position, clamped to the current track. */
+  seekToMs(ms: number) {
+    if (!this.sequencer?.getPlayer()) return;
+    this.seekRelativeInner(clamp(ms, 0, this.state.currentSongDurationMs));
   }
 
   seekRelativeInner(seekMs: number) {
@@ -540,15 +412,21 @@ class App extends React.Component<AppProps, AppState> {
     }, 100);
   }
 
+  /** Current playback position in milliseconds, or 0 with no player. */
+  getPositionMs(): number {
+    const player = this.sequencer?.getPlayer();
+    return player ? player.getPositionMs() : 0;
+  }
+
   handleSetVoiceMask(voiceMask: boolean[]) {
-    if (!this.sequencer.getPlayer()) return;
+    if (!this.sequencer?.getPlayer()) return;
 
     this.sequencer.getPlayer()!.setVoiceMask(voiceMask);
     this.setState({ voiceMask: [...voiceMask] });
   }
 
   handleTempoChange(event: any) {
-    if (!this.sequencer.getPlayer()) return;
+    if (!this.sequencer?.getPlayer()) return;
 
     const value = parseFloat(event.target ? event.target.value : event) || 1.0;
     this.sequencer.getPlayer()!.setTempo(value);
@@ -564,7 +442,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   handleParamChange(id: string, value: any) {
-    if (!this.sequencer.getPlayer()) return;
+    if (!this.sequencer?.getPlayer()) return;
     const player = this.sequencer.getPlayer()!;
     (player as any).setParameter(id, value);
     this.setState((prevState) => ({
@@ -592,7 +470,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   setSpeedRelative(delta: number) {
-    if (!this.sequencer.getPlayer()) return;
+    if (!this.sequencer?.getPlayer()) return;
 
     const tempo = clamp(this.state.tempo + delta, 0.1, 2);
     this.sequencer.getPlayer()!.setTempo(tempo);
@@ -601,162 +479,32 @@ class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  handleShufflePlay(path: string) {
-    handleShufflePlayLogic(path, this.pathToHref, (items) => this.sequencer.playContext(items));
-  }
-
-  handleCycleShuffle() {
-    const shuffle = (this.state.shuffle + 1) % NUM_SHUFFLE_MODES;
-    this.setState({ shuffle });
-    this.sequencer.setShuffle(shuffle);
-  }
-
-  handleSongClick(url: string | null, context?: PlayContext, index?: number) {
-    return (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (context && index !== undefined) {
-        this.playContext(context, index);
-      } else if (url) {
-        this.sequencer.playSonglist([url]);
-      }
-    };
-  }
-
   handleVolumeChange(volume: number) {
     this.setState({ volume });
     this.gainNode.gain.value = Math.max(0, Math.min(2, volume * 0.01));
   }
 
-  handleToggleLock() {
-    const isLocked = !this.state.isLocked;
-    this.setState({ isLocked });
-    if (this.sequencer) {
-      this.sequencer.setLocked(isLocked);
-    }
+  /** Turns shuffle on or off and persists the choice. */
+  handleSetShuffle(on: boolean) {
+    const shuffle = on ? SHUFFLE_ON : SHUFFLE_OFF;
+    this.setState({ shuffle });
+    if (this.sequencer) this.sequencer.setShuffle(shuffle);
+    this.props.userContext.updateSettings({ shuffle: on });
   }
 
-  toggleInfo() {
-    this.setState({
-      showInfo: !this.state.showInfo,
-    });
+  /** Turns single-track repeat on or off and persists the choice. */
+  handleSetRepeat(on: boolean) {
+    this.setState({ isLocked: on });
+    if (this.sequencer) this.sequencer.setLocked(on);
+    this.props.userContext.updateSettings({ repeat: on });
   }
 
-  directoryListingToContext(items: any[]): PlayContext {
-    return items.filter((item) => item.type === 'file').map((item) => item.href); // Use the href that was already built in fetchDirectory
+  /** Resumes a suspended AudioContext; must be called inside a user gesture. */
+  resumeAudio() {
+    if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
   }
 
-  pathToHref(path: string): string {
-    const prefix = IS_PRODUCTION ? `${PUBLIC_URL}/music` : CATALOG_PREFIX;
-    return pathJoin(prefix, path.replace('%', '%25').replace('#', '%23'));
-  }
-
-  fetchDirectory(path: string): Promise<void> {
-    const slashPath = pathJoin('/', path);
-    // Load from static directories.json (both dev and production)
-    const fetchPromise = fetch(`${PUBLIC_URL}/directories.json`)
-      .then((response) => response.json())
-      .then((directories: any) => directories[slashPath] || [])
-      .catch((error) => {
-        // Fallback to mock data in stub mode
-        console.warn('Failed to load directories.json, using mock catalog data:', error);
-        return MOCK_DIRECTORIES[slashPath] || [];
-      });
-
-    return fetchPromise.then((items: any[]) => {
-      items.forEach((item) => {
-        // Convert timestamp 1704067200 to ISO date 2024-01-01
-        item.mtime = new Date(item.mtime * 1000).toISOString().split('T')[0];
-        item.name = item.path.split('/').pop();
-        // XXX: Escape immediately: the escaped URL is considered canonical.
-        //      The URL must be decoded for display from here on out.
-        item.path.replace('%', '%25').replace('#', '%23');
-        if (item.type === 'file') {
-          // In production, prepend PUBLIC_URL to the music path
-          const prefix = IS_PRODUCTION ? `${PUBLIC_URL}/music` : CATALOG_PREFIX;
-          item.href = pathJoin(prefix, item.path);
-        } else {
-          item.href = pathJoin('/', item.path);
-        }
-      });
-
-      // Build play context AFTER href is set
-      this.playContexts[path] = this.directoryListingToContext(items);
-
-      if (path !== '') {
-        // No '..' at top level browse path.
-        // Use substring, not slice, to pass through strings that don't contain any '/'.
-        const parentPath = path.substring(0, path.lastIndexOf('/'));
-        items.unshift({
-          type: 'directory',
-          path: parentPath,
-          href: pathJoin('/', parentPath),
-          name: '..',
-        });
-      }
-
-      const directories = {
-        ...this.state.directories,
-        [path]: items,
-      };
-      this.setState({ directories });
-    });
-  }
-
-  getCurrentSongLink(): string | null {
-    const url = this.sequencer?.getCurrUrl();
-    if (!url) return null;
-    // Remove CATALOG_PREFIX and ensure we don't duplicate path segments
-    const relativeUrl = url.startsWith(CATALOG_PREFIX) ? url.substring(CATALOG_PREFIX.length) : url;
-    let link = BASE_URL + '/?play=' + encodeURIComponent(relativeUrl);
-    return link;
-  }
-
-  handleCopyLink = (url: string) => {
-    navigator.clipboard.writeText(url);
-  };
-
-  getSongLinkForHref(href: string): string {
-    if (!href) return '';
-    const relativeUrl = href.startsWith(CATALOG_PREFIX)
-      ? href.substring(CATALOG_PREFIX.length)
-      : href;
-    return BASE_URL + '/?play=' + encodeURIComponent(relativeUrl);
-  }
-
-  handleCopyLinkForHref = (href: string) => {
-    const link = this.getSongLinkForHref(href);
-    if (link) {
-      this.handleCopyLink(link);
-    }
-  };
-
-  navigateToCurrentSong = () => {
-    const currUrl = this.sequencer?.getCurrUrl();
-    if (!currUrl) return;
-
-    // Strip CATALOG_PREFIX to get relative path
-    const playPath = currUrl.startsWith(CATALOG_PREFIX)
-      ? currUrl.substring(CATALOG_PREFIX.length)
-      : currUrl;
-    const dirPath = dirname(playPath);
-
-    // Load directory, then navigate
-    this.fetchDirectory(dirPath).then(() => {
-      // Find file index for scroll positioning
-      const listing = this.state.directories[dirPath];
-      const index = listing?.findIndex((item) => item.href === currUrl) ?? -1;
-
-      // Navigate with scroll state
-      this.props.history.push(pathJoin('/', dirPath), {
-        selectedRow: index >= 0 ? index : 0,
-        scrollTop: 0,
-      });
-    });
-  };
-
-  handleTabChange = (tab: TabType) => {
-    this.setState({ activeTab: tab });
-  };
+  // ===== End playback commands =====
 
   componentDidMount() {
     // Apply saved UI palette on mount
@@ -777,9 +525,26 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
-    const { title, subtitle } = titlesFromMetadata(this.state.currentSongMetadata);
-    const currContext = this.sequencer?.getCurrContext();
-    const currIdx = this.sequencer?.getCurrIdx();
+    const { settings } = this.props.userContext;
+    const player = this.state.hasPlayer && this.sequencer ? this.sequencer.getPlayer() : null;
+    const playback: PlaybackState = {
+      ready: !this.state.loading && !!this.sequencer,
+      ejected: this.state.ejected,
+      paused: this.state.paused,
+      songUrl: this.state.songUrl,
+      durationMs: this.state.currentSongDurationMs,
+      tempo: this.state.tempo,
+      numVoices: this.state.currentSongNumVoices,
+      voiceMask: this.state.voiceMask,
+      voiceNames: this.state.voiceNames,
+      voiceGroups: this.state.voiceGroups,
+      paramDefs: this.state.paramDefs,
+      paramValues: this.state.paramValues,
+      playerKey: player ? player.playerKey : null,
+      volume: this.state.volume,
+      shuffle: this.state.shuffle === SHUFFLE_ON,
+      repeat: this.state.isLocked,
+    };
 
     return (
       <AudioPulseProvider
@@ -787,195 +552,19 @@ class App extends React.Component<AppProps, AppState> {
         sourceNode={this.playerNode}
         paused={this.state.paused}
         ejected={this.state.ejected}
-        enabled={this.props.userContext.settings.audioReactivePulse ?? true}
+        enabled={settings.audioReactivePulse ?? true}
       >
-        <div className={`App ${!this.state.paused && !this.state.ejected ? 'is-playing' : ''}`}>
-          {/* SVG filter definition for CRT noise effect */}
-          <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-            <defs>
-              <filter id="crt-noise">
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.9"
-                  numOctaves="4"
-                  result="noise"
-                  seed="0"
-                >
-                  <animate
-                    attributeName="seed"
-                    from="0"
-                    to="100"
-                    dur="8s"
-                    repeatCount="indefinite"
-                  />
-                </feTurbulence>
-                <feComponentTransfer in="noise" result="opacity">
-                  <feFuncA type="discrete" tableValues="0 0 0 1" />
-                </feComponentTransfer>
-              </filter>
-            </defs>
-          </svg>
-          {/* CRT noise overlay */}
-          <div className="crt-noise-overlay" aria-hidden="true" />
-          <MessageBox
-            showInfo={this.state.showInfo}
-            infoTexts={this.state.infoTexts}
-            toggleInfo={this.toggleInfo}
-          />
-          <Toast />
-          <AppHeader />
-          <TabBar activeTab={this.state.activeTab} onTabChange={this.handleTabChange} />
-          <div
-            className={`App-main ${this.state.visualizerMaximized ? 'visualizer-maximized' : ''}`}
-          >
-            <div className="App-main-inner">
-              <div className="App-main-content-and-settings">
-                {!this.state.visualizerMaximized && (
-                  <div
-                    className={`App-main-content-area mobile-tab-content ${this.state.activeTab === 'browser' ? 'mobile-tab-active' : ''}`}
-                    ref={this.contentAreaRef}
-                  >
-                    <Switch>
-                      <Route
-                        path="/:browsePath*"
-                        render={({ history, match, location }) => {
-                          // Undo the react-router-dom double-encoded % workaround - see DirectoryLink.js
-                          const browsePath =
-                            (match.params as any)?.browsePath?.replace('%25', '%') || '';
-                          return (
-                            <Browse
-                              key={`browse-${this.state.visualizerMaximized}`}
-                              currContext={currContext}
-                              currIdx={currIdx}
-                              history={history}
-                              locationKey={(location as any).key}
-                              browsePath={browsePath}
-                              listing={this.state.directories[browsePath]}
-                              playContext={this.playContexts[browsePath]}
-                              fetchDirectory={this.fetchDirectory}
-                              onSongClick={this.handleSongClick}
-                              handleShufflePlay={this.handleShufflePlay}
-                              onCopyLink={this.handleCopyLinkForHref}
-                              scrollContainerRef={this.contentAreaRef}
-                              listRef={this.listRef}
-                            />
-                          );
-                        }}
-                      />
-                    </Switch>
-                  </div>
-                )}
-                {!this.state.loading && (
-                  <div
-                    className={`mobile-tab-content ${this.state.activeTab === 'visualizer' ? 'mobile-tab-active' : ''}`}
-                  >
-                    <Visualizer
-                      audioCtx={this.audioCtx}
-                      sourceNode={this.playerNode}
-                      chipCore={this.chipCore}
-                      paused={this.state.ejected || this.state.paused}
-                      persistedSettings={this.props.userContext.settings}
-                      onThemeChange={(theme) =>
-                        this.props.userContext.updateSettings({ visualizerTheme: theme })
-                      }
-                      onThemesExpandedChange={(expanded) =>
-                        this.props.userContext.updateSettings({
-                          visualizerThemesExpanded: expanded,
-                        })
-                      }
-                      onMaximizedChange={(maximized) =>
-                        this.setState({ visualizerMaximized: maximized })
-                      }
-                    />
-                  </div>
-                )}
-                {!this.state.visualizerMaximized && (
-                  <>
-                    {/* Mobile: Combined settings panel */}
-                    <div
-                      className={`App-main-content-area settings mobile-only mobile-tab-content ${this.state.activeTab === 'settings' ? 'mobile-tab-active' : ''}`}
-                    >
-                      <Settings
-                        ejected={this.state.ejected}
-                        tempo={this.state.tempo}
-                        numVoices={this.state.currentSongNumVoices}
-                        voiceMask={this.state.voiceMask}
-                        voiceNames={this.state.voiceNames}
-                        voiceGroups={this.state.voiceGroups}
-                        onVoiceMaskChange={this.handleSetVoiceMask}
-                        onTempoChange={this.handleTempoChange}
-                        paramDefs={this.state.paramDefs}
-                        paramValues={this.state.paramValues}
-                        onParamChange={this.handleParamChange}
-                        onPinParam={this.handlePinParam}
-                        persistedSettings={this.props.userContext.settings}
-                        hasPlayer={!!this.sequencer?.getPlayer()}
-                        playerKey={this.sequencer?.getPlayer()?.playerKey ?? null}
-                      />
-                    </div>
-                    {/* Desktop: Separate UI settings panel */}
-                    <div className="App-main-content-area ui-settings desktop-only">
-                      <UISettings persistedSettings={this.props.userContext.settings} />
-                    </div>
-                    {/* Desktop: Separate player settings panel */}
-                    <div className="App-main-content-area player-settings desktop-only">
-                      <PlayerSettings
-                        ejected={this.state.ejected}
-                        tempo={this.state.tempo}
-                        numVoices={this.state.currentSongNumVoices}
-                        voiceMask={this.state.voiceMask}
-                        voiceNames={this.state.voiceNames}
-                        voiceGroups={this.state.voiceGroups}
-                        onVoiceMaskChange={this.handleSetVoiceMask}
-                        onTempoChange={this.handleTempoChange}
-                        paramDefs={this.state.paramDefs}
-                        paramValues={this.state.paramValues}
-                        onParamChange={this.handleParamChange}
-                        onPinParam={this.handlePinParam}
-                        persistedSettings={this.props.userContext.settings}
-                        hasPlayer={!!this.sequencer?.getPlayer()}
-                        playerKey={this.sequencer?.getPlayer()?.playerKey ?? null}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-          <AppFooter
-            currentSongDurationMs={this.state.currentSongDurationMs}
-            ejected={this.state.ejected}
-            getCurrentSongLink={this.getCurrentSongLink}
-            handleCopyLink={this.handleCopyLink}
-            handleCycleShuffle={this.handleCycleShuffle}
-            handleTimeSliderChange={this.handleTimeSliderChange}
-            handleVolumeChange={this.handleVolumeChange}
-            imageUrl={this.state.imageUrl}
-            navigateToCurrentSong={this.navigateToCurrentSong}
-            nextSong={this.nextSong}
-            paused={this.state.paused}
-            prevSong={this.prevSong}
-            shuffle={this.state.shuffle}
-            isLocked={this.state.isLocked}
-            handleToggleLock={this.handleToggleLock}
-            hasPlayer={!!this.sequencer?.getPlayer()}
-            playerKey={this.sequencer?.getPlayer()?.playerKey ?? null}
-            songUrl={this.state.songUrl}
-            togglePause={this.togglePause}
-            volume={this.state.volume}
-          />
-        </div>
+        <AppShell playback={playback} controls={this.controls} audioGraph={this.audioGraph} />
       </AudioPulseProvider>
     );
   }
 }
 
-// TODO: convert App to a function component and remove this.
-// Inject contexts as props since class components only support a single context.
+/** Injects the user and toast contexts as props, since class components only support one context. */
 const AppWithContext = (props: any) => {
   const userContext = useContext(UserContext);
   const toastContext = useContext(ToastContext);
   return <App {...props} userContext={userContext} toastContext={toastContext} />;
 };
 
-export default withRouter(AppWithContext);
+export default AppWithContext;

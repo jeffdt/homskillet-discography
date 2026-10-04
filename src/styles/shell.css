@@ -925,3 +925,16 @@
     min-height: var(--touch-target);
   }
 }
+
+/* ===== Root ===== */
+
+.App.AppShell {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.AppShell .toast-box-outer {
+  z-index: 7;
+}
