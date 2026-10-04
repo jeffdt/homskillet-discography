@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Album } from '../catalog/catalog';
 import { CATALOG_PREFIX } from '../config';
 import { albumPattern } from '../shell/albumPattern';
@@ -13,9 +13,18 @@ export default function AlbumArt({
   size?: 'small' | 'large';
 }) {
   const cells = useMemo(() => albumPattern(album.id), [album.id]);
+  const [failedArt, setFailedArt] = useState<string | null>(null);
   const className = `AlbumArt AlbumArt--${size}`;
-  if (album.art) {
-    return <img className={className} src={pathJoin(CATALOG_PREFIX, album.id, album.art)} alt="" />;
+  if (album.art && failedArt !== album.art) {
+    const art = album.art;
+    return (
+      <img
+        className={className}
+        src={pathJoin(CATALOG_PREFIX, album.id, art)}
+        alt=""
+        onError={() => setFailedArt(art)}
+      />
+    );
   }
   return (
     <svg className={className} viewBox="0 0 8 8" aria-hidden="true" shapeRendering="crispEdges">

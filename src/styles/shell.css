@@ -615,6 +615,7 @@
   75%,
   100% {
     background: transparent;
+    color: var(--neutral3);
   }
 }
 
