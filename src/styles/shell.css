@@ -149,3 +149,24 @@
   font: var(--font-body);
   color: var(--neutral2);
 }
+
+/* ===== Stage ===== */
+
+.Stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.Stage canvas {
+  position: absolute;
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.Stage-analyzer {
+  z-index: 1;
+}
