@@ -85,8 +85,9 @@ export class ChipRenderer {
     this.unload();
     const core = this.core;
     const emu = openMultiChannelEmu(core, bytes, this.sampleRate);
-    // Mutes are gains in our mixer, so GME's silence detection only sees real silence.
-    core._gme_ignore_silence(emu, 0);
+    // Silence detection must stay off: in multi-channel mode it corrupts the per-voice output
+    // (measured 23632 LSB off stereo mode on echo.nsf). Tracks therefore end at their duration.
+    core._gme_ignore_silence(emu, 1);
     core._gme_set_tempo(emu, settings.tempo);
     core._gme_set_stereo_depth(emu, settings.stereoWidth);
     if (core._gme_start_track(emu, 0) !== 0) {

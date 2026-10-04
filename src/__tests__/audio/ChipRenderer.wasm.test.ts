@@ -65,12 +65,6 @@ function openStereo(bytes: Uint8Array, depth: number): number {
   return emu;
 }
 
-/** GME reads the ignore_silence flag at start_track, so restart the track after changing it. */
-function restartIgnoringSilence(emu: number, ignoreSilence: number): void {
-  core._gme_ignore_silence(emu, ignoreSilence);
-  core._gme_start_track(emu, 0);
-}
-
 describe('ChipRenderer on real chip-core', () => {
   it('reads VRC6 voice names and the extended duration', () => {
     const info = makeRenderer().load(
@@ -92,51 +86,32 @@ describe('ChipRenderer on real chip-core', () => {
     expect(info.durationMs).toBeGreaterThan(0);
   });
 
-  /** Max |renderer - GME stereo mode| in LSB over 10 s; `ignoreSilence` is applied to both emulators. */
-  function nullTestMaxLsb(path: string, ignoreSilence: number): number {
-    const bytes = readTrack(path);
-    const renderer = makeRenderer();
-    renderer.load(bytes, '/' + path, SETTINGS);
-    const stereo = openStereo(bytes, 1);
-    restartIgnoringSilence(stereo, ignoreSilence);
-    restartIgnoringSilence((renderer as unknown as { emu: number }).emu, ignoreSilence);
-    const buffer = core._malloc(RENDER_CHUNK_FRAMES * 2 * 2);
-    const left = new Float32Array(RENDER_CHUNK_FRAMES);
-    const right = new Float32Array(RENDER_CHUNK_FRAMES);
-    let maxLsb = 0;
-    for (let q = 0; q < (10 * RATE) / RENDER_CHUNK_FRAMES; q++) {
-      renderer.render(left, right);
-      core._gme_play(stereo, RENDER_CHUNK_FRAMES * 2, buffer);
-      const heap = core.HEAP16;
-      const base = buffer >> 1;
-      for (let i = 0; i < RENDER_CHUNK_FRAMES; i++) {
-        maxLsb = Math.max(
-          maxLsb,
-          Math.abs(left[i] - heap[base + 2 * i] * OUTPUT_SCALE) / OUTPUT_SCALE,
-          Math.abs(right[i] - heap[base + 2 * i + 1] * OUTPUT_SCALE) / OUTPUT_SCALE
-        );
-      }
-    }
-    core._free(buffer);
-    core._gme_delete(stereo);
-    return maxLsb;
-  }
-
   it.each(['MetallicWing/echo.nsf', 'SuperFORE!/parkour.nsf'])(
-    'sums %s to within 32 LSB of GME stereo mode with silence detection off (null test)',
+    'sums %s to within 32 LSB of GME stereo mode (null test)',
     (path) => {
-      expect(nullTestMaxLsb(path, 1)).toBeLessThanOrEqual(32);
-    }
-  );
-
-  // FINDING: with gme_ignore_silence(0), as ChipRenderer.load sets it, multi-channel GME corrupts the
-  // output (echo.nsf: 23632 LSB off, about 0.5x as loud) while stereo mode is unaffected. The null
-  // test above passes with ignore_silence(1) on both emulators. it.fails until the renderer's
-  // silence handling is decided.
-  it.fails.each(['MetallicWing/echo.nsf', 'SuperFORE!/parkour.nsf'])(
-    'sums %s to within 32 LSB of GME stereo mode with the renderer defaults',
-    (path) => {
-      expect(nullTestMaxLsb(path, 0)).toBeLessThanOrEqual(32);
+      const bytes = readTrack(path);
+      const renderer = makeRenderer();
+      renderer.load(bytes, '/' + path, SETTINGS);
+      const stereo = openStereo(bytes, 1);
+      const buffer = core._malloc(RENDER_CHUNK_FRAMES * 2 * 2);
+      const left = new Float32Array(RENDER_CHUNK_FRAMES);
+      const right = new Float32Array(RENDER_CHUNK_FRAMES);
+      let maxLsb = 0;
+      for (let q = 0; q < (10 * RATE) / RENDER_CHUNK_FRAMES; q++) {
+        renderer.render(left, right);
+        core._gme_play(stereo, RENDER_CHUNK_FRAMES * 2, buffer);
+        const heap = core.HEAP16;
+        const base = buffer >> 1;
+        for (let i = 0; i < RENDER_CHUNK_FRAMES; i++) {
+          maxLsb = Math.max(
+            maxLsb,
+            Math.abs(left[i] - heap[base + 2 * i] * OUTPUT_SCALE) / OUTPUT_SCALE,
+            Math.abs(right[i] - heap[base + 2 * i + 1] * OUTPUT_SCALE) / OUTPUT_SCALE
+          );
+        }
+      }
+      core._gme_delete(stereo);
+      expect(maxLsb).toBeLessThanOrEqual(32);
     }
   );
 
@@ -207,23 +182,18 @@ describe('ChipRenderer on real chip-core', () => {
     30000
   );
 
-  it('still ends a track that goes silent (multi-channel silence detection)', () => {
+  it('does not end the tone fixture on silence; it ends at its duration through the end fade', () => {
     const events: RendererEvent[] = [];
     const renderer = makeRenderer(events);
-    renderer.load(buildToneThenSilenceNsf(), '/Fixtures/tone.nsf', SETTINGS);
-    capture(renderer, RATE);
-    const left = new Float32Array(RENDER_CHUNK_FRAMES);
-    const right = new Float32Array(RENDER_CHUNK_FRAMES);
-    let quanta = 0;
-    while (
-      !events.some((e) => e.type === 'ended') &&
-      quanta++ < (15 * RATE) / RENDER_CHUNK_FRAMES
-    ) {
-      renderer.render(left, right);
-    }
-    expect(events.filter((e) => e.type === 'ended')).toHaveLength(1);
-    expect(renderer.positionMs).toBeLessThan(10000);
-  });
+    const info = renderer.load(buildToneThenSilenceNsf(), '/Fixtures/tone.nsf', SETTINGS);
+    capture(renderer, 10 * RATE);
+    expect(renderer.positionMs).toBeGreaterThan(9000);
+    expect(events).toEqual([]);
+    renderer.seek(info.durationMs - 100, 1);
+    const fadeQuanta = Math.ceil(((END_FADE_MS / 1000) * RATE) / RENDER_CHUNK_FRAMES);
+    renderUntil(renderer, () => events.some((e) => e.type === 'ended'), fadeQuanta + 1500);
+    expect(events.map((e) => e.type)).toEqual(['seeked', 'ended']);
+  }, 30000);
 
   it('renders an audible tone from the fixture', () => {
     const renderer = makeRenderer();
@@ -285,7 +255,8 @@ describe('ChipRenderer seek probes on real chip-core', () => {
       30000
     );
 
-    // FINDING: GME's integer tell_scaled reads up to 94 ms off the true song position at non-dyadic
+    // Documents a known GME limitation (integer out_time_scaled at non-dyadic tempos), same as today's
+    // GMEPlayer: GME's integer tell_scaled reads up to 94 ms off the true song position at non-dyadic
     // tempos (e.g. 18906 vs 19000 at 0.95), so positionMs is not within a few ms of the target.
     it.fails(
       'reports a positionMs within 5 ms of the target at non-dyadic tempos',
@@ -315,16 +286,27 @@ describe('ChipRenderer seek probes on real chip-core', () => {
     expect(renderer.positionMs).toBeLessThan(30003);
   }, 30000);
 
-  it('answers a seek past a silence-detected end with seeked, then ended', () => {
+  it('answers a seek into the fixture silent section with seeked and keeps playing', () => {
     const events: RendererEvent[] = [];
     const renderer = makeRenderer(events);
     renderer.load(buildToneThenSilenceNsf(), '/Fixtures/tone.nsf', SETTINGS);
     capture(renderer, RATE / 2);
     renderer.seek(8000, 3);
-    renderUntil(renderer, () => events.some((e) => e.type === 'ended'), 2000);
-    expect(events.map((e) => e.type)).toEqual(['seeked', 'ended']);
-    expect(events[0]).toMatchObject({ seekId: 3 });
+    renderUntil(renderer, () => events.some((e) => e.type === 'seeked'), 2000);
+    capture(renderer, RATE);
+    expect(events).toEqual([{ type: 'seeked', seekId: 3, positionMs: expect.any(Number) }]);
   });
+
+  it('answers a seek past the track duration with seeked, then ends through the end fade', () => {
+    const events: RendererEvent[] = [];
+    const renderer = makeRenderer(events);
+    const info = renderer.load(buildToneThenSilenceNsf(), '/Fixtures/tone.nsf', SETTINGS);
+    renderer.seek(info.durationMs + 5000, 4);
+    const fadeQuanta = Math.ceil(((END_FADE_MS / 1000) * RATE) / RENDER_CHUNK_FRAMES);
+    renderUntil(renderer, () => events.some((e) => e.type === 'ended'), fadeQuanta + 3000);
+    expect(events.map((e) => e.type)).toEqual(['seeked', 'ended']);
+    expect(events[0]).toMatchObject({ seekId: 4 });
+  }, 30000);
 
   it('finishes a seek issued in the last quanta of the end fade', () => {
     const events: RendererEvent[] = [];
