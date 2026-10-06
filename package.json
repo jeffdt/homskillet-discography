@@ -14,7 +14,6 @@
     "auto-bind": "^5.0.1",
     "autoprefixer": "7.1.6",
     "chalk": "^2.4.1",
-    "chroma-js": "^1.4.0",
     "directory-tree": "2.2.1",
     "dotenv": "4.0.0",
     "dotenv-expand": "4.2.0",

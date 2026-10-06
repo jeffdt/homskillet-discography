@@ -1,30 +1,10 @@
-import chroma from 'chroma-js';
 import { Rgb, parseHexColor } from './color';
-
-/** The visualizer's default palette (moved from Spectrogram.js). */
-export const DEFAULT_COLOR_PALETTE = [
-  '#000000',
-  '#0000a0',
-  '#6000a0',
-  '#962761',
-  '#dd1440',
-  '#f0b000',
-  '#ffffa0',
-  '#ffffff',
-];
 
 /** Waterfall speed in CSS pixels per second (the old 2 px per frame at 60 fps). */
 export const SPECTROGRAM_SCROLL_PX_PER_S = 120;
 
 /** Peak decay rates are given per frame at 60 fps. */
 export const PEAK_DECAY_REFERENCE_MS = 1000 / 60;
-
-/** 256 hex colors spanning a palette, so drawing never calls chroma per bin. */
-export function buildColorLut(colors: string[]): string[] {
-  const palette = Array.isArray(colors) && colors.length >= 2 ? colors : DEFAULT_COLOR_PALETTE;
-  const scale = chroma.scale(palette).domain([0, 255]);
-  return Array.from({ length: 256 }, (_, i) => scale(i).hex());
-}
 
 /** Turns a speed and elapsed time into whole pixels per frame, carrying the fraction forward. */
 export class ScrollAccumulator {

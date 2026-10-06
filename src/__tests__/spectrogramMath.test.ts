@@ -1,29 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DEFAULT_COLOR_PALETTE,
   SHADE_HIGHLIGHT_MAX,
   SHADE_KNEE,
   ScrollAccumulator,
   aWeightingLut,
-  buildColorLut,
   buildShadeTable,
   peakDecayFactor,
   readCssRgb,
   rowBinRanges,
 } from '../visuals/spectrogramMath';
-
-describe('buildColorLut', () => {
-  it('spans the palette in 256 steps', () => {
-    const lut = buildColorLut(['#000000', '#ffffff']);
-    expect(lut).toHaveLength(256);
-    expect(lut[0]).toBe('#000000');
-    expect(lut[255]).toBe('#ffffff');
-  });
-
-  it('falls back to the default palette when given fewer than two colors', () => {
-    expect(buildColorLut(['#ff0000'])).toEqual(buildColorLut(DEFAULT_COLOR_PALETTE));
-  });
-});
 
 describe('ScrollAccumulator', () => {
   const total = (fps: number, seconds: number) => {
