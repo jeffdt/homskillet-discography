@@ -217,6 +217,19 @@ describe('AppShell', () => {
     expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
   });
 
+  it('closes Albums on a press outside the panels and chrome, but not inside them', async () => {
+    const { container } = renderShell();
+    fireEvent.click(await screen.findByText('or browse 2 albums'));
+    const albums = screen.getByRole('dialog', { name: 'Albums' });
+
+    fireEvent.pointerDown(albums);
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mixer' }));
+    expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+
+    fireEvent.pointerDown(container.querySelector('.AppShell') as Element);
+    expect(screen.queryByRole('dialog', { name: 'Albums' })).toBeNull();
+  });
+
   it('opens Albums at the playing album and plays tracks from it', async () => {
     const { controls } = renderShell({
       ...IDLE,
