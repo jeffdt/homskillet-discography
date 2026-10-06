@@ -23,10 +23,10 @@ function touch(el: Element, type: string, key: 'touches' | 'changedTouches', cli
 }
 
 describe('PanelHost', () => {
-  it('shows left, right and center panels together on wide layouts', () => {
+  it('shows outer, inner and center panels together on wide layouts', () => {
     renderHost({ open: ['albums', 'stage', 'about'] }, false);
-    expect(screen.getByRole('dialog', { name: 'Albums' }).className).toContain('Panel--left');
-    expect(screen.getByRole('dialog', { name: 'Visuals' }).className).toContain('Panel--right');
+    expect(screen.getByRole('dialog', { name: 'Albums' }).className).toContain('Panel--outer');
+    expect(screen.getByRole('dialog', { name: 'Visuals' }).className).toContain('Panel--inner');
     expect(screen.getByRole('dialog', { name: 'About' }).className).toContain('Panel--center');
   });
 

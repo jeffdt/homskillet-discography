@@ -12,15 +12,15 @@ const open = (state: PanelState, id: any, compact = false) =>
   panelsReducer(state, { type: 'open', id, compact });
 
 describe('panelsReducer (wide layout)', () => {
-  it('keeps one panel per slot and allows left and right together', () => {
+  it('keeps one panel per slot and allows outer and inner together', () => {
     let s = open(INITIAL_PANELS, 'albums');
     s = open(s, 'stage');
     expect(s.open).toEqual(['albums', 'stage']);
-    expect(panelInSlot(s, 'left')).toBe('albums');
-    expect(panelInSlot(s, 'right')).toBe('stage');
+    expect(panelInSlot(s, 'outer')).toBe('albums');
+    expect(panelInSlot(s, 'inner')).toBe('stage');
   });
 
-  it('swaps mixer and stage in the right slot', () => {
+  it('swaps mixer and visuals in the inner slot', () => {
     let s = open(open(INITIAL_PANELS, 'stage'), 'mixer');
     expect(s.open).toEqual(['mixer']);
     expect(isPanelOpen(s, 'stage')).toBe(false);

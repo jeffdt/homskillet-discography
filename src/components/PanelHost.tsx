@@ -9,7 +9,8 @@ import {
 } from '../shell/panels';
 
 const SWIPE_CLOSE_PX = 80;
-const WIDE_SLOTS: PanelSlot[] = ['left', 'right', 'center'];
+// Outer renders before inner so CSS can push inner beside it with a sibling selector.
+const WIDE_SLOTS: PanelSlot[] = ['outer', 'inner', 'center'];
 
 type Placement = PanelSlot | 'sheet';
 
@@ -69,7 +70,7 @@ interface PanelHostProps {
   renderPanel: (id: PanelId) => React.ReactNode;
 }
 
-/** Places open panels: left, right and center slots on wide layouts; one bottom sheet on compact layouts. */
+/** Places open panels: outer, inner and center slots on wide layouts; one bottom sheet on compact layouts. */
 export default function PanelHost({ panels, compact, onClose, renderPanel }: PanelHostProps) {
   if (compact) {
     const id = topmostPanel(panels);

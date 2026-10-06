@@ -17,6 +17,7 @@
   --radius: 6px;
   --touch-target: 44px;
   --chrome-gap: 16px;
+  --panel-width: min(380px, calc(100vw - 2 * var(--chrome-gap)));
 }
 
 /* One typeface for the whole UI; only the logo (--font-title) stays pixel. These override the
@@ -53,7 +54,7 @@
   top: 64px;
   bottom: 112px;
   z-index: 4;
-  width: min(380px, calc(100vw - 2 * var(--chrome-gap)));
+  width: var(--panel-width);
   display: flex;
   flex-direction: column;
   background: var(--panel-bg);
@@ -65,12 +66,21 @@
   outline: none;
 }
 
-.Panel--left {
+.Panel--outer,
+.Panel--inner {
   left: var(--chrome-gap);
 }
 
-.Panel--right {
-  right: var(--chrome-gap);
+/* With Albums open, Mixer or Visuals sits beside it; the right edge stays clear for the visualizer. */
+.Panel--outer ~ .Panel--inner {
+  left: calc(2 * var(--chrome-gap) + var(--panel-width));
+}
+
+/* Too narrow for two side by side: the inner panel overlaps the outer one instead. */
+@media (max-width: 860px) {
+  .Panel--outer ~ .Panel--inner {
+    left: var(--chrome-gap);
+  }
 }
 
 .Panel--center {
