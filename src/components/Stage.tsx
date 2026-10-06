@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { visualizerPaletteColors } from '../config/visualizerPalettes';
 import { useAudioData } from '../contexts/AudioDataContext';
+import { useChannelColors } from '../hooks/useChannelColors';
 import { useFrameLoop } from '../hooks/useFrameLoop';
+import { useVoices } from '../hooks/useVoices';
 import { CanvasBox, computeStageLayout } from '../shell/stageLayout';
-import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor } from '../visuals/spectrogramMath';
+import { BinColorizer } from '../visuals/BinColorizer';
+import { SPECTROGRAM_SCROLL_PX_PER_S, readCssRgb } from '../visuals/spectrogramMath';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
 import { UserSettings } from './UserProvider';
 
@@ -22,21 +24,29 @@ function applyBox(canvas: HTMLCanvasElement, box: CanvasBox): void {
   canvas.style.height = `${box.height}px`;
 }
 
-/** Full-window spectrogram and analyzer behind all other UI, drawn by one FrameLoop consumer. */
+/** Full-window channel-colored spectrogram and analyzer behind all other UI, drawn by one FrameLoop consumer. */
 export default function Stage({ settings, renderScale }: StageProps) {
   const { source } = useAudioData();
+  const voices = useVoices();
+  const channelColors = useChannelColors();
   const containerRef = useRef<HTMLDivElement>(null);
   const specRef = useRef<HTMLCanvasElement>(null);
   const freqRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<SpectrogramRenderer | null>(null);
+  const colorizerRef = useRef<BinColorizer | null>(null);
 
   useEffect(() => {
     if (!freqRef.current || !specRef.current) return;
+    const layout = source.getSpectrumLayout();
     rendererRef.current = new SpectrogramRenderer(
       { analyzer: freqRef.current, spectrogram: specRef.current },
-      source.getSpectrumLayout(),
-      readCssColor('--neutral0', '#101010')
+      layout,
+      {
+        background: readCssRgb('--neutral0', '#101010'),
+        highlight: readCssRgb('--neutral4', '#fefefe'),
+      }
     );
+    colorizerRef.current = new BinColorizer(layout.bins, readCssRgb('--neutral3', '#c3c3c3'));
   }, [source]);
 
   const applyLayout = useCallback(() => {
@@ -70,9 +80,12 @@ export default function Stage({ settings, renderScale }: StageProps) {
   }, [applyLayout]);
 
   useEffect(() => {
-    if (rendererRef.current)
-      rendererRef.current.setColorPalette(visualizerPaletteColors(settings.visualizerTheme));
-  }, [source, settings.visualizerTheme]);
+    if (colorizerRef.current) colorizerRef.current.setChannelColors(channelColors);
+  }, [source, channelColors]);
+
+  useEffect(() => {
+    if (colorizerRef.current) colorizerRef.current.setVoices(voices);
+  }, [source, voices]);
 
   useEffect(() => {
     if (rendererRef.current) rendererRef.current.setPeakDecayRate(settings.peakDecayRate ?? 0.98);
@@ -84,9 +97,16 @@ export default function Stage({ settings, renderScale }: StageProps) {
   }, [source, settings.peakQuantization]);
 
   useFrameLoop('stage-spectrogram', (frame, dtMs) => {
+    const renderer = rendererRef.current;
+    const colorizer = colorizerRef.current;
+    if (!renderer || !colorizer) return;
     // The speed is in CSS pixels; the canvas backing store is renderScale times that.
-    if (rendererRef.current)
-      rendererRef.current.draw(frame.mixSpectrum, dtMs, SPECTROGRAM_SCROLL_PX_PER_S * renderScale);
+    renderer.draw(
+      frame.mixSpectrum,
+      colorizer.update(frame, dtMs),
+      dtMs,
+      SPECTROGRAM_SCROLL_PX_PER_S * renderScale
+    );
   });
 
   return (
