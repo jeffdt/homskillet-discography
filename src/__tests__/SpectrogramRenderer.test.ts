@@ -9,9 +9,9 @@ function fakeCanvas(width: number, height: number) {
   return { canvas, ctx };
 }
 
-function setup() {
+function setup(analyzerWidth = 64) {
   const layout = createSpectrumLayout();
-  const analyzer = fakeCanvas(64, 448);
+  const analyzer = fakeCanvas(analyzerWidth, 448);
   const spectrogram = fakeCanvas(800, 448);
   const scratch = fakeCanvas(0, 0);
   const renderer = new SpectrogramRenderer(
@@ -31,12 +31,13 @@ function columnCalls(ctx: { fillRect: ReturnType<typeof vi.fn> }) {
 
 describe('SpectrogramRenderer', () => {
   it('scrolls by speed times elapsed time, not per frame', () => {
-    const { renderer, spectrogram, loud } = setup();
+    const { renderer, spectrogram, scratch, loud } = setup();
     renderer.draw(loud, 1000 / 60, 120);
     const at60 = columnCalls(spectrogram.ctx);
     expect(at60.length).toBe(448);
     expect(at60[0][0]).toBe(798);
     expect(at60[0][2]).toBe(2);
+    expect(scratch.ctx.drawImage).toHaveBeenCalledWith(spectrogram.canvas, -2, 0);
     spectrogram.ctx.fillRect.mockClear();
     renderer.draw(loud, 1000 / 120, 120);
     expect(columnCalls(spectrogram.ctx)[0][2]).toBe(1);
@@ -59,6 +60,30 @@ describe('SpectrogramRenderer', () => {
     renderer.draw(new Float32Array(448), 1000 / 60, 120);
     expect(analyzer.ctx.fillRect).toHaveBeenCalledTimes(1); // the background
     expect(columnCalls(spectrogram.ctx)).toHaveLength(0);
+  });
+
+  it('decays the peak hold by elapsed time, not by frame count', () => {
+    const peakXAfter = (fps: number) => {
+      const { renderer, analyzer, loud } = setup(2560);
+      renderer.setPeakQuantization(1);
+      renderer.draw(
+        Float32Array.from(loud, (_, i) => (i === 0 ? 1 : 0)),
+        1000 / fps,
+        0
+      );
+      const fading = new Float32Array(loud.length);
+      fading[1] = 1e-6; // non-zero so the bins are drawn, but bin 0 contributes no new peak
+      for (let i = 0; i < fps / 2; i++) {
+        analyzer.ctx.fillRect.mockClear();
+        renderer.draw(fading, 1000 / fps, 0);
+      }
+      const peakCall = analyzer.ctx.fillRect.mock.calls[2]; // background, bar, then bin 0's peak
+      return peakCall[0];
+    };
+    const at30 = peakXAfter(30);
+    const at60 = peakXAfter(60);
+    expect(at60).toBeGreaterThan(0);
+    expect(Math.abs(at30 - at60)).toBeLessThanOrEqual(2);
   });
 
   it('does nothing without 2D contexts', () => {

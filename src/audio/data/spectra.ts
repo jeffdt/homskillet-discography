@@ -50,7 +50,7 @@ export interface MixAnalyzer {
   dispose(): void;
 }
 
-/** The old Spectrogram's constant-Q transform (src/showcqtbar.c in chip-core), fed from taps. */
+/** The constant-Q transform (src/showcqtbar.c in chip-core), fed from taps. */
 export class CqtMixAnalyzer implements MixAnalyzer {
   private constructor(
     private readonly core: SpectrumCore,

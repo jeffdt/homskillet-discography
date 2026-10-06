@@ -20,7 +20,7 @@ export const MAX_ALIGN_DELAY_SAMPLES = TAP_HISTORY - MIX_INPUT_SAMPLES;
 export const SPECTRUM_BINS = 448;
 export const SPECTRUM_MIN_HZ = 25.95;
 export const SPECTRUM_MAX_HZ = 4504;
-/** showcqtbar's volume argument (the old Spectrogram's `db`). */
+/** showcqtbar's volume argument (the old visualizer's `db`). */
 export const CQT_VOLUME = 32;
 
 /** FFT size for per-voice spectra and the stub-mode mix spectrum (85 ms at 24 kHz). */
