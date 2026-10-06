@@ -8,7 +8,10 @@ import {
   SCOPE_WIDTH,
   findTrigger,
   levelToMeter,
+  nextScopeGain,
   scopePath,
+  targetScopeGain,
+  windowPeak,
 } from './scopeMath';
 
 /** A channel's color: the active palette's --ch-N, or the accent until a palette defines it. */
@@ -31,11 +34,16 @@ export default function ChannelStrip({ voice, onToggleMute, onToggleSolo }: Chan
   const pathRef = useRef<SVGPathElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
   const drawn = useRef({ path: FLAT_SCOPE_PATH, level: '' });
+  const gain = useRef<number | null>(null);
 
-  useFrameLoop(`mixer-strip-${index}`, (frame: VoiceFrame) => {
+  useFrameLoop(`mixer-strip-${index}`, (frame: VoiceFrame, dtMs: number) => {
     const data = frame.voices[index];
     if (!data) return;
-    const path = scopePath(data.waveform, findTrigger(data.waveform, SCOPE_SAMPLES), SCOPE_SAMPLES);
+    const start = findTrigger(data.waveform, SCOPE_SAMPLES);
+    const peak = windowPeak(data.waveform, start, SCOPE_SAMPLES);
+    gain.current =
+      gain.current === null ? targetScopeGain(peak) : nextScopeGain(gain.current, peak, dtMs);
+    const path = scopePath(data.waveform, start, SCOPE_SAMPLES, gain.current);
     if (path !== drawn.current.path && pathRef.current) {
       pathRef.current.setAttribute('d', path);
       drawn.current.path = path;
