@@ -47,7 +47,6 @@ export default class EnginePlayer extends Player {
     this.fileExtensions = FILE_EXTENSIONS;
     this.paramDefs = PARAM_DEFS;
     engine.on('ended', this.handleEnded);
-    engine.on('error', (message) => this.emit('playerError', message));
   }
 
   async loadData(

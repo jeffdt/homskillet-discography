@@ -7,7 +7,7 @@ import { MAX_VOICES, REPLACE_STATE_ON_SEEK } from '../config';
 import Sequencer, { SHUFFLE_OFF, SHUFFLE_ON } from '../Sequencer';
 
 import { AudioEngine } from '../audio/engine/AudioEngine';
-import { createAudioEngine } from '../audio/engine/createAudioEngine';
+import { createAudioEngine, createUnlockedAudioContext } from '../audio/engine/createAudioEngine';
 import { parseEngineOverrides } from '../audio/engine/engineKind';
 import EnginePlayer from '../players/EnginePlayer';
 import { UI_PALETTES } from '../config/uiPalettes';
@@ -32,8 +32,8 @@ const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.
 class App extends React.Component<AppProps, AppState> {
   private engine: AudioEngine | null = null;
   private chipCore: any;
-  private audioCtx!: AudioContext;
-  private playerNode!: AudioNode;
+  private audioCtx: AudioContext | null = null;
+  private playerNode: AudioNode | null = null;
   private sequencer!: Sequencer;
   private mediaSessionAudio?: HTMLAudioElement;
   private audioGraph: AudioGraph | null = null;
@@ -46,7 +46,9 @@ class App extends React.Component<AppProps, AppState> {
     this.attachMediaKeyHandlers();
     (window as any).ChipPlayer = this;
 
-    // The AudioEngine is created asynchronously in initAudioEngine (below).
+    // The AudioEngine is created asynchronously in initAudioEngine (below). The AudioContext
+    // exists immediately so resumeAudio works before the engine resolves.
+    this.audioCtx = createUnlockedAudioContext(isMobile.any ? 'interactive' : 'playback');
 
     const { shuffle, repeat } = props.userContext.settings;
     this.state = {
@@ -111,6 +113,7 @@ class App extends React.Component<AppProps, AppState> {
         forcedKind,
         forcedTapTransport,
         debug: urlParams.get('debug') !== null,
+        context: this.audioCtx ?? undefined,
       });
     } catch (e) {
       console.error('Error creating the audio engine:', e);
@@ -123,7 +126,7 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     this.engine = engine;
-    this.audioCtx = (window as any).audioCtx = engine.context;
+    (window as any).audioCtx = engine.context;
     this.playerNode = engine.outputNode;
     this.chipCore = engine.mainThreadCore;
     if (engine.kind === 'stub') {
@@ -133,7 +136,16 @@ class App extends React.Component<AppProps, AppState> {
       );
     }
 
+    engine.setVolume(Math.max(0, Math.min(2, this.state.volume * 0.01)));
+    engine.on('error', () =>
+      this.props.toastContext.enqueueToast(
+        'Audio engine stopped. Reload the page.',
+        ToastLevels.ERROR
+      )
+    );
+
     const player = new EnginePlayer(engine);
+    player.setLocked(this.state.isLocked);
     this.sequencer = new Sequencer([player], null, () => this.props.userContext.settings);
     this.sequencer.on('sequencerStateUpdate', this.handleSequencerStateUpdate);
     this.sequencer.on('playerError', (message: string) =>
@@ -424,7 +436,7 @@ class App extends React.Component<AppProps, AppState> {
 
   /** Resumes a suspended AudioContext; must be called inside a user gesture. */
   resumeAudio() {
-    const context = this.engine?.context;
+    const context = this.audioCtx;
     if (context && context.state === 'suspended') context.resume();
   }
 

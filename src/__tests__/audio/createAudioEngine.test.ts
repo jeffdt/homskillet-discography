@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
 
+import { WorkletLink } from '../../audio/engine/links';
 import {
   discardWorkletNode,
   waitForProcessorReadyOrDiscard,
@@ -67,5 +68,17 @@ describe('worklet node failure cleanup', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     discardWorkletNode(node as any);
     expect(node.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a processor failure after ready through the link as an error event', () => {
+    const port = { onmessage: null as unknown, postMessage: vi.fn(), close: vi.fn() };
+    const link = new WorkletLink(port as unknown as MessagePort, null);
+    const listener = vi.fn();
+    link.setListener(listener);
+    link.reportFatal('Audio processor stopped unexpectedly.');
+    expect(listener).toHaveBeenCalledWith({
+      type: 'error',
+      message: 'Audio processor stopped unexpectedly.',
+    });
   });
 });

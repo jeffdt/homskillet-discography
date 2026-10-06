@@ -22,15 +22,23 @@ export interface CreateAudioEngineOptions {
   forcedKind?: EngineKind | null;
   forcedTapTransport?: TapTransport | null;
   debug?: boolean;
+  /** An AudioContext from createUnlockedAudioContext, so callers can resume it before the engine resolves. */
+  context?: AudioContext;
+}
+
+/** Creates an AudioContext (rate-limited) that unlocks itself on the first user gesture. */
+export function createUnlockedAudioContext(latencyHint: AudioContextLatencyCategory): AudioContext {
+  const context = createAudioContext(latencyHint, MAX_SAMPLE_RATE);
+  unlockAudioContext(context);
+  return context;
 }
 
 /**
  * Builds the best available engine: AudioWorklet, then ScriptProcessor, then silent stub mode.
- * The AudioContext is created immediately, and unlocks on the first user gesture.
+ * Uses options.context when given; otherwise creates an AudioContext that unlocks on the first user gesture.
  */
 export async function createAudioEngine(options: CreateAudioEngineOptions): Promise<AudioEngine> {
-  const context = createAudioContext(options.latencyHint, MAX_SAMPLE_RATE);
-  unlockAudioContext(context);
+  const context = options.context ?? createUnlockedAudioContext(options.latencyHint);
   const volumeNode = context.createGain();
   volumeNode.connect(context.destination);
   const debug = !!options.debug;
@@ -134,6 +142,7 @@ async function createWorkletEngine(
     ? null
     : new PooledTapReader((buffer) => node.port.postMessage(buffer, [buffer]));
   const link = new WorkletLink(node.port, pooled);
+  node.onprocessorerror = () => link.reportFatal('Audio processor stopped unexpectedly.');
   const taps = sharedTaps
     ? new RingTapReader(new TapRing(sharedTaps))
     : (pooled as PooledTapReader);
@@ -263,5 +272,6 @@ function createScriptProcessorEngine(
     link,
     taps: new RingTapReader(ring),
     debug,
+    bufferDurationS: bufferSize / context.sampleRate,
   });
 }

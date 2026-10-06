@@ -18,6 +18,8 @@ export interface ChipEngineParts {
   link: ProcessorLink;
   taps: TapReader;
   debug?: boolean;
+  /** Seconds per ScriptProcessor buffer; snapshots are stamped this far ahead of what is audible. */
+  bufferDurationS?: number;
 }
 
 type PendingLoad = {
@@ -41,6 +43,7 @@ export class ChipEngine implements AudioEngine {
   private readonly link: ProcessorLink;
   private readonly taps: TapReader;
   private readonly debug: boolean;
+  private readonly bufferDurationS: number;
   private readonly listeners = new Map<keyof AudioEngineEvents, Set<Listener>>();
   private loadId = 0;
   private pendingLoad: PendingLoad | null = null;
@@ -63,6 +66,7 @@ export class ChipEngine implements AudioEngine {
     this.link = parts.link;
     this.taps = parts.taps;
     this.debug = !!parts.debug;
+    this.bufferDurationS = parts.bufferDurationS ?? 0;
     this.link.setListener(this.handleEvent);
   }
 
@@ -131,7 +135,7 @@ export class ChipEngine implements AudioEngine {
     let position = snapshot.positionMs;
     if (!this.paused && !snapshot.paused && !snapshot.seeking) {
       const elapsed = Math.min(
-        Math.max(this.context.currentTime - snapshot.contextTime, 0),
+        Math.max(this.context.currentTime - snapshot.contextTime, -this.bufferDurationS),
         MAX_POSITION_EXTRAPOLATION_S
       );
       position += elapsed * 1000 * this.tempo;
@@ -200,6 +204,16 @@ export class ChipEngine implements AudioEngine {
     this.listeners.get(event)?.forEach((listener) => listener(...args));
   }
 
+  private failPendingWork(message: string): void {
+    this.loaded = false;
+    this.pendingSeek = null;
+    this.seekLanding = null;
+    if (this.pendingLoad) {
+      this.pendingLoad.reject(new Error(message));
+      this.pendingLoad = null;
+    }
+  }
+
   private supersedePendingLoad(): void {
     if (!this.pendingLoad) return;
     this.pendingLoad.reject(new LoadSupersededError());
@@ -249,6 +263,7 @@ export class ChipEngine implements AudioEngine {
         break;
       case 'error':
         console.error('[engine] processor error:', event.message);
+        this.failPendingWork(event.message);
         this.emit('error', event.message);
         break;
       default:

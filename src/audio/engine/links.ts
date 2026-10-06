@@ -34,6 +34,11 @@ export class WorkletLink implements ProcessorLink {
     this.listener = listener;
   }
 
+  /** Surfaces a failure the port cannot carry (the processor died) as an error event. */
+  reportFatal(message: string): void {
+    this.listener({ type: 'error', message });
+  }
+
   dispose(): void {
     this.port.onmessage = null;
     this.port.close();

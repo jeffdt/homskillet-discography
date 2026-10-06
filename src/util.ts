@@ -2,7 +2,7 @@ export function unlockAudioContext(context: AudioContext): void {
   // https://hackernoon.com/unlocking-web-audio-the-smarter-way-8858218c0e09
   console.log('AudioContext initial state is %s.', context.state);
   if (context.state === 'suspended') {
-    const events = ['touchstart', 'touchend', 'mousedown', 'mouseup'];
+    const events = ['touchstart', 'touchend', 'mousedown', 'mouseup', 'keydown'];
     const unlock = () =>
       context
         .resume()

@@ -264,4 +264,59 @@ describe('ChipEngine', () => {
     engine.dispose();
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
+
+  describe('processor failure', () => {
+    it('rejects a pending load, clears the seek and stops reporting position', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { engine, link } = await loaded();
+      engine.seek(5000);
+      const reloading = engine.load(new Uint8Array([1]), '/A/u.nsf', SETTINGS);
+      const rejection = expect(reloading).rejects.toThrow('dead');
+      link.listener({ type: 'error', message: 'dead' });
+      await rejection;
+      expect(engine.isSeeking()).toBe(false);
+      expect(engine.getPositionMs()).toBe(0);
+    });
+
+    it('emits an error event and ignores seeks afterwards', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { engine, link } = await loaded();
+      const errors = vi.fn();
+      engine.on('error', errors);
+      link.listener({ type: 'error', message: 'dead' });
+      expect(errors).toHaveBeenCalledWith('dead');
+      engine.seek(1000);
+      expect(engine.isSeeking()).toBe(false);
+    });
+  });
+
+  it('lets position lead by at most one buffer when the snapshot is stamped ahead', async () => {
+    const make = (bufferDurationS?: number) => {
+      const link = new FakeLink();
+      const ring = new TapRing();
+      const context = { currentTime: 1, close: vi.fn(() => Promise.resolve()) };
+      const engine = new ChipEngine({
+        kind: 'script-processor',
+        context: context as unknown as AudioContext,
+        outputNode: { disconnect: vi.fn() } as unknown as AudioNode,
+        volumeNode: { gain: { value: 1 }, disconnect: vi.fn() } as unknown as GainNode,
+        mainThreadCore: {} as ChipCore,
+        link,
+        taps: new RingTapReader(ring),
+        bufferDurationS,
+      });
+      return { engine, link, ring };
+    };
+    const positionWith = async (bufferDurationS?: number) => {
+      const { engine, link, ring } = make(bufferDurationS);
+      const loading = engine.load(new Uint8Array([1]), '/A/t.nsf', SETTINGS);
+      const { loadId } = link.last('load')!;
+      link.listener({ type: 'loaded', loadId, info: INFO });
+      await loading;
+      ring.setStatus(10000, 1.1, 0, 1, 24000, loadId);
+      return engine.getPositionMs();
+    };
+    expect(await positionWith()).toBe(10000);
+    expect(await positionWith(0.05)).toBeCloseTo(10000 - 50, 3);
+  });
 });

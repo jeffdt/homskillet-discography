@@ -111,12 +111,12 @@ describe('EnginePlayer', () => {
     expect(player.isPlaying()).toBe(false);
   });
 
-  it('forwards engine errors as playerError', () => {
+  it('leaves engine errors to the app instead of emitting playerError', () => {
     const { fire, player } = fakeEngine();
     const errors = vi.fn();
     player.on('playerError', errors);
     fire('error', 'boom');
-    expect(errors).toHaveBeenCalledWith('boom');
+    expect(errors).not.toHaveBeenCalled();
   });
 
   it('maps the voice mask to mutes', async () => {
