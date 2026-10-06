@@ -19,7 +19,6 @@ import { ToastLevels } from './Toast';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
 import { AudioDataContext } from '../contexts/AudioDataContext';
-import { AudioPulseProvider } from '../contexts/AudioPulseContext';
 import { AppProps, AppState } from '../types/app';
 import { SequencerState } from '../types/sequencer';
 import { PlaybackControls, PlaybackState } from '../types/playback';
@@ -34,7 +33,6 @@ const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.
 class App extends React.Component<AppProps, AppState> {
   private engine: AudioEngine | null = null;
   private audioCtx: AudioContext | null = null;
-  private playerNode: AudioNode | null = null;
   private sequencer!: Sequencer;
   private mediaSessionAudio?: HTMLAudioElement;
   private controls: PlaybackControls;
@@ -135,7 +133,6 @@ class App extends React.Component<AppProps, AppState> {
     this.engine = engine;
     this.audioData.source.attach(engine);
     (window as any).audioCtx = engine.context;
-    this.playerNode = engine.outputNode;
     if (engine.kind === 'stub') {
       this.props.toastContext.enqueueToast(
         'Running in STUB MODE - no actual audio playback. UI development only.',
@@ -474,7 +471,6 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
-    const { settings } = this.props.userContext;
     const player = this.state.hasPlayer && this.sequencer ? this.sequencer.getPlayer() : null;
     const playback: PlaybackState = {
       ready: !this.state.loading && !!this.sequencer,
@@ -497,15 +493,7 @@ class App extends React.Component<AppProps, AppState> {
 
     return (
       <AudioDataContext.Provider value={this.audioData}>
-        <AudioPulseProvider
-          audioCtx={this.audioCtx}
-          sourceNode={this.playerNode}
-          paused={this.state.paused}
-          ejected={this.state.ejected}
-          enabled={settings.audioReactivePulse ?? true}
-        >
-          <AppShell playback={playback} controls={this.controls} />
-        </AudioPulseProvider>
+        <AppShell playback={playback} controls={this.controls} />
       </AudioDataContext.Provider>
     );
   }

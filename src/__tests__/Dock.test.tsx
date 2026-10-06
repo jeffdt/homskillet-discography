@@ -1,10 +1,11 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { buildCatalog } from '../catalog/catalog';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import Dock from '../components/Dock';
+import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 vi.mock('../components/TimeSlider', () => ({
   default: ({ particleEnabled }: { particleEnabled?: boolean }) => (
@@ -142,5 +143,34 @@ describe('Dock', () => {
   it('shows fullscreen only when supported', () => {
     renderDock({}, { showFullscreen: true });
     expect(screen.getByRole('button', { name: 'Fullscreen' })).toBeTruthy();
+  });
+
+  it('glows with the audio pulse while playing and resets when paused', () => {
+    const data = createTestAudioData();
+    data.source.frame.mixSpectrum.fill(0.4);
+    data.frameLoop.setPlaying(true);
+    const dock = (paused: boolean) =>
+      withAudioData(
+        data.value,
+        <Dock
+          playback={{ ...playing, paused }}
+          controls={makeControls()}
+          track={track}
+          album={album}
+          settings={{}}
+          onShowInAlbums={() => {}}
+          showFullscreen={false}
+        />
+      );
+    const { rerender } = render(dock(false));
+    act(() => {
+      for (let i = 0; i < 30; i++) data.scheduler.tick((i * 1000) / 60);
+    });
+    const pause = screen.getByRole('button', { name: 'Pause' });
+    expect(Number(pause.style.getPropertyValue('--pulse-intensity'))).toBeGreaterThan(0.9);
+    rerender(dock(true));
+    expect(
+      screen.getByRole('button', { name: 'Play' }).style.getPropertyValue('--pulse-intensity')
+    ).toBe('0');
   });
 });
