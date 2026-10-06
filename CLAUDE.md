@@ -88,6 +88,8 @@ The audio engine lives in `src/audio/`. In production it renders in an AudioWork
 
 Without AudioWorklet, the same `ProcessorCore` runs on the main thread inside a ScriptProcessorNode. In stub mode it runs there on `chip-core-stub.js` with the volume forced to 0. Seeks render into a scratch buffer with `gme_play`; never call `gme_seek_scaled` in multi-channel mode (inexact in one shot, hangs in small steps at tempo above 1).
 
+Visuals never talk to the engine. `TapAudioDataSource` (`src/audio/data/`) turns the taps into a `VoiceFrame` lined up with what is audible: per-voice waveforms and levels, per-voice FFT spectra and the mix constant-Q spectrum (from the main-thread chip-core), the spectra computed only when read. One `FrameLoop` drives every animated consumer (stage spectrogram, audio pulse, time slider, sparks) with a frame-rate-independent `dtMs`, stops when paused or hidden, and caps at 30 fps on low-power devices. Register per-frame work with `useFrameLoop` (or `frameLoop.add` in a class); never start another `requestAnimationFrame` loop and never put per-frame values in React state. The contract is `src/audio/data/contract.ts`.
+
 ### Player State Machine
 
 Players follow a state machine pattern with 3 states and 5 transitions:
@@ -115,7 +117,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
-- **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`
+- **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`
 - **src/styles/shell.css** - Stage shell styles
 - **src/audio/** - Audio engine (TypeScript)
   - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it
@@ -123,9 +125,11 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - render/ChipRenderer.ts - GME multi-channel rendering and mixing, shared by every engine kind
   - worklet/chipProcessor.ts - AudioWorklet entry point
   - taps/ - Per-voice analysis taps (pooled transfer buffers, or a SharedArrayBuffer ring when crossOriginIsolated)
+  - data/ - The visual data contract (contract.ts), TapAudioDataSource, FrameLoop, PulseChannel, spectra
 - **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
-- **src/Spectrogram.js** - Audio visualization using constant-Q transform
+- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), sparks physics
+- **src/contexts/AudioDataContext.tsx** - AudioDataSource, FrameLoop and PulseChannel for React
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
 
 ### Emscripten Build System
@@ -418,7 +422,7 @@ The Docker container builds chip-core and copies the artifacts to your local mac
 ## Important Notes
 
 - **Compiled Artifacts**: `chip-core.js` and `chip-core.wasm` are committed to the repo for convenience. Most contributors won't need to rebuild them.
-- **TypeScript Migration**: The codebase is ~85% TypeScript. Most React components and utilities are migrated. Spectrogram.js remains JavaScript.
+- **TypeScript Migration**: The codebase is ~85% TypeScript. Most React components and utilities are migrated. The visualizer is TypeScript too (src/visuals/).
 - **Music Files**: All music is stored in `public/music/` and committed to the repo. To add new tracks:
   1. Add NSF files to `public/music/AlbumName/`
   2. Run `bun run build-catalog` to regenerate catalog indexes

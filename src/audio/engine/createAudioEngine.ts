@@ -2,7 +2,7 @@ import ChipCoreFactoryModule from '../../chip-core';
 import ChipCoreStub from '../../chip-core-stub';
 import { MAX_SAMPLE_RATE } from '../../config';
 import { unlockAudioContext } from '../../util';
-import { CHIP_PROCESSOR_NAME, WORKLET_READY_TIMEOUT_MS } from '../constants';
+import { CHIP_PROCESSOR_NAME, TAP_RING, WORKLET_READY_TIMEOUT_MS } from '../constants';
 import { CompiledWasm, compileChipCoreWasm, instantiateChipCore } from '../loadChipCore';
 import { ProcessorCore } from '../processor/ProcessorCore';
 import { ProcessorEvent } from '../protocol';
@@ -152,7 +152,7 @@ async function createWorkletEngine(
     context,
     outputNode: node,
     volumeNode,
-    mainThreadCore,
+    spectrumCore: mainThreadCore,
     link,
     taps,
     debug,
@@ -268,9 +268,9 @@ function createScriptProcessorEngine(
     context,
     outputNode: node,
     volumeNode,
-    mainThreadCore,
+    spectrumCore: mainThreadCore,
     link,
-    taps: new RingTapReader(ring),
+    taps: new RingTapReader(ring, TAP_RING),
     debug,
     bufferDurationS: bufferSize / context.sampleRate,
   });

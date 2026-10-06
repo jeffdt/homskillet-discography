@@ -1,16 +1,12 @@
-import React from 'react';
-import { useAudioPulse } from '../contexts/AudioPulseContext';
+import React, { useRef } from 'react';
+import { usePulseTarget } from '../hooks/usePulseTarget';
 
-/** Three small bars that follow the audio pulse; a leaf so only it re-renders per pulse. */
+/** Three small bars that follow the audio pulse through the --level CSS variable (no re-renders). */
 export default function LevelIndicator({ active }: { active: boolean }) {
-  const { amplitude } = useAudioPulse();
-  const level = active ? Math.min(1, amplitude) : 0;
+  const ref = useRef<HTMLSpanElement>(null);
+  usePulseTarget(ref, '--level', active);
   return (
-    <span
-      className="LevelIndicator"
-      aria-hidden="true"
-      style={{ '--level': level } as React.CSSProperties}
-    >
+    <span ref={ref} className="LevelIndicator" aria-hidden="true">
       <span />
       <span />
       <span />

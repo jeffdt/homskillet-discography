@@ -1,6 +1,8 @@
 import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { Album, PlayPlan, albumPlan, shuffleAllPlan } from '../catalog/catalog';
 import { useCatalog } from '../catalog/useCatalog';
+import { LOW_POWER_MAX_FPS } from '../audio/data/constants';
+import { useAudioData } from '../contexts/AudioDataContext';
 import { COMPACT_LAYOUT_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { useIdleFade } from '../hooks/useIdleFade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -23,7 +25,7 @@ import {
   parseInitialLocation,
   stripPlayParams,
 } from '../shell/playUrl';
-import { AudioGraph, PlaybackControls, PlaybackState } from '../types/playback';
+import { PlaybackControls, PlaybackState } from '../types/playback';
 import AboutPanel from './AboutPanel';
 import AlbumsPanel from './AlbumsPanel';
 import Dock from './Dock';
@@ -43,7 +45,6 @@ export const DEFAULT_TAGLINE = 'Original NES music';
 interface AppShellProps {
   playback: PlaybackState;
   controls: PlaybackControls;
-  audioGraph: AudioGraph | null;
 }
 
 /** Panel state reduced to its topmost panel, matching what a compact sheet shows. */
@@ -53,11 +54,20 @@ function topOnly(panels: PanelState): PanelState {
 }
 
 /** The immersive stage UI: everything visual, driven by App's playback state and controls. */
-export default function AppShell({ playback, controls, audioGraph }: AppShellProps) {
+export default function AppShell({ playback, controls }: AppShellProps) {
   const { settings } = useContext(UserContext);
   const catalog = useCatalog();
   const compact = useMediaQuery(COMPACT_LAYOUT_QUERY);
   const perf = usePerfMode(compact);
+  const { frameLoop, pulse } = useAudioData();
+
+  useEffect(() => {
+    frameLoop.setMaxFps(perf === 'low' ? LOW_POWER_MAX_FPS : null);
+  }, [frameLoop, perf]);
+
+  useEffect(() => {
+    pulse.setEnabled(settings.audioReactivePulse ?? true);
+  }, [pulse, settings.audioReactivePulse]);
   const [panels, dispatch] = useReducer(panelsReducer, INITIAL_PANELS);
   const [albumsAlbumId, setAlbumsAlbumId] = useState<string | null>(null);
   const [albumsFocusTrackId, setAlbumsFocusTrackId] = useState<string | null>(null);
@@ -291,12 +301,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
         <FilmGrain amount={settings.filmGrainAmount ?? 50} />
       )}
 
-      <Stage
-        audioGraph={audioGraph}
-        paused={!playing}
-        settings={settings}
-        renderScale={perf === 'low' ? 0.5 : 1}
-      />
+      <Stage settings={settings} renderScale={perf === 'low' ? 0.5 : 1} />
 
       {showTitle && (
         <TitleScreen

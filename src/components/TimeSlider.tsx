@@ -1,11 +1,11 @@
 import React from 'react';
-import Slider from './Slider';
 import autoBindReact from 'auto-bind/react';
-import { useAudioPulse } from '../contexts/AudioPulseContext';
+import { AudioDataContext, AudioDataContextValue } from '../contexts/AudioDataContext';
+import Slider from './Slider';
 
-//  46 ms = 2048/44100 sec or 21.7 fps
-// 400 ms = 2.5 fps
-const UPDATE_INTERVAL_MS = 100;
+/** Knob and elapsed time update this often while playing (the label changes once a second). */
+const POSITION_MAX_FPS = 30;
+const TIME_SLIDER_LOOP_ID = 'time-slider';
 const pad = (n: number): string => (n < 10 ? '0' + n : String(n));
 
 interface TimeSliderProps {
@@ -25,77 +25,72 @@ interface TimeSliderProps {
   particleSpeed?: number;
   particleSpeedVariance?: number;
   particleGravity?: number;
-  particleHueVariation?: number;
   particleFadeMode?: string;
 }
 
 interface TimeSliderState {
   draggedSongPositionMs: number;
-  currentSongPositionMs: number;
 }
 
+/**
+ * Seekable progress bar. While playing, a FrameLoop consumer moves the knob and rewrites the
+ * elapsed label directly, so playback causes no React renders; React renders only on prop changes
+ * and drags.
+ */
 export default class TimeSlider extends React.Component<TimeSliderProps, TimeSliderState> {
-  private timer: NodeJS.Timeout | null = null;
+  static contextType = AudioDataContext;
+  private positionMs: number;
+  private removeFromLoop: (() => void) | null = null;
+  private readonly slider = React.createRef<Slider>();
+  private readonly elapsed = React.createRef<HTMLDivElement>();
 
   constructor(props: TimeSliderProps) {
     super(props);
     autoBindReact(this);
-
-    this.state = {
-      draggedSongPositionMs: -1,
-      currentSongPositionMs: 0,
-    };
+    this.state = { draggedSongPositionMs: -1 };
+    this.positionMs = this.readPosition();
   }
 
-  /** Starts the position timer if the song is already playing when the slider mounts. */
   componentDidMount(): void {
-    if (!this.props.paused) this.startTimer();
+    const { frameLoop } = this.context as AudioDataContextValue;
+    this.removeFromLoop = frameLoop.add(TIME_SLIDER_LOOP_ID, this.sync, {
+      maxFps: POSITION_MAX_FPS,
+    });
   }
 
-  /** Starts or stops the position timer when playback pauses or resumes. */
-  componentDidUpdate(prevProps: TimeSliderProps): void {
-    if (prevProps.paused === true && this.props.paused === false) {
-      this.startTimer();
-    } else if (prevProps.paused === false && this.props.paused === true) {
-      this.stopTimer();
-    }
+  /** Prop changes (pause, seek, track change) resync at once, even while the loop is stopped. */
+  componentDidUpdate(): void {
+    this.sync();
   }
 
   componentWillUnmount(): void {
-    this.stopTimer();
+    if (this.removeFromLoop) this.removeFromLoop();
   }
 
-  /** Polls the player position every UPDATE_INTERVAL_MS, replacing any running timer. */
-  startTimer(): void {
-    this.stopTimer();
-    this.timer = setInterval(() => {
-      const { getCurrentPositionMs, currentSongDurationMs } = this.props;
-      this.setState({
-        currentSongPositionMs: this.props.looping
-          ? getCurrentPositionMs()
-          : Math.min(getCurrentPositionMs(), currentSongDurationMs),
-      });
-    }, UPDATE_INTERVAL_MS);
+  /** Reads the position and moves the knob and elapsed label without rendering. */
+  sync(): void {
+    this.positionMs = this.readPosition();
+    if (this.state.draggedSongPositionMs >= 0) return;
+    if (this.slider.current) this.slider.current.showPosition(this.getSongPos());
+    const label = this.elapsed.current;
+    const text = this.getTime(this.positionMs);
+    if (label && label.textContent !== text) label.textContent = text;
   }
 
-  /** Stops the position timer if one is running. */
-  stopTimer(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-    }
+  readPosition(): number {
+    const { getCurrentPositionMs, currentSongDurationMs, looping } = this.props;
+    const position = getCurrentPositionMs();
+    return looping ? position : Math.min(position, currentSongDurationMs);
   }
 
   getSongPos(): number {
-    return this.state.currentSongPositionMs / this.props.currentSongDurationMs;
+    return this.positionMs / this.props.currentSongDurationMs;
   }
 
   getTimeLabel(): string {
-    const val =
-      this.state.draggedSongPositionMs >= 0
-        ? this.state.draggedSongPositionMs
-        : this.state.currentSongPositionMs;
-    return this.getTime(val);
+    const ms =
+      this.state.draggedSongPositionMs >= 0 ? this.state.draggedSongPositionMs : this.positionMs;
+    return this.getTime(ms);
   }
 
   getTime(ms: number): string {
@@ -109,17 +104,12 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
   handlePositionDrag(event: React.ChangeEvent<HTMLInputElement> | number): void {
     const pos =
       typeof event === 'number' ? event : event.target ? parseFloat(event.target.value) : 0;
-    // Update current time position label
-    this.setState({
-      draggedSongPositionMs: pos * this.props.currentSongDurationMs,
-    });
+    this.setState({ draggedSongPositionMs: pos * this.props.currentSongDurationMs });
   }
 
   handlePositionDrop(event: React.ChangeEvent<HTMLInputElement> | number): void {
-    this.setState({
-      draggedSongPositionMs: -1,
-      currentSongPositionMs: this.state.draggedSongPositionMs,
-    });
+    if (this.state.draggedSongPositionMs >= 0) this.positionMs = this.state.draggedSongPositionMs;
+    this.setState({ draggedSongPositionMs: -1 });
     const pos =
       typeof event === 'number' ? event : event.target ? parseFloat(event.target.value) : 0;
     this.props.onChange(pos);
@@ -129,6 +119,7 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
     return (
       <div className="TimeSlider">
         <Slider
+          ref={this.slider}
           pos={this.getSongPos()}
           onDrag={this.handlePositionDrag}
           onChange={this.handlePositionDrop}
@@ -140,11 +131,10 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
           particleSpeed={this.props.particleSpeed}
           particleSpeedVariance={this.props.particleSpeedVariance}
           particleGravity={this.props.particleGravity}
-          particleHueVariation={this.props.particleHueVariation}
           particleFadeMode={this.props.particleFadeMode}
         />
         <div className="TimeSlider-labels">
-          <div>{this.getTimeLabel()}</div>
+          <div ref={this.elapsed}>{this.getTimeLabel()}</div>
           <div>
             {this.props.looping ? (
               <span aria-label="Loops forever">∞</span>

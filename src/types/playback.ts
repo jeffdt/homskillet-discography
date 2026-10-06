@@ -47,10 +47,3 @@ export interface PlaybackControls {
   /** Resumes a suspended AudioContext; call from inside a user gesture. */
   resumeAudio(): void;
 }
-
-/** What the current single-color visualizer needs. Sub-project 3 replaces it with AudioDataSource. */
-export interface AudioGraph {
-  audioCtx: AudioContext;
-  sourceNode: AudioNode;
-  chipCore: any;
-}

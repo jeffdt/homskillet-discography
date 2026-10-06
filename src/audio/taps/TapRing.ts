@@ -19,6 +19,7 @@ export const STATUS_VOICE_COUNT = 3;
 export const STATUS_SAMPLE_RATE = 4;
 export const STATUS_LOAD_ID = 5;
 export const STATUS_SEQUENCE = 6;
+export const STATUS_TAP_WRITE_INDEX = 7;
 
 export const FLAG_SEEKING = 1;
 export const FLAG_PAUSED = 2;
@@ -118,6 +119,7 @@ export class TapRing {
     s[STATUS_VOICE_COUNT] = voiceCount;
     s[STATUS_SAMPLE_RATE] = tapSampleRate;
     s[STATUS_LOAD_ID] = loadId;
+    s[STATUS_TAP_WRITE_INDEX] = this.control[CONTROL_WRITE_INDEX];
     s[STATUS_SEQUENCE] += 1;
   }
 }

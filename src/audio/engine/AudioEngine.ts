@@ -1,5 +1,13 @@
+import { TapHistory } from '../taps/TapHistory';
 import { TapSnapshot } from '../taps/TapSnapshot';
-import { ChipCore, EngineKind, RendererSettings, TrackInfo, VoiceMix } from '../types';
+import {
+  EngineKind,
+  LoadedTrack,
+  RendererSettings,
+  SpectrumCore,
+  TrackInfo,
+  VoiceMix,
+} from '../types';
 
 /** Events an AudioEngine emits on the main thread. */
 export interface AudioEngineEvents {
@@ -8,6 +16,12 @@ export interface AudioEngineEvents {
   error: (message: string) => void;
   /** A seek finished; positionMs is where playback resumed. */
   seeked: (positionMs: number) => void;
+  /** A track finished loading (load() resolves too). */
+  loaded: (track: LoadedTrack) => void;
+  /** stop() ran, or the engine failed: no track is loaded any more. */
+  unloaded: () => void;
+  /** setVoiceMix changed mute or solo; mix is a copy. */
+  voiceMixChanged: (mix: VoiceMix) => void;
 }
 
 /**
@@ -17,10 +31,14 @@ export interface AudioEngineEvents {
 export interface AudioEngine {
   readonly kind: EngineKind;
   readonly context: AudioContext;
-  /** Pre-volume output; AnalyserNodes (Spectrogram, useAudioAnalysis) connect here. */
+  /** Pre-volume output (the AudioWorkletNode or ScriptProcessorNode). Visuals read taps, not this node. */
   readonly outputNode: AudioNode;
-  /** chip-core on the main thread, for the Spectrogram's constant-Q transform until sub-project 3. */
-  readonly mainThreadCore: ChipCore;
+  /**
+   * chip-core on the main thread, used only for the mix spectrum's constant-Q transform
+   * (TapAudioDataSource). In worklet mode it is a second instance compiled from the same module
+   * that never renders audio; in ScriptProcessor and stub mode it is the instance that renders.
+   */
+  readonly spectrumCore: SpectrumCore;
   /** Loads and starts a track. Rejects with LoadSupersededError if load() or stop() runs again first. */
   load(data: Uint8Array, filepath: string, settings: RendererSettings): Promise<TrackInfo>;
   /** Unloads the track and rejects any pending load. */
@@ -43,12 +61,16 @@ export interface AudioEngine {
   setLoopForever(loopForever: boolean): void;
   /** A copy of the current mute/solo state. */
   getVoiceMix(): VoiceMix;
+  /** The loaded track, or null. */
+  getLoadedTrack(): LoadedTrack | null;
   /** Mute/solo state survives track changes; callers reset it if they want to. */
   setVoiceMix(mix: VoiceMix): void;
   /** Output volume applied after outputNode; ignored (silent) in stub mode. */
   setVolume(volume: number): void;
   /** Latest per-voice taps and status. The object is reused; never keep it. */
   readTaps(): TapSnapshot;
+  /** Continuous per-voice tap history, up to date with the transport. The object is reused; never keep it. */
+  readTapHistory(): TapHistory;
   /** Subscribes to an event; returns the unsubscribe function. */
   on<K extends keyof AudioEngineEvents>(event: K, callback: AudioEngineEvents[K]): () => void;
   /** Releases the processor link, nodes and context. */

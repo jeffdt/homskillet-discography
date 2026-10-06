@@ -6,7 +6,9 @@ import { LoadSupersededError } from '../../audio/errors';
 import { EngineCommand, ProcessorEvent } from '../../audio/protocol';
 import { FLAG_PAUSED, TapRing } from '../../audio/taps/TapRing';
 import { RingTapReader } from '../../audio/taps/transports';
-import { ChipCore, EngineKind, RendererSettings, TrackInfo } from '../../audio/types';
+import { ramp, writeTaps } from '../helpers/taps';
+import { nsfHeader } from '../helpers/nsfHeader';
+import { EngineKind, RendererSettings, SpectrumCore, TrackInfo } from '../../audio/types';
 
 const SETTINGS: RendererSettings = { tempo: 1, stereoWidth: 1, subBass: 0, loopForever: false };
 const INFO: TrackInfo = {
@@ -42,7 +44,7 @@ function makeEngine(kind: EngineKind = 'worklet') {
     context: context as unknown as AudioContext,
     outputNode: { disconnect: vi.fn() } as unknown as AudioNode,
     volumeNode: volumeNode as unknown as GainNode,
-    mainThreadCore: {} as ChipCore,
+    spectrumCore: {} as SpectrumCore,
     link,
     taps: new RingTapReader(ring),
   });
@@ -59,6 +61,12 @@ async function loaded() {
 }
 
 describe('ChipEngine', () => {
+  it('exposes the transport history', () => {
+    const { engine, ring } = makeEngine();
+    writeTaps(ring, [ramp(0, 32)]);
+    expect(engine.readTapHistory().writeIndex).toBe(32);
+  });
+
   it('sends a copy of the bytes, transferred, with the current gains', async () => {
     const { engine, link } = makeEngine();
     const data = new Uint8Array([1, 2, 3]);
@@ -300,7 +308,7 @@ describe('ChipEngine', () => {
         context: context as unknown as AudioContext,
         outputNode: { disconnect: vi.fn() } as unknown as AudioNode,
         volumeNode: { gain: { value: 1 }, disconnect: vi.fn() } as unknown as GainNode,
-        mainThreadCore: {} as ChipCore,
+        spectrumCore: {} as SpectrumCore,
         link,
         taps: new RingTapReader(ring),
         bufferDurationS,
@@ -318,5 +326,67 @@ describe('ChipEngine', () => {
     };
     expect(await positionWith()).toBe(10000);
     expect(await positionWith(0.05)).toBeCloseTo(10000 - 50, 3);
+  });
+});
+
+describe('track and mix events', () => {
+  const VRC6_INFO: TrackInfo = {
+    metadata: {},
+    durationMs: 1000,
+    voices: [
+      'Square 1',
+      'Square 2',
+      'Triangle',
+      'Noise',
+      'DMC',
+      'Saw Wave',
+      'Square 3',
+      'Square 4',
+    ].map((name, index) => ({ index, name })),
+    gmeVoiceCount: 8,
+  };
+
+  it('emits loaded with each voice chip and remembers the track', async () => {
+    const { engine, link } = makeEngine();
+    const loaded = vi.fn();
+    engine.on('loaded', loaded);
+    const promise = engine.load(nsfHeader(0x01), '/A/t.nsf', SETTINGS);
+    link.listener({ type: 'loaded', loadId: link.last('load')!.loadId, info: VRC6_INFO });
+    await promise;
+    const track = loaded.mock.calls[0][0];
+    expect(track.voiceChips).toEqual([
+      '2A03',
+      '2A03',
+      '2A03',
+      '2A03',
+      '2A03',
+      'VRC6',
+      'VRC6',
+      'VRC6',
+    ]);
+    expect(engine.getLoadedTrack()).toBe(track);
+  });
+
+  it('emits unloaded on stop only when a track was loaded', async () => {
+    const { engine, link } = makeEngine();
+    const unloaded = vi.fn();
+    engine.on('unloaded', unloaded);
+    engine.stop();
+    expect(unloaded).not.toHaveBeenCalled();
+    const promise = engine.load(nsfHeader(0), '/A/t.nsf', SETTINGS);
+    link.listener({ type: 'loaded', loadId: link.last('load')!.loadId, info: INFO });
+    await promise;
+    engine.stop();
+    expect(unloaded).toHaveBeenCalledTimes(1);
+    expect(engine.getLoadedTrack()).toBeNull();
+  });
+
+  it('emits voiceMixChanged with a copy of the new mix', () => {
+    const { engine } = makeEngine();
+    const changed = vi.fn();
+    engine.on('voiceMixChanged', changed);
+    engine.setVoiceMix({ muted: [true], soloed: [] });
+    expect(changed.mock.calls[0][0].muted.slice(0, 2)).toEqual([true, false]);
+    expect(changed.mock.calls[0][0].soloed).toHaveLength(8);
   });
 });

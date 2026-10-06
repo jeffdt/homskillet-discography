@@ -842,10 +842,13 @@ body,
 
 .SliderParticle {
   position: fixed;
+  left: 0;
+  top: 0;
   width: 2px;
   height: 2px;
   background-color: var(--accent);
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 /* Disable particles for users who prefer reduced motion */

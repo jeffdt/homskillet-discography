@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Album, Track } from '../catalog/catalog';
 import { titleFromFilename } from '../catalog/titles';
-import { useAudioPulse } from '../contexts/AudioPulseContext';
+import { usePulseTarget } from '../hooks/usePulseTarget';
 import { toggleFullscreen } from '../shell/fullscreen';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 import TimeSlider from './TimeSlider';
@@ -51,12 +51,11 @@ function sparkSettings(settings: Partial<UserSettings>, faded: boolean) {
     particleSpeed: settings.particleSpeed,
     particleSpeedVariance: settings.particleSpeedVariance,
     particleGravity: settings.particleGravity,
-    particleHueVariation: settings.particleHueVariation,
     particleFadeMode: settings.particleFadeMode,
   };
 }
 
-/** Play/pause with the audio-reactive glow; isolated so only this button re-renders per pulse. */
+/** Play/pause with the audio-reactive glow, written straight to a CSS variable (no re-renders). */
 function PlayPauseButton({
   paused,
   disabled,
@@ -66,16 +65,17 @@ function PlayPauseButton({
   disabled: boolean;
   onClick: () => void;
 }) {
-  const { amplitude } = useAudioPulse();
+  const ref = useRef<HTMLButtonElement>(null);
+  usePulseTarget(ref, '--pulse-intensity', !paused && !disabled);
   const label = paused ? 'Play' : 'Pause';
   return (
     <button
+      ref={ref}
       className="Dock-button Dock-play"
       aria-label={label}
       title={`${label} (Space)`}
       onClick={onClick}
       disabled={disabled}
-      style={{ '--pulse-intensity': paused || disabled ? 0 : amplitude } as React.CSSProperties}
     >
       {paused ? <IconPlay /> : <IconPause />}
     </button>

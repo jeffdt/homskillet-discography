@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import Spectrogram from '../Spectrogram';
 import { visualizerPaletteColors } from '../config/visualizerPalettes';
-import { CQT_BINS, CanvasBox, computeStageLayout } from '../shell/stageLayout';
-import { AudioGraph } from '../types/playback';
+import { useAudioData } from '../contexts/AudioDataContext';
+import { useFrameLoop } from '../hooks/useFrameLoop';
+import { CanvasBox, computeStageLayout } from '../shell/stageLayout';
+import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor } from '../visuals/spectrogramMath';
+import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
 import { UserSettings } from './UserProvider';
 
 interface StageProps {
-  audioGraph: AudioGraph | null;
-  paused: boolean;
   settings: UserSettings;
   /** Backing-store scale: 1 normally, 0.5 in low-power mode. */
   renderScale: number;
@@ -22,12 +22,22 @@ function applyBox(canvas: HTMLCanvasElement, box: CanvasBox): void {
   canvas.style.height = `${box.height}px`;
 }
 
-/** Full-window spectrogram and analyzer behind all other UI. */
-export default function Stage({ audioGraph, paused, settings, renderScale }: StageProps) {
+/** Full-window spectrogram and analyzer behind all other UI, drawn by one FrameLoop consumer. */
+export default function Stage({ settings, renderScale }: StageProps) {
+  const { source } = useAudioData();
   const containerRef = useRef<HTMLDivElement>(null);
   const specRef = useRef<HTMLCanvasElement>(null);
   const freqRef = useRef<HTMLCanvasElement>(null);
-  const spectrogramRef = useRef<any>(null);
+  const rendererRef = useRef<SpectrogramRenderer | null>(null);
+
+  useEffect(() => {
+    if (!freqRef.current || !specRef.current) return;
+    rendererRef.current = new SpectrogramRenderer(
+      { analyzer: freqRef.current, spectrogram: specRef.current },
+      source.getSpectrumLayout(),
+      readCssColor('--neutral0', '#101010')
+    );
+  }, [source]);
 
   const applyLayout = useCallback(() => {
     const container = containerRef.current;
@@ -37,26 +47,8 @@ export default function Stage({ audioGraph, paused, settings, renderScale }: Sta
     const layout = computeStageLayout(container.clientWidth, container.clientHeight, renderScale);
     applyBox(spec, layout.spectrogram);
     applyBox(freq, layout.analyzer);
-    if (spectrogramRef.current) spectrogramRef.current.setHorizontal(true);
+    if (rendererRef.current) rendererRef.current.resize();
   }, [renderScale]);
-
-  useEffect(() => {
-    if (!audioGraph || spectrogramRef.current || !freqRef.current || !specRef.current) return;
-    // Spectrogram derives its CQT bin count from the analyzer width at construction time.
-    freqRef.current.width = CQT_BINS;
-    const spectrogram = new Spectrogram(
-      audioGraph.chipCore,
-      audioGraph.audioCtx,
-      audioGraph.sourceNode,
-      freqRef.current,
-      specRef.current,
-      null
-    );
-    spectrogram.setWeighting(1);
-    spectrogram.setSpeed(2);
-    spectrogramRef.current = spectrogram;
-    applyLayout();
-  }, [audioGraph, applyLayout]);
 
   useEffect(() => {
     const hasRaf = typeof requestAnimationFrame === 'function';
@@ -78,31 +70,24 @@ export default function Stage({ audioGraph, paused, settings, renderScale }: Sta
   }, [applyLayout]);
 
   useEffect(() => {
-    const s = spectrogramRef.current;
-    if (s) s.setColorPalette(visualizerPaletteColors(settings.visualizerTheme));
-  }, [audioGraph, settings.visualizerTheme]);
+    if (rendererRef.current)
+      rendererRef.current.setColorPalette(visualizerPaletteColors(settings.visualizerTheme));
+  }, [source, settings.visualizerTheme]);
 
   useEffect(() => {
-    const s = spectrogramRef.current;
-    if (s) s.setPeakDecayRate(settings.peakDecayRate ?? 0.98);
-  }, [audioGraph, settings.peakDecayRate]);
+    if (rendererRef.current) rendererRef.current.setPeakDecayRate(settings.peakDecayRate ?? 0.98);
+  }, [source, settings.peakDecayRate]);
 
   useEffect(() => {
-    const s = spectrogramRef.current;
-    if (s) s.setPeakQuantization(settings.peakQuantization ?? 4);
-  }, [audioGraph, settings.peakQuantization]);
+    if (rendererRef.current)
+      rendererRef.current.setPeakQuantization(settings.peakQuantization ?? 4);
+  }, [source, settings.peakQuantization]);
 
-  useEffect(() => {
-    const s = spectrogramRef.current;
-    if (s) s.setPaused(paused);
-  }, [audioGraph, paused]);
-
-  useEffect(
-    () => () => {
-      if (spectrogramRef.current) spectrogramRef.current.setPaused(true);
-    },
-    []
-  );
+  useFrameLoop('stage-spectrogram', (frame, dtMs) => {
+    // The speed is in CSS pixels; the canvas backing store is renderScale times that.
+    if (rendererRef.current)
+      rendererRef.current.draw(frame.mixSpectrum, dtMs, SPECTROGRAM_SCROLL_PX_PER_S * renderScale);
+  });
 
   return (
     <div ref={containerRef} className="Stage" aria-hidden="true">

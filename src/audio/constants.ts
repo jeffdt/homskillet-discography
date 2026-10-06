@@ -40,6 +40,9 @@ export const TAP_WINDOW = 1024;
 /** Ring capacity per voice. Must be a power of two and larger than TAP_WINDOW. */
 export const TAP_RING = 4096;
 
+/** Samples per voice the main thread keeps in TapHistory (683 ms at 24 kHz). Power of two. */
+export const TAP_HISTORY = 16384;
+
 /** The pooled transport posts one snapshot per this many output frames (16 ms at 48 kHz). */
 export const TAP_POST_INTERVAL_FRAMES = 768;
 

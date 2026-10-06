@@ -1,10 +1,13 @@
 import { TAP_POOL_SIZE, TAP_POST_INTERVAL_FRAMES } from '../constants';
+import { RING_INGEST_LIMIT, TapHistory } from './TapHistory';
 import { TapRing } from './TapRing';
 import { TAP_SNAPSHOT_BYTES, TapSnapshot, writeSnapshotBuffer } from './TapSnapshot';
 
-/** Main-thread access to the newest tap snapshot, whatever the transport. */
+/** Main-thread access to the newest tap snapshot and the continuous history, whatever the transport. */
 export interface TapReader {
   read(): TapSnapshot;
+  /** The continuous history, brought up to date with everything the transport has delivered. */
+  readHistory(): TapHistory;
   dispose(): void;
 }
 
@@ -51,15 +54,17 @@ export class PooledTapSender {
   }
 }
 
-/** Main-thread side of the pooled transport: keeps the newest snapshot and returns each buffer. */
+/** Main-thread side of the pooled transport: keeps the newest snapshot, feeds the history, returns each buffer. */
 export class PooledTapReader implements TapReader {
   private readonly snapshot = new TapSnapshot();
+  private readonly history = new TapHistory();
 
   constructor(private readonly returnBuffer: (buffer: ArrayBuffer) => void) {}
 
   /** Handles one snapshot message from the processor. */
   receive(buffer: ArrayBuffer): void {
     this.snapshot.copyFrom(buffer);
+    this.history.ingestSnapshot(this.snapshot);
     this.returnBuffer(buffer);
   }
 
@@ -67,26 +72,48 @@ export class PooledTapReader implements TapReader {
     return this.snapshot;
   }
 
+  readHistory(): TapHistory {
+    return this.history;
+  }
+
   dispose(): void {}
 }
 
 /**
  * Reads straight from a TapRing: the SharedArrayBuffer ring (crossOriginIsolated worklet) or the
- * in-process ring (ScriptProcessor and stub). Retries a few times if a write was in progress.
+ * in-process ring (ScriptProcessor and stub). Retries a few times if a write was in progress, and
+ * feeds the history only from a consistent read.
  */
 export class RingTapReader implements TapReader {
   private readonly snapshot = new TapSnapshot();
+  private readonly history = new TapHistory();
 
-  constructor(private readonly ring: TapRing) {}
+  /**
+   * ingestLimit is how many new samples one read may take: the default keeps a SharedArrayBuffer
+   * ring's concurrent writer out of the read; an in-process ring has no concurrent writer and can
+   * pass TAP_RING.
+   */
+  constructor(
+    private readonly ring: TapRing,
+    private readonly ingestLimit = RING_INGEST_LIMIT
+  ) {}
 
   read(): TapSnapshot {
     for (let attempt = 0; attempt < 4; attempt++) {
       const before = this.ring.sequence;
       if (before % 2 !== 0) continue;
       this.snapshot.fillFromRing(this.ring);
-      if (this.ring.sequence === before) break;
+      if (this.ring.sequence === before) {
+        this.history.ingestRing(this.snapshot, this.ring, this.ingestLimit);
+        break;
+      }
     }
     return this.snapshot;
+  }
+
+  readHistory(): TapHistory {
+    this.read();
+    return this.history;
   }
 
   dispose(): void {}
