@@ -33,6 +33,12 @@ describe('panelsReducer (wide layout)', () => {
     expect(isPanelOpen(s, 'about')).toBe(false);
   });
 
+  it('closeAll closes every panel and is a no-op when none are open', () => {
+    const both = open(open(INITIAL_PANELS, 'albums'), 'mixer');
+    expect(panelsReducer(both, { type: 'closeAll' })).toEqual({ open: [] });
+    expect(panelsReducer(INITIAL_PANELS, { type: 'closeAll' })).toBe(INITIAL_PANELS);
+  });
+
   it('closeTopmost walks back in opening order', () => {
     let s = open(open(open(INITIAL_PANELS, 'albums'), 'mixer'), 'about');
     expect(topmostPanel(s)).toBe('about');

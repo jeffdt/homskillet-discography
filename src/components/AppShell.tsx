@@ -203,20 +203,20 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
     dispatch({ type: 'open', id: 'albums', compact });
   }, [compact]);
 
-  const albumsOpen = isPanelOpen(panels, 'albums');
+  const anyPanelOpen = panels.open.length > 0;
 
-  // Wide layouts have no backdrop behind the drawer, so a press anywhere outside the panels and
-  // chrome closes Albums. Compact sheets close from their own backdrop instead.
+  // Wide layouts have no backdrop behind panels, so a press anywhere outside the panels and chrome
+  // closes them all. Compact sheets close from their own backdrop instead.
   useEffect(() => {
-    if (!albumsOpen || compact) return undefined;
+    if (!anyPanelOpen || compact) return undefined;
     const onPointerDown = (e: Event) => {
       const target = e.target as Element | null;
       if (target && target.closest && target.closest('.Panel, .Chrome, .toast-box-outer')) return;
-      dispatch({ type: 'close', id: 'albums' });
+      dispatch({ type: 'closeAll' });
     };
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, [albumsOpen, compact]);
+  }, [anyPanelOpen, compact]);
 
   useKeyboardShortcuts({
     togglePause: () => controls.togglePause(),

@@ -217,17 +217,20 @@ describe('AppShell', () => {
     expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
   });
 
-  it('closes Albums on a press outside the panels and chrome, but not inside them', async () => {
+  it('closes every open panel on a press outside the panels and chrome, but not inside them', async () => {
     const { container } = renderShell();
     fireEvent.click(await screen.findByText('or browse 2 albums'));
+    fireEvent.click(screen.getByRole('button', { name: 'Mixer' }));
     const albums = screen.getByRole('dialog', { name: 'Albums' });
 
     fireEvent.pointerDown(albums);
-    fireEvent.pointerDown(screen.getByRole('button', { name: 'Mixer' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'About' }));
     expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Mixer' })).toBeTruthy();
 
     fireEvent.pointerDown(container.querySelector('.AppShell') as Element);
     expect(screen.queryByRole('dialog', { name: 'Albums' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'Mixer' })).toBeNull();
   });
 
   it('opens Albums at the playing album and plays tracks from it', async () => {

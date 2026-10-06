@@ -26,7 +26,8 @@ export type PanelAction =
   | { type: 'open'; id: PanelId; compact: boolean }
   | { type: 'toggle'; id: PanelId; compact: boolean }
   | { type: 'close'; id: PanelId }
-  | { type: 'closeTopmost' };
+  | { type: 'closeTopmost' }
+  | { type: 'closeAll' };
 
 /** True when the panel is open. */
 export function isPanelOpen(state: PanelState, id: PanelId): boolean {
@@ -63,6 +64,8 @@ export function panelsReducer(state: PanelState, action: PanelAction): PanelStat
         : state;
     case 'closeTopmost':
       return state.open.length ? { open: state.open.slice(0, -1) } : state;
+    case 'closeAll':
+      return state.open.length ? INITIAL_PANELS : state;
     default:
       return state;
   }
