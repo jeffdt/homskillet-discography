@@ -129,12 +129,6 @@
   min-height: var(--touch-target);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .App .SwatchPicker-card {
-    transition: none;
-  }
-}
-
 /* ===== Channel legend ===== */
 
 .ChannelLegend {

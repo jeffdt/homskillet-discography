@@ -86,6 +86,15 @@ describe('StagePanel', () => {
     expect(screen.queryByLabelText('Peak decay')).toBeNull();
   });
 
+  it.each([1000, '768'])(
+    'shows the default zoom for an unsupported stored span %s',
+    (scopeSpan) => {
+      renderPanel({ visualizerStyle: 'scopes', scopeSpan });
+      expect((screen.getByLabelText(SCOPE_ZOOM.label) as HTMLInputElement).value).toBe('1');
+      expect(screen.getByText('21 ms')).toBeTruthy();
+    }
+  );
+
   it('picks a style, a channel palette and an accent', () => {
     const { updateSettings } = renderPanel();
     fireEvent.click(screen.getByRole('radio', { name: 'Channel scopes' }));

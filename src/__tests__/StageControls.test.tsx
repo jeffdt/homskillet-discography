@@ -120,6 +120,16 @@ describe('SwatchPicker', () => {
     expect(onSelect).toHaveBeenLastCalledWith('a');
   });
 
+  it('leaves arrow keys with Ctrl, Meta or Alt to the browser', () => {
+    const { onSelect, radios } = renderPicker('b');
+    expect(fireEvent.keyDown(radios[1], { key: 'ArrowRight', metaKey: true })).toBe(true);
+    expect(fireEvent.keyDown(radios[1], { key: 'ArrowLeft', altKey: true })).toBe(true);
+    expect(fireEvent.keyDown(radios[1], { key: 'ArrowRight', ctrlKey: true })).toBe(true);
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(fireEvent.keyDown(radios[1], { key: 'ArrowRight' })).toBe(false);
+    expect(onSelect).toHaveBeenCalledWith('c');
+  });
+
   it('jumps to the first and last card with Home and End and ignores other keys', () => {
     const { onSelect, radios } = renderPicker('b');
     fireEvent.keyDown(radios[1], { key: 'End' });

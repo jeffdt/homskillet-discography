@@ -40,6 +40,7 @@ export default function SwatchPicker({
   );
 
   const onKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const last = options.length - 1;
     let target: number | null = null;
     if (NEXT_KEYS.includes(e.key)) target = index === last ? 0 : index + 1;
