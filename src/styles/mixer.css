@@ -157,3 +157,59 @@
   font: var(--font-body);
   color: var(--neutral2);
 }
+
+/* ===== Sliders ===== */
+
+.MixerSlider + .MixerSlider {
+  margin-top: 10px;
+}
+
+.MixerSlider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.App .MixerSlider-label {
+  flex: 0 0 96px;
+  font: var(--font-strong);
+  color: var(--neutral3);
+}
+
+.MixerSlider-row input[type='range'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.App .MixerSlider-value {
+  flex: 0 0 44px;
+  text-align: right;
+  font: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--neutral4);
+}
+
+.App .MixerSlider-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  align-self: center;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+}
+
+.App .MixerSlider-pin[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.App .MixerSlider .Mixer-explain {
+  margin: 2px 0 0;
+}
+
+.App[data-layout='compact'] .MixerSlider-pin {
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+}
