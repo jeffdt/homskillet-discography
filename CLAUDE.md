@@ -117,7 +117,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
-- **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`
+- **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
 - **src/audio/** - Audio engine (TypeScript)
@@ -129,7 +129,8 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - data/ - The visual data contract (contract.ts), TapAudioDataSource, FrameLoop, PulseChannel, spectra
 - **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
-- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), sparks physics
+- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), BinColorizer (per-bin channel colors), channelColors (channel color store and --ch-N variables), sparks physics
+- **src/config/channelPalettes.ts** - Channel palettes: one color per voice, Chromatic by default
 - **src/contexts/AudioDataContext.tsx** - AudioDataSource, FrameLoop and PulseChannel for React
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
 
@@ -375,6 +376,13 @@ The project uses a custom "Metallic Wing Green" color palette defined in `src/in
 - `--neutral3` (#c3c3c3) - Light gray (emphasized text)
 - `--neutral4` (#fefefe) - Metallic Wing White (headings, high contrast)
 
+**Channel colors** (one per chip voice, set from the active channel palette):
+
+- `--ch-0` through `--ch-7` - `--ch-N` is the color of voice index N (`VoiceInfo.index`) in the visualizer, Mixer and any other per-channel display
+- Palettes live in `src/config/channelPalettes.ts` (`channelPaletteById`, persisted as `settings.channelPalette`); the `:root` defaults in `src/index.css` are the Chromatic palette
+- Canvas and JS code read them with `useChannelColors()` (`src/hooks/useChannelColors.ts`) or `channelColors.get()` / `subscribe()` (`src/visuals/channelColors.ts`), never by polling `getComputedStyle`
+- A channel's color never changes with mute or solo; dim using `VoiceInfo.audible`
+
 #### Important Rules:
 
 1. **Always use CSS variables first** - Use `var(--neutral4)` instead of hardcoded colors like `#fefefe` or `rgba(255, 255, 255, 1)`
@@ -384,6 +392,7 @@ The project uses a custom "Metallic Wing Green" color palette defined in `src/in
    - Add a new variable to the palette
    - Use the requested color directly (for special cases like gradients)
    - Map to an existing palette color
+5. **Per-channel colors come from `--ch-N`** (or `useChannelColors()` in canvas code). Never hardcode a channel's hex value in a component. A new channel palette must pass `src/__tests__/channelPalettes.test.ts`.
 
 #### Examples:
 
