@@ -26,6 +26,7 @@ describe('TopBar', () => {
 
   it('hides the logo while the title screen shows its own', () => {
     render(<TopBar panels={{ open: [] }} onToggle={() => {}} showLogo={false} />);
-    expect(screen.getByText('HOMSKILLET').style.visibility).toBe('hidden');
+    const logo = screen.getByText('HOMSKILLET').closest('.TopBar-logo') as HTMLElement;
+    expect(logo.style.visibility).toBe('hidden');
   });
 });

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import '@fontsource/space-grotesk/400.css';
 import '@fontsource/space-grotesk/600.css';
+import '@fontsource/tilt-warp/400.css';
 import './styles/shell.css';
 import App from './components/App';
 import { UserProvider } from './components/UserProvider';

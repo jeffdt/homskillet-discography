@@ -8,6 +8,7 @@
         "@babel/plugin-syntax-bigint": "^7.8.3",
         "@babel/plugin-transform-optional-chaining": "^7.22.5",
         "@fontsource/space-grotesk": "^5.3.0",
+        "@fontsource/tilt-warp": "^5.3.0",
         "@typescript-eslint/eslint-plugin": "5.59.9",
         "@typescript-eslint/parser": "5.59.9",
         "auto-bind": "^5.0.1",
@@ -373,6 +374,8 @@
     "@eslint/js": ["@eslint/js@8.57.1", "", {}, "sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q=="],
 
     "@fontsource/space-grotesk": ["@fontsource/space-grotesk@5.3.0", "", {}, "sha512-ksnGizDPXIDuvqcTYTSrmZ+evx9sDlS8rp7+42BQ7wU+spt3twEoXfbJz672C+5CLg6VeUQwRy5RXshWb67LcQ=="],
+
+    "@fontsource/tilt-warp": ["@fontsource/tilt-warp@5.3.0", "", {}, "sha512-ZmO5tjNLWHNUyz81pQFu4lrRNZbwC3xVJXr1cXBKWCnLn3KSDWR3gUcl5BR0Fg/3HY/ZhrKocfplVaK904B5jg=="],
 
     "@humanwhocodes/config-array": ["@humanwhocodes/config-array@0.13.0", "", { "dependencies": { "@humanwhocodes/object-schema": "^2.0.3", "debug": "^4.3.1", "minimatch": "^3.0.5" } }, "sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw=="],
 

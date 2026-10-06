@@ -1,5 +1,6 @@
 import React from 'react';
 import { PANEL_TITLES, PanelId, PanelState, isPanelOpen } from '../shell/panels';
+import Wordmark from './Wordmark';
 import { IconAlbums, IconInfo, IconMixer, IconStage } from './icons';
 
 const BUTTONS: Array<{ id: PanelId; shortcut: string | null; Icon: () => JSX.Element }> = [
@@ -21,7 +22,7 @@ export default function TopBar({ panels, onToggle, showLogo = true }: TopBarProp
   return (
     <header className="TopBar Chrome">
       <div className="TopBar-logo" style={showLogo ? undefined : { visibility: 'hidden' }}>
-        HOMSKILLET
+        <Wordmark />
       </div>
       <nav className="TopBar-nav" aria-label="Panels">
         {BUTTONS.map(({ id, shortcut, Icon }) => {

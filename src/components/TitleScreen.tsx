@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Wordmark from './Wordmark';
 
 export const START_COOLDOWN_MS = 3000;
 
@@ -74,7 +75,9 @@ export default function TitleScreen({
   return (
     <div className="TitleScreen">
       <div className="TitleScreen-glow" aria-hidden="true" />
-      <h1 className="TitleScreen-logo">HOMSKILLET</h1>
+      <h1 className="TitleScreen-logo">
+        <Wordmark />
+      </h1>
       <p className="TitleScreen-tagline">{tagline}</p>
       {sharedLine && <p className="TitleScreen-shared">{sharedLine}</p>}
       <button

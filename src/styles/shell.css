@@ -221,10 +221,125 @@
 }
 
 .App .TopBar-logo {
-  font: var(--font-title);
-  color: var(--neutral4);
-  letter-spacing: 3px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ===== Wordmark ===== */
+
+.Wordmark {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.App .Wordmark-word,
+.App .Wordmark-word::before,
+.App .Wordmark-word::after {
+  font:
+    400 1em/1 'Tilt Warp',
+    var(--fontSans);
+  letter-spacing: 0.03em;
+}
+
+.App .Wordmark-word {
+  position: relative;
+  display: inline-block;
+  color: var(--accent);
+}
+
+/* Two offset copies of the word: a faint white one and a dark green one, glitching together. */
+.Wordmark-word::before,
+.Wordmark-word::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.Wordmark-word::before {
+  color: var(--neutral4);
+  opacity: 0.55;
+  transform: translateX(-0.03em);
+  animation: wordmark-split-a 3.2s steps(1) infinite;
+}
+
+.Wordmark-word::after {
+  color: var(--accent-dark);
+  transform: translateX(0.03em);
+  animation: wordmark-split-b 3.2s steps(1) infinite;
+}
+
+.Wordmark-lines {
+  position: absolute;
+  inset: -0.1em -0.2em;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neutral0) 55%, transparent) 0 2px,
+    transparent 2px 5px
+  );
+  animation: wordmark-roll 6s linear infinite;
+}
+
+.TopBar-logo .Wordmark-lines {
+  background: repeating-linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--neutral0) 45%, transparent) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+@keyframes wordmark-roll {
+  to {
+    background-position: 0 50px;
+  }
+}
+
+@keyframes wordmark-split-a {
+  0%,
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translateX(-0.03em);
+  }
+  82% {
+    clip-path: inset(30% 0 52% 0);
+    transform: translateX(-0.12em);
+  }
+  86% {
+    clip-path: inset(62% 0 18% 0);
+    transform: translateX(0.08em);
+  }
+  90% {
+    clip-path: inset(0 0 0 0);
+    transform: translateX(-0.03em);
+  }
+}
+
+@keyframes wordmark-split-b {
+  0%,
+  100% {
+    transform: translateX(0.03em);
+  }
+  83% {
+    transform: translateX(0.1em);
+  }
+  88% {
+    transform: translateX(-0.05em);
+  }
+  91% {
+    transform: translateX(0.03em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Wordmark-word::before,
+  .Wordmark-word::after,
+  .Wordmark-lines {
+    animation: none;
+  }
 }
 
 .TopBar-nav {
@@ -476,12 +591,9 @@
 
 .App .TitleScreen-logo {
   margin: 0;
-  /* The global h1-h6 rule uses !important, so heading fonts here must too. */
-  font: var(--font-title) !important;
-  font-size: clamp(32px, 8vw, 72px) !important;
+  /* The global h1-h6 rule uses !important, so the size here must too. The Wordmark sets its own face. */
+  font-size: clamp(40px, 10vw, 104px) !important;
   line-height: 1 !important;
-  color: var(--neutral4);
-  letter-spacing: 4px;
 }
 
 .App .TitleScreen-tagline {
@@ -1045,8 +1157,7 @@
 }
 
 .App[data-layout='compact'] .TopBar-logo {
-  font-size: 16px;
-  letter-spacing: 2px;
+  font-size: 18px;
 }
 
 .App[data-layout='compact'] .Dock {
