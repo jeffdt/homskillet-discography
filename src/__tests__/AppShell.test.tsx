@@ -5,6 +5,8 @@ import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import AppShell from '../components/AppShell';
 import { UserProvider } from '../components/UserProvider';
+import { COMPACT_LAYOUT_QUERY } from '../hooks/useMediaQuery';
+import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 const { FIXTURE } = vi.hoisted(() => ({
   FIXTURE: {
@@ -387,5 +389,48 @@ describe('AppShell', () => {
       expect(screen.getByRole('dialog', { name: 'Mixer' })).toBeTruthy();
       expect(mixerButton.getAttribute('aria-pressed')).toBe('true');
     });
+  });
+});
+
+describe('AppShell and the frame loop', () => {
+  it('caps the frame loop at 30 fps on compact layouts', () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query === COMPACT_LAYOUT_QUERY,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof window.matchMedia;
+    try {
+      const data = createTestAudioData();
+      const setMaxFps = vi.spyOn(data.frameLoop, 'setMaxFps');
+      render(
+        <UserProvider>
+          {withAudioData(
+            data.value,
+            <AppShell playback={IDLE} controls={makeControls()} audioGraph={null} />
+          )}
+        </UserProvider>
+      );
+      expect(setMaxFps).toHaveBeenLastCalledWith(30);
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
+  it('turns the pulse off when the reactive UI setting is off', () => {
+    window.localStorage.setItem('settings', JSON.stringify({ audioReactivePulse: false }));
+    const data = createTestAudioData();
+    const setEnabled = vi.spyOn(data.pulse, 'setEnabled');
+    render(
+      <UserProvider>
+        {withAudioData(
+          data.value,
+          <AppShell playback={IDLE} controls={makeControls()} audioGraph={null} />
+        )}
+      </UserProvider>
+    );
+    expect(setEnabled).toHaveBeenLastCalledWith(false);
   });
 });

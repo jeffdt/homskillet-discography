@@ -6,6 +6,7 @@ import clamp from 'lodash/clamp';
 import { MAX_VOICES, REPLACE_STATE_ON_SEEK } from '../config';
 import Sequencer, { SHUFFLE_OFF, SHUFFLE_ON } from '../Sequencer';
 
+import { AudioData, createAudioData } from '../audio/data/createAudioData';
 import { AudioEngine } from '../audio/engine/AudioEngine';
 import { createAudioEngine, createUnlockedAudioContext } from '../audio/engine/createAudioEngine';
 import { parseEngineOverrides } from '../audio/engine/engineKind';
@@ -17,6 +18,7 @@ import AppShell from './AppShell';
 import { ToastLevels } from './Toast';
 import { UserContext } from './UserProvider';
 import { ToastContext } from './ToastProvider';
+import { AudioDataContext } from '../contexts/AudioDataContext';
 import { AudioPulseProvider } from '../contexts/AudioPulseContext';
 import { AppProps, AppState } from '../types/app';
 import { SequencerState } from '../types/sequencer';
@@ -38,10 +40,16 @@ class App extends React.Component<AppProps, AppState> {
   private mediaSessionAudio?: HTMLAudioElement;
   private audioGraph: AudioGraph | null = null;
   private controls: PlaybackControls;
+  private readonly audioData: AudioData;
 
   constructor(props: AppProps) {
     super(props);
     autoBindReact(this);
+    const pageParams = new URLSearchParams(window.location.search);
+    this.audioData = createAudioData({
+      logStats: pageParams.get('debug') !== null,
+      forceVoiceSpectra: pageParams.get('analysis') === 'full',
+    });
 
     this.attachMediaKeyHandlers();
     (window as any).ChipPlayer = this;
@@ -126,6 +134,7 @@ class App extends React.Component<AppProps, AppState> {
     }
 
     this.engine = engine;
+    this.audioData.source.attach(engine);
     (window as any).audioCtx = engine.context;
     this.playerNode = engine.outputNode;
     this.chipCore = engine.spectrumCore;
@@ -213,6 +222,11 @@ class App extends React.Component<AppProps, AppState> {
         this.seekRelative(5000)
       );
     }
+  }
+
+  /** The frame loop runs consumers only while a track is playing (idle animations excepted). */
+  syncFrameLoop() {
+    this.audioData.frameLoop.setPlaying(!this.state.paused && !this.state.ejected);
   }
 
   handleSequencerStateUpdate(sequencerState: SequencerState) {
@@ -447,6 +461,7 @@ class App extends React.Component<AppProps, AppState> {
     const { uiPalette = 0 } = this.props.userContext.settings;
     const palette = UI_PALETTES[uiPalette];
     updateAccentColors(palette.accent, palette.accentDark);
+    this.syncFrameLoop();
   }
 
   componentDidUpdate(prevProps: AppProps) {
@@ -458,6 +473,11 @@ class App extends React.Component<AppProps, AppState> {
       const palette = UI_PALETTES[currentPalette];
       updateAccentColors(palette.accent, palette.accentDark);
     }
+    this.syncFrameLoop();
+  }
+
+  componentWillUnmount() {
+    this.audioData.dispose();
   }
 
   render() {
@@ -483,15 +503,17 @@ class App extends React.Component<AppProps, AppState> {
     };
 
     return (
-      <AudioPulseProvider
-        audioCtx={this.audioCtx}
-        sourceNode={this.playerNode}
-        paused={this.state.paused}
-        ejected={this.state.ejected}
-        enabled={settings.audioReactivePulse ?? true}
-      >
-        <AppShell playback={playback} controls={this.controls} audioGraph={this.audioGraph} />
-      </AudioPulseProvider>
+      <AudioDataContext.Provider value={this.audioData}>
+        <AudioPulseProvider
+          audioCtx={this.audioCtx}
+          sourceNode={this.playerNode}
+          paused={this.state.paused}
+          ejected={this.state.ejected}
+          enabled={settings.audioReactivePulse ?? true}
+        >
+          <AppShell playback={playback} controls={this.controls} audioGraph={this.audioGraph} />
+        </AudioPulseProvider>
+      </AudioDataContext.Provider>
     );
   }
 }

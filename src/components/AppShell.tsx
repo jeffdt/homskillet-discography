@@ -1,6 +1,8 @@
 import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { Album, PlayPlan, albumPlan, shuffleAllPlan } from '../catalog/catalog';
 import { useCatalog } from '../catalog/useCatalog';
+import { LOW_POWER_MAX_FPS } from '../audio/data/constants';
+import { useAudioData } from '../contexts/AudioDataContext';
 import { COMPACT_LAYOUT_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { useIdleFade } from '../hooks/useIdleFade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -58,6 +60,15 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
   const catalog = useCatalog();
   const compact = useMediaQuery(COMPACT_LAYOUT_QUERY);
   const perf = usePerfMode(compact);
+  const { frameLoop, pulse } = useAudioData();
+
+  useEffect(() => {
+    frameLoop.setMaxFps(perf === 'low' ? LOW_POWER_MAX_FPS : null);
+  }, [frameLoop, perf]);
+
+  useEffect(() => {
+    pulse.setEnabled(settings.audioReactivePulse ?? true);
+  }, [pulse, settings.audioReactivePulse]);
   const [panels, dispatch] = useReducer(panelsReducer, INITIAL_PANELS);
   const [albumsAlbumId, setAlbumsAlbumId] = useState<string | null>(null);
   const [albumsFocusTrackId, setAlbumsFocusTrackId] = useState<string | null>(null);
