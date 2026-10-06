@@ -134,3 +134,75 @@
     transition: none;
   }
 }
+
+/* ===== Channel legend ===== */
+
+.ChannelLegend {
+  list-style: none;
+  margin: var(--charW1) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: calc(var(--charW1) / 2) var(--charW1);
+}
+
+.ChannelLegend-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--charW1) / 2);
+  color: var(--neutral3);
+}
+
+.ChannelLegend-item.is-silent {
+  opacity: 0.45;
+}
+
+.ChannelLegend-swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--neutral1);
+  background: var(--channel);
+}
+
+.App .ChannelLegend-state {
+  font-size: 0.8em;
+  color: var(--neutral2);
+}
+
+/* ===== More settings and buttons ===== */
+
+.StagePanel-more {
+  margin-top: 12px;
+}
+
+.App .StagePanel-more summary {
+  font: var(--font-strong);
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.StagePanel-more[open] summary {
+  margin-bottom: 10px;
+}
+
+.App .StagePanel-button {
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--button);
+  color: var(--clickable);
+  font: var(--font-strong);
+  cursor: pointer;
+}
+
+.App .StagePanel-button:hover {
+  border-color: var(--accent);
+  color: var(--neutral4);
+}
+
+.App[data-layout='compact'] .StagePanel-button,
+.App[data-layout='compact'] .StagePanel-more summary {
+  min-height: var(--touch-target);
+}
