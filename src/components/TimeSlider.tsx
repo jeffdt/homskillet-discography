@@ -3,7 +3,7 @@ import autoBindReact from 'auto-bind/react';
 import { AudioDataContext, AudioDataContextValue } from '../contexts/AudioDataContext';
 import Slider from './Slider';
 
-/** The knob and elapsed time move this often while playing (the label changes once a second anyway). */
+/** Knob and elapsed time update this often while playing (the label changes once a second). */
 const POSITION_MAX_FPS = 30;
 const TIME_SLIDER_LOOP_ID = 'time-slider';
 const pad = (n: number): string => (n < 10 ? '0' + n : String(n));

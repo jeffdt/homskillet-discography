@@ -80,4 +80,46 @@ describe('SparkSystem', () => {
     system.clear();
     expect(system.sparks).toHaveLength(0);
   });
+
+  describe('frame rate independence', () => {
+    const FRAME_COUNTS = [30, 60, 120, 144];
+    /** Not a multiple of the 200 ms wait, so no spawn lands exactly on the last frame boundary. */
+    const TOTAL_MS = 1050;
+
+    function run(frames: number) {
+      const system = steady();
+      system.configure({ spawnRate: 100, lifespan: 100000, baseAngle: 180, gravity: 0.5 });
+      system.clear();
+      let spawned = 0;
+      let live = 0;
+      for (let i = 0; i < frames; i++) {
+        system.step(TOTAL_MS / frames, ORIGIN);
+        spawned += Math.max(0, system.sparks.length - live);
+        live = system.sparks.length;
+      }
+      return { system, spawned, dtMs: TOTAL_MS / frames };
+    }
+
+    it('spawns the same number of sparks over the same time at every rate', () => {
+      const counts = FRAME_COUNTS.map((frames) => run(frames).spawned);
+      expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+      expect(counts[0]).toBeGreaterThanOrEqual(8);
+    });
+
+    it('places the oldest spark at the same point at every rate', () => {
+      const oldest = FRAME_COUNTS.map((frames) => {
+        const { system, dtMs } = run(frames);
+        return { spark: system.sparks[0], dtMs };
+      });
+      for (const { spark, dtMs } of oldest) {
+        const t = spark.ageMs / 1000;
+        expect(spark.x).toBeCloseTo(100 - 80 * t, 6);
+        expect(spark.y).toBeCloseTo(50 + 0.5 * 0.5 * 80 * t * t, 6);
+        expect(spark.opacity).toBeCloseTo(1 - spark.ageMs / 100000, 6);
+        expect(Math.abs(spark.ageMs - (TOTAL_MS - 200))).toBeLessThanOrEqual(dtMs + 1e-6);
+      }
+      const xs = oldest.map(({ spark }) => spark.x);
+      expect(Math.max(...xs) - Math.min(...xs)).toBeLessThan(80 * 0.04);
+    });
+  });
 });

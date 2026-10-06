@@ -71,7 +71,7 @@ export class SparkSystem {
     };
   }
 
-  /** Ages and culls sparks, spawns due ones at origin() (none when it returns null), and moves them. */
+  /** Ages and culls sparks, spawns due ones at origin() (none if it returns null), moves them. */
   step(dtMs: number, origin: () => { x: number; y: number } | null): void {
     for (let i = this.sparks.length - 1; i >= 0; i--) {
       const spark = this.sparks[i];

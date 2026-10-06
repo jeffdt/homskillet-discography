@@ -54,4 +54,12 @@ describe('TimeSlider', () => {
     expect(screen.getByText('3:20')).toBeTruthy();
     expect(screen.getByText('∞')).toBeTruthy();
   });
+
+  it('leaves the frame loop when it unmounts', () => {
+    const { data, utils } = renderSlider({ ms: 8000 });
+    data.frameLoop.setPlaying(true);
+    expect(data.frameLoop.isRunning()).toBe(true);
+    utils.unmount();
+    expect(data.frameLoop.isRunning()).toBe(false);
+  });
 });

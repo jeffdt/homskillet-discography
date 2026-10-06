@@ -43,7 +43,7 @@ describe('steady-state playback', () => {
     data.frameLoop.setPlaying(true);
     let positionMs = 0;
     const controls = {
-      getPositionMs: () => (positionMs += 16),
+      getPositionMs: () => (positionMs += 100),
       togglePause: vi.fn(),
       prevTrack: vi.fn(),
       nextTrack: vi.fn(),
@@ -71,10 +71,15 @@ describe('steady-state playback', () => {
       )
     );
     const commitsAfterMount = onRender.mock.calls.length;
+    const elapsedBefore = screen.getByText('0:00');
+    const knob = document.body.querySelector('.Slider-knob') as HTMLElement;
+    const knobBefore = knob.style.left;
     act(() => {
       for (let i = 0; i < 120; i++) data.scheduler.tick((i * 1000) / 60);
     });
     expect(onRender.mock.calls.length).toBe(commitsAfterMount);
+    expect(elapsedBefore.textContent).not.toBe('0:00');
+    expect(knob.style.left).not.toBe(knobBefore);
     const glow = screen.getByRole('button', { name: 'Pause' }).style;
     expect(Number(glow.getPropertyValue('--pulse-intensity'))).toBeGreaterThan(0.5);
     expect(document.body.querySelectorAll('.SliderParticle').length).toBeGreaterThan(0);
