@@ -50,7 +50,9 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
       const knob = this.knob.current;
       if (!node || !knob) return;
 
-      const frac = (event.clientX - node.offsetLeft - knob.offsetWidth / 2) / node.offsetWidth;
+      // Bounding rect, not offsetLeft: offsetLeft is relative to the nearest positioned ancestor.
+      const rect = node.getBoundingClientRect();
+      const frac = (event.clientX - rect.left - knob.offsetWidth / 2) / rect.width;
       const pos = Math.max(Math.min(frac, 1), 0);
       this.setState({
         draggedPos: pos,
