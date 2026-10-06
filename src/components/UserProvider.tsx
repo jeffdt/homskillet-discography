@@ -1,3 +1,4 @@
+import { DEFAULT_CHANNEL_PALETTE_ID } from '../config/channelPalettes';
 import React, { createContext, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { debounce } from 'lodash';
 
@@ -39,6 +40,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   particleFadeMode: 'fade', // 'fade' or 'instant'
 
   // Visualizer settings
+  channelPalette: DEFAULT_CHANNEL_PALETTE_ID, // channel palette id (src/config/channelPalettes.ts)
   visualizerTheme: 0, // default to MW Green theme
   visualizerThemesExpanded: false, // collapsed by default for cleaner view
   peakDecayRate: 0.98, // peak hold decay rate (0.50=fast, 0.99=slow)

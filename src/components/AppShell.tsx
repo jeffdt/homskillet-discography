@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { Album, PlayPlan, albumPlan, shuffleAllPlan } from '../catalog/catalog';
 import { useCatalog } from '../catalog/useCatalog';
+import { channelPaletteById } from '../config/channelPalettes';
 import { LOW_POWER_MAX_FPS } from '../audio/data/constants';
 import { useAudioData } from '../contexts/AudioDataContext';
 import { COMPACT_LAYOUT_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
@@ -26,6 +27,7 @@ import {
   stripPlayParams,
 } from '../shell/playUrl';
 import { PlaybackControls, PlaybackState } from '../types/playback';
+import { channelColors } from '../visuals/channelColors';
 import AboutPanel from './AboutPanel';
 import AlbumsPanel from './AlbumsPanel';
 import Dock from './Dock';
@@ -68,6 +70,9 @@ export default function AppShell({ playback, controls }: AppShellProps) {
   useEffect(() => {
     pulse.setEnabled(settings.audioReactivePulse ?? true);
   }, [pulse, settings.audioReactivePulse]);
+  useEffect(() => {
+    channelColors.set(channelPaletteById(settings.channelPalette).channels);
+  }, [settings.channelPalette]);
   const [panels, dispatch] = useReducer(panelsReducer, INITIAL_PANELS);
   const [albumsAlbumId, setAlbumsAlbumId] = useState<string | null>(null);
   const [albumsFocusTrackId, setAlbumsFocusTrackId] = useState<string | null>(null);
