@@ -18,11 +18,12 @@ import {
   STAGE_COPY,
   STAGE_TOGGLES,
   StageSliderDef,
+  displayValue,
   nearestIndex,
   sliderSetting,
   toggleSetting,
 } from '../components/stage/stageControls';
-import { STAGE_DEFAULTS } from '../config/stageSettings';
+import { SCOPE_SPANS, STAGE_DEFAULTS, scopeSpanOf } from '../config/stageSettings';
 
 const EM_DASH = new RegExp(String.fromCharCode(0x2014));
 
@@ -117,7 +118,6 @@ describe('stage controls', () => {
     expect(nearestIndex([1, 2, 4, 8], 3)).toBe(1);
     expect(PEAK_QUANTIZATION.toSlider(3)).toBe(1);
     expect(PEAK_QUANTIZATION.toSlider(100)).toBe(3);
-    expect(SCOPE_ZOOM.toSlider(1000)).toBe(2);
     expect(FILM_GRAIN.toSlider(150)).toBe(100);
     expect(FILM_GRAIN.toSlider(-5)).toBe(0);
   });
@@ -139,5 +139,18 @@ describe('stage controls', () => {
     expect(toggleSetting({ particleFadeMode: 'instant' }, SPARK_FADE)).toBe(false);
     expect(SPARK_FADE.toValue(false)).toBe('instant');
     expect(SPARK_FADE.toValue(true)).toBe('fade');
+  });
+
+  it('resolve the scope zoom like the renderer does', () => {
+    [1000, '256', undefined, 'garbage', 768].forEach((value) =>
+      expect(SCOPE_ZOOM.toSlider(value as number)).toBe(SCOPE_SPANS.indexOf(scopeSpanOf(value)))
+    );
+  });
+
+  it('display the snapped value for stale stored values', () => {
+    expect(displayValue(FILM_GRAIN, 150)).toBe('100%');
+    expect(displayValue(FILM_GRAIN, 0)).toBe('Off');
+    expect(displayValue(SCOPE_ZOOM, 1000)).toBe('21 ms');
+    expect(displayValue(PEAK_QUANTIZATION, 3)).toBe('Low');
   });
 });

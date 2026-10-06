@@ -1,4 +1,9 @@
-import { SCOPE_SPANS, STAGE_DEFAULTS, StageSettingKey } from '../../config/stageSettings';
+import {
+  SCOPE_SPANS,
+  STAGE_DEFAULTS,
+  StageSettingKey,
+  scopeSpanOf,
+} from '../../config/stageSettings';
 
 /** A Stage panel slider: the setting it writes, how slider positions map to it, and its explanation. */
 export interface StageSliderDef {
@@ -76,6 +81,7 @@ const SPAWN_VALUES = [200, 180, 160, 140, 120, 100, 80, 60, 40, 20];
 const SPEED_VARIANCE_VALUES = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90];
 const TAP_SAMPLES_PER_MS = 24;
 
+/** How long the spectrum peak markers hang before falling. */
 export const PEAK_DECAY: StageSliderDef = {
   id: 'peak-decay',
   key: 'peakDecayRate',
@@ -87,6 +93,7 @@ export const PEAK_DECAY: StageSliderDef = {
   format: (value) => `${nearestIndex(PEAK_DECAY_VALUES, value) + 1}/${PEAK_DECAY_VALUES.length}`,
 };
 
+/** How coarsely the falling peak markers snap to steps. */
 export const PEAK_QUANTIZATION: StageSliderDef = {
   id: 'peak-quantization',
   key: 'peakQuantization',
@@ -98,6 +105,7 @@ export const PEAK_QUANTIZATION: StageSliderDef = {
   format: (value) => PEAK_QUANTIZATION_NAMES[nearestIndex(PEAK_QUANTIZATION_VALUES, value)],
 };
 
+/** How many samples each channel scope trace shows. */
 export const SCOPE_ZOOM: StageSliderDef = {
   id: 'scope-zoom',
   key: 'scopeSpan',
@@ -106,9 +114,11 @@ export const SCOPE_ZOOM: StageSliderDef = {
     'How much time each trace shows. Zoom in to see the shape of single waves; zoom out to watch notes change.',
   step: 1,
   ...stepped(SCOPE_SPANS),
+  toSlider: (value) => SCOPE_SPANS.indexOf(scopeSpanOf(value)),
   format: (value) => `${Math.round(value / TAP_SAMPLES_PER_MS)} ms`,
 };
 
+/** Strength of the film grain overlay. */
 export const FILM_GRAIN: StageSliderDef = {
   id: 'film-grain',
   key: 'filmGrainAmount',
@@ -120,6 +130,7 @@ export const FILM_GRAIN: StageSliderDef = {
   format: (value) => (value === 0 ? 'Off' : `${value}%`),
 };
 
+/** How often sparks spawn off the progress bar. */
 export const SPARK_SPAWN: StageSliderDef = {
   id: 'spark-spawn',
   key: 'particleSpawnRate',
@@ -130,6 +141,7 @@ export const SPARK_SPAWN: StageSliderDef = {
   format: (value) => `${nearestIndex(SPAWN_VALUES, value) + 1}`,
 };
 
+/** How long each spark lives. */
 export const SPARK_LIFESPAN: StageSliderDef = {
   id: 'spark-lifespan',
   key: 'particleLifespan',
@@ -140,6 +152,7 @@ export const SPARK_LIFESPAN: StageSliderDef = {
   format: (value) => `${(value / 1000).toFixed(1)} s`,
 };
 
+/** The direction sparks fly. */
 export const SPARK_ANGLE: StageSliderDef = {
   id: 'spark-angle',
   key: 'particleBaseAngle',
@@ -150,6 +163,7 @@ export const SPARK_ANGLE: StageSliderDef = {
   format: (value) => `${value}°`,
 };
 
+/** How far sparks may stray from the spray angle. */
 export const SPARK_CONE: StageSliderDef = {
   id: 'spark-cone',
   key: 'particleAngleSpread',
@@ -160,6 +174,7 @@ export const SPARK_CONE: StageSliderDef = {
   format: (value) => `±${value}°`,
 };
 
+/** How fast sparks leave the bar. */
 export const SPARK_SPEED: StageSliderDef = {
   id: 'spark-speed',
   key: 'particleSpeed',
@@ -170,6 +185,7 @@ export const SPARK_SPEED: StageSliderDef = {
   format: (value) => `${value.toFixed(1)}×`,
 };
 
+/** How much spark speeds differ from each other. */
 export const SPARK_SPEED_VARIANCE: StageSliderDef = {
   id: 'spark-speed-variance',
   key: 'particleSpeedVariance',
@@ -180,6 +196,7 @@ export const SPARK_SPEED_VARIANCE: StageSliderDef = {
   format: (value) => `${SPEED_VARIANCE_VALUES[nearestIndex(SPEED_VARIANCE_VALUES, value)]}%`,
 };
 
+/** How strongly gravity pulls sparks down. */
 export const SPARK_GRAVITY: StageSliderDef = {
   id: 'spark-gravity',
   key: 'particleGravity',
@@ -211,6 +228,7 @@ export const ALL_STAGE_SLIDERS: readonly StageSliderDef[] = [
   ...MORE_SPARK_SLIDERS,
 ];
 
+/** Switch for the audio-reactive play button and logo. */
 export const REACTIVE_UI: StageToggleDef = {
   id: 'reactive-ui',
   key: 'audioReactivePulse',
@@ -220,6 +238,7 @@ export const REACTIVE_UI: StageToggleDef = {
   toValue: (on) => on,
 };
 
+/** Switch for sparks on the progress bar. */
 export const SPARKS: StageToggleDef = {
   id: 'sparks',
   key: 'sliderSparksEnabled',
@@ -230,6 +249,7 @@ export const SPARKS: StageToggleDef = {
   toValue: (on) => on,
 };
 
+/** Switch for fading sparks out as they age. */
 export const SPARK_FADE: StageToggleDef = {
   id: 'spark-fade',
   key: 'particleFadeMode',
@@ -263,4 +283,9 @@ export function sliderSetting(settings: Record<string, any>, def: StageSliderDef
 export function toggleSetting(settings: Record<string, any>, def: StageToggleDef): boolean {
   const stored = settings[def.key];
   return def.isOn(stored === undefined || stored === null ? STAGE_DEFAULTS[def.key] : stored);
+}
+
+/** The value text for a stored setting, shown from the snapped or clamped slider position so stale values read true. */
+export function displayValue(def: StageSliderDef, stored: number): string {
+  return def.format(def.fromSlider(def.toSlider(stored)));
 }
