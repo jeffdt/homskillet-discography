@@ -66,13 +66,17 @@
     repeating-linear-gradient(to bottom, #fff2 0px, #fff2 1px, #fff0 1px, #fff0 var(--charH));
 }
 
-.App * {
+/* Descendants inherit the font from here; headings and components set their own. */
+.App {
   font: var(--font);
   -webkit-font-smoothing: antialiased;
   /* supports Japanese characters better than 'none' */
   -moz-osx-font-smoothing: grayscale;
   /* Firefox */
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.App a {
   text-decoration: none;
 }
 
@@ -144,7 +148,7 @@ h6 {
   color: var(--neutral4);
   margin: var(--charH) 0;
   padding: 0;
-  font: var(--font-accent) !important;
+  font: var(--font-accent);
 }
 
 p {
@@ -885,11 +889,6 @@ body,
     font-size: 18px;
     line-height: 1.4;
   }
-
-  .Settings-section h3 {
-    font-size: 20px;
-    line-height: 1.3;
-  }
 }
 
 .Settings-toggle input[type='checkbox'] {
@@ -922,7 +921,6 @@ body,
 .Settings-subsection {
   margin-top: calc(var(--charH) * 1.5);
   margin-bottom: var(--charH);
-  font-size: 0.9em;
   color: var(--neutral3);
 }
 
@@ -939,6 +937,7 @@ body,
 }
 
 .Settings-subsection-with-toggle input[type='checkbox'] {
+  font: var(--font);
   margin: 0;
   margin-right: calc(var(--charW1) / 2);
   cursor: pointer;
@@ -948,6 +947,7 @@ body,
   display: inline-block;
   transition: transform 150ms ease-out;
   font-size: 0.8em;
+  font-weight: 400;
 }
 
 .Settings-subsection-arrow.expanded {
@@ -955,6 +955,7 @@ body,
 }
 
 .Settings-reset-button {
+  font: var(--font);
   margin-left: auto;
   padding: 0 calc(var(--charW1) / 2);
   background: transparent;

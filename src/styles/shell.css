@@ -237,11 +237,9 @@
 
 /* ===== Wordmark ===== */
 
-/* font: inherit undoes the legacy `.App * { font }` reset so the logo takes its container's size. */
 .App .Wordmark {
   position: relative;
   display: inline-block;
-  font: inherit;
   line-height: 1;
   white-space: nowrap;
 }
@@ -606,9 +604,8 @@
 
 .App .TitleScreen-logo {
   margin: 0;
-  /* The global h1-h6 rule uses !important, so the size here must too. The Wordmark sets its own face. */
-  font-size: clamp(40px, 10vw, 104px) !important;
-  line-height: 1 !important;
+  font-size: clamp(40px, 10vw, 104px);
+  line-height: 1;
 }
 
 .App .TitleScreen-tagline {
@@ -938,8 +935,8 @@
 
 .App .Tracklist-albumTitle {
   margin: 0 0 4px;
-  font: var(--font-display) !important;
-  font-size: 22px !important;
+  font: var(--font-display);
+  font-size: 22px;
   color: var(--neutral4);
 }
 
