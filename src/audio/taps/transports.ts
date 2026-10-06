@@ -20,7 +20,7 @@ export class PooledTapSender {
 
   constructor(
     private readonly post: (buffer: ArrayBuffer) => void,
-    poolSize = TAP_POOL_SIZE
+    private readonly poolSize = TAP_POOL_SIZE
   ) {
     for (let i = 0; i < poolSize; i++) this.free.push(new ArrayBuffer(TAP_SNAPSHOT_BYTES));
   }
@@ -31,7 +31,7 @@ export class PooledTapSender {
 
   /** Takes back a buffer the main thread returned. */
   recycle(buffer: ArrayBuffer): void {
-    if (buffer.byteLength === TAP_SNAPSHOT_BYTES && this.free.length < TAP_POOL_SIZE) {
+    if (buffer.byteLength === TAP_SNAPSHOT_BYTES && this.free.length < this.poolSize) {
       this.free.push(buffer);
     }
   }

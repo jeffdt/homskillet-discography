@@ -242,4 +242,16 @@ describe('ChipRenderer (stub core)', () => {
     boosted.renderer.render(b, new Float32Array(4800));
     expect(a.some((x, i) => Math.abs(x - b[i]) > 1e-6)).toBe(true);
   });
+
+  it('starts each loaded track with a fresh SubBass filter', async () => {
+    const fresh = await setup({ subBass: 2 });
+    const reused = await setup({ subBass: 2 });
+    renderQuanta(reused.renderer, 50);
+    reused.renderer.load(new Uint8Array(16), '/Album/track.nsf', { ...SETTINGS, subBass: 2 });
+    const expected = new Float32Array(RENDER_CHUNK_FRAMES);
+    const actual = new Float32Array(RENDER_CHUNK_FRAMES);
+    fresh.renderer.render(expected, new Float32Array(RENDER_CHUNK_FRAMES));
+    reused.renderer.render(actual, new Float32Array(RENDER_CHUNK_FRAMES));
+    expect(Array.from(actual)).toEqual(Array.from(expected));
+  });
 });

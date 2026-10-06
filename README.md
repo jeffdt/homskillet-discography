@@ -68,7 +68,7 @@ bun run deploy-lite
 ## Project Structure
 
 - **src/components/** - React UI components
-- **src/players/** - Player implementations (GMEPlayer for NSF files)
+- **src/audio/** - Audio engine (AudioWorklet, ScriptProcessor and stub), with **src/players/** holding EnginePlayer, the Player that drives it
 - **src/config/** - Configuration files
 - **public/** - Static assets
 - **server/** - Development API server

@@ -255,18 +255,31 @@ describe('ChipRenderer seek probes on real chip-core', () => {
       30000
     );
 
+    const seekAtTempo = (tempo: number) => {
+      const events: RendererEvent[] = [];
+      const renderer = makeRenderer(events, null, rate);
+      renderer.load(readTrack(PARKOUR), '/' + PARKOUR, { ...SETTINGS, tempo });
+      renderer.seek(SEEK_TARGET_MS, 7);
+      renderUntil(renderer, () => events.some((e) => e.type === 'seeked'), 5000);
+      return { events, renderer };
+    };
+    const NON_DYADIC_TEMPOS = [0.95, 0.9, 0.3, 1.05, 1.1];
+
+    it('finishes a seek at non-dyadic tempos', () => {
+      for (const tempo of NON_DYADIC_TEMPOS) {
+        const { events } = seekAtTempo(tempo);
+        expect(events.find((e) => e.type === 'seeked')).toMatchObject({ seekId: 7 });
+      }
+    }, 30000);
+
     // Documents a known GME limitation (integer out_time_scaled at non-dyadic tempos), same as today's
-    // GMEPlayer: GME's integer tell_scaled reads up to 94 ms off the true song position at non-dyadic
-    // tempos (e.g. 18906 vs 19000 at 0.95), so positionMs is not within a few ms of the target.
+    // GMEPlayer: GME's integer tell_scaled drifts from the true song position at non-dyadic tempos,
+    // so positionMs is not within a few ms of the target. Seek completion is asserted separately above.
     it.fails(
       'reports a positionMs within 5 ms of the target at non-dyadic tempos',
       () => {
-        for (const tempo of [0.95, 0.9, 0.3, 1.05, 1.1]) {
-          const events: RendererEvent[] = [];
-          const renderer = makeRenderer(events, null, rate);
-          renderer.load(readTrack(PARKOUR), '/' + PARKOUR, { ...SETTINGS, tempo });
-          renderer.seek(SEEK_TARGET_MS, 7);
-          renderUntil(renderer, () => events.some((e) => e.type === 'seeked'), 5000);
+        for (const tempo of NON_DYADIC_TEMPOS) {
+          const { renderer } = seekAtTempo(tempo);
           expect(Math.abs(renderer.positionMs - SEEK_TARGET_MS)).toBeLessThan(5);
         }
       },
@@ -319,11 +332,7 @@ describe('ChipRenderer seek probes on real chip-core', () => {
     const fadeStarted = () => (renderer as unknown as { endFadeStarted: boolean }).endFadeStarted;
     renderUntil(renderer, fadeStarted, 1000);
     let rendered = 0;
-    renderUntil(
-      renderer,
-      () => rendered++ >= fadeQuanta - 3 || renderer.positionMs < 0,
-      fadeQuanta
-    );
+    renderUntil(renderer, () => rendered++ >= fadeQuanta - 3, fadeQuanta);
     expect(events.filter((e) => e.type === 'ended')).toHaveLength(0);
     renderer.seek(1000, 2);
     renderUntil(renderer, () => events.some((e) => e.type === 'seeked'), 500);

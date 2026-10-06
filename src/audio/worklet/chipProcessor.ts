@@ -50,7 +50,9 @@ class ChipProcessor extends AudioWorkletProcessor {
   }
 
   process(_inputs: Float32Array[][], outputs: Float32Array[][]): boolean {
-    const [left, right] = outputs[0];
+    const output = outputs[0];
+    const left = output[0];
+    const right = output[1];
     if (this.processorCore) this.processorCore.process(left, right ?? left, currentTime);
     return true;
   }

@@ -39,7 +39,7 @@ export class ChipRenderer {
   private readonly endFade = new GainRamp();
   private readonly declickFrames: number;
   private readonly endFadeFrames: number;
-  private readonly subBassFilter: SubBass;
+  private subBassFilter: SubBass;
   private settings: RendererSettings = { tempo: 1, stereoWidth: 1, subBass: 0, loopForever: false };
   private durationMs = 0;
   private paused = false;
@@ -108,6 +108,7 @@ export class ChipRenderer {
     this.endFade.reset(1);
     this.currentGains.set(this.targetGains);
     this.taps?.clear();
+    this.subBassFilter = new SubBass(this.sampleRate);
     return info;
   }
 

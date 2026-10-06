@@ -1,6 +1,7 @@
 /**
  * A minimal one-song NSF: INIT starts a 440 Hz square on pulse 1, and PLAY counts frames and
- * silences the APU ($4015 = 0) after 120 frames (2 s). GME's silence detection then ends the track.
+ * silences the APU ($4015 = 0) after 120 frames (2 s). The engine ignores silence (ignore_silence(1)),
+ * so the track keeps playing silence until its duration.
  */
 export function buildToneThenSilenceNsf(): Uint8Array {
   const header = new Uint8Array(0x80);

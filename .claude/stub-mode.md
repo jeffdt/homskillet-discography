@@ -97,35 +97,21 @@ When stub mode is active, you'll see:
 
 The stub implements all game-music-emu functions used by the app:
 
-```javascript
-// Memory management
-(_malloc, _free, getValue, setValue, UTF8ToString);
-
-// Audio playback
-(_gme_open_data, _gme_delete, _gme_play, _gme_start_track);
-(_gme_identify_header,
-  _gme_identify_extension,
-  _gme_new_emu_multi_channel,
-  _gme_load_data,
-  _gme_multi_channel,
-  _gme_free_info);
-
-// Playback control
-(_gme_seek_scaled, _gme_tell_scaled, _gme_track_ended);
-
-// Metadata
-(_gme_track_count, _gme_track_info, _gme_voice_count, _gme_voice_name);
-
-// Audio parameters
-(_gme_set_tempo, _gme_set_stereo_depth, _gme_set_fade, _gme_mute_voices);
-
-// Visualization (stubs)
-(_cqt_init, _cqt_calc, _cqt_render_line);
+```text
+Memory management:   _malloc, _free, getValue, setValue, UTF8ToString
+Audio playback:      _gme_open_data, _gme_delete, _gme_play, _gme_start_track
+                     _gme_identify_header, _gme_identify_extension,
+                     _gme_new_emu_multi_channel, _gme_load_data, _gme_multi_channel,
+                     _gme_free_info
+Playback control:    _gme_seek_scaled, _gme_tell_scaled, _gme_track_ended
+Metadata:            _gme_track_count, _gme_track_info, _gme_voice_count, _gme_voice_name
+Audio parameters:    _gme_set_tempo, _gme_set_stereo_depth, _gme_set_fade, _gme_mute_voices
+Visualization:       _cqt_init, _cqt_calc, _cqt_render_line (stubs)
 ```
 
 ## Limitations
 
-- No actual audio playback (generates silence)
+- No actual audio playback (the stub generates fake per-voice waveforms, but the engine runs them at zero volume)
 - Mock catalog has only 3 demo tracks (vs. 100+ real tracks)
 - Metadata is generic mock data
 - The constant-Q spectrogram stays disabled (the stub's `_cqt_init` returns 0)
