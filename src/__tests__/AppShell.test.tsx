@@ -118,14 +118,21 @@ afterEach(() => {
 });
 
 describe('AppShell', () => {
-  it('shows the film grain overlay by default', async () => {
+  it('shows the film grain overlay at 60% by default', async () => {
     const { container } = renderShell();
     await screen.findByText('or browse 2 albums');
-    expect(container.querySelector('.FilmGrain')).not.toBeNull();
+    expect((container.querySelector('.FilmGrain') as HTMLElement).style.opacity).toBe('0.6');
   });
 
-  it('hides the film grain overlay when the setting is off', async () => {
-    window.localStorage.setItem('settings', JSON.stringify({ filmGrainEnabled: false }));
+  it('scales the film grain overlay with the amount setting', async () => {
+    window.localStorage.setItem('settings', JSON.stringify({ filmGrainAmount: 25 }));
+    const { container } = renderShell();
+    await screen.findByText('or browse 2 albums');
+    expect((container.querySelector('.FilmGrain') as HTMLElement).style.opacity).toBe('0.25');
+  });
+
+  it('removes the film grain overlay at 0', async () => {
+    window.localStorage.setItem('settings', JSON.stringify({ filmGrainAmount: 0 }));
     const { container } = renderShell();
     await screen.findByText('or browse 2 albums');
     expect(container.querySelector('.FilmGrain')).toBeNull();

@@ -45,20 +45,26 @@ function UISettings({ persistedSettings }: UISettingsProps) {
           <InfoIcon tooltip="UI elements pulse and glow in response to audio" />
         </div>
 
-        <div className="Settings-row">
-          <label className="Settings-toggle">
-            <input
-              type="checkbox"
-              checked={persistedSettings.filmGrainEnabled ?? true}
-              onChange={(e) => {
-                userContext.updateSettings({
-                  filmGrainEnabled: e.target.checked,
-                });
-              }}
-            />
-            <span>Film grain</span>
-          </label>
-          <InfoIcon tooltip="Animated SVG turbulence noise blended over the whole screen, like a CRT" />
+        <div className="Settings-param">
+          <label htmlFor="film-grain-amount">Film Grain</label>
+          <input
+            id="film-grain-amount"
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={persistedSettings.filmGrainAmount ?? 60}
+            onChange={(e) => {
+              userContext.updateSettings({ filmGrainAmount: parseInt(e.target.value) });
+              flashValue('filmGrainAmount');
+            }}
+          />
+          <span className={flashingSetting === 'filmGrainAmount' ? 'Settings-value-flash' : ''}>
+            {(persistedSettings.filmGrainAmount ?? 60) === 0
+              ? 'Off'
+              : `${persistedSettings.filmGrainAmount ?? 60}%`}
+          </span>
+          <InfoIcon tooltip="A tile of random specks drawn once and jittered across the screen, like film grain. 0 turns it off" />
         </div>
 
         <h4

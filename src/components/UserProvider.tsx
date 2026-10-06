@@ -23,7 +23,7 @@ const UserContext = createContext<UserContextValue>({
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
   audioReactivePulse: true,
-  filmGrainEnabled: true, // flickering grain overlay across the whole app
+  filmGrainAmount: 60, // grain overlay strength, 0-100 (0 = off)
   sliderSparksEnabled: false, // enable/disable slider sparks
   sliderSparksExpanded: false, // collapsed by default
 

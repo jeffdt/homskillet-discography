@@ -26,17 +26,18 @@ export function makeGrainTile(random: () => number = Math.random): string | null
 }
 
 /**
- * Full-screen film grain. The noise tile is drawn once and the layer jitters with
- * transforms only, so it stays on the compositor and costs the visualizer no frames.
+ * Full-screen film grain at `amount` percent strength. The noise tile is drawn once and the
+ * layer jitters with transforms only, so it stays on the compositor and costs the visualizer
+ * no frames; changing the amount only changes the layer's opacity.
  */
-export default function FilmGrain() {
+export default function FilmGrain({ amount }: { amount: number }) {
   const [tile, setTile] = useState<string | null>(null);
   useEffect(() => setTile(makeGrainTile()), []);
   return (
     <div
       className="FilmGrain"
       aria-hidden="true"
-      style={tile ? { backgroundImage: `url(${tile})` } : undefined}
+      style={{ opacity: amount / 100, backgroundImage: tile ? `url(${tile})` : undefined }}
     />
   );
 }
