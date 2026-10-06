@@ -126,3 +126,34 @@
   min-height: var(--touch-target);
   min-width: var(--touch-target);
 }
+
+/* ===== Strips grouped by chip ===== */
+
+.ChannelStrips-chip + .ChannelStrips-chip {
+  margin-top: 12px;
+}
+
+.App .ChannelStrips-chip-name {
+  margin: 0 0 2px;
+  color: var(--neutral3);
+}
+
+.ChannelStrips-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ===== Shared copy styles ===== */
+
+.App .Mixer-explain {
+  margin: 0 0 8px;
+  font: var(--font-small);
+  color: var(--neutral2);
+}
+
+.App .Mixer-hint {
+  margin: 0 0 8px;
+  font: var(--font-body);
+  color: var(--neutral2);
+}
