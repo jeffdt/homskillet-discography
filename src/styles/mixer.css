@@ -213,3 +213,35 @@
   min-height: var(--touch-target);
   min-width: var(--touch-target);
 }
+
+/* ===== Panel layout ===== */
+
+.Mixer-section + .Mixer-section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.App .Mixer-reset {
+  margin: 0 0 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--button);
+  color: var(--clickable);
+  font: var(--font-strong);
+  cursor: pointer;
+}
+
+.App .Mixer-reset:hover:not(:disabled) {
+  border-color: var(--neutral2);
+  color: var(--neutral4);
+}
+
+.App .Mixer-reset:disabled {
+  cursor: default;
+}
+
+.App[data-layout='compact'] .Mixer-reset {
+  min-height: var(--touch-target);
+}

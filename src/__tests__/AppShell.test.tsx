@@ -88,7 +88,6 @@ function makeControls(): PlaybackControls {
     getPositionMs: vi.fn(() => 0),
     setTempo: vi.fn(),
     setSpeedRelative: vi.fn(),
-    setVoiceMask: vi.fn(),
     setVoiceMix: vi.fn(),
     setParam: vi.fn(),
     pinParam: vi.fn(),

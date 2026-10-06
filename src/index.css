@@ -745,21 +745,6 @@ body,
   /* Adjust negative margins to match reduced padding */
 }
 
-.App-voice-label {
-  width: calc(var(--charW1) * 18);
-  white-space: nowrap;
-}
-
-.App-voice-label:hover label {
-  color: #fefefe;
-  /* White - hover guidance for label */
-}
-
-.App-voice-label:has(input:active) label {
-  color: var(--accent);
-  /* Accent - electrify label on click */
-}
-
 .Slider {
   height: var(--charH);
   padding: 0;
@@ -1303,62 +1288,6 @@ body,
   100% {
     opacity: 1;
   }
-}
-
-.PlayerParams h3 {
-  margin-top: 0;
-}
-
-.PlayerParams-param {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.PlayerParams-param:hover .PlayerParams-label {
-  color: #fefefe;
-  /* White - hover guidance for label */
-}
-
-.PlayerParams-param:has(input:active) .PlayerParams-label {
-  color: var(--accent);
-  /* Accent - electrify label on click */
-}
-
-.PlayerParams-param input {
-  margin-right: var(--charW1);
-  flex-shrink: 0;
-}
-
-.PlayerParams-param > span {
-  transition: color 400ms ease-out;
-}
-
-.PlayerParams-group-title {
-  width: 100%;
-  font: var(--font-accent) !important;
-  color: #c3c3c3;
-  /* Light Gray - section headers */
-}
-
-.PlayerParams-voiceList {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: var(--charW1);
-  margin-right: calc(var(--charW1) * -1);
-  max-width: calc(var(--charW1) * 60);
-}
-
-.PlayerParams-label {
-  flex-shrink: 0;
-  width: calc(var(--charW1) * 14);
-  margin-right: var(--charW1);
-  color: #c3c3c3;
-  /* Light Gray - setting labels */
-}
-
-.PlayerParams-group {
-  margin-bottom: var(--charH);
 }
 
 button.FavoriteButton:active {

@@ -89,7 +89,6 @@ class App extends React.Component<AppProps, AppState> {
       getPositionMs: this.getPositionMs,
       setTempo: this.handleTempoChange,
       setSpeedRelative: this.setSpeedRelative,
-      setVoiceMask: this.handleSetVoiceMask,
       setVoiceMix: this.handleSetVoiceMix,
       setParam: this.handleParamChange,
       pinParam: this.handlePinParam,
@@ -362,13 +361,6 @@ class App extends React.Component<AppProps, AppState> {
   getPositionMs(): number {
     const player = this.sequencer?.getPlayer();
     return player ? player.getPositionMs() : 0;
-  }
-
-  handleSetVoiceMask(voiceMask: boolean[]) {
-    if (!this.sequencer?.getPlayer()) return;
-
-    this.sequencer.getPlayer()!.setVoiceMask(voiceMask);
-    this.setState({ voiceMask: [...voiceMask] });
   }
 
   /** Applies mute and solo from the Mixer; the strips update from the engine's voiceMixChanged event. */
