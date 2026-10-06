@@ -61,7 +61,6 @@ export interface IPlayer extends EventEmitter {
   isPlaying(): boolean;
   getTempo(): number;
   setTempo(tempo: number): void;
-  setFadeout(startMs: number): void;
   getDurationMs(): number;
   getPositionMs(): number;
   seekMs(positionMs: number): void;
@@ -79,6 +78,4 @@ export interface IPlayer extends EventEmitter {
   resolveParamValues(persistedSettings: any): void;
   getParamValues(): Record<string, any>;
   getBasePlayerState(): BasePlayerState;
-  processAudio(output: Float32Array[]): void;
-  handleFileSystemReady(): void;
 }

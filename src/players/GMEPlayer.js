@@ -1,4 +1,4 @@
-import Player from './Player.js';
+import Player from './LegacyPlayer.js';
 import SubBass from '../effects/SubBass';
 import { allOrNone, remap01 } from '../util';
 import autoBind from 'auto-bind';
