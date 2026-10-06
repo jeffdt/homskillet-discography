@@ -30,6 +30,12 @@ export class ChipRenderer {
   /** Frames passed to gme_play since the track (re)started. Tests use it to line seeks up with continuous playback. */
   emulatedFrames = 0;
 
+  // Song position tracked in float, not GME's integer tell_scaled, which drifts about 0.5% at
+  // non-dyadic tempos (0.95, 1.1) and skews the clock, seek landings and the end fade. It is the
+  // position at the last tempo change plus the frames since, so constant-tempo playback adds no
+  // rounding error.
+  private tempoBaseMs = 0;
+  private framesAtTempo = 0;
   private emu = 0;
   private readonly renderBuffer: number;
   private readonly seekScratch: number;
@@ -77,7 +83,11 @@ export class ChipRenderer {
   /** Song position in ms (tempo-scaled); the seek target while a seek is running. */
   get positionMs(): number {
     if (this.seekTargetMs !== null) return this.seekTargetMs;
-    return this.emu ? this.core._gme_tell_scaled(this.emu) : 0;
+    return this.emu ? this.songPositionMs : 0;
+  }
+
+  private get songPositionMs(): number {
+    return this.tempoBaseMs + (this.framesAtTempo * 1000 * this.settings.tempo) / this.sampleRate;
   }
 
   /** Opens and starts a track, replacing any loaded one (and dropping a pending seek without a `seeked` event). Throws if GME rejects the file. */
@@ -104,6 +114,7 @@ export class ChipRenderer {
     this.seekTargetMs = null;
     this.seekFramesRemaining = null;
     this.emulatedFrames = 0;
+    this.resetPosition();
     this.declick.reset(1);
     this.endFade.reset(1);
     this.currentGains.set(this.targetGains);
@@ -128,6 +139,8 @@ export class ChipRenderer {
   }
 
   setTempo(tempo: number): void {
+    this.tempoBaseMs = this.songPositionMs;
+    this.framesAtTempo = 0;
     this.settings.tempo = tempo;
     if (this.emu) this.core._gme_set_tempo(this.emu, tempo);
     // A running seek re-plans its frame count at the new tempo.
@@ -195,7 +208,7 @@ export class ChipRenderer {
     }
     const core = this.core;
     core._gme_play(this.emu, frames * INTERLEAVED_CHANNELS, this.renderBuffer);
-    this.emulatedFrames += frames;
+    this.advancePosition(frames);
     // Re-read HEAP16 every chunk: memory growth replaces the view.
     const heap = core.HEAP16;
     const base = this.renderBuffer >> 1;
@@ -222,6 +235,17 @@ export class ChipRenderer {
     }
   }
 
+  /** Counts frames handed to gme_play and advances the song position at the current tempo. */
+  private advancePosition(frames: number): void {
+    this.emulatedFrames += frames;
+    this.framesAtTempo += frames;
+  }
+
+  private resetPosition(): void {
+    this.tempoBaseMs = 0;
+    this.framesAtTempo = 0;
+  }
+
   // Seeks render into a scratch buffer with gme_play: sample-exact at every tempo. gme_seek_scaled
   // is inexact in one shot and hangs in small steps at tempo above 1 in multi-channel mode.
   private advanceSeek(renderedFrames: number): void {
@@ -231,7 +255,7 @@ export class ChipRenderer {
     while (remaining > 0 && budget > 0 && !core._gme_track_ended(this.emu)) {
       const n = Math.min(remaining, budget, SEEK_CHUNK_FRAMES);
       core._gme_play(this.emu, n * INTERLEAVED_CHANNELS, this.seekScratch);
-      this.emulatedFrames += n;
+      this.advancePosition(n);
       remaining -= n;
       budget -= n;
     }
@@ -248,12 +272,15 @@ export class ChipRenderer {
   private planSeek(): number {
     const core = this.core;
     const target = this.seekTargetMs as number;
-    if (target < core._gme_tell_scaled(this.emu)) {
+    if (target < this.songPositionMs) {
       core._gme_start_track(this.emu, 0);
       this.emulatedFrames = 0;
+      this.resetPosition();
     }
-    const tell = core._gme_tell_scaled(this.emu);
-    return target > tell ? framesToReach(tell, target, this.settings.tempo, this.sampleRate) : 0;
+    const position = this.songPositionMs;
+    return target > position
+      ? framesToReach(position, target, this.settings.tempo, this.sampleRate)
+      : 0;
   }
 
   private finishSeek(): void {
@@ -265,7 +292,7 @@ export class ChipRenderer {
     this.onEvent({
       type: 'seeked',
       seekId: this.seekId,
-      positionMs: this.core._gme_tell_scaled(this.emu),
+      positionMs: this.songPositionMs,
     });
   }
 
@@ -287,7 +314,7 @@ export class ChipRenderer {
       if (this.endFade.isSilent()) this.markEnded();
       return;
     }
-    if (!this.settings.loopForever && core._gme_tell_scaled(this.emu) >= this.durationMs) {
+    if (!this.settings.loopForever && this.songPositionMs >= this.durationMs) {
       this.endFadeStarted = true;
       this.endFade.rampTo(0, this.endFadeFrames);
     }

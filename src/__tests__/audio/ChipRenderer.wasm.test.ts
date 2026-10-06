@@ -272,20 +272,38 @@ describe('ChipRenderer seek probes on real chip-core', () => {
       }
     }, 30000);
 
-    // Documents a known GME limitation (integer out_time_scaled at non-dyadic tempos), same as today's
-    // GMEPlayer: GME's integer tell_scaled drifts from the true song position at non-dyadic tempos,
-    // so positionMs is not within a few ms of the target. Seek completion is asserted separately above.
-    it.fails(
-      'reports a positionMs within 5 ms of the target at non-dyadic tempos',
-      () => {
-        for (const tempo of NON_DYADIC_TEMPOS) {
-          const { renderer } = seekAtTempo(tempo);
-          expect(Math.abs(renderer.positionMs - SEEK_TARGET_MS)).toBeLessThan(5);
-        }
-      },
-      30000
-    );
+    it('reports a positionMs within 5 ms of the target at non-dyadic tempos', () => {
+      for (const tempo of NON_DYADIC_TEMPOS) {
+        const { renderer } = seekAtTempo(tempo);
+        expect(Math.abs(renderer.positionMs - SEEK_TARGET_MS)).toBeLessThan(5);
+      }
+    }, 30000);
   });
+
+  // GME's integer tell_scaled drifts about 0.5% at non-dyadic tempos; positionMs must not.
+  it.each([0.95, 0.9, 1.1])(
+    'tracks song position without drift during 30 s of playback at tempo %s',
+    (tempo) => {
+      const renderer = makeRenderer();
+      renderer.load(readTrack(PARKOUR), '/' + PARKOUR, { ...SETTINGS, tempo });
+      const quanta = Math.round((30 * RATE) / RENDER_CHUNK_FRAMES);
+      renderUntil(renderer, () => renderer.emulatedFrames >= quanta * RENDER_CHUNK_FRAMES, quanta);
+      const expectedMs = (renderer.emulatedFrames / RATE) * 1000 * tempo;
+      expect(Math.abs(renderer.positionMs - expectedMs)).toBeLessThan(1);
+    },
+    30000
+  );
+
+  it('accumulates song position piecewise across a tempo change', () => {
+    const renderer = makeRenderer();
+    renderer.load(readTrack(PARKOUR), '/' + PARKOUR, { ...SETTINGS, tempo: 0.95 });
+    const quanta = Math.round((10 * RATE) / RENDER_CHUNK_FRAMES);
+    capture(renderer, quanta * RENDER_CHUNK_FRAMES);
+    renderer.setTempo(1.1);
+    capture(renderer, quanta * RENDER_CHUNK_FRAMES);
+    const segmentMs = ((quanta * RENDER_CHUNK_FRAMES) / RATE) * 1000;
+    expect(Math.abs(renderer.positionMs - segmentMs * (0.95 + 1.1))).toBeLessThan(1);
+  }, 30000);
 
   it('handles a fractional seek target', () => {
     const events: RendererEvent[] = [];

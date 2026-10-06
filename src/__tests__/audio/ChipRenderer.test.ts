@@ -69,7 +69,7 @@ describe('ChipRenderer (stub core)', () => {
     const big = new Float32Array(2048);
     renderer.render(big, new Float32Array(2048));
     expect(big.some((x) => x !== 0)).toBe(true);
-    expect(renderer.positionMs).toBe(42);
+    expect(renderer.positionMs).toBeCloseTo((2048 / RATE) * 1000, 9);
   });
 
   it('silences all voices with gains but keeps writing taps', async () => {
