@@ -7,6 +7,7 @@ import { MAX_VOICES, REPLACE_STATE_ON_SEEK } from '../config';
 import Sequencer, { SHUFFLE_OFF, SHUFFLE_ON } from '../Sequencer';
 
 import { AudioData, createAudioData } from '../audio/data/createAudioData';
+import { VoiceMix } from '../audio/types';
 import { AudioEngine } from '../audio/engine/AudioEngine';
 import { createAudioEngine, createUnlockedAudioContext } from '../audio/engine/createAudioEngine';
 import { parseEngineOverrides } from '../audio/engine/engineKind';
@@ -89,6 +90,7 @@ class App extends React.Component<AppProps, AppState> {
       setTempo: this.handleTempoChange,
       setSpeedRelative: this.setSpeedRelative,
       setVoiceMask: this.handleSetVoiceMask,
+      setVoiceMix: this.handleSetVoiceMix,
       setParam: this.handleParamChange,
       pinParam: this.handlePinParam,
       setVolume: this.handleVolumeChange,
@@ -367,6 +369,14 @@ class App extends React.Component<AppProps, AppState> {
 
     this.sequencer.getPlayer()!.setVoiceMask(voiceMask);
     this.setState({ voiceMask: [...voiceMask] });
+  }
+
+  /** Applies mute and solo from the Mixer; the strips update from the engine's voiceMixChanged event. */
+  handleSetVoiceMix(mix: VoiceMix) {
+    const player = this.sequencer?.getPlayer();
+    if (!player) return;
+    player.setVoiceMix(mix);
+    this.setState({ voiceMask: [...player.getVoiceMask()] });
   }
 
   handleTempoChange(event: any) {

@@ -37,6 +37,7 @@ class TestPlayer extends Player {
     return [true, true];
   }
   setVoiceMask(): void {}
+  setVoiceMix(): void {}
   getNumVoices(): number {
     return 2;
   }

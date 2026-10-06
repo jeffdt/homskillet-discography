@@ -55,6 +55,7 @@ function makeControls(): PlaybackControls {
     setTempo: vi.fn(),
     setSpeedRelative: vi.fn(),
     setVoiceMask: vi.fn(),
+    setVoiceMix: vi.fn(),
     setParam: vi.fn(),
     pinParam: vi.fn(),
     setVolume: vi.fn(),

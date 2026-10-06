@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AudioEngine } from '../../audio/engine/AudioEngine';
 import { LoadSupersededError } from '../../audio/errors';
 import { TrackInfo } from '../../audio/types';
-import EnginePlayer from '../../players/EnginePlayer';
+import EnginePlayer, { ENGINE_PARAM_DEFS, PLAYER_KEY } from '../../players/EnginePlayer';
 
 const TRACK: TrackInfo = {
   metadata: { title: 'Parkour', game: 'SuperFORE!' },
@@ -159,5 +159,22 @@ describe('EnginePlayer', () => {
     expect(engine.stop).toHaveBeenCalled();
     expect(updates).toEqual([{ isStopped: true }]);
     expect(player.getDurationMs()).toBe(0);
+  });
+
+  it('forwards mute and solo to the engine and keeps the voice mask in step', async () => {
+    const { engine, player } = fakeEngine();
+    await player.loadData(new Uint8Array(4), '/A/1.nsf', {});
+    player.setVoiceMix({ muted: [false, true], soloed: [true] });
+    expect(engine.setVoiceMix).toHaveBeenLastCalledWith({
+      muted: [false, true, false, false, false, false, false, false],
+      soloed: [true, false, false, false, false, false, false, false],
+    });
+    expect(player.getVoiceMask()).toEqual([true, false]);
+  });
+
+  it('exports its settings key and parameter definitions for the Mixer', () => {
+    const { player } = fakeEngine();
+    expect(PLAYER_KEY).toBe(player.playerKey);
+    expect(ENGINE_PARAM_DEFS).toBe(player.getParamDefs());
   });
 });
