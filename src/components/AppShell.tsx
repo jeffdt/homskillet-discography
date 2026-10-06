@@ -286,25 +286,35 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
       data-layout={compact ? 'compact' : 'wide'}
       data-perf={perf}
     >
-      <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
-        <defs>
-          <filter id="crt-noise">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.9"
-              numOctaves="4"
-              result="noise"
-              seed="0"
-            >
-              <animate attributeName="seed" from="0" to="100" dur="8s" repeatCount="indefinite" />
-            </feTurbulence>
-            <feComponentTransfer in="noise" result="opacity">
-              <feFuncA type="discrete" tableValues="0 0 0 1" />
-            </feComponentTransfer>
-          </filter>
-        </defs>
-      </svg>
-      <div className="crt-noise-overlay" aria-hidden="true" />
+      {(settings.filmGrainEnabled ?? true) && (
+        <>
+          <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
+            <defs>
+              <filter id="crt-noise">
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.9"
+                  numOctaves="4"
+                  result="noise"
+                  seed="0"
+                >
+                  <animate
+                    attributeName="seed"
+                    from="0"
+                    to="100"
+                    dur="8s"
+                    repeatCount="indefinite"
+                  />
+                </feTurbulence>
+                <feComponentTransfer in="noise" result="opacity">
+                  <feFuncA type="discrete" tableValues="0 0 0 1" />
+                </feComponentTransfer>
+              </filter>
+            </defs>
+          </svg>
+          <div className="crt-noise-overlay" aria-hidden="true" />
+        </>
+      )}
 
       <Stage
         audioGraph={audioGraph}

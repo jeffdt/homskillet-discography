@@ -45,6 +45,22 @@ function UISettings({ persistedSettings }: UISettingsProps) {
           <InfoIcon tooltip="UI elements pulse and glow in response to audio" />
         </div>
 
+        <div className="Settings-row">
+          <label className="Settings-toggle">
+            <input
+              type="checkbox"
+              checked={persistedSettings.filmGrainEnabled ?? true}
+              onChange={(e) => {
+                userContext.updateSettings({
+                  filmGrainEnabled: e.target.checked,
+                });
+              }}
+            />
+            <span>Film grain</span>
+          </label>
+          <InfoIcon tooltip="Animated SVG turbulence noise blended over the whole screen, like a CRT" />
+        </div>
+
         <h4
           className="Settings-subsection Settings-subsection-collapsible"
           onClick={() =>

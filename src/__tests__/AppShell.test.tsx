@@ -115,6 +115,20 @@ afterEach(() => {
 });
 
 describe('AppShell', () => {
+  it('shows the film grain overlay by default', async () => {
+    const { container } = renderShell();
+    await screen.findByText('or browse 2 albums');
+    expect(container.querySelector('.crt-noise-overlay')).not.toBeNull();
+  });
+
+  it('hides the film grain overlay when the setting is off', async () => {
+    window.localStorage.setItem('settings', JSON.stringify({ filmGrainEnabled: false }));
+    const { container } = renderShell();
+    await screen.findByText('or browse 2 albums');
+    expect(container.querySelector('.crt-noise-overlay')).toBeNull();
+    expect(container.querySelector('#crt-noise')).toBeNull();
+  });
+
   it('Start listening shuffles the whole catalog', async () => {
     const { controls } = renderShell();
     await screen.findByText('or browse 2 albums');
