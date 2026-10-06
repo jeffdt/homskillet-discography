@@ -165,6 +165,20 @@ describe('AppShell', () => {
     expect(controls.playTracks).not.toHaveBeenCalled();
   });
 
+  it('treats a refresh as a reset: no resume offer and a clean URL', async () => {
+    window.history.replaceState(null, '', '/?play=Bazaar%2Fmt.nsf&t=5000&debug=true');
+    const entries = vi
+      .spyOn(performance, 'getEntriesByType')
+      .mockReturnValue([{ type: 'reload' }] as unknown as PerformanceEntryList);
+    try {
+      renderShell();
+      await screen.findByRole('button', { name: /start listening/i });
+      await waitFor(() => expect(window.location.search).toBe('?debug=true'));
+    } finally {
+      entries.mockRestore();
+    }
+  });
+
   it('ignores a garbage t= on a known shared track', async () => {
     window.history.replaceState(null, '', '/?play=Bazaar%2Fmt.nsf&t=abc');
     const { controls, rerenderWith } = renderShell();

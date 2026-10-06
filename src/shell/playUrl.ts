@@ -56,3 +56,14 @@ export function stripPlayParams(search: string): string {
   const rest = params.toString();
   return rest ? `?${rest}` : '';
 }
+
+/**
+ * True when this page load was a browser refresh. A refresh is how people reset the app, so the
+ * ?play= link the address bar has been tracking should not bring the old track back.
+ */
+export function isPageReload(): boolean {
+  if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function')
+    return false;
+  const [navigation] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+  return !!navigation && navigation.type === 'reload';
+}

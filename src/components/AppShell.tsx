@@ -19,6 +19,7 @@ import {
   BASE_PATH,
   InitialLocation,
   buildPlayUrl,
+  isPageReload,
   parseInitialLocation,
   stripPlayParams,
 } from '../shell/playUrl';
@@ -78,7 +79,10 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
 
   useEffect(() => {
     if (!catalog || initialLocation) return;
-    const parsed = parseInitialLocation(window.location.pathname, window.location.search, catalog);
+    const search = isPageReload()
+      ? stripPlayParams(window.location.search)
+      : window.location.search;
+    const parsed = parseInitialLocation(window.location.pathname, search, catalog);
     setInitialLocation(parsed);
     if (!parsed.sharedTrack) {
       window.history.replaceState(null, '', BASE_PATH + stripPlayParams(window.location.search));
