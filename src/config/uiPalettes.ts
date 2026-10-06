@@ -27,3 +27,13 @@ export const UI_PALETTES: UIPalette[] = [
     accent: '#F0424A',
   },
 ];
+
+/** The accent palette at a stored index, or the first (MW Green) when the index is not valid. */
+export function uiPaletteAt(index: unknown): UIPalette {
+  return typeof index === 'number' &&
+    Number.isInteger(index) &&
+    index >= 0 &&
+    index < UI_PALETTES.length
+    ? UI_PALETTES[index]
+    : UI_PALETTES[0];
+}

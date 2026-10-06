@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { debounce } from 'lodash';
 import { DEFAULT_CHANNEL_PALETTE_ID } from '../config/channelPalettes';
+import { STAGE_DEFAULTS } from '../config/stageSettings';
 
 export interface UserSettings {
   showPlayerSettings: boolean;
@@ -25,30 +26,7 @@ const UserContext = createContext<UserContextValue>({
 
 const DEFAULT_SETTINGS: UserSettings = {
   showPlayerSettings: true,
-  audioReactivePulse: true,
-  filmGrainAmount: 50, // grain overlay strength, 0-100 (0 = off)
-  sliderSparksEnabled: false, // enable/disable slider sparks
-  sliderSparksExpanded: false, // collapsed by default
-
-  // Slider particle settings
-  particleSpawnRate: 20, // min spawn interval (lower = faster)
-  particleLifespan: 600, // milliseconds
-  particleBaseAngle: 180, // base angle in degrees (0=right, 90=down, 180=left, 270=up)
-  particleAngleSpread: 30, // angle spread in degrees (cone width)
-  particleSpeed: 1.7, // speed multiplier
-  particleSpeedVariance: 20, // speed variance percentage (0-100)
-  particleGravity: 0.0, // gravity strength (0=none, 1=normal, 2=strong)
-  particleHueVariation: 30, // hue degrees
-  particleFadeMode: 'fade', // 'fade' or 'instant'
-
-  // Visualizer settings
-  channelPalette: DEFAULT_CHANNEL_PALETTE_ID, // channel palette id (src/config/channelPalettes.ts)
-  peakDecayRate: 0.98, // peak hold decay rate (0.50=fast, 0.99=slow)
-  peakQuantization: 4, // peak decay pixelation (1=off/smooth, 2=low, 4=med, 8=high)
-
-  // UI Palette settings
-  uiPalette: 0, // default to MW Green (index 0)
-  uiPaletteSelectorExpanded: false, // collapsed by default
+  ...STAGE_DEFAULTS,
 };
 
 function migrateSettings(settings: Partial<UserSettings>): UserSettings {
