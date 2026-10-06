@@ -1277,3 +1277,56 @@
     transition: none;
   }
 }
+
+/* ===== Film grain ===== */
+
+/* Oversized by half a tile so the jitter never exposes an edge; transform-only, so it stays on the compositor. */
+.FilmGrain {
+  position: fixed;
+  inset: -64px;
+  z-index: 99999;
+  background-size: 128px 128px;
+  pointer-events: none;
+  animation: film-grain-jitter 0.66s steps(1, end) infinite;
+  will-change: transform;
+}
+
+@keyframes film-grain-jitter {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  12.5% {
+    transform: translate(-37px, 21px);
+  }
+
+  25% {
+    transform: translate(18px, -45px);
+  }
+
+  37.5% {
+    transform: translate(-52px, -9px);
+  }
+
+  50% {
+    transform: translate(41px, 33px);
+  }
+
+  62.5% {
+    transform: translate(-14px, 56px);
+  }
+
+  75% {
+    transform: translate(29px, -27px);
+  }
+
+  87.5% {
+    transform: translate(-61px, 40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .FilmGrain {
+    animation: none;
+  }
+}

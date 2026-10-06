@@ -36,6 +36,9 @@ vi.mock('../catalog/loadCatalog', async () => {
 vi.mock('../components/Stage', () => ({ default: () => null }));
 vi.mock('../components/TimeSlider', () => ({ default: () => null }));
 
+// jsdom has no 2D canvas and logs an error per call; FilmGrain handles the null context.
+vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+
 /** Node's experimental localStorage shadows jsdom's and is undefined here, so install an in-memory one. */
 function installMemoryLocalStorage() {
   const store = new Map<string, string>();
@@ -118,15 +121,14 @@ describe('AppShell', () => {
   it('shows the film grain overlay by default', async () => {
     const { container } = renderShell();
     await screen.findByText('or browse 2 albums');
-    expect(container.querySelector('.crt-noise-overlay')).not.toBeNull();
+    expect(container.querySelector('.FilmGrain')).not.toBeNull();
   });
 
   it('hides the film grain overlay when the setting is off', async () => {
     window.localStorage.setItem('settings', JSON.stringify({ filmGrainEnabled: false }));
     const { container } = renderShell();
     await screen.findByText('or browse 2 albums');
-    expect(container.querySelector('.crt-noise-overlay')).toBeNull();
-    expect(container.querySelector('#crt-noise')).toBeNull();
+    expect(container.querySelector('.FilmGrain')).toBeNull();
   });
 
   it('Start listening shuffles the whole catalog', async () => {
