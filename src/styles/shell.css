@@ -282,6 +282,18 @@
   line-height: 1;
 }
 
+/* Reactive UI: the logo swells slightly with the music. Transform only, so it never repaints. */
+.App .TopBar-logo {
+  transform: scale(calc(1 + var(--pulse-intensity, 0) * 0.04));
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .App .TopBar-logo {
+    transform: none;
+  }
+}
+
 /* ===== Wordmark ===== */
 
 .App .Wordmark {
@@ -492,7 +504,7 @@
   height: 44px;
   background: var(--accent);
   color: var(--neutral0);
-  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 16px) var(--accent-dark);
+  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 10px) var(--accent-dark);
 }
 
 .Dock-play:hover:not(:disabled) {

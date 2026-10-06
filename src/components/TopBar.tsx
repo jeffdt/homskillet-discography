@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef } from 'react';
+import { usePulseTarget } from '../hooks/usePulseTarget';
 import { Box, LOGO_HANDOFF_MS, handoffTransform } from '../shell/logoHandoff';
 import { prefersReducedMotion } from '../shell/motion';
 import { PANEL_TITLES, PanelId, PanelState, isPanelOpen } from '../shell/panels';
@@ -19,6 +20,8 @@ interface TopBarProps {
   showLogo?: boolean;
   /** Returns, once, where the title screen's logo was, so this logo can glide in from there. */
   takeLogoHandoff?: () => Box | null;
+  /** While true the logo swells with the audio pulse (Reactive UI); otherwise it holds still. */
+  pulsing?: boolean;
 }
 
 /** Panel toggles on the left, above where panels open, and the logo on the right; fades when idle. */
@@ -27,8 +30,10 @@ export default function TopBar({
   onToggle,
   showLogo = true,
   takeLogoHandoff,
+  pulsing = false,
 }: TopBarProps) {
   const logoRef = useRef<HTMLDivElement>(null);
+  usePulseTarget(logoRef, '--pulse-intensity', pulsing);
 
   // Runs before paint in the commit that removes the title screen, so the logo never flashes in its corner.
   useLayoutEffect(() => {
