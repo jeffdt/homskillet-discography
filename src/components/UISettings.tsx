@@ -45,6 +45,28 @@ function UISettings({ persistedSettings }: UISettingsProps) {
           <InfoIcon tooltip="UI elements pulse and glow in response to audio" />
         </div>
 
+        <div className="Settings-param">
+          <label htmlFor="film-grain-amount">Film Grain</label>
+          <input
+            id="film-grain-amount"
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={persistedSettings.filmGrainAmount ?? 50}
+            onChange={(e) => {
+              userContext.updateSettings({ filmGrainAmount: parseInt(e.target.value) });
+              flashValue('filmGrainAmount');
+            }}
+          />
+          <span className={flashingSetting === 'filmGrainAmount' ? 'Settings-value-flash' : ''}>
+            {(persistedSettings.filmGrainAmount ?? 50) === 0
+              ? 'Off'
+              : `${persistedSettings.filmGrainAmount ?? 50}%`}
+          </span>
+          <InfoIcon tooltip="A tile of random specks drawn once and jittered across the screen, like film grain. 0 turns it off" />
+        </div>
+
         <h4
           className="Settings-subsection Settings-subsection-collapsible"
           onClick={() =>
@@ -148,7 +170,7 @@ function UISettings({ persistedSettings }: UISettingsProps) {
         >
           <input
             type="checkbox"
-            checked={persistedSettings.sliderSparksEnabled ?? true}
+            checked={persistedSettings.sliderSparksEnabled ?? false}
             onChange={(e) => {
               e.stopPropagation();
               userContext.updateSettings({

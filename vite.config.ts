@@ -46,7 +46,7 @@ export default defineConfig(({ command, mode }) => {
       target: 'es2015',
       minify: isProduction ? 'esbuild' : false,
       // Bundle size is reasonable for audio-visual application with WebAssembly integration,
-      // real-time audio visualization, particle effects, and virtual list rendering.
+      // real-time audio visualization and particle effects.
       // ~177KB gzipped is acceptable compared to similar apps (Spotify: 2-3MB, SoundCloud: 1.5MB)
       chunkSizeWarningLimit: 600,
     },
@@ -76,7 +76,7 @@ export default defineConfig(({ command, mode }) => {
     },
 
     optimizeDeps: {
-      include: ['react', 'react-dom', 'react-router-dom'],
+      include: ['react', 'react-dom'],
       exclude: ['chip-core.wasm'],
     },
 

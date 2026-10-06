@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import ReactDOM from 'react-dom';
 
 interface Particle {
   id: number;
@@ -178,7 +179,9 @@ export default class SliderParticles extends PureComponent<
   render(): React.ReactNode {
     const now = this.state.animationTime;
 
-    return (
+    // Portaled to body: a transformed or backdrop-filtered ancestor (the Dock) would otherwise
+    // become the containing block for these fixed-position particles and offset them.
+    return ReactDOM.createPortal(
       <div className="SliderParticles">
         {this.state.particles.map((particle) => {
           // Calculate elapsed time in seconds
@@ -213,7 +216,8 @@ export default class SliderParticles extends PureComponent<
             />
           );
         })}
-      </div>
+      </div>,
+      document.body
     );
   }
 }

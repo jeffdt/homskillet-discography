@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, ReactNode } from 'react';
+import ReactDOM from 'react-dom';
 
 interface TooltipProps {
   children: ReactNode;
@@ -79,26 +80,29 @@ function Tooltip({ children, content, side = 'right' }: TooltipProps) {
       >
         {children}
       </span>
-      {isVisible && (
-        <div
-          ref={tooltipRef}
-          className={`Tooltip Tooltip-${side}`}
-          style={{
-            top: position ? `${position.top}px` : '0px',
-            left: position ? `${position.left}px` : '0px',
-            opacity: position ? 1 : 0,
-          }}
-        >
-          <div className="Tooltip-wrapper" style={glitchVars}>
-            <div className="Tooltip-box" style={glitchVars}>
-              <div style={{ paddingLeft: '16px' }}>{content}</div>
+      {/* Portaled to body: panels use backdrop-filter, which would trap a fixed-position tooltip. */}
+      {isVisible &&
+        ReactDOM.createPortal(
+          <div
+            ref={tooltipRef}
+            className={`Tooltip Tooltip-${side}`}
+            style={{
+              top: position ? `${position.top}px` : '0px',
+              left: position ? `${position.left}px` : '0px',
+              opacity: position ? 1 : 0,
+            }}
+          >
+            <div className="Tooltip-wrapper" style={glitchVars}>
+              <div className="Tooltip-box" style={glitchVars}>
+                <div style={{ paddingLeft: '16px' }}>{content}</div>
+              </div>
+              <div className="Tooltip-glitch" aria-hidden="true" style={glitchVars}>
+                <div style={{ paddingLeft: '16px' }}>{content}</div>
+              </div>
             </div>
-            <div className="Tooltip-glitch" aria-hidden="true" style={glitchVars}>
-              <div style={{ paddingLeft: '16px' }}>{content}</div>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

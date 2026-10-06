@@ -5,9 +5,9 @@
  * is not available (e.g., lightweight dev environments, remote deployments)
  */
 
-import type { Directories } from '../types/catalog';
+import type { RawDirectories } from '../catalog/catalog';
 
-export const MOCK_DIRECTORIES: Directories = {
+export const MOCK_DIRECTORIES: RawDirectories = {
   '/': [
     {
       path: '/Demo Album',
@@ -41,9 +41,3 @@ export const MOCK_DIRECTORIES: Directories = {
     },
   ],
 };
-
-export const MOCK_CATALOG: string[] = [
-  'Demo Album/Track 01 - Intro.nsf',
-  'Demo Album/Track 02 - Main Theme.nsf',
-  'Demo Album/Track 03 - Finale.nsf',
-];

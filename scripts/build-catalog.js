@@ -4,13 +4,7 @@ const directoryTree = require('directory-tree');
 const { toArabic } = require('roman-numerals');
 
 // GME (Game Music Emu) supported formats only
-const FORMATS = [
-  'ay',
-  'gbs',
-  'nsf',
-  'nsfe',
-  'spc',
-];
+const FORMATS = ['ay', 'gbs', 'nsf', 'nsfe', 'spc'];
 
 // Paths are relative to project root.
 //
@@ -65,12 +59,16 @@ function replaceRomanWithArabic(str) {
 }
 
 if (!fs.existsSync(catalogPath)) {
-  console.log('Couldn\'t find a music folder for indexing. Create a folder or symlink at \'%s\'.', catalogPath);
+  console.log(
+    "Couldn't find a music folder for indexing. Create a folder or symlink at '%s'.",
+    catalogPath
+  );
   process.exit(1);
 }
 
-const files = glob.sync(`${catalogPath}**/*.{${FORMATS.join(',')}}`, { nocase: true },)
-  .map(file => file.replace(catalogPath, ''));
+const files = glob
+  .sync(`${catalogPath}**/*.{${FORMATS.join(',')}}`, { nocase: true })
+  .map((file) => file.replace(catalogPath, ''));
 
 const data = JSON.stringify(files, null, 2);
 fs.writeSync(fs.openSync(outputPath, 'w+'), data);
@@ -79,13 +77,13 @@ console.log('Wrote %d entries in %s (%d bytes).', files.length, outputPath, data
 const dirDict = {};
 const dirOptions = {
   extensions: formatsRegex,
-  attributes: [ 'mtimeMs' ],
+  attributes: ['mtimeMs'],
 };
-directoryTree(catalogPath, dirOptions, null, item => {
+directoryTree(catalogPath, dirOptions, null, (item) => {
   if (item.children) {
     item.path = item.path.replace(catalogPath, '/');
 
-    const children = item.children.map(child => {
+    const children = item.children.map((child) => {
       child.path = child.path.replace(catalogPath, '/');
       if (child.children) {
         child.numChildren = child.children.length;
@@ -99,23 +97,23 @@ directoryTree(catalogPath, dirOptions, null, item => {
     });
 
     const arabicMap = {};
-    const needsRomanNumeralSort = children.some(item => {
+    const needsRomanNumeralSort = children.some((item) => {
       // Only convert Roman numerals if the list sort could benefit from it.
       // Roman numerals less than 9 would be sorted incidentally.
       // This assumes that Roman numeral ranges don't have gaps.
       return item.path.match(romanNumeralNineRegex);
     });
     if (needsRomanNumeralSort) {
-      console.log("Roman numeral sort is active for %s", item.path);
+      console.log('Roman numeral sort is active for %s', item.path);
       // Movement IV. Wow => Movement 0004. Wow
-      children.forEach(item => arabicMap[item.path] = replaceRomanWithArabic(item.path));
+      children.forEach((item) => (arabicMap[item.path] = replaceRomanWithArabic(item.path)));
     }
 
     children
       .sort((a, b) => {
-        const [strA, strB] = needsRomanNumeralSort ?
-          [arabicMap[a.path], arabicMap[b.path]] :
-          [a.path, b.path];
+        const [strA, strB] = needsRomanNumeralSort
+          ? [arabicMap[a.path], arabicMap[b.path]]
+          : [a.path, b.path];
         return NUMERIC_COLLATOR.compare(strA, strB);
       })
       .sort((a, b) => {
@@ -125,11 +123,40 @@ directoryTree(catalogPath, dirOptions, null, item => {
       });
 
     // Add file idx property
-    children.filter(child => child.type === 'file').forEach((item, idx) => item.idx = idx);
+    children.filter((child) => child.type === 'file').forEach((item, idx) => (item.idx = idx));
     dirDict[item.path] = children;
   }
 });
 
 const dirDictData = JSON.stringify(dirDict, null, 2);
 fs.writeSync(fs.openSync(dirDictOutputPath, 'w+'), dirDictData);
-console.log('Wrote %d entries in %s (%d bytes).', Object.keys(dirDict).length, dirDictOutputPath, dirDictData.length);
+console.log(
+  'Wrote %d entries in %s (%d bytes).',
+  Object.keys(dirDict).length,
+  dirDictOutputPath,
+  dirDictData.length
+);
+
+const metadataPath = `${catalogPath}metadata.json`;
+if (fs.existsSync(metadataPath)) {
+  const { validateMetadata } = require('../src/catalog/validateMetadata.ts');
+  const filesByAlbum = {};
+  Object.keys(dirDict)
+    .filter((dirPath) => dirPath !== '/')
+    .forEach((dirPath) => {
+      filesByAlbum[dirPath.slice(1)] = dirDict[dirPath]
+        .filter((child) => child.type === 'file')
+        .map((child) => child.path.split('/').pop());
+    });
+  let metadata;
+  try {
+    metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+  } catch (e) {
+    console.warn('metadata.json is not valid JSON: %s', e.message);
+  }
+  if (metadata !== undefined) {
+    const warnings = validateMetadata(metadata, filesByAlbum);
+    warnings.forEach((warning) => console.warn('metadata.json: %s', warning));
+    console.log('Checked metadata.json (%d warnings).', warnings.length);
+  }
+}

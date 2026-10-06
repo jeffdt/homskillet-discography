@@ -96,13 +96,18 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 
 ### Component Structure
 
-- **src/components/App.tsx** - Main application component, manages audio context, player lifecycle, and routing
 - **src/components/** - React UI components (mostly TypeScript)
-  - Browse.tsx - Directory browser for music catalog
-  - Visualizer.tsx - Audio visualization canvas
+  - App.tsx - Audio wiring, Sequencer, playback commands
+  - AppShell.tsx - Layout, panels, URL sync, keyboard
+  - Stage.tsx - Full-window visualizer
+  - TitleScreen, TopBar, Dock, NowPlayingSpotlight
+  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel, AboutPanel
   - PlayerParams.tsx - Player controls (tempo, stereo width, bass boost)
-  - Settings.tsx - User settings panel
   - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
+- **src/catalog/** - Catalog merge and metadata
+- **src/shell/** - Pure UI logic
+- **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`
+- **src/styles/shell.css** - Stage shell styles
 - **src/players/** - Audio player implementations (JavaScript)
   - Player.js - Base class with state machine logic (stopped/playing/paused)
   - GMEPlayer.js - Game Music Emu player (NSF, NSFE, SPC, GBS, AY)
@@ -156,16 +161,14 @@ The catalog system indexes music files for browsing and playback:
 - **scripts/build-catalog.js** - Scans public/music/ and generates catalog indexes
 - **public/catalog.json** - Flat list of all music file paths (for playlist generation)
 - **public/directories.json** - Nested directory structure with metadata (size, type, index)
+- **public/music/metadata.json** - Optional owner metadata: tagline, about, album titles, descriptions, art, track order, titles, blurbs. `build-catalog` warns about entries that reference missing files
 - Music files live in **public/music/** organized by album/project folders (committed to repo)
 - Only GME formats are indexed: NSF, NSFE, AY, GBS, SPC
 - Run `bun run build-catalog` after adding/removing music files to regenerate indexes
 
 ### Routing
 
-React Router handles navigation:
-
-- `/*` - Browse catalog (simplified single-route structure)
-- Query params: `?play=path` to auto-play a file
+No router. The app reads `?play=<album>/<file>` (and optional `t=` in ms) on load, keeps `?play=` in sync with the current track, and maps legacy `/<Album>` paths to the Albums drawer.
 
 ## Working with GitHub Issues
 

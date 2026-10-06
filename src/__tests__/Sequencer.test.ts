@@ -417,4 +417,33 @@ describe('Sequencer', () => {
       playSongSpy.mockRestore();
     });
   });
+
+  describe('play plans used by the stage shell', () => {
+    it('with shuffle on, plays the requested track first, then every other track once', () => {
+      const played: string[] = [];
+      (sequencer as any).playSong = (url: string) => played.push(url);
+      (sequencer as any).player = mockPlayer;
+      const context = ['a.nsf', 'b.nsf', 'c.nsf', 'd.nsf'];
+
+      sequencer.setShuffle(SHUFFLE_ON);
+      sequencer.playContext(context, 2);
+      sequencer.nextSong();
+      sequencer.nextSong();
+      sequencer.nextSong();
+
+      expect(played[0]).toBe('c.nsf');
+      expect([...played].sort()).toEqual([...context].sort());
+    });
+
+    it('with shuffle off, continues through the album in order', () => {
+      const played: string[] = [];
+      (sequencer as any).playSong = (url: string) => played.push(url);
+      (sequencer as any).player = mockPlayer;
+
+      sequencer.playContext(['a.nsf', 'b.nsf', 'c.nsf'], 1);
+      sequencer.nextSong();
+
+      expect(played).toEqual(['b.nsf', 'c.nsf']);
+    });
+  });
 });

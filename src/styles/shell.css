@@ -1,0 +1,1332 @@
+/* Stage shell styles. Colors come only from the palette variables in index.css. */
+
+:root {
+  --fontSans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 400 15px/1.45 var(--fontSans);
+  --font-small: 400 13px/1.4 var(--fontSans);
+  --font-strong: 600 15px/1.45 var(--fontSans);
+  --font-display: 600 32px/1.15 var(--fontSans);
+
+  --panel-bg: color-mix(in srgb, var(--neutral0) 74%, transparent);
+  --chrome-bg: color-mix(in srgb, var(--neutral0) 62%, transparent);
+  --hairline: color-mix(in srgb, var(--neutral3) 20%, transparent);
+  --scrim: color-mix(in srgb, var(--shadow) 45%, transparent);
+  --panel-blur: blur(14px);
+
+  --fade-duration: 400ms;
+  --radius: 6px;
+  --touch-target: 44px;
+  --chrome-gap: 16px;
+  --panel-width: min(380px, calc(100vw - 2 * var(--chrome-gap)));
+}
+
+/* One typeface for the whole UI; only the logo (--font-title) stays pixel. These override the
+   legacy pixel-font variables from fonts.css so older components inside the shell follow too. */
+.App {
+  --font: 400 14px/1.45 var(--fontSans);
+  --font-accent: 600 13px/1.45 var(--fontSans);
+}
+
+.App[data-layout='compact'] {
+  --font: 400 16px/1.45 var(--fontSans);
+  --font-accent: 600 15px/1.45 var(--fontSans);
+}
+
+@supports not (color: color-mix(in srgb, red 50%, transparent)) {
+  :root {
+    --panel-bg: var(--neutral0);
+    --chrome-bg: var(--neutral0);
+    --hairline: var(--neutral1);
+    --scrim: transparent;
+  }
+}
+
+/* Global button:focus rules in index.css remove outlines; restore visible keyboard focus inside the shell. */
+.AppShell :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Panels ===== */
+
+.Panel {
+  position: absolute;
+  top: 64px;
+  bottom: 112px;
+  z-index: 4;
+  width: var(--panel-width);
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: var(--panel-blur);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px var(--shadow);
+  outline: none;
+}
+
+.Panel--outer,
+.Panel--inner {
+  left: var(--chrome-gap);
+}
+
+/* With Albums open, Mixer or Visuals sits beside it; the right edge stays clear for the visualizer. */
+.Panel--outer ~ .Panel--inner {
+  left: calc(2 * var(--chrome-gap) + var(--panel-width));
+}
+
+/* Too narrow for two side by side: the inner panel overlaps the outer one instead. */
+@media (max-width: 860px) {
+  .Panel--outer ~ .Panel--inner {
+    left: var(--chrome-gap);
+  }
+}
+
+.Panel--center {
+  top: 50%;
+  bottom: auto;
+  left: 50%;
+  max-height: calc(100vh - 176px);
+  transform: translate(-50%, -50%);
+}
+
+.Panel--sheet {
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 6;
+  width: auto;
+  height: 70vh;
+  border-radius: 12px 12px 0 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.Panel-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--scrim);
+}
+
+.Panel-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px 10px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.Panel-grabber {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: 2px;
+  background: var(--neutral2);
+}
+
+.App .Panel-title {
+  flex: 1;
+  margin: 0;
+  font: var(--font-accent);
+  color: var(--neutral4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.Panel-close {
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.Panel--sheet .Panel-close {
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+}
+
+.Panel-close:hover {
+  color: var(--neutral4);
+}
+
+/* Panels scroll internally so long content (expanded settings) is always reachable (#105). */
+.Panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 16px 16px;
+}
+
+.App .Panel-empty {
+  font: var(--font-body);
+  color: var(--neutral2);
+}
+
+/* ===== Stage ===== */
+
+.Stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.Stage canvas {
+  position: absolute;
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.Stage-analyzer {
+  z-index: 1;
+}
+
+/* ===== Chrome and idle fade ===== */
+
+.Chrome {
+  transition: opacity var(--fade-duration) ease;
+}
+
+.AppShell[data-idle='true'] .Chrome {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.AppShell[data-idle='true'] {
+  cursor: none;
+}
+
+.Icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ===== Top bar ===== */
+
+.TopBar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px var(--chrome-gap) 24px;
+  background: linear-gradient(to bottom, var(--chrome-bg), transparent);
+}
+
+.App .TopBar-logo {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ===== Wordmark ===== */
+
+/* font: inherit undoes the legacy `.App * { font }` reset so the logo takes its container's size. */
+.App .Wordmark {
+  position: relative;
+  display: inline-block;
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.App .Wordmark-word,
+.App .Wordmark-word::before,
+.App .Wordmark-word::after {
+  font:
+    400 1em/1 'Tilt Warp',
+    var(--fontSans);
+  letter-spacing: 0.03em;
+}
+
+.App .Wordmark-word {
+  /* Whole-pixel scanlines: em-sized stripes land on fractional pixels and render unevenly. */
+  --scan-on: 3px;
+  --scan-off: 2px;
+  --scan-mask: repeating-linear-gradient(
+    180deg,
+    #000 0 var(--scan-on),
+    rgba(0, 0, 0, 0.4) var(--scan-on) calc(var(--scan-on) + var(--scan-off))
+  );
+
+  position: relative;
+  display: inline-block;
+  padding: 0 0.12em;
+  color: var(--accent);
+  /* The mask is alpha only, so the scanlines cut into the letters and never darken the backdrop. */
+  -webkit-mask-image: var(--scan-mask);
+  mask-image: var(--scan-mask);
+  /* One step per pixel across one stripe period, so the lines roll without sub-pixel shimmer. */
+  animation: wordmark-roll 0.6s steps(5) infinite;
+}
+
+/* Finer scanlines at the smaller top bar size. */
+.App .TopBar-logo .Wordmark-word {
+  --scan-on: 2px;
+  --scan-off: 1px;
+  animation: wordmark-roll 0.36s steps(3) infinite;
+}
+
+/* Two offset copies of the word: a faint white one and a dark green one, glitching together. */
+.Wordmark-word::before,
+.Wordmark-word::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0 0.12em;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.Wordmark-word::before {
+  color: var(--neutral4);
+  opacity: 0.55;
+  transform: translateX(-0.03em);
+  animation: wordmark-split-a 3.2s steps(1) infinite;
+}
+
+.Wordmark-word::after {
+  color: var(--accent-dark);
+  transform: translateX(0.03em);
+  animation: wordmark-split-b 3.2s steps(1) infinite;
+}
+
+@keyframes wordmark-roll {
+  to {
+    -webkit-mask-position: 0 calc(var(--scan-on) + var(--scan-off));
+    mask-position: 0 calc(var(--scan-on) + var(--scan-off));
+  }
+}
+
+@keyframes wordmark-split-a {
+  0%,
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translateX(-0.03em);
+  }
+  82% {
+    clip-path: inset(30% 0 52% 0);
+    transform: translateX(-0.12em);
+  }
+  86% {
+    clip-path: inset(62% 0 18% 0);
+    transform: translateX(0.08em);
+  }
+  90% {
+    clip-path: inset(0 0 0 0);
+    transform: translateX(-0.03em);
+  }
+}
+
+@keyframes wordmark-split-b {
+  0%,
+  100% {
+    transform: translateX(0.03em);
+  }
+  83% {
+    transform: translateX(0.1em);
+  }
+  88% {
+    transform: translateX(-0.05em);
+  }
+  91% {
+    transform: translateX(0.03em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Wordmark-word,
+  .Wordmark-word::before,
+  .Wordmark-word::after {
+    animation: none;
+  }
+}
+
+.TopBar-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.TopBar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--chrome-bg);
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.TopBar-button:hover {
+  color: var(--neutral4);
+}
+
+.TopBar-button.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--neutral0);
+}
+
+.App .TopBar-label {
+  font: var(--font-accent);
+}
+
+/* ===== Dock ===== */
+
+.Dock {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  z-index: 3;
+  width: min(900px, max(60vw, 600px), calc(100vw - 2 * var(--chrome-gap)));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  transform: translateX(-50%);
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: var(--panel-blur);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  box-shadow: 0 8px 32px var(--shadow);
+  box-sizing: border-box;
+}
+
+.Dock-transport,
+.Dock-modes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.Dock-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.Dock-button:hover:not(:disabled) {
+  color: var(--neutral4);
+}
+
+.Dock-button:disabled {
+  color: var(--neutral2);
+  cursor: default;
+}
+
+.Dock-play {
+  width: 44px;
+  height: 44px;
+  background: var(--accent);
+  color: var(--neutral0);
+  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 16px) var(--accent-dark);
+}
+
+.Dock-play:hover:not(:disabled) {
+  background: var(--accent-dark);
+  color: var(--neutral0);
+}
+
+.Dock-toggle.is-on {
+  background: var(--accent);
+  color: var(--neutral0);
+}
+
+.Dock-toggle.is-on::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--neutral0);
+}
+
+.Dock-meta {
+  display: flex;
+  flex: 0 1 220px;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.Dock-meta:disabled {
+  cursor: default;
+}
+
+.App .Dock-title {
+  overflow: hidden;
+  font: var(--font-strong);
+  color: var(--neutral4);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.App .Dock-album {
+  overflow: hidden;
+  font: var(--font-small);
+  color: var(--neutral2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Dock-progress {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.Dock .TimeSlider {
+  margin: 0;
+}
+
+.Dock-volume {
+  width: 96px;
+}
+
+/* Compact (portrait phone): every control gets a 44px target and the dock wraps into rows. */
+@media (max-width: 768px) and (orientation: portrait) {
+  .TopBar-button {
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    justify-content: center;
+  }
+
+  .TopBar-label {
+    display: none;
+  }
+
+  .Dock {
+    bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    border-radius: var(--radius);
+  }
+
+  .Dock-button {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+
+  .Dock-meta {
+    flex: 1 1 100px;
+    min-height: var(--touch-target);
+    justify-content: center;
+  }
+
+  .Dock-progress {
+    flex: 1 1 100%;
+    order: 5;
+  }
+
+  .Dock-volume {
+    flex: 1 1 96px;
+    min-height: var(--touch-target);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Chrome {
+    transition: none;
+  }
+}
+
+/* ===== Title screen ===== */
+
+.TitleScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.TitleScreen-glow {
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  background: radial-gradient(
+    circle at 50% 55%,
+    color-mix(in srgb, var(--accent-dark) 22%, transparent),
+    transparent 55%
+  );
+  pointer-events: none;
+  animation: title-breathe 9s ease-in-out infinite alternate;
+}
+
+@keyframes title-breathe {
+  from {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+}
+
+.App .TitleScreen-logo {
+  margin: 0;
+  /* The global h1-h6 rule uses !important, so the size here must too. The Wordmark sets its own face. */
+  font-size: clamp(40px, 10vw, 104px) !important;
+  line-height: 1 !important;
+}
+
+.App .TitleScreen-tagline {
+  margin: 0;
+  font: var(--font-body);
+  color: var(--neutral3);
+}
+
+.App .TitleScreen-shared {
+  margin: 8px 0 0;
+  font: var(--font-small);
+  color: var(--neutral2);
+}
+
+/* The global button rule sets align-self: start, which pins these to the left edge. */
+.App .TitleScreen-start,
+.App .TitleScreen-browse {
+  align-self: center;
+}
+
+.App .TitleScreen-start {
+  min-height: 52px;
+  margin-top: 16px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--neutral0);
+  font: var(--font-strong);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.App .TitleScreen-start:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.App .TitleScreen-start:disabled {
+  cursor: progress;
+  opacity: 0.8;
+}
+
+.App .TitleScreen-browse {
+  min-height: var(--touch-target);
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--neutral3);
+  font: var(--font-body);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.App .TitleScreen-browse:hover {
+  color: var(--neutral4);
+}
+
+/* ===== Spotlight ===== */
+
+.Spotlight {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  z-index: 2;
+  max-width: min(80vw, 720px);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 700ms ease;
+}
+
+.Spotlight.is-visible {
+  opacity: 1;
+}
+
+.App .Spotlight-title {
+  font: var(--font-display);
+  font-size: clamp(28px, 5vw, 56px);
+  color: var(--neutral4);
+  text-shadow: 0 2px 16px var(--shadow);
+}
+
+.App .Spotlight-album {
+  margin-top: 8px;
+  font: var(--font-accent);
+  color: var(--accent);
+  text-transform: uppercase;
+  text-shadow: 0 2px 12px var(--shadow);
+}
+
+.App .Spotlight-blurb {
+  margin: 12px 0 0;
+  font: var(--font-body);
+  color: var(--neutral3);
+  text-shadow: 0 2px 12px var(--shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .TitleScreen-glow {
+    animation: none;
+  }
+
+  .Spotlight {
+    transition: none;
+  }
+}
+
+/* ===== Albums drawer ===== */
+
+.Albums-level--forward {
+  transform-origin: left center;
+  animation: albums-unfold 260ms ease-out;
+}
+
+.Albums-level--back {
+  animation: albums-slide-back 200ms ease-out;
+}
+
+@keyframes albums-unfold {
+  from {
+    opacity: 0;
+    transform: scaleX(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes albums-slide-back {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Two flashes (#82): on, off, on, off across ALBUM_FLASH_MS. */
+@keyframes album-flash {
+  0%,
+  50% {
+    background: var(--accent);
+    color: var(--neutral0);
+  }
+  25%,
+  75%,
+  100% {
+    background: transparent;
+    color: var(--neutral3);
+  }
+}
+
+.AlbumList-items,
+.Tracklist-tracks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.App .AlbumList-shuffle,
+.App .Tracklist-playAlbum {
+  min-height: 36px;
+  margin-bottom: 12px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--neutral0);
+  font: var(--font-strong);
+  cursor: pointer;
+}
+
+.App .AlbumList-shuffle:hover,
+.App .Tracklist-playAlbum:hover {
+  background: var(--accent-dark);
+}
+
+.AlbumList-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--neutral3);
+  text-align: left;
+  cursor: pointer;
+}
+
+.AlbumList-item:hover,
+.AlbumList-item[aria-current='true'] {
+  background: var(--neutral1);
+}
+
+.AlbumList-item.is-flashing {
+  animation: album-flash 320ms steps(1, end);
+}
+
+.App .AlbumList-item.is-flashing .AlbumList-title,
+.App .AlbumList-item.is-flashing .AlbumList-description,
+.App .AlbumList-item.is-flashing .AlbumList-count {
+  color: inherit;
+}
+
+.AlbumList-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Albums rest in gray, light up white under the pointer or focus, and glow accent while playing. */
+.App .AlbumList-title {
+  font: var(--font-strong);
+  color: var(--neutral2);
+  transition: color 160ms ease;
+}
+
+.App .AlbumList-item:hover .AlbumList-title,
+.App .AlbumList-item:focus-visible .AlbumList-title {
+  color: var(--neutral4);
+}
+
+.App .AlbumList-item[aria-current='true'] .AlbumList-title {
+  color: var(--accent);
+}
+
+.App .AlbumList-description {
+  overflow: hidden;
+  font: var(--font-small);
+  color: var(--neutral3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.App .AlbumList-count {
+  font: var(--font-small);
+  color: var(--neutral2);
+}
+
+.AlbumArt {
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.AlbumArt--small {
+  width: 48px;
+  height: 48px;
+}
+
+.AlbumArt--large {
+  width: 96px;
+  height: 96px;
+}
+
+.AlbumArt-bg {
+  fill: var(--neutral1);
+}
+
+/* Each line is filled with the tile color so nearer ridges hide the ones behind them. */
+.AlbumArt-line {
+  fill: var(--neutral1);
+  stroke: var(--neutral2);
+  stroke-opacity: 0.55;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  transition:
+    stroke 160ms ease,
+    stroke-opacity 160ms ease;
+}
+
+.AlbumArt-line.is-hot {
+  stroke-opacity: 1;
+  stroke-width: 2;
+}
+
+.AlbumList-item:hover .AlbumArt-line,
+.AlbumList-item:focus-visible .AlbumArt-line,
+.Tracklist-header .AlbumArt-line {
+  stroke: var(--neutral3);
+  stroke-opacity: 0.7;
+}
+
+.AlbumList-item:hover .AlbumArt-line.is-hot,
+.AlbumList-item:focus-visible .AlbumArt-line.is-hot,
+.Tracklist-header .AlbumArt-line.is-hot {
+  stroke: var(--neutral4);
+  stroke-opacity: 1;
+}
+
+.AlbumList-item[aria-current='true'] .AlbumArt-line,
+.Tracklist-header.is-playing .AlbumArt-line {
+  stroke: var(--accent-dark);
+  stroke-opacity: 1;
+}
+
+.AlbumList-item[aria-current='true'] .AlbumArt-line.is-hot,
+.Tracklist-header.is-playing .AlbumArt-line.is-hot {
+  stroke: var(--accent);
+}
+
+.App .Tracklist-back {
+  min-height: 32px;
+  margin-bottom: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--clickable);
+  font: var(--font-body);
+  cursor: pointer;
+}
+
+.App .Tracklist-back:hover {
+  color: var(--neutral4);
+}
+
+.Tracklist-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.App .Tracklist-albumTitle {
+  margin: 0 0 4px;
+  font: var(--font-display) !important;
+  font-size: 22px !important;
+  color: var(--neutral4);
+}
+
+.App .Tracklist-description {
+  margin: 0 0 8px;
+  font: var(--font-small);
+  color: var(--neutral3);
+}
+
+.Tracklist-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.Tracklist-track {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--neutral3);
+  text-align: left;
+  cursor: pointer;
+}
+
+.Tracklist-track:hover {
+  background: var(--neutral1);
+}
+
+.Tracklist-track[aria-current='true'] {
+  color: var(--accent);
+}
+
+.App .Tracklist-number {
+  width: 20px;
+  font: var(--font-small);
+  color: var(--neutral2);
+  text-align: right;
+}
+
+.App .Tracklist-title {
+  overflow: hidden;
+  font: var(--font-body);
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.App .Tracklist-info {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--clickable);
+  font: var(--font-small);
+  cursor: pointer;
+}
+
+.App .Tracklist-blurb {
+  flex-basis: 100%;
+  margin: 4px 8px 8px 40px;
+  font: var(--font-small);
+  color: var(--neutral3);
+}
+
+.LevelIndicator {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.LevelIndicator span {
+  width: 3px;
+  height: calc(20% + var(--level, 0) * 80%);
+  background: var(--accent);
+}
+
+.LevelIndicator span:nth-child(2) {
+  height: calc(35% + var(--level, 0) * 65%);
+}
+
+/* Compact: every drawer control keeps a 44px target. */
+@media (max-width: 768px) and (orientation: portrait) {
+  .App .AlbumList-shuffle,
+  .App .Tracklist-playAlbum,
+  .App .Tracklist-back,
+  .Tracklist-track {
+    min-height: var(--touch-target);
+  }
+
+  .App .Tracklist-back {
+    min-width: var(--touch-target);
+  }
+
+  .App .Tracklist-info {
+    width: var(--touch-target);
+    height: var(--touch-target);
+  }
+
+  .App .Tracklist-blurb {
+    margin-left: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Albums-level--forward,
+  .Albums-level--back,
+  .AlbumList-item.is-flashing {
+    animation: none;
+  }
+}
+
+/* ===== About ===== */
+
+.App .AboutPanel-intro {
+  margin: 0 0 12px;
+  font: var(--font-body);
+  color: var(--neutral4);
+}
+
+.AboutPanel-credits {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}
+
+.App .AboutPanel-credits li,
+.App .AboutPanel-credits a {
+  font: var(--font-small);
+  color: var(--neutral3);
+}
+
+.App .AboutPanel-credits a,
+.App .AboutPanel-source {
+  text-decoration: underline;
+}
+
+.App .AboutPanel-source {
+  font: var(--font-body);
+  color: var(--accent);
+}
+
+/* ===== Interim lab slots (contents replaced in sub-projects 6 and 7) ===== */
+
+.LabSlot .Settings {
+  padding: 0;
+}
+
+.LabSlot button.Visualizer-theme-card {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Theme selector styles */
+
+.Visualizer-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--charW1);
+}
+
+.Visualizer-theme-card {
+  cursor: pointer;
+  border: 1px solid var(--neutral2);
+  padding: calc(var(--charW1) / 2);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.Visualizer-theme-card-new-row {
+  grid-column: 1;
+}
+
+.Visualizer-theme-card:hover {
+  border-color: var(--neutral4);
+}
+
+.Visualizer-theme-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.Visualizer-theme-swatch {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-bottom: calc(var(--charW1) / 2);
+  border: 1px solid var(--neutral4);
+}
+
+.Visualizer-theme-pixel {
+  flex: 1;
+  height: 8px;
+}
+
+.Visualizer-theme-label {
+  display: block;
+  text-align: center;
+  font-size: 0.8em;
+  color: var(--neutral3);
+}
+
+.Visualizer-theme-card.selected .Visualizer-theme-label {
+  color: var(--accent);
+}
+
+/* Compact: 2-column palette grid (after the base rules so it wins the cascade). */
+@media (max-width: 768px) and (orientation: portrait) {
+  .Visualizer-theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns on mobile */
+    gap: var(--charW2);
+  }
+
+  .Visualizer-theme-card {
+    padding: calc(var(--charW2) / 2);
+  }
+
+  .Visualizer-theme-pixel {
+    height: 12px;
+    /* Slightly taller for easier tapping on mobile */
+  }
+}
+
+/* Compact: About links and palette cards keep 44px targets. */
+@media (max-width: 768px) and (orientation: portrait) {
+  .App .AboutPanel-credits a,
+  .App .AboutPanel-source {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+
+  .LabSlot button.Visualizer-theme-card {
+    min-height: var(--touch-target);
+  }
+}
+
+/* ===== Root ===== */
+
+.App.AppShell {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.AppShell .toast-box-outer {
+  z-index: 7;
+}
+
+/* ===== Low-power mode: solid panels, no blur ===== */
+
+.AppShell[data-perf='low'] {
+  --panel-bg: var(--neutral0);
+  --chrome-bg: var(--neutral0);
+  --panel-blur: none;
+}
+
+/* ===== Compact layout (portrait phones) ===== */
+
+.App[data-layout='compact'] .TopBar {
+  padding: calc(8px + env(safe-area-inset-top)) 12px 16px;
+}
+
+.App[data-layout='compact'] .TopBar-logo {
+  font-size: 18px;
+}
+
+.App[data-layout='compact'] .Dock {
+  right: 0;
+  bottom: 0;
+  left: 0;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: auto;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  transform: none;
+  border-radius: 12px 12px 0 0;
+}
+
+/* The pinned dock never fades on phones. */
+.AppShell[data-layout='compact'][data-idle='true'] .Dock {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.App[data-layout='compact'] .Dock-meta {
+  flex-basis: 100%;
+  order: -2;
+}
+
+.App[data-layout='compact'] .Dock-progress {
+  flex-basis: 100%;
+  order: -1;
+}
+
+.App[data-layout='compact'] .Dock-volume {
+  display: none;
+}
+
+.App[data-layout='compact'] .Dock-play {
+  width: 52px;
+  height: 52px;
+}
+
+.App[data-layout='compact'] .Panel-close,
+.App[data-layout='compact'] .Tracklist-track,
+.App[data-layout='compact'] .AlbumList-item,
+.App[data-layout='compact'] .Tracklist-back {
+  min-height: var(--touch-target);
+}
+
+.App[data-layout='compact'] .Tracklist-info {
+  width: var(--touch-target);
+  height: var(--touch-target);
+}
+
+.App[data-layout='compact'] .Spotlight {
+  top: 38%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Visualizer-theme-card {
+    transition: none;
+  }
+}
+
+/* ===== Film grain ===== */
+
+/* Oversized by half a tile so the jitter never exposes an edge; transform-only, so it stays on the compositor. */
+.FilmGrain {
+  position: fixed;
+  inset: -64px;
+  z-index: 99999;
+  background-size: 128px 128px;
+  pointer-events: none;
+  animation: film-grain-jitter 0.66s steps(1, end) infinite;
+  will-change: transform;
+}
+
+@keyframes film-grain-jitter {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  12.5% {
+    transform: translate(-37px, 21px);
+  }
+
+  25% {
+    transform: translate(18px, -45px);
+  }
+
+  37.5% {
+    transform: translate(-52px, -9px);
+  }
+
+  50% {
+    transform: translate(41px, 33px);
+  }
+
+  62.5% {
+    transform: translate(-14px, 56px);
+  }
+
+  75% {
+    transform: translate(29px, -27px);
+  }
+
+  87.5% {
+    transform: translate(-61px, 40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .FilmGrain {
+    animation: none;
+  }
+}

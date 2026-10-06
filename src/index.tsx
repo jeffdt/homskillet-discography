@@ -1,8 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/600.css';
+import '@fontsource/tilt-warp/400.css';
+import './styles/shell.css';
 import App from './components/App';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { UserProvider } from './components/UserProvider';
 import { ToastProvider } from './components/ToastProvider';
 
@@ -24,12 +27,11 @@ if (GA_ID && GA_ID !== 'UA-XXXXXXXXXX') {
   document.head.appendChild(script2);
 }
 
-ReactDOM.render((
-  <Router basename="/">
-    <ToastProvider>
-      <UserProvider>
-        <App/>
-      </UserProvider>
-    </ToastProvider>
-  </Router>
-), document.getElementById('root'));
+ReactDOM.render(
+  <ToastProvider>
+    <UserProvider>
+      <App />
+    </UserProvider>
+  </ToastProvider>,
+  document.getElementById('root')
+);
