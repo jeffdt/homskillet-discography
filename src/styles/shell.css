@@ -227,9 +227,11 @@
 
 /* ===== Wordmark ===== */
 
-.Wordmark {
+/* font: inherit undoes the legacy `.App * { font }` reset so the logo takes its container's size. */
+.App .Wordmark {
   position: relative;
   display: inline-block;
+  font: inherit;
   line-height: 1;
   white-space: nowrap;
 }
@@ -246,7 +248,16 @@
 .App .Wordmark-word {
   position: relative;
   display: inline-block;
+  padding: 0 0.12em;
   color: var(--accent);
+  /* Scanlines cut into the letters (the mask is alpha only), so nothing darkens the backdrop. */
+  -webkit-mask-image: repeating-linear-gradient(
+    180deg,
+    #000 0 0.05em,
+    rgba(0, 0, 0, 0.4) 0.05em 0.08em
+  );
+  mask-image: repeating-linear-gradient(180deg, #000 0 0.05em, rgba(0, 0, 0, 0.4) 0.05em 0.08em);
+  animation: wordmark-roll 6s linear infinite;
 }
 
 /* Two offset copies of the word: a faint white one and a dark green one, glitching together. */
@@ -254,7 +265,7 @@
 .Wordmark-word::after {
   content: attr(data-text);
   position: absolute;
-  inset: 0;
+  inset: 0 0.12em;
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -272,29 +283,10 @@
   animation: wordmark-split-b 3.2s steps(1) infinite;
 }
 
-.Wordmark-lines {
-  position: absolute;
-  inset: -0.1em -0.2em;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neutral0) 55%, transparent) 0 2px,
-    transparent 2px 5px
-  );
-  animation: wordmark-roll 6s linear infinite;
-}
-
-.TopBar-logo .Wordmark-lines {
-  background: repeating-linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--neutral0) 45%, transparent) 0 1px,
-    transparent 1px 3px
-  );
-}
-
 @keyframes wordmark-roll {
   to {
-    background-position: 0 50px;
+    -webkit-mask-position: 0 0.8em;
+    mask-position: 0 0.8em;
   }
 }
 
@@ -335,9 +327,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .Wordmark-word,
   .Wordmark-word::before,
-  .Wordmark-word::after,
-  .Wordmark-lines {
+  .Wordmark-word::after {
     animation: none;
   }
 }
