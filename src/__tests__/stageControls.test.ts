@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ALL_STAGE_SLIDERS,
   FILM_GRAIN,
+  REACTIVE_STRENGTH,
   MORE_SPARK_SLIDERS,
   PEAK_DECAY,
   PEAK_QUANTIZATION,
@@ -41,6 +42,7 @@ describe('stage controls', () => {
     expect(ALL_STAGE_SLIDERS).toEqual([
       ...PEAK_SLIDERS,
       SCOPE_ZOOM,
+      REACTIVE_STRENGTH,
       FILM_GRAIN,
       ...SPARK_SLIDERS,
       ...MORE_SPARK_SLIDERS,
@@ -49,6 +51,7 @@ describe('stage controls', () => {
       'peakDecayRate',
       'peakQuantization',
       'scopeSpan',
+      'reactiveStrength',
       'filmGrainAmount',
       'particleSpawnRate',
       'particleLifespan',
@@ -63,6 +66,13 @@ describe('stage controls', () => {
       'sliderSparksEnabled',
       'particleFadeMode',
     ]);
+  });
+
+  it('format the reactive UI strength as a percentage with an Off at zero', () => {
+    expect(REACTIVE_STRENGTH.format(0)).toBe('Off');
+    expect(REACTIVE_STRENGTH.format(100)).toBe('100%');
+    expect(REACTIVE_STRENGTH.toSlider(500)).toBe(REACTIVE_STRENGTH.max);
+    expect(sliderSetting({}, REACTIVE_STRENGTH)).toBe(100);
   });
 
   it('write only stage settings, have unique ids and explain themselves in plain lines', () => {

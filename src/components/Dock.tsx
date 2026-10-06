@@ -120,9 +120,11 @@ export default function Dock({
 }: DockProps) {
   const disabled = playback.ejected;
   const title = track ? track.title : fallbackTitle(playback.songUrl);
+  const regionRef = useRef<HTMLDivElement>(null);
+  usePulseTarget(regionRef, '--pulse-intensity', !playback.paused && !disabled);
 
   return (
-    <div className="Dock Chrome" role="region" aria-label="Player">
+    <div ref={regionRef} className="Dock Chrome" role="region" aria-label="Player">
       <div className="Dock-transport">
         <button
           className="Dock-button"

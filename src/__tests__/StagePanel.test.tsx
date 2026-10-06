@@ -6,6 +6,7 @@ import StagePanel from '../components/StagePanel';
 import { UserContext, UserSettings } from '../components/UserProvider';
 import {
   FILM_GRAIN,
+  REACTIVE_STRENGTH,
   MORE_SPARK_SLIDERS,
   PEAK_SLIDERS,
   REACTIVE_UI,
@@ -54,7 +55,13 @@ describe('StagePanel', () => {
     ['Style', 'Channel colors', 'Interface', 'Sparks'].forEach((heading) =>
       expect(screen.getByRole('heading', { name: heading })).toBeTruthy()
     );
-    [...PEAK_SLIDERS, FILM_GRAIN, ...SPARK_SLIDERS, ...MORE_SPARK_SLIDERS].forEach((def) => {
+    [
+      ...PEAK_SLIDERS,
+      REACTIVE_STRENGTH,
+      FILM_GRAIN,
+      ...SPARK_SLIDERS,
+      ...MORE_SPARK_SLIDERS,
+    ].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
@@ -154,6 +161,20 @@ describe('StagePanel', () => {
     expect(updateSettings).toHaveBeenLastCalledWith({ audioReactivePulse: false });
     fireEvent.click(screen.getByRole('switch', { name: 'Sparks' }));
     expect(updateSettings).toHaveBeenLastCalledWith({ sliderSparksEnabled: true });
+  });
+
+  it('disables the reactive strength slider while Reactive UI is off', () => {
+    renderPanel({ audioReactivePulse: false });
+    expect((screen.getByLabelText(REACTIVE_STRENGTH.label) as HTMLInputElement).disabled).toBe(
+      true
+    );
+  });
+
+  it('leaves the reactive strength slider enabled while Reactive UI is on', () => {
+    renderPanel();
+    expect((screen.getByLabelText(REACTIVE_STRENGTH.label) as HTMLInputElement).disabled).toBe(
+      false
+    );
   });
 
   it('disables spark tuning while sparks are off', () => {

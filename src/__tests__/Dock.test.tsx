@@ -168,7 +168,10 @@ describe('Dock', () => {
     });
     const pause = screen.getByRole('button', { name: 'Pause' });
     expect(Number(pause.style.getPropertyValue('--pulse-intensity'))).toBeGreaterThan(0.9);
+    const region = screen.getByRole('region', { name: 'Player' });
+    expect(Number(region.style.getPropertyValue('--pulse-intensity'))).toBeGreaterThan(0.9);
     rerender(dock(true));
+    expect(region.style.getPropertyValue('--pulse-intensity')).toBe('0');
     expect(
       screen.getByRole('button', { name: 'Play' }).style.getPropertyValue('--pulse-intensity')
     ).toBe('0');

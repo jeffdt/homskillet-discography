@@ -118,6 +118,18 @@ export const SCOPE_ZOOM: StageSliderDef = {
   format: (value) => `${Math.round(value / TAP_SAMPLES_PER_MS)} ms`,
 };
 
+/** How strongly the dock, play button and logo react to the music. */
+export const REACTIVE_STRENGTH: StageSliderDef = {
+  id: 'reactive-strength',
+  key: 'reactiveStrength',
+  label: 'Reactive UI strength',
+  explanation:
+    'How big the glow on the dock and play button and the swell of the logo get when the music hits. At 100% it is easy to see; turn it down for a calmer screen.',
+  step: 10,
+  ...direct(0, 150, 0),
+  format: (value) => (value === 0 ? 'Off' : `${value}%`),
+};
+
 /** Strength of the film grain overlay. */
 export const FILM_GRAIN: StageSliderDef = {
   id: 'film-grain',
@@ -223,6 +235,7 @@ export const MORE_SPARK_SLIDERS: readonly StageSliderDef[] = [
 export const ALL_STAGE_SLIDERS: readonly StageSliderDef[] = [
   ...PEAK_SLIDERS,
   SCOPE_ZOOM,
+  REACTIVE_STRENGTH,
   FILM_GRAIN,
   ...SPARK_SLIDERS,
   ...MORE_SPARK_SLIDERS,
@@ -233,7 +246,7 @@ export const REACTIVE_UI: StageToggleDef = {
   id: 'reactive-ui',
   key: 'audioReactivePulse',
   label: 'Reactive UI',
-  explanation: 'The play button glows and the logo swells gently with the music.',
+  explanation: 'The dock and play button glow and the logo swells with the music.',
   isOn: (value) => value !== false,
   toValue: (on) => on,
 };

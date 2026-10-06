@@ -74,6 +74,7 @@ export const STAGE_DEFAULTS = {
   peakDecayRate: 0.98,
   peakQuantization: 4,
   audioReactivePulse: true,
+  reactiveStrength: 100,
   filmGrainAmount: 50,
   sliderSparksEnabled: false,
   ...SPARK_DEFAULTS,

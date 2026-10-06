@@ -429,6 +429,18 @@ describe('AppShell and the frame loop', () => {
     );
     expect(setEnabled).toHaveBeenLastCalledWith(false);
   });
+
+  it('exposes the reactive UI strength as a CSS variable on the shell', () => {
+    window.localStorage.setItem('settings', JSON.stringify({ reactiveStrength: 60 }));
+    const data = createTestAudioData();
+    const { container } = render(
+      <UserProvider>
+        {withAudioData(data.value, <AppShell playback={IDLE} controls={makeControls()} />)}
+      </UserProvider>
+    );
+    const shell = container.querySelector('.AppShell') as HTMLElement;
+    expect(shell.style.getPropertyValue('--reactive-strength')).toBe('0.6');
+  });
 });
 
 describe('AppShell channel palette', () => {
