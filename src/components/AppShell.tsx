@@ -6,6 +6,7 @@ import { useIdleFade } from '../hooks/useIdleFade';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { usePerfMode } from '../hooks/usePerfMode';
 import { isFullscreenSupported, toggleFullscreen } from '../shell/fullscreen';
+import { Box } from '../shell/logoHandoff';
 import {
   INITIAL_PANELS,
   PanelId,
@@ -63,6 +64,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
   const pendingSeekRef = useRef<{ trackId: string; ms: number } | null>(null);
   const wasEjectedRef = useRef(playback.ejected);
   const [hasStarted, setHasStarted] = useState(!playback.ejected);
+  const logoHandoffRef = useRef<Box | null>(null);
 
   const currentTrack =
     (catalog && playback.songUrl && catalog.trackByHref.get(playback.songUrl)) || null;
@@ -179,6 +181,18 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
     [currentTrackId, compact]
   );
 
+  /** Records where the title logo was as the title screen leaves. */
+  const handLogoOff = useCallback((box: Box) => {
+    logoHandoffRef.current = box;
+  }, []);
+
+  /** Hands the recorded title logo position to the top bar exactly once. */
+  const takeLogoHandoff = useCallback(() => {
+    const box = logoHandoffRef.current;
+    logoHandoffRef.current = null;
+    return box;
+  }, []);
+
   /** Opens the Albums drawer at the album list. */
   const browseAlbums = useCallback(() => {
     setAlbumsAlbumId(null);
@@ -293,6 +307,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
           onStart={sharedTrack ? playSharedTrack : startListening}
           onGesture={controls.resumeAudio}
           onBrowse={browseAlbums}
+          onLogoExit={handLogoOff}
         />
       )}
 
@@ -309,6 +324,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
         panels={compact ? topOnly(panels) : panels}
         onToggle={togglePanel}
         showLogo={!showTitle}
+        takeLogoHandoff={takeLogoHandoff}
       />
 
       {!showTitle && (

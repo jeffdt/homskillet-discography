@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Box } from '../shell/logoHandoff';
 import Wordmark from './Wordmark';
 
 export const START_COOLDOWN_MS = 3000;
@@ -14,6 +15,8 @@ interface TitleScreenProps {
   /** Called synchronously inside the press, so audio can resume within the user gesture. */
   onGesture?: () => void;
   onBrowse: () => void;
+  /** Receives the big logo's position as the screen unmounts, so the top bar can animate from it. */
+  onLogoExit?: (box: Box) => void;
 }
 
 /** First-load screen: one big play action, a browse link, and a dim idle glow behind them. */
@@ -25,12 +28,25 @@ export default function TitleScreen({
   onStart,
   onGesture,
   onBrowse,
+  onLogoExit,
 }: TitleScreenProps) {
   const [pending, setPending] = useState(false);
   const [starting, setStarting] = useState(false);
   const startLockedRef = useRef(false);
   const onStartRef = useRef(onStart);
   onStartRef.current = onStart;
+  const logoRef = useRef<HTMLHeadingElement>(null);
+  const onLogoExitRef = useRef(onLogoExit);
+  onLogoExitRef.current = onLogoExit;
+
+  // Layout-effect cleanup runs while the unmounting DOM is still attached, so it can be measured.
+  useLayoutEffect(
+    () => () => {
+      const word = logoRef.current && logoRef.current.querySelector('.Wordmark');
+      if (word && onLogoExitRef.current) onLogoExitRef.current(word.getBoundingClientRect());
+    },
+    []
+  );
 
   useEffect(() => {
     if (!pending || !ready) return;
@@ -75,7 +91,7 @@ export default function TitleScreen({
   return (
     <div className="TitleScreen">
       <div className="TitleScreen-glow" aria-hidden="true" />
-      <h1 className="TitleScreen-logo">
+      <h1 className="TitleScreen-logo" ref={logoRef}>
         <Wordmark />
       </h1>
       <p className="TitleScreen-tagline">{tagline}</p>

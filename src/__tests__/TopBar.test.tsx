@@ -29,4 +29,34 @@ describe('TopBar', () => {
     const logo = screen.getByText('HOMSKILLET').closest('.TopBar-logo') as HTMLElement;
     expect(logo.style.visibility).toBe('hidden');
   });
+
+  it('glides the logo in from the title position once it appears', () => {
+    const animate = vi.fn();
+    (HTMLElement.prototype as any).animate = animate;
+    const takeLogoHandoff = vi.fn(() => ({ left: 300, top: 400, height: 100 }));
+    try {
+      const { rerender } = render(
+        <TopBar
+          panels={{ open: [] }}
+          onToggle={() => {}}
+          showLogo={false}
+          takeLogoHandoff={takeLogoHandoff}
+        />
+      );
+      expect(takeLogoHandoff).not.toHaveBeenCalled();
+      rerender(
+        <TopBar
+          panels={{ open: [] }}
+          onToggle={() => {}}
+          showLogo
+          takeLogoHandoff={takeLogoHandoff}
+        />
+      );
+      expect(takeLogoHandoff).toHaveBeenCalledTimes(1);
+      expect(animate).toHaveBeenCalledTimes(1);
+      expect(animate.mock.calls[0][0][0].transform).toMatch(/^translate\(300px, 400px\)/);
+    } finally {
+      delete (HTMLElement.prototype as any).animate;
+    }
+  });
 });

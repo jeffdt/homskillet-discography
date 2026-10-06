@@ -123,4 +123,12 @@ describe('TitleScreen', () => {
     renderTitle({ albumCount: 0 });
     expect(screen.getByRole('button', { name: 'or browse albums' })).toBeTruthy();
   });
+
+  it('reports where the logo was as it unmounts', () => {
+    const onLogoExit = vi.fn();
+    const { unmount } = renderTitle({ onLogoExit });
+    unmount();
+    expect(onLogoExit).toHaveBeenCalledTimes(1);
+    expect(onLogoExit.mock.calls[0][0]).toHaveProperty('height');
+  });
 });
