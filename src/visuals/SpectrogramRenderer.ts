@@ -102,10 +102,11 @@ export class SpectrogramRenderer {
       spectrogramCtx.drawImage(this.scratch, 0, 0);
     }
 
-    if (!isSilent(spectrum)) this.drawBins(spectrum, dtMs, step);
+    this.drawBins(spectrum, dtMs, step, isSilent(spectrum));
   }
 
-  private drawBins(spectrum: Float32Array, dtMs: number, step: number): void {
+  /** A silent frame draws no bars or waterfall column, but the peak holds keep decaying. */
+  private drawBins(spectrum: Float32Array, dtMs: number, step: number, silent: boolean): void {
     const analyzerCtx = this.analyzerCtx as CanvasRenderingContext2D;
     const spectrogramCtx = this.spectrogramCtx as CanvasRenderingContext2D;
     const { analyzer, spectrogram } = this.canvases;
@@ -128,15 +129,19 @@ export class SpectrogramRenderer {
 
       // Low frequencies at the bottom of both canvases.
       const analyzerY = analyzerHeight - Math.ceil(((i + 1) / bins) * analyzerHeight);
-      analyzerCtx.fillStyle = color;
-      analyzerCtx.fillRect(0, analyzerY, (value * widthPerValue) | 0, analyzerBinHeight);
+      if (!silent) {
+        analyzerCtx.fillStyle = color;
+        analyzerCtx.fillRect(0, analyzerY, (value * widthPerValue) | 0, analyzerBinHeight);
+      }
 
       const peakWidth =
         Math.floor(((this.peaks[i] * widthPerValue) | 0) / quantization) * quantization;
-      analyzerCtx.fillStyle = this.colors[colorIndex(this.peaks[i])];
-      analyzerCtx.fillRect(peakWidth - 2, analyzerY, 2, analyzerBinHeight);
+      if (!silent || this.peaks[i] >= 1) {
+        analyzerCtx.fillStyle = this.colors[colorIndex(this.peaks[i])];
+        analyzerCtx.fillRect(peakWidth - 2, analyzerY, 2, analyzerBinHeight);
+      }
 
-      if (step > 0) {
+      if (step > 0 && !silent) {
         const spectrogramY = spectrogramHeight - Math.ceil(((i + 1) / bins) * spectrogramHeight);
         spectrogramCtx.fillStyle = color;
         spectrogramCtx.fillRect(spectrogramWidth - step, spectrogramY, step, spectrogramBinHeight);

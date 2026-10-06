@@ -51,7 +51,6 @@ function sparkSettings(settings: Partial<UserSettings>, faded: boolean) {
     particleSpeed: settings.particleSpeed,
     particleSpeedVariance: settings.particleSpeedVariance,
     particleGravity: settings.particleGravity,
-    particleHueVariation: settings.particleHueVariation,
     particleFadeMode: settings.particleFadeMode,
   };
 }

@@ -37,6 +37,7 @@ class App extends React.Component<AppProps, AppState> {
   private mediaSessionAudio?: HTMLAudioElement;
   private controls: PlaybackControls;
   private readonly audioData: AudioData;
+  private unmounted = false;
 
   constructor(props: AppProps) {
     super(props);
@@ -130,6 +131,10 @@ class App extends React.Component<AppProps, AppState> {
       return;
     }
 
+    if (this.unmounted) {
+      engine.dispose();
+      return;
+    }
     this.engine = engine;
     this.audioData.source.attach(engine);
     (window as any).audioCtx = engine.context;
@@ -467,6 +472,7 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   componentWillUnmount() {
+    this.unmounted = true;
     this.audioData.dispose();
   }
 

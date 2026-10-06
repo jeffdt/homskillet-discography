@@ -86,6 +86,26 @@ describe('SpectrogramRenderer', () => {
     expect(Math.abs(at30 - at60)).toBeLessThanOrEqual(2);
   });
 
+  it('keeps decaying the peak hold through silence', () => {
+    const { renderer, analyzer, loud } = setup(2560);
+    renderer.setPeakQuantization(1);
+    renderer.draw(
+      Float32Array.from(loud, (_, i) => (i === 0 ? 1 : 0)),
+      1000 / 60,
+      0
+    );
+    const silentPeakX = () => {
+      analyzer.ctx.fillRect.mockClear();
+      renderer.draw(new Float32Array(loud.length), 1000 / 60, 0);
+      return analyzer.ctx.fillRect.mock.calls[1][0]; // after the background: bin 0's peak
+    };
+    const first = silentPeakX();
+    for (let i = 0; i < 30; i++) silentPeakX();
+    const later = silentPeakX();
+    expect(first).toBeGreaterThan(0);
+    expect(later).toBeLessThan(first);
+  });
+
   it('does nothing without 2D contexts', () => {
     const none = { width: 10, height: 10, getContext: () => null } as unknown as HTMLCanvasElement;
     const renderer = new SpectrogramRenderer(

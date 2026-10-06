@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { TAP_POST_INTERVAL_FRAMES } from '../../audio/constants';
+import { TAP_POST_INTERVAL_FRAMES, TAP_RING } from '../../audio/constants';
 import { TapHistory } from '../../audio/taps/TapHistory';
 import { TapRing } from '../../audio/taps/TapRing';
 import { TapSnapshot } from '../../audio/taps/TapSnapshot';
@@ -57,6 +57,17 @@ describe('TapHistory from a ring', () => {
     expect(values.slice(0, 100)).toEqual(ramp(1, 100));
     expect(values.slice(100, 528)).toEqual(silence(428));
     expect(values.slice(528)).toEqual(ramp(1428, 3072));
+  });
+
+  it('reads a whole ring written in one burst without a hole when in process', () => {
+    const ring = new TapRing();
+    const reader = new RingTapReader(ring, TAP_RING);
+    writeTaps(ring, [ramp(1, 100)]);
+    reader.readHistory();
+    writeTaps(ring, [ramp(1000, TAP_RING)]);
+    const values = newest(reader.readHistory(), 0, TAP_RING + 100);
+    expect(values.slice(0, 100)).toEqual(ramp(1, 100));
+    expect(values.slice(100)).toEqual(ramp(1000, TAP_RING));
   });
 
   it('clears when a new track loads', () => {

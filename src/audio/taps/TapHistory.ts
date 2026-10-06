@@ -43,10 +43,10 @@ export class TapHistory {
 
   /**
    * Appends new samples straight from a ring. snapshot must hold that ring's status from the same
-   * consistent read (see RingTapReader.read).
+   * consistent read (see RingTapReader.read). limit caps how many new samples one ingest reads.
    */
-  ingestRing(snapshot: TapSnapshot, ring: TapRing): void {
-    const count = this.advance(snapshot, RING_INGEST_LIMIT);
+  ingestRing(snapshot: TapSnapshot, ring: TapRing, limit = RING_INGEST_LIMIT): void {
+    const count = this.advance(snapshot, limit);
     if (count === 0) return;
     const start = (this.writeIndex - count) | 0;
     const source = ring.samples;

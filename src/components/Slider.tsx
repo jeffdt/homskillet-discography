@@ -16,7 +16,6 @@ interface SliderProps {
   particleSpeed?: number;
   particleSpeedVariance?: number;
   particleGravity?: number;
-  particleHueVariation?: number;
   particleFadeMode?: string;
 }
 

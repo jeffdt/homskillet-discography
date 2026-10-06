@@ -21,6 +21,7 @@ export interface CreateAudioDataOptions {
 }
 
 // The forced read stores its result here only so the spectrum getter cannot be optimized away.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- write-only on purpose, see above
 let lastForcedSpectrum: Float32Array | null = null;
 
 function readEveryVoiceSpectrum(frame: VoiceFrame): void {

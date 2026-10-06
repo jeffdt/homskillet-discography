@@ -5,7 +5,7 @@ import { smoothToward } from './levels';
 /**
  * The audio-reactive pulse (dock glow, level indicator): RMS of the mix spectrum's mid band
  * (leads and snares), boosted, clipped at 1 and squared so loud hits stand out, then smoothed over
- * time. Replaces useAudioAnalysis, which did the same on an AnalyserNode once per frame.
+ * time.
  */
 export class PulseMeter {
   /** First layout bin inside the band. */

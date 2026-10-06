@@ -1,5 +1,5 @@
 import { TAP_POOL_SIZE, TAP_POST_INTERVAL_FRAMES } from '../constants';
-import { TapHistory } from './TapHistory';
+import { RING_INGEST_LIMIT, TapHistory } from './TapHistory';
 import { TapRing } from './TapRing';
 import { TAP_SNAPSHOT_BYTES, TapSnapshot, writeSnapshotBuffer } from './TapSnapshot';
 
@@ -88,7 +88,15 @@ export class RingTapReader implements TapReader {
   private readonly snapshot = new TapSnapshot();
   private readonly history = new TapHistory();
 
-  constructor(private readonly ring: TapRing) {}
+  /**
+   * ingestLimit is how many new samples one read may take: the default keeps a SharedArrayBuffer
+   * ring's concurrent writer out of the read; an in-process ring has no concurrent writer and can
+   * pass TAP_RING.
+   */
+  constructor(
+    private readonly ring: TapRing,
+    private readonly ingestLimit = RING_INGEST_LIMIT
+  ) {}
 
   read(): TapSnapshot {
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -96,7 +104,7 @@ export class RingTapReader implements TapReader {
       if (before % 2 !== 0) continue;
       this.snapshot.fillFromRing(this.ring);
       if (this.ring.sequence === before) {
-        this.history.ingestRing(this.snapshot, this.ring);
+        this.history.ingestRing(this.snapshot, this.ring, this.ingestLimit);
         break;
       }
     }
