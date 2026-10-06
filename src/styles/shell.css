@@ -19,6 +19,18 @@
   --chrome-gap: 16px;
 }
 
+/* One typeface for the whole UI; only the logo (--font-title) stays pixel. These override the
+   legacy pixel-font variables from fonts.css so older components inside the shell follow too. */
+.App {
+  --font: 400 14px/1.45 var(--fontSans);
+  --font-accent: 600 13px/1.45 var(--fontSans);
+}
+
+.App[data-layout='compact'] {
+  --font: 400 16px/1.45 var(--fontSans);
+  --font-accent: 600 15px/1.45 var(--fontSans);
+}
+
 @supports not (color: color-mix(in srgb, red 50%, transparent)) {
   :root {
     --panel-bg: var(--neutral0);
@@ -187,8 +199,8 @@
 }
 
 .Icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
