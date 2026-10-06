@@ -6,6 +6,7 @@ import { LoadSupersededError } from '../../audio/errors';
 import { EngineCommand, ProcessorEvent } from '../../audio/protocol';
 import { FLAG_PAUSED, TapRing } from '../../audio/taps/TapRing';
 import { RingTapReader } from '../../audio/taps/transports';
+import { ramp, writeTaps } from '../helpers/taps';
 import { ChipCore, EngineKind, RendererSettings, TrackInfo } from '../../audio/types';
 
 const SETTINGS: RendererSettings = { tempo: 1, stereoWidth: 1, subBass: 0, loopForever: false };
@@ -59,6 +60,12 @@ async function loaded() {
 }
 
 describe('ChipEngine', () => {
+  it('exposes the transport history', () => {
+    const { engine, ring } = makeEngine();
+    writeTaps(ring, [ramp(0, 32)]);
+    expect(engine.readTapHistory().writeIndex).toBe(32);
+  });
+
   it('sends a copy of the bytes, transferred, with the current gains', async () => {
     const { engine, link } = makeEngine();
     const data = new Uint8Array([1, 2, 3]);

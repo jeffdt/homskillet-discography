@@ -2,6 +2,7 @@ import { MAX_POSITION_EXTRAPOLATION_S, VOICE_PAIRS } from '../constants';
 import { LoadSupersededError } from '../errors';
 import { ProcessorEvent } from '../protocol';
 import { computeVoiceGains } from '../render/voiceGains';
+import { TapHistory } from '../taps/TapHistory';
 import { TapSnapshot } from '../taps/TapSnapshot';
 import { TapReader } from '../taps/transports';
 import { ChipCore, EngineKind, RendererSettings, TrackInfo, VoiceMix } from '../types';
@@ -175,6 +176,10 @@ export class ChipEngine implements AudioEngine {
 
   readTaps(): TapSnapshot {
     return this.taps.read();
+  }
+
+  readTapHistory(): TapHistory {
+    return this.taps.readHistory();
   }
 
   on<K extends keyof AudioEngineEvents>(event: K, callback: AudioEngineEvents[K]): () => void {

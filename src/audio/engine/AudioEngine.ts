@@ -1,3 +1,4 @@
+import { TapHistory } from '../taps/TapHistory';
 import { TapSnapshot } from '../taps/TapSnapshot';
 import { ChipCore, EngineKind, RendererSettings, TrackInfo, VoiceMix } from '../types';
 
@@ -49,6 +50,8 @@ export interface AudioEngine {
   setVolume(volume: number): void;
   /** Latest per-voice taps and status. The object is reused; never keep it. */
   readTaps(): TapSnapshot;
+  /** Continuous per-voice tap history, up to date with the transport. The object is reused; never keep it. */
+  readTapHistory(): TapHistory;
   /** Subscribes to an event; returns the unsubscribe function. */
   on<K extends keyof AudioEngineEvents>(event: K, callback: AudioEngineEvents[K]): () => void;
   /** Releases the processor link, nodes and context. */

@@ -10,6 +10,7 @@ import {
   STATUS_SAMPLE_RATE,
   STATUS_SEQUENCE,
   STATUS_SLOTS,
+  STATUS_TAP_WRITE_INDEX,
   STATUS_VOICE_COUNT,
   TapRing,
 } from './TapRing';
@@ -60,6 +61,10 @@ export class TapSnapshot {
   }
   get sequence(): number {
     return this.status[STATUS_SEQUENCE];
+  }
+  /** Absolute index one past the newest tap sample (wraps like int32). */
+  get tapWriteIndex(): number {
+    return this.status[STATUS_TAP_WRITE_INDEX];
   }
 
   /** Copies a pooled transfer buffer into this snapshot. */
