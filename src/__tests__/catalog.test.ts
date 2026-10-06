@@ -59,6 +59,11 @@ describe('buildCatalog with no metadata', () => {
     expect(bazaar.tracks[0].blurb).toBeNull();
   });
 
+  it('gives each album its own generated cover family', () => {
+    const families = catalog.albums.map((a) => a.coverFamily);
+    expect(new Set(families).size).toBe(families.length);
+  });
+
   it('ignores nested folders', () => {
     expect(catalog.albumById.get('Bazaar')!.tracks).toHaveLength(3);
   });

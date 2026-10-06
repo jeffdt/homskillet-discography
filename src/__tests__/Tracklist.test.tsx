@@ -55,6 +55,34 @@ describe('Tracklist', () => {
     expect(screen.getByText('Groove').closest('button')!.getAttribute('aria-current')).toBe('true');
   });
 
+  it('marks the header as playing only while one of its tracks plays', () => {
+    const { container } = render(
+      <Tracklist
+        album={album}
+        playingTrackId="Bazaar/groove.nsf"
+        paused={false}
+        onBack={vi.fn()}
+        onPlayTrack={vi.fn()}
+        initialExpandedTrackId={null}
+      />
+    );
+    expect(container.querySelector('.Tracklist-header')!.classList).toContain('is-playing');
+  });
+
+  it('leaves the header unlit for another album', () => {
+    const { container } = render(
+      <Tracklist
+        album={album}
+        playingTrackId="Covers/x.nsf"
+        paused={false}
+        onBack={vi.fn()}
+        onPlayTrack={vi.fn()}
+        initialExpandedTrackId={null}
+      />
+    );
+    expect(container.querySelector('.Tracklist-header')!.classList).not.toContain('is-playing');
+  });
+
   it('shows blurb toggles only for tracks with blurbs', () => {
     renderList();
     const toggles = screen.getAllByRole('button', { name: /^About /i });

@@ -29,7 +29,11 @@ export default function Tracklist({
       <button className="Tracklist-back" onClick={onBack}>
         ← Albums
       </button>
-      <div className="Tracklist-header">
+      <div
+        className={`Tracklist-header${
+          album.tracks.some((t) => t.id === playingTrackId) ? ' is-playing' : ''
+        }`}
+      >
         <AlbumArt album={album} size="large" />
         <div className="Tracklist-heading">
           <h3 className="Tracklist-albumTitle">{album.title}</h3>

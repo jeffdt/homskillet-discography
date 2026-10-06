@@ -825,9 +825,20 @@
   min-width: 0;
 }
 
+/* Albums rest in gray, light up white under the pointer or focus, and glow accent while playing. */
 .App .AlbumList-title {
   font: var(--font-strong);
+  color: var(--neutral2);
+  transition: color 160ms ease;
+}
+
+.App .AlbumList-item:hover .AlbumList-title,
+.App .AlbumList-item:focus-visible .AlbumList-title {
   color: var(--neutral4);
+}
+
+.App .AlbumList-item[aria-current='true'] .AlbumList-title {
+  color: var(--accent);
 }
 
 .App .AlbumList-description {
@@ -846,7 +857,6 @@
 .AlbumArt {
   flex-shrink: 0;
   border-radius: 4px;
-  image-rendering: pixelated;
 }
 
 .AlbumArt--small {
@@ -863,12 +873,46 @@
   fill: var(--neutral1);
 }
 
-.AlbumArt-px1 {
-  fill: var(--accent-dark);
+/* Each line is filled with the tile color so nearer ridges hide the ones behind them. */
+.AlbumArt-line {
+  fill: var(--neutral1);
+  stroke: var(--neutral2);
+  stroke-opacity: 0.55;
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  transition:
+    stroke 160ms ease,
+    stroke-opacity 160ms ease;
 }
 
-.AlbumArt-px2 {
-  fill: var(--accent);
+.AlbumArt-line.is-hot {
+  stroke-opacity: 1;
+  stroke-width: 2;
+}
+
+.AlbumList-item:hover .AlbumArt-line,
+.AlbumList-item:focus-visible .AlbumArt-line,
+.Tracklist-header .AlbumArt-line {
+  stroke: var(--neutral3);
+  stroke-opacity: 0.7;
+}
+
+.AlbumList-item:hover .AlbumArt-line.is-hot,
+.AlbumList-item:focus-visible .AlbumArt-line.is-hot,
+.Tracklist-header .AlbumArt-line.is-hot {
+  stroke: var(--neutral4);
+  stroke-opacity: 1;
+}
+
+.AlbumList-item[aria-current='true'] .AlbumArt-line,
+.Tracklist-header.is-playing .AlbumArt-line {
+  stroke: var(--accent-dark);
+  stroke-opacity: 1;
+}
+
+.AlbumList-item[aria-current='true'] .AlbumArt-line.is-hot,
+.Tracklist-header.is-playing .AlbumArt-line.is-hot {
+  stroke: var(--accent);
 }
 
 .App .Tracklist-back {

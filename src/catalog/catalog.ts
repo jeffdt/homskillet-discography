@@ -1,4 +1,5 @@
 import { CATALOG_PREFIX } from '../config';
+import { assignRidgeFamilies, RidgeFamily } from '../shell/albumRidges';
 import { pathJoin } from '../util';
 import { splitCamelCase, titleFromFilename } from './titles';
 
@@ -48,6 +49,8 @@ export interface Album {
   title: string;
   description: string | null;
   art: string | null;
+  /** Shape of the generated cover shown when there is no art. */
+  coverFamily: RidgeFamily;
   tracks: Track[];
 }
 
@@ -118,7 +121,12 @@ export function trackHref(albumId: string, file: string): string {
 }
 
 /** Builds one album from its directory entries, ordering listed tracks first. */
-function buildAlbum(albumId: string, entries: RawDirectoryEntry[], meta: AlbumMetadata): Album {
+function buildAlbum(
+  albumId: string,
+  entries: RawDirectoryEntry[],
+  meta: AlbumMetadata,
+  coverFamily: RidgeFamily
+): Album {
   const files = entries.filter((e) => e.type === 'file').map((e) => basename(e.path));
   const metaTracks = (meta.tracks || []).filter((t) => files.includes(t.file));
   const listed = Array.from(new Set(metaTracks.map((t) => t.file)));
@@ -146,6 +154,7 @@ function buildAlbum(albumId: string, entries: RawDirectoryEntry[], meta: AlbumMe
     title: meta.title || splitCamelCase(albumId),
     description: meta.description || null,
     art: meta.art || null,
+    coverFamily,
     tracks,
   };
 }
@@ -162,9 +171,13 @@ export function buildCatalog(directories: RawDirectories, metadata: SiteMetadata
   const metaOrder = Object.keys(albumMeta).filter((id) => folders.includes(id));
   const rest = folders.filter((id) => !metaOrder.includes(id)).sort(NAME_COLLATOR.compare);
 
-  const albums = [...metaOrder, ...rest]
-    .map((id) => buildAlbum(id, directories[`/${id}`] || [], albumMeta[id] || {}))
-    .filter((album) => album.tracks.length > 0);
+  const nonEmpty = [...metaOrder, ...rest].filter((id) =>
+    (directories[`/${id}`] || []).some((e) => e.type === 'file')
+  );
+  const coverFamilies = assignRidgeFamilies(nonEmpty);
+  const albums = nonEmpty.map((id) =>
+    buildAlbum(id, directories[`/${id}`] || [], albumMeta[id] || {}, coverFamilies.get(id)!)
+  );
 
   const albumById = new Map<string, Album>();
   const trackById = new Map<string, Track>();

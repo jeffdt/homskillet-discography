@@ -19,10 +19,11 @@ describe('AlbumArt', () => {
     expect(container.querySelector('svg')).toBeNull();
   });
 
-  it('falls back to the generated pattern when the image fails to load', () => {
+  it('falls back to generated ridge lines when the image fails to load', () => {
     const { container } = render(<AlbumArt album={album} />);
     fireEvent.error(container.querySelector('img')!);
     expect(container.querySelector('img')).toBeNull();
-    expect(container.querySelector('svg')).not.toBeNull();
+    expect(container.querySelectorAll('svg .AlbumArt-line').length).toBeGreaterThanOrEqual(8);
+    expect(container.querySelector('svg .AlbumArt-line.is-hot')).not.toBeNull();
   });
 });

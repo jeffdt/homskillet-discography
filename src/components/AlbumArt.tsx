@@ -1,10 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { Album } from '../catalog/catalog';
 import { CATALOG_PREFIX } from '../config';
-import { albumPattern } from '../shell/albumPattern';
+import { ridgeLines } from '../shell/albumRidges';
 import { pathJoin } from '../util';
 
-/** Real album art when metadata names a file, otherwise a generated pixel pattern in accent colors. */
+/**
+ * Real album art when metadata names a file, otherwise generated ridge lines. The lines
+ * are gray at rest; the parent's hover, focus and playing styles relight them.
+ */
 export default function AlbumArt({
   album,
   size = 'small',
@@ -12,7 +15,10 @@ export default function AlbumArt({
   album: Album;
   size?: 'small' | 'large';
 }) {
-  const cells = useMemo(() => albumPattern(album.id), [album.id]);
+  const lines = useMemo(
+    () => ridgeLines(album.id, album.coverFamily),
+    [album.id, album.coverFamily]
+  );
   const [failedArt, setFailedArt] = useState<string | null>(null);
   const className = `AlbumArt AlbumArt--${size}`;
   if (album.art && failedArt !== album.art) {
@@ -27,22 +33,15 @@ export default function AlbumArt({
     );
   }
   return (
-    <svg className={className} viewBox="0 0 8 8" aria-hidden="true" shapeRendering="crispEdges">
-      <rect className="AlbumArt-bg" width="8" height="8" />
-      {cells.map((row, y) =>
-        row.map((cell, x) =>
-          cell ? (
-            <rect
-              key={`${x}-${y}`}
-              className={`AlbumArt-px${cell}`}
-              x={x}
-              y={y}
-              width="1"
-              height="1"
-            />
-          ) : null
-        )
-      )}
+    <svg className={className} viewBox="0 0 100 100" aria-hidden="true">
+      <rect className="AlbumArt-bg" width="100" height="100" />
+      {lines.map((line, i) => (
+        <polyline
+          key={i}
+          className={`AlbumArt-line${line.hot ? ' is-hot' : ''}`}
+          points={line.points}
+        />
+      ))}
     </svg>
   );
 }
