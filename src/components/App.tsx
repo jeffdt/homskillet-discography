@@ -22,7 +22,7 @@ import { AudioDataContext } from '../contexts/AudioDataContext';
 import { AudioPulseProvider } from '../contexts/AudioPulseContext';
 import { AppProps, AppState } from '../types/app';
 import { SequencerState } from '../types/sequencer';
-import { AudioGraph, PlaybackControls, PlaybackState } from '../types/playback';
+import { PlaybackControls, PlaybackState } from '../types/playback';
 
 const publicUrl = import.meta.env.BASE_URL;
 const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.origin;
@@ -33,12 +33,10 @@ const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.
  */
 class App extends React.Component<AppProps, AppState> {
   private engine: AudioEngine | null = null;
-  private chipCore: any;
   private audioCtx: AudioContext | null = null;
   private playerNode: AudioNode | null = null;
   private sequencer!: Sequencer;
   private mediaSessionAudio?: HTMLAudioElement;
-  private audioGraph: AudioGraph | null = null;
   private controls: PlaybackControls;
   private readonly audioData: AudioData;
 
@@ -106,8 +104,9 @@ class App extends React.Component<AppProps, AppState> {
   // ===== Audio wiring (continued): engine startup, media session, sequencer state =====
 
   /**
-   * Creates the AudioEngine and, once it resolves, the Sequencer and AudioGraph. The promise can
-   * stay pending until the first user gesture (suspended AudioContext), so nothing waits on it.
+   * Creates the AudioEngine and, once it resolves, the Sequencer, and attaches the audio data
+   * source. The promise can stay
+   * pending until the first user gesture (suspended AudioContext), so nothing waits on it.
    */
   async initAudioEngine() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -137,7 +136,6 @@ class App extends React.Component<AppProps, AppState> {
     this.audioData.source.attach(engine);
     (window as any).audioCtx = engine.context;
     this.playerNode = engine.outputNode;
-    this.chipCore = engine.spectrumCore;
     if (engine.kind === 'stub') {
       this.props.toastContext.enqueueToast(
         'Running in STUB MODE - no actual audio playback. UI development only.',
@@ -163,11 +161,6 @@ class App extends React.Component<AppProps, AppState> {
 
     this.sequencer.setShuffle(this.state.shuffle);
     this.sequencer.setLocked(this.state.isLocked);
-    this.audioGraph = {
-      audioCtx: engine.context,
-      sourceNode: engine.outputNode,
-      chipCore: engine.spectrumCore,
-    };
     this.setState({ loading: false });
   }
 
@@ -511,7 +504,7 @@ class App extends React.Component<AppProps, AppState> {
           ejected={this.state.ejected}
           enabled={settings.audioReactivePulse ?? true}
         >
-          <AppShell playback={playback} controls={this.controls} audioGraph={this.audioGraph} />
+          <AppShell playback={playback} controls={this.controls} />
         </AudioPulseProvider>
       </AudioDataContext.Provider>
     );

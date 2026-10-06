@@ -102,13 +102,13 @@ function makeControls(): PlaybackControls {
 function renderShell(playback: PlaybackState = IDLE, controls = makeControls()) {
   const utils = render(
     <UserProvider>
-      <AppShell playback={playback} controls={controls} audioGraph={null} />
+      <AppShell playback={playback} controls={controls} />
     </UserProvider>
   );
   const rerenderWith = (next: PlaybackState) =>
     utils.rerender(
       <UserProvider>
-        <AppShell playback={next} controls={controls} audioGraph={null} />
+        <AppShell playback={next} controls={controls} />
       </UserProvider>
     );
   return { ...utils, controls, rerenderWith };
@@ -407,10 +407,7 @@ describe('AppShell and the frame loop', () => {
       const setMaxFps = vi.spyOn(data.frameLoop, 'setMaxFps');
       render(
         <UserProvider>
-          {withAudioData(
-            data.value,
-            <AppShell playback={IDLE} controls={makeControls()} audioGraph={null} />
-          )}
+          {withAudioData(data.value, <AppShell playback={IDLE} controls={makeControls()} />)}
         </UserProvider>
       );
       expect(setMaxFps).toHaveBeenLastCalledWith(30);
@@ -425,10 +422,7 @@ describe('AppShell and the frame loop', () => {
     const setEnabled = vi.spyOn(data.pulse, 'setEnabled');
     render(
       <UserProvider>
-        {withAudioData(
-          data.value,
-          <AppShell playback={IDLE} controls={makeControls()} audioGraph={null} />
-        )}
+        {withAudioData(data.value, <AppShell playback={IDLE} controls={makeControls()} />)}
       </UserProvider>
     );
     expect(setEnabled).toHaveBeenLastCalledWith(false);

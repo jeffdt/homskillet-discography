@@ -1,6 +1,4 @@
 export const ANALYZER_WIDTH = 64;
-/** Spectrogram sizes its constant-Q transform from the analyzer canvas width at construction. */
-export const CQT_BINS = 448;
 
 export interface CanvasBox {
   left: number;

@@ -1,4 +1,4 @@
-import { DEFAULT_COLOR_PALETTE } from '../Spectrogram';
+import { DEFAULT_COLOR_PALETTE } from '../visuals/spectrogramMath';
 import { ColorPalette } from '../types/visualizer';
 
 export const VISUALIZER_PALETTES: ColorPalette[] = [

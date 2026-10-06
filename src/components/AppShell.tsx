@@ -25,7 +25,7 @@ import {
   parseInitialLocation,
   stripPlayParams,
 } from '../shell/playUrl';
-import { AudioGraph, PlaybackControls, PlaybackState } from '../types/playback';
+import { PlaybackControls, PlaybackState } from '../types/playback';
 import AboutPanel from './AboutPanel';
 import AlbumsPanel from './AlbumsPanel';
 import Dock from './Dock';
@@ -45,7 +45,6 @@ export const DEFAULT_TAGLINE = 'Original NES music';
 interface AppShellProps {
   playback: PlaybackState;
   controls: PlaybackControls;
-  audioGraph: AudioGraph | null;
 }
 
 /** Panel state reduced to its topmost panel, matching what a compact sheet shows. */
@@ -55,7 +54,7 @@ function topOnly(panels: PanelState): PanelState {
 }
 
 /** The immersive stage UI: everything visual, driven by App's playback state and controls. */
-export default function AppShell({ playback, controls, audioGraph }: AppShellProps) {
+export default function AppShell({ playback, controls }: AppShellProps) {
   const { settings } = useContext(UserContext);
   const catalog = useCatalog();
   const compact = useMediaQuery(COMPACT_LAYOUT_QUERY);
@@ -302,12 +301,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
         <FilmGrain amount={settings.filmGrainAmount ?? 50} />
       )}
 
-      <Stage
-        audioGraph={audioGraph}
-        paused={!playing}
-        settings={settings}
-        renderScale={perf === 'low' ? 0.5 : 1}
-      />
+      <Stage settings={settings} renderScale={perf === 'low' ? 0.5 : 1} />
 
       {showTitle && (
         <TitleScreen
