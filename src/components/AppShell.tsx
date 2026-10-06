@@ -287,8 +287,8 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
       data-layout={compact ? 'compact' : 'wide'}
       data-perf={perf}
     >
-      {(settings.filmGrainAmount ?? 60) > 0 && (
-        <FilmGrain amount={settings.filmGrainAmount ?? 60} />
+      {(settings.filmGrainAmount ?? 50) > 0 && (
+        <FilmGrain amount={settings.filmGrainAmount ?? 50} />
       )}
 
       <Stage

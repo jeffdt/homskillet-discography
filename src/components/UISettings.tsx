@@ -53,16 +53,16 @@ function UISettings({ persistedSettings }: UISettingsProps) {
             min="0"
             max="100"
             step="5"
-            value={persistedSettings.filmGrainAmount ?? 60}
+            value={persistedSettings.filmGrainAmount ?? 50}
             onChange={(e) => {
               userContext.updateSettings({ filmGrainAmount: parseInt(e.target.value) });
               flashValue('filmGrainAmount');
             }}
           />
           <span className={flashingSetting === 'filmGrainAmount' ? 'Settings-value-flash' : ''}>
-            {(persistedSettings.filmGrainAmount ?? 60) === 0
+            {(persistedSettings.filmGrainAmount ?? 50) === 0
               ? 'Off'
-              : `${persistedSettings.filmGrainAmount ?? 60}%`}
+              : `${persistedSettings.filmGrainAmount ?? 50}%`}
           </span>
           <InfoIcon tooltip="A tile of random specks drawn once and jittered across the screen, like film grain. 0 turns it off" />
         </div>

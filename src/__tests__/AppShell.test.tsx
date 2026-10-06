@@ -118,10 +118,10 @@ afterEach(() => {
 });
 
 describe('AppShell', () => {
-  it('shows the film grain overlay at 60% by default', async () => {
+  it('shows the film grain overlay at 50% by default', async () => {
     const { container } = renderShell();
     await screen.findByText('or browse 2 albums');
-    expect((container.querySelector('.FilmGrain') as HTMLElement).style.opacity).toBe('0.6');
+    expect((container.querySelector('.FilmGrain') as HTMLElement).style.opacity).toBe('0.5');
   });
 
   it('scales the film grain overlay with the amount setting', async () => {
