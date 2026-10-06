@@ -1,7 +1,24 @@
 import { PlayerMetadata } from '../types/player';
 
+/** The chip-core calls the main thread's constant-Q transform needs (src/showcqtbar.c). */
+export interface SpectrumCore {
+  HEAPF32: Float32Array;
+  _malloc(size: number): number;
+  _free(ptr: number): void;
+  _cqt_init(
+    rate: number,
+    width: number,
+    volume: number,
+    minHz: number,
+    maxHz: number,
+    supersample: number
+  ): number;
+  _cqt_calc(inputLeft: number, inputRight: number): void;
+  _cqt_render_line(outPtr: number): void;
+}
+
 /** The subset of the Emscripten chip-core module the audio engine uses. chip-core-stub.js implements the same surface. */
-export interface ChipCore {
+export interface ChipCore extends SpectrumCore {
   HEAPU8: Uint8Array;
   HEAP16: Int16Array;
   HEAP32: Int32Array;
@@ -74,3 +91,10 @@ export type EngineKind = 'worklet' | 'script-processor' | 'stub';
 
 /** How analysis taps reach the main thread from the worklet. */
 export type TapTransport = 'pooled' | 'shared';
+
+/** A loaded track as the engine reports it on the main thread. */
+export interface LoadedTrack {
+  info: TrackInfo;
+  /** Sound chip of each voice in info.voices, from voiceChips. */
+  voiceChips: string[];
+}

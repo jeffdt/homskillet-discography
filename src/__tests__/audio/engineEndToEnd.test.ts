@@ -40,7 +40,7 @@ describe('engine end to end on the stub core', () => {
       context: context as unknown as AudioContext,
       outputNode,
       volumeNode,
-      mainThreadCore: core,
+      spectrumCore: core,
       link,
       taps: new RingTapReader(ring),
     });
@@ -91,7 +91,7 @@ describe('engine end to end on the stub core', () => {
       context: context as unknown as AudioContext,
       outputNode,
       volumeNode,
-      mainThreadCore: core,
+      spectrumCore: core,
       link: new WorkletLink(port2, taps),
       taps,
     });
@@ -135,7 +135,7 @@ describe('engine end to end on the stub core', () => {
       context: context as unknown as AudioContext,
       outputNode,
       volumeNode,
-      mainThreadCore: core,
+      spectrumCore: core,
       link: new WorkletLink(port2, taps),
       taps,
     });

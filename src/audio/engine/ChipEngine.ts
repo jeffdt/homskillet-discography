@@ -5,9 +5,17 @@ import { computeVoiceGains } from '../render/voiceGains';
 import { TapHistory } from '../taps/TapHistory';
 import { TapSnapshot } from '../taps/TapSnapshot';
 import { TapReader } from '../taps/transports';
-import { ChipCore, EngineKind, RendererSettings, TrackInfo, VoiceMix } from '../types';
+import {
+  EngineKind,
+  LoadedTrack,
+  RendererSettings,
+  SpectrumCore,
+  TrackInfo,
+  VoiceMix,
+} from '../types';
 import { AudioEngine, AudioEngineEvents } from './AudioEngine';
 import { ProcessorLink } from './links';
+import { expansionFromNsfHeader, voiceChips } from './voiceChips';
 
 /** Everything a ChipEngine is assembled from (see createAudioEngine). */
 export interface ChipEngineParts {
@@ -15,7 +23,7 @@ export interface ChipEngineParts {
   context: AudioContext;
   outputNode: AudioNode;
   volumeNode: GainNode;
-  mainThreadCore: ChipCore;
+  spectrumCore: SpectrumCore;
   link: ProcessorLink;
   taps: TapReader;
   debug?: boolean;
@@ -27,6 +35,7 @@ type PendingLoad = {
   loadId: number;
   resolve: (info: TrackInfo) => void;
   reject: (error: Error) => void;
+  expansion: string | null;
 };
 
 type Listener = (...args: any[]) => void;
@@ -39,7 +48,7 @@ export class ChipEngine implements AudioEngine {
   readonly kind: EngineKind;
   readonly context: AudioContext;
   readonly outputNode: AudioNode;
-  readonly mainThreadCore: ChipCore;
+  readonly spectrumCore: SpectrumCore;
   private readonly volumeNode: GainNode;
   private readonly link: ProcessorLink;
   private readonly taps: TapReader;
@@ -49,6 +58,7 @@ export class ChipEngine implements AudioEngine {
   private loadId = 0;
   private pendingLoad: PendingLoad | null = null;
   private loaded = false;
+  private loadedTrack: LoadedTrack | null = null;
   private paused = false;
   private tempo = 1;
   private seekId = 0;
@@ -62,7 +72,7 @@ export class ChipEngine implements AudioEngine {
     this.kind = parts.kind;
     this.context = parts.context;
     this.outputNode = parts.outputNode;
-    this.mainThreadCore = parts.mainThreadCore;
+    this.spectrumCore = parts.spectrumCore;
     this.volumeNode = parts.volumeNode;
     this.link = parts.link;
     this.taps = parts.taps;
@@ -81,7 +91,7 @@ export class ChipEngine implements AudioEngine {
     this.tempo = settings.tempo;
     const bytes = data.slice().buffer;
     return new Promise((resolve, reject) => {
-      this.pendingLoad = { loadId, resolve, reject };
+      this.pendingLoad = { loadId, resolve, reject, expansion: expansionFromNsfHeader(data) };
       this.link.send(
         { type: 'load', loadId, bytes, filepath, settings: { ...settings }, gains: this.gains() },
         [bytes]
@@ -96,6 +106,7 @@ export class ChipEngine implements AudioEngine {
     this.pendingSeek = null;
     this.seekLanding = null;
     this.link.send({ type: 'unload' });
+    this.forgetTrack();
   }
 
   setPaused(paused: boolean): void {
@@ -165,9 +176,14 @@ export class ChipEngine implements AudioEngine {
     return { muted: [...this.mix.muted], soloed: [...this.mix.soloed] };
   }
 
+  getLoadedTrack(): LoadedTrack | null {
+    return this.loadedTrack;
+  }
+
   setVoiceMix(mix: VoiceMix): void {
     this.mix = { muted: padTo(mix.muted), soloed: padTo(mix.soloed) };
     this.link.send({ type: 'gains', gains: this.gains() });
+    this.emit('voiceMixChanged', this.getVoiceMix());
   }
 
   setVolume(volume: number): void {
@@ -217,12 +233,20 @@ export class ChipEngine implements AudioEngine {
       this.pendingLoad.reject(new Error(message));
       this.pendingLoad = null;
     }
+    this.forgetTrack();
   }
 
   private supersedePendingLoad(): void {
     if (!this.pendingLoad) return;
     this.pendingLoad.reject(new LoadSupersededError());
     this.pendingLoad = null;
+  }
+
+  /** Drops the loaded track and tells listeners, if one was loaded. */
+  private forgetTrack(): void {
+    if (!this.loadedTrack) return;
+    this.loadedTrack = null;
+    this.emit('unloaded');
   }
 
   private handleEvent = (event: ProcessorEvent): void => {
@@ -232,7 +256,10 @@ export class ChipEngine implements AudioEngine {
           const pending = this.pendingLoad;
           this.pendingLoad = null;
           this.loaded = true;
+          const names = event.info.voices.map((voice) => voice.name);
+          this.loadedTrack = { info: event.info, voiceChips: voiceChips(names, pending.expansion) };
           pending.resolve(event.info);
+          this.emit('loaded', this.loadedTrack);
         }
         break;
       case 'loadFailed':

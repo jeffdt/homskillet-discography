@@ -128,7 +128,7 @@ class App extends React.Component<AppProps, AppState> {
     this.engine = engine;
     (window as any).audioCtx = engine.context;
     this.playerNode = engine.outputNode;
-    this.chipCore = engine.mainThreadCore;
+    this.chipCore = engine.spectrumCore;
     if (engine.kind === 'stub') {
       this.props.toastContext.enqueueToast(
         'Running in STUB MODE - no actual audio playback. UI development only.',
@@ -157,7 +157,7 @@ class App extends React.Component<AppProps, AppState> {
     this.audioGraph = {
       audioCtx: engine.context,
       sourceNode: engine.outputNode,
-      chipCore: engine.mainThreadCore,
+      chipCore: engine.spectrumCore,
     };
     this.setState({ loading: false });
   }
