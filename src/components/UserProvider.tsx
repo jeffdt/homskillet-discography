@@ -1,9 +1,10 @@
-import { DEFAULT_CHANNEL_PALETTE_ID } from '../config/channelPalettes';
 import React, { createContext, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import { debounce } from 'lodash';
+import { DEFAULT_CHANNEL_PALETTE_ID } from '../config/channelPalettes';
 
 export interface UserSettings {
   showPlayerSettings: boolean;
+  channelPalette: string;
   [key: string]: any; // Allow additional settings
 }
 
@@ -16,6 +17,7 @@ export interface UserContextValue {
 const UserContext = createContext<UserContextValue>({
   settings: {
     showPlayerSettings: true,
+    channelPalette: DEFAULT_CHANNEL_PALETTE_ID,
   },
   updateSettings: () => {},
   replaceSettings: () => {},

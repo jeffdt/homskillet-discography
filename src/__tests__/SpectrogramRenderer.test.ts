@@ -174,6 +174,33 @@ describe('SpectrogramRenderer', () => {
     expect(pixelAt(bars, peakWidth - 3, row)).toEqual(BG_PIXEL);
   });
 
+  it('keeps decaying the peak hold through silence without reviving it when sound returns', () => {
+    const { renderer, analyzer, binColors } = setup();
+    const spectrum = new Float32Array(layout.bins);
+    const silence = new Float32Array(layout.bins);
+    const row = 447 - 100;
+    setColor(binColors, 100, BLUE);
+    spectrum[100] = valueFor(255, 100);
+    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    const initialPeakWidth = Math.floor(Math.floor((255 * 64) / 256) / 4) * 4;
+    expect(pixelAt(lastImage(analyzer.ctx), initialPeakWidth - 1, row)[3]).toBe(255);
+
+    const silentFrames = 10;
+    for (let i = 0; i < silentFrames; i++) renderer.draw(silence, binColors, 1000 / 60, 120);
+    const afterOneFrame = lastImage(analyzer.ctx);
+    const fallenPeak = 255 * peakDecayFactor(0.98, 1000 / 60) ** silentFrames;
+    const fallenWidth = Math.floor(Math.floor((fallenPeak * 64) / 256) / 4) * 4;
+    expect(fallenWidth).toBeLessThan(initialPeakWidth);
+    expect(pixelAt(afterOneFrame, fallenWidth - 1, row)).not.toEqual(BG_PIXEL);
+    expect(pixelAt(afterOneFrame, initialPeakWidth - 1, row)).toEqual(BG_PIXEL);
+
+    for (let i = 0; i < 600; i++) renderer.draw(silence, binColors, 1000 / 60, 120);
+    spectrum[100] = valueFor(8, 100);
+    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    const resumed = lastImage(analyzer.ctx);
+    for (let x = 4; x < resumed.width; x++) expect(pixelAt(resumed, x, row)).toEqual(BG_PIXEL);
+  });
+
   it('rebuilds rows and images on resize', () => {
     const { renderer, analyzer, spectrogram, binColors } = setup(448);
     (analyzer.canvas as { height: number }).height = 224;

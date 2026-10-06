@@ -145,7 +145,11 @@ export class SpectrogramRenderer {
     }
 
     analyzerImage.pixels.fill(this.backgroundPixel);
-    if (!isSilent(spectrum)) {
+    if (isSilent(spectrum)) {
+      // Keep painting so peak markers fall; rowBins keeps the last bin, so a marker keeps its color.
+      this.rowValues.fill(0);
+      this.paintBars(analyzerImage, binColors, dtMs);
+    } else {
       this.measureRows(spectrum, binColors);
       this.paintBars(analyzerImage, binColors, dtMs);
       if (step > 0) this.paintColumn(spectrogramCtx, step);
