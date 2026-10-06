@@ -71,13 +71,22 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 
 ### Audio Pipeline
 
-The application uses Web Audio API with this graph structure:
+The audio engine lives in `src/audio/`. In production it renders in an AudioWorklet:
 
 ```
-┌────────────┐      ┌────────────┐      ┌─────────────┐
-│ playerNode ├─────>│  gainNode  ├─────>│ destination │
-└────────────┘      └────────────┘      └─────────────┘
+ AudioWorklet (audio thread)                      Main thread
+┌────────────────────────────────┐  commands  ┌──────────────────────────────┐
+│ chipProcessor -> ProcessorCore │<───────────┤ ChipEngine (AudioEngine)     │
+│  ChipRenderer: GME multi-      │  events,   │  EnginePlayer -> Sequencer   │
+│  channel emu (8 voice pairs),  ├───────────>│  TapReader (taps + position) │
+│  mute/solo gains, SubBass,     │  taps      └──────────────────────────────┘
+│  declick, end fade, seeks      │
+└───────────────┬────────────────┘
+                v
+   AudioWorkletNode ──> volume GainNode ──> destination
 ```
+
+Without AudioWorklet, the same `ProcessorCore` runs on the main thread inside a ScriptProcessorNode. In stub mode it runs there on `chip-core-stub.js` with the volume forced to 0. Seeks render into a scratch buffer with `gme_play`; never call `gme_seek_scaled` in multi-channel mode (inexact in one shot, hangs in small steps at tempo above 1).
 
 ### Player State Machine
 
@@ -108,11 +117,13 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/shell/** - Pure UI logic
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`
 - **src/styles/shell.css** - Stage shell styles
-- **src/players/** - Audio player implementations (JavaScript)
-  - Player.js - Base class with state machine logic (stopped/playing/paused)
-  - GMEPlayer.js - Game Music Emu player (NSF, NSFE, SPC, GBS, AY)
-  - ChipWorkletProcessor.js - Web Audio worklet for audio processing
-  - Legacy players (being removed): MIDIPlayer, XMPPlayer, VGMPlayer, etc.
+- **src/audio/** - Audio engine (TypeScript)
+  - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it
+  - engine/ChipEngine.ts - The `AudioEngine` implementation (load, pause, seek, tempo, mute/solo, taps)
+  - render/ChipRenderer.ts - GME multi-channel rendering and mixing, shared by every engine kind
+  - worklet/chipProcessor.ts - AudioWorklet entry point
+  - taps/ - Per-voice analysis taps (pooled transfer buffers, or a SharedArrayBuffer ring when crossOriginIsolated)
+- **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
 - **src/Spectrogram.js** - Audio visualization using constant-Q transform
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
@@ -141,7 +152,7 @@ The application includes a **stub mode** that allows UI development without chip
 
 - **src/chip-core-stub.js** - Mock implementation of the game-music-emu API
 - **src/stub-data/mock-directories.ts** - Mock catalog data for development
-- **Automatic fallback** - If chip-core.wasm fails to load, the app automatically uses the stub
+- **Automatic fallback** - If chip-core.wasm fails to load, the engine runs the stub on a silent ScriptProcessor; it produces fake per-voice waveforms so the visualizer moves. `?engine=stub` forces it.
 - **Use cases**: UI/UX work, remote development, testing without audio dependencies
 - See `.claude/stub-mode.md` for detailed documentation
 
@@ -407,7 +418,7 @@ The Docker container builds chip-core and copies the artifacts to your local mac
 ## Important Notes
 
 - **Compiled Artifacts**: `chip-core.js` and `chip-core.wasm` are committed to the repo for convenience. Most contributors won't need to rebuild them.
-- **TypeScript Migration**: The codebase is ~85% TypeScript. Most React components and utilities are migrated. The player layer (Player.js, GMEPlayer.js, Spectrogram.js) remains JavaScript.
+- **TypeScript Migration**: The codebase is ~85% TypeScript. Most React components and utilities are migrated. Spectrogram.js remains JavaScript.
 - **Music Files**: All music is stored in `public/music/` and committed to the repo. To add new tracks:
   1. Add NSF files to `public/music/AlbumName/`
   2. Run `bun run build-catalog` to regenerate catalog indexes
