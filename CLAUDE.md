@@ -112,13 +112,16 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - AppShell.tsx - Layout, panels, URL sync, keyboard
   - Stage.tsx - Full-window visualizer
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
-  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel, AboutPanel
+  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visuals" panel; controls in src/components/stage/), AboutPanel
   - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
   - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
+- **src/styles/stage.css** - Visuals panel styles
+- **src/config/stageSettings.ts** - Every Visuals panel setting and default ("Reset stage" writes them); visualizer styles (Spectrum, Channel scopes)
+- **src/visuals/ScopeRenderer.ts** - The Channel scopes style: one oscilloscope lane per voice, triggered on rising zero crossings
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
 - **src/audio/** - Audio engine (TypeScript)
   - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it

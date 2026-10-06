@@ -1,7 +1,8 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import TopBar from '../components/TopBar';
+import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 describe('TopBar', () => {
   it('shows the logo and one pressed-state button per panel', () => {
@@ -58,5 +59,44 @@ describe('TopBar', () => {
     } finally {
       delete (HTMLElement.prototype as any).animate;
     }
+  });
+});
+
+describe('TopBar pulse', () => {
+  function renderPulsing(pulsing: boolean) {
+    const data = createTestAudioData();
+    data.source.frame.mixSpectrum.fill(0.5);
+    data.frameLoop.setPlaying(true);
+    render(
+      withAudioData(
+        data.value,
+        <TopBar panels={{ open: [] }} onToggle={() => {}} pulsing={pulsing} />
+      )
+    );
+    const logo = screen.getByText('HOMSKILLET').closest('.TopBar-logo') as HTMLElement;
+    const run = () =>
+      act(() => {
+        for (let i = 0; i < 30; i++) data.scheduler.tick((i * 1000) / 60);
+      });
+    return { data, logo, run };
+  }
+
+  it('swells the logo with the music while playing', () => {
+    const { logo, run } = renderPulsing(true);
+    run();
+    expect(Number(logo.style.getPropertyValue('--pulse-intensity'))).toBeGreaterThan(0);
+  });
+
+  it('holds the logo still while not playing', () => {
+    const { logo, run } = renderPulsing(false);
+    run();
+    expect(logo.style.getPropertyValue('--pulse-intensity')).toBe('0');
+  });
+
+  it('holds the logo still when Reactive UI is off', () => {
+    const { data, logo, run } = renderPulsing(true);
+    act(() => data.pulse.setEnabled(false));
+    run();
+    expect(logo.style.getPropertyValue('--pulse-intensity')).toBe('0');
   });
 });

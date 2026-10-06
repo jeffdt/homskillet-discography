@@ -12,7 +12,7 @@ import { AudioEngine } from '../audio/engine/AudioEngine';
 import { createAudioEngine, createUnlockedAudioContext } from '../audio/engine/createAudioEngine';
 import { parseEngineOverrides } from '../audio/engine/engineKind';
 import EnginePlayer from '../players/EnginePlayer';
-import { UI_PALETTES } from '../config/uiPalettes';
+import { uiPaletteAt } from '../config/uiPalettes';
 import { updateAccentColors } from '../util/cssVariables';
 
 import AppShell from './AppShell';
@@ -456,7 +456,7 @@ class App extends React.Component<AppProps, AppState> {
   componentDidMount() {
     // Apply saved UI palette on mount
     const { uiPalette = 0 } = this.props.userContext.settings;
-    const palette = UI_PALETTES[uiPalette];
+    const palette = uiPaletteAt(uiPalette);
     updateAccentColors(palette.accent, palette.accentDark);
     this.syncFrameLoop();
   }
@@ -467,7 +467,7 @@ class App extends React.Component<AppProps, AppState> {
     const currentPalette = this.props.userContext.settings.uiPalette ?? 0;
 
     if (prevPalette !== currentPalette) {
-      const palette = UI_PALETTES[currentPalette];
+      const palette = uiPaletteAt(currentPalette);
       updateAccentColors(palette.accent, palette.accentDark);
     }
     this.syncFrameLoop();

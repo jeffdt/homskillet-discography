@@ -11,6 +11,8 @@ export interface CanvasBox {
 export interface StageLayout {
   spectrogram: CanvasBox;
   analyzer: CanvasBox;
+  /** The whole container, for full-window styles such as the channel scopes. */
+  full: CanvasBox;
 }
 
 /** Lays out the spectrogram and the right-edge analyzer; the spectrogram overlaps by 1px so no seam can show (#70). */
@@ -37,6 +39,13 @@ export function computeStageLayout(
       width: ANALYZER_WIDTH,
       height: h,
       pixelWidth: Math.max(1, Math.round(ANALYZER_WIDTH * renderScale)),
+      pixelHeight,
+    },
+    full: {
+      left: 0,
+      width: w,
+      height: h,
+      pixelWidth: Math.max(1, Math.round(w * renderScale)),
       pixelHeight,
     },
   };

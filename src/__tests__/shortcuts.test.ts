@@ -106,4 +106,13 @@ describe('resolveShortcut', () => {
       'nextTrack'
     );
   });
+
+  it('lets a focused radio keep its arrow keys', () => {
+    const radio = { tagName: 'BUTTON', role: 'radio' };
+    expect(resolveShortcut(key('ArrowRight', { target: radio }))).toBeNull();
+    expect(resolveShortcut(key('ArrowLeft', { target: radio, shiftKey: true }))).toBeNull();
+    const input = { tagName: 'INPUT', type: 'radio' };
+    expect(resolveShortcut(key('ArrowLeft', { target: input }))).toBeNull();
+    expect(resolveShortcut(key('ArrowRight', { target: { tagName: 'BUTTON' } }))).toBe('nextTrack');
+  });
 });

@@ -1,0 +1,202 @@
+/* Stage panel ("Visuals") styles. Colors come only from the palette variables in index.css. */
+
+.StagePanel-section + .StagePanel-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+
+.App .StagePanel-heading {
+  margin: 0 0 8px;
+  font: var(--font-accent);
+  color: var(--neutral4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.App .StagePanel-note {
+  margin: 6px 0 10px;
+  font: var(--font-small);
+  color: var(--neutral3);
+}
+
+/* ===== Sliders and switches ===== */
+
+.StageControl + .StageControl {
+  margin-top: 10px;
+}
+
+.StageControl-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.App .StageControl-label {
+  flex: 0 0 118px;
+  font: var(--font-strong);
+  color: var(--neutral3);
+}
+
+.StageControl-row input[type='range'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.App .StageControl-value {
+  flex: 0 0 52px;
+  text-align: right;
+  font: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--neutral4);
+}
+
+.App .StageControl-explain {
+  margin: 2px 0 0;
+  font: var(--font-small);
+  color: var(--neutral2);
+}
+
+.StageControl.is-disabled .StageControl-label,
+.StageControl.is-disabled .StageControl-value {
+  color: var(--neutral2);
+}
+
+.StageToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.StageToggle input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* ===== Swatch picker ===== */
+
+.SwatchPicker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.App .SwatchPicker-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--neutral3);
+  font: var(--font-small);
+  text-align: center;
+  cursor: pointer;
+}
+
+.App .SwatchPicker-card:hover {
+  border-color: var(--neutral3);
+}
+
+.App .SwatchPicker-card.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  color: var(--accent);
+}
+
+.SwatchPicker-swatch {
+  display: flex;
+  height: 8px;
+  border: 1px solid var(--neutral1);
+}
+
+.SwatchPicker-pixel {
+  flex: 1;
+}
+
+/* ===== Compact: 44px touch targets ===== */
+
+.App[data-layout='compact'] .SwatchPicker-card,
+.App[data-layout='compact'] .StageToggle {
+  min-height: var(--touch-target);
+}
+
+.App[data-layout='compact'] .StageControl-row input[type='range'] {
+  min-height: var(--touch-target);
+}
+
+/* ===== Channel legend ===== */
+
+.ChannelLegend {
+  list-style: none;
+  margin: var(--charW1) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: calc(var(--charW1) / 2) var(--charW1);
+}
+
+.ChannelLegend-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--charW1) / 2);
+  color: var(--neutral3);
+}
+
+.ChannelLegend-item.is-silent {
+  opacity: 0.45;
+}
+
+.ChannelLegend-swatch {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--neutral1);
+  background: var(--channel);
+}
+
+.App .ChannelLegend-state {
+  font-size: 0.8em;
+  color: var(--neutral2);
+}
+
+/* ===== More settings and buttons ===== */
+
+.StagePanel-more {
+  margin-top: 12px;
+}
+
+.App .StagePanel-more summary {
+  font: var(--font-strong);
+  color: var(--clickable);
+  cursor: pointer;
+}
+
+.StagePanel-more[open] summary {
+  margin-bottom: 10px;
+}
+
+.App .StagePanel-button {
+  margin-top: 12px;
+  padding: 6px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--button);
+  color: var(--clickable);
+  font: var(--font-strong);
+  cursor: pointer;
+}
+
+.App .StagePanel-button:hover {
+  border-color: var(--accent);
+  color: var(--neutral4);
+}
+
+.App[data-layout='compact'] .StagePanel-button,
+.App[data-layout='compact'] .StagePanel-more summary {
+  min-height: var(--touch-target);
+}

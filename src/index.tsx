@@ -6,6 +6,7 @@ import '@fontsource/space-grotesk/600.css';
 import '@fontsource/tilt-warp/400.css';
 import './styles/shell.css';
 import './styles/mixer.css';
+import './styles/stage.css';
 import App from './components/App';
 import { UserProvider } from './components/UserProvider';
 import { ToastProvider } from './components/ToastProvider';

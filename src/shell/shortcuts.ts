@@ -43,6 +43,8 @@ const CONTINUOUS_ACTIONS = new Set<ShortcutAction>([
   'speedUp',
   'speedUpFine',
 ]);
+const ARROW_ROLES = new Set(['slider', 'radio']);
+const ARROW_INPUT_TYPES = new Set(['range', 'radio']);
 const SPACE_INPUT_TYPES = new Set(['checkbox', 'radio', 'button', 'submit', 'reset']);
 
 /** Uppercased tag name of the target, or empty when there is none. */
@@ -64,10 +66,10 @@ function isTextEntry(target: ShortcutTarget | null): boolean {
   return tag === 'INPUT' && TEXT_INPUT_TYPES.has(inputType(target));
 }
 
-/** True for a range input or role=slider element, which owns the arrow keys. */
-function isRangeInput(target: ShortcutTarget | null): boolean {
-  if (target && target.role === 'slider') return true;
-  return tagOf(target) === 'INPUT' && inputType(target) === 'range';
+/** True for a slider or a radio (element or role), which move with the arrow keys. */
+function ownsArrowKeys(target: ShortcutTarget | null): boolean {
+  if (target && target.role && ARROW_ROLES.has(target.role)) return true;
+  return tagOf(target) === 'INPUT' && ARROW_INPUT_TYPES.has(inputType(target));
 }
 
 /** True when Space activates the focused control instead of toggling playback. */
@@ -107,7 +109,7 @@ function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
   }
 
   if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-    if (isRangeInput(e.target)) return null;
+    if (ownsArrowKeys(e.target)) return null;
     if (e.key === 'ArrowLeft') return e.shiftKey ? 'seekBack' : 'prevTrack';
     return e.shiftKey ? 'seekForward' : 'nextTrack';
   }

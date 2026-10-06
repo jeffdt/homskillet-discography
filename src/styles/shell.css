@@ -47,6 +47,13 @@
   outline-offset: 2px;
 }
 
+/* index.css clears the outline on range and checkbox inputs with higher specificity than the rule above. */
+.AppShell input[type='range']:focus-visible,
+.AppShell input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ===== Panels ===== */
 
 .Panel {
@@ -193,6 +200,53 @@
   z-index: 1;
 }
 
+.Stage[data-style='scopes'] .Stage-spectrogram,
+.Stage[data-style='scopes'] .Stage-analyzer,
+.Stage:not([data-style='scopes']) .Stage-scopes {
+  display: none;
+}
+
+/* Lane names sit on the right: panels open on the left. */
+.App .Stage-scopeLabel {
+  position: absolute;
+  right: 12px;
+  margin-top: 8px;
+  z-index: 1;
+  font: var(--font-small);
+  color: var(--channel, var(--neutral3));
+  pointer-events: none;
+}
+
+.Stage-scopeLabel.is-silent {
+  opacity: 0.45;
+}
+
+/* Per-channel color for any element tagged data-channel="N"; --ch-N comes from the channel palette. */
+[data-channel='0'] {
+  --channel: var(--ch-0);
+}
+[data-channel='1'] {
+  --channel: var(--ch-1);
+}
+[data-channel='2'] {
+  --channel: var(--ch-2);
+}
+[data-channel='3'] {
+  --channel: var(--ch-3);
+}
+[data-channel='4'] {
+  --channel: var(--ch-4);
+}
+[data-channel='5'] {
+  --channel: var(--ch-5);
+}
+[data-channel='6'] {
+  --channel: var(--ch-6);
+}
+[data-channel='7'] {
+  --channel: var(--ch-7);
+}
+
 /* ===== Chrome and idle fade ===== */
 
 .Chrome {
@@ -235,13 +289,23 @@
   line-height: 1;
 }
 
+/* Reactive UI: the logo swells slightly with the music. Transform only, so it never repaints. */
+.App .TopBar-logo {
+  transform: scale(calc(1 + var(--pulse-intensity, 0) * 0.04));
+  transform-origin: right center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .App .TopBar-logo {
+    transform: none;
+  }
+}
+
 /* ===== Wordmark ===== */
 
-/* font: inherit undoes the legacy `.App * { font }` reset so the logo takes its container's size. */
 .App .Wordmark {
   position: relative;
   display: inline-block;
-  font: inherit;
   line-height: 1;
   white-space: nowrap;
 }
@@ -447,7 +511,7 @@
   height: 44px;
   background: var(--accent);
   color: var(--neutral0);
-  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 16px) var(--accent-dark);
+  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 10px) var(--accent-dark);
 }
 
 .Dock-play:hover:not(:disabled) {
@@ -606,9 +670,8 @@
 
 .App .TitleScreen-logo {
   margin: 0;
-  /* The global h1-h6 rule uses !important, so the size here must too. The Wordmark sets its own face. */
-  font-size: clamp(40px, 10vw, 104px) !important;
-  line-height: 1 !important;
+  font-size: clamp(40px, 10vw, 104px);
+  line-height: 1;
 }
 
 .App .TitleScreen-tagline {
@@ -938,8 +1001,8 @@
 
 .App .Tracklist-albumTitle {
   margin: 0 0 4px;
-  font: var(--font-display) !important;
-  font-size: 22px !important;
+  font: var(--font-display);
+  font-size: 22px;
   color: var(--neutral4);
 }
 
@@ -1089,164 +1152,12 @@
   color: var(--accent);
 }
 
-/* ===== Lab slot (Stage panel only; the Mixer has its own styles in mixer.css) ===== */
-
-.LabSlot .Settings {
-  padding: 0;
-}
-
-.LabSlot button.Visualizer-theme-card {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-/* Theme selector styles */
-
-.Visualizer-theme-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: var(--charW1);
-}
-
-.Visualizer-theme-card {
-  cursor: pointer;
-  border: 1px solid var(--neutral2);
-  padding: calc(var(--charW1) / 2);
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-}
-
-.Visualizer-theme-card-new-row {
-  grid-column: 1;
-}
-
-.Visualizer-theme-card:hover {
-  border-color: var(--neutral4);
-}
-
-.Visualizer-theme-card.selected {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.Visualizer-theme-swatch {
-  display: flex;
-  gap: 0;
-  width: 100%;
-  margin-bottom: calc(var(--charW1) / 2);
-  border: 1px solid var(--neutral4);
-}
-
-.Visualizer-theme-pixel {
-  flex: 1;
-  height: 8px;
-}
-
-.Visualizer-theme-label {
-  display: block;
-  text-align: center;
-  font-size: 0.8em;
-  color: var(--neutral3);
-}
-
-.Visualizer-theme-card.selected .Visualizer-theme-label {
-  color: var(--accent);
-}
-
-.App .ChannelPalette-note {
-  margin: 0 0 var(--charW1);
-  font: var(--font-body);
-  color: var(--neutral3);
-}
-
-.ChannelLegend {
-  list-style: none;
-  margin: var(--charW1) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: calc(var(--charW1) / 2) var(--charW1);
-}
-
-.ChannelLegend-item {
-  display: flex;
-  align-items: center;
-  gap: calc(var(--charW1) / 2);
-  color: var(--neutral3);
-}
-
-.ChannelLegend-item.is-silent {
-  opacity: 0.45;
-}
-
-.ChannelLegend-swatch {
-  flex: none;
-  width: 12px;
-  height: 12px;
-  border: 1px solid var(--neutral1);
-}
-
-.ChannelLegend-swatch[data-channel='0'] {
-  background: var(--ch-0);
-}
-.ChannelLegend-swatch[data-channel='1'] {
-  background: var(--ch-1);
-}
-.ChannelLegend-swatch[data-channel='2'] {
-  background: var(--ch-2);
-}
-.ChannelLegend-swatch[data-channel='3'] {
-  background: var(--ch-3);
-}
-.ChannelLegend-swatch[data-channel='4'] {
-  background: var(--ch-4);
-}
-.ChannelLegend-swatch[data-channel='5'] {
-  background: var(--ch-5);
-}
-.ChannelLegend-swatch[data-channel='6'] {
-  background: var(--ch-6);
-}
-.ChannelLegend-swatch[data-channel='7'] {
-  background: var(--ch-7);
-}
-
-.App .ChannelLegend-state {
-  font-size: 0.8em;
-  color: var(--neutral2);
-}
-
-/* Compact: 2-column palette grid (after the base rules so it wins the cascade). */
-@media (max-width: 768px) and (orientation: portrait) {
-  .Visualizer-theme-grid {
-    grid-template-columns: repeat(2, 1fr);
-    /* 2 columns on mobile */
-    gap: var(--charW2);
-  }
-
-  .Visualizer-theme-card {
-    padding: calc(var(--charW2) / 2);
-  }
-
-  .Visualizer-theme-pixel {
-    height: 12px;
-    /* Slightly taller for easier tapping on mobile */
-  }
-}
-
-/* Compact: About links and palette cards keep 44px targets. */
+/* Compact: About links keep 44px targets. */
 @media (max-width: 768px) and (orientation: portrait) {
   .App .AboutPanel-credits a,
   .App .AboutPanel-source {
     display: inline-flex;
     align-items: center;
-    min-height: var(--touch-target);
-  }
-
-  .LabSlot button.Visualizer-theme-card {
     min-height: var(--touch-target);
   }
 }
@@ -1333,12 +1244,6 @@
 
 .App[data-layout='compact'] .Spotlight {
   top: 38%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .Visualizer-theme-card {
-    transition: none;
-  }
 }
 
 /* ===== Film grain ===== */

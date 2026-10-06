@@ -339,6 +339,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
         onToggle={togglePanel}
         showLogo={!showTitle}
         takeLogoHandoff={takeLogoHandoff}
+        pulsing={playing}
       />
 
       {!showTitle && (
