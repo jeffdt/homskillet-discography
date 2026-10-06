@@ -162,6 +162,7 @@ export default function Dock({
           currentSongDurationMs={playback.durationMs}
           getCurrentPositionMs={controls.getPositionMs}
           onChange={controls.seekToFraction}
+          looping={playback.repeat}
           {...sparkSettings(settings)}
         />
       </div>

@@ -13,6 +13,8 @@ interface TimeSliderProps {
   currentSongDurationMs: number;
   getCurrentPositionMs: () => number;
   onChange: (event: number) => void;
+  /** Repeat is on: the track loops forever, so elapsed time runs past the nominal duration. */
+  looping?: boolean;
 
   // Particle settings (optional, passed to Slider)
   particleEnabled?: boolean;
@@ -69,7 +71,9 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
     this.timer = setInterval(() => {
       const { getCurrentPositionMs, currentSongDurationMs } = this.props;
       this.setState({
-        currentSongPositionMs: Math.min(getCurrentPositionMs(), currentSongDurationMs),
+        currentSongPositionMs: this.props.looping
+          ? getCurrentPositionMs()
+          : Math.min(getCurrentPositionMs(), currentSongDurationMs),
       });
     }, UPDATE_INTERVAL_MS);
   }
@@ -141,7 +145,13 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
         />
         <div className="TimeSlider-labels">
           <div>{this.getTimeLabel()}</div>
-          <div>{this.getTime(this.props.currentSongDurationMs)}</div>
+          <div>
+            {this.props.looping ? (
+              <span aria-label="Loops forever">∞</span>
+            ) : (
+              this.getTime(this.props.currentSongDurationMs)
+            )}
+          </div>
         </div>
       </div>
     );
