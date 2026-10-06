@@ -30,4 +30,9 @@ describe('computeStageLayout', () => {
     expect(tiny.spectrogram.pixelWidth).toBeGreaterThanOrEqual(1);
     expect(tiny.spectrogram.pixelHeight).toBe(1);
   });
+
+  it('gives the full-window canvas the whole container at the render scale', () => {
+    const { full } = computeStageLayout(1000.6, 600, 0.5);
+    expect(full).toEqual({ left: 0, width: 1000, height: 600, pixelWidth: 500, pixelHeight: 300 });
+  });
 });

@@ -3,9 +3,11 @@ import { useAudioData } from '../contexts/AudioDataContext';
 import { useChannelColors } from '../hooks/useChannelColors';
 import { useFrameLoop } from '../hooks/useFrameLoop';
 import { useVoices } from '../hooks/useVoices';
+import { scopeSpanOf, visualizerStyleById } from '../config/stageSettings';
 import { CanvasBox, computeStageLayout } from '../shell/stageLayout';
 import { BinColorizer } from '../visuals/BinColorizer';
-import { SPECTROGRAM_SCROLL_PX_PER_S, readCssRgb } from '../visuals/spectrogramMath';
+import { ScopeRenderer } from '../visuals/ScopeRenderer';
+import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor, readCssRgb } from '../visuals/spectrogramMath';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
 import { UserSettings } from './UserProvider';
 
@@ -24,14 +26,18 @@ function applyBox(canvas: HTMLCanvasElement, box: CanvasBox): void {
   canvas.style.height = `${box.height}px`;
 }
 
-/** Full-window channel-colored spectrogram and analyzer behind all other UI, drawn by one FrameLoop consumer. */
+/** Full-window visualizer behind all other UI: the channel-colored spectrum or the channel scopes, each drawn by its own FrameLoop consumer while selected. */
 export default function Stage({ settings, renderScale }: StageProps) {
   const { source } = useAudioData();
   const voices = useVoices();
   const channelColors = useChannelColors();
+  const style = visualizerStyleById(settings.visualizerStyle).id;
+  const scopeSpan = scopeSpanOf(settings.scopeSpan);
   const containerRef = useRef<HTMLDivElement>(null);
   const specRef = useRef<HTMLCanvasElement>(null);
   const freqRef = useRef<HTMLCanvasElement>(null);
+  const scopesRef = useRef<HTMLCanvasElement>(null);
+  const scopeRendererRef = useRef<ScopeRenderer | null>(null);
   const rendererRef = useRef<SpectrogramRenderer | null>(null);
   const colorizerRef = useRef<BinColorizer | null>(null);
 
@@ -49,6 +55,27 @@ export default function Stage({ settings, renderScale }: StageProps) {
     colorizerRef.current = new BinColorizer(layout.bins, readCssRgb('--neutral3', '#c3c3c3'));
   }, [source]);
 
+  useEffect(() => {
+    if (!scopesRef.current) return;
+    scopeRendererRef.current = new ScopeRenderer(
+      scopesRef.current,
+      readCssColor('--neutral0', '#101010'),
+      Math.max(1, 2 * renderScale)
+    );
+  }, [renderScale]);
+
+  useEffect(() => {
+    if (scopeRendererRef.current) scopeRendererRef.current.setColors(channelColors);
+  }, [renderScale, channelColors]);
+
+  useEffect(() => {
+    if (scopeRendererRef.current) scopeRendererRef.current.setVoices(voices);
+  }, [renderScale, voices]);
+
+  useEffect(() => {
+    if (scopeRendererRef.current) scopeRendererRef.current.setSpan(scopeSpan);
+  }, [renderScale, scopeSpan]);
+
   const applyLayout = useCallback(() => {
     const container = containerRef.current;
     const spec = specRef.current;
@@ -57,6 +84,7 @@ export default function Stage({ settings, renderScale }: StageProps) {
     const layout = computeStageLayout(container.clientWidth, container.clientHeight, renderScale);
     applyBox(spec, layout.spectrogram);
     applyBox(freq, layout.analyzer);
+    if (scopesRef.current) applyBox(scopesRef.current, layout.full);
     if (rendererRef.current) rendererRef.current.resize();
   }, [renderScale]);
 
@@ -80,6 +108,10 @@ export default function Stage({ settings, renderScale }: StageProps) {
   }, [applyLayout]);
 
   useEffect(() => {
+    applyLayout();
+  }, [style, applyLayout]);
+
+  useEffect(() => {
     if (colorizerRef.current) colorizerRef.current.setChannelColors(channelColors);
   }, [source, channelColors]);
 
@@ -96,23 +128,47 @@ export default function Stage({ settings, renderScale }: StageProps) {
       rendererRef.current.setPeakQuantization(settings.peakQuantization ?? 4);
   }, [source, settings.peakQuantization]);
 
-  useFrameLoop('stage-spectrogram', (frame, dtMs) => {
-    const renderer = rendererRef.current;
-    const colorizer = colorizerRef.current;
-    if (!renderer || !colorizer) return;
-    // The speed is in CSS pixels; the canvas backing store is renderScale times that.
-    renderer.draw(
-      frame.mixSpectrum,
-      colorizer.update(frame, dtMs),
-      dtMs,
-      SPECTROGRAM_SCROLL_PX_PER_S * renderScale
-    );
-  });
+  useFrameLoop(
+    'stage-spectrogram',
+    (frame, dtMs) => {
+      const renderer = rendererRef.current;
+      const colorizer = colorizerRef.current;
+      if (!renderer || !colorizer) return;
+      // The speed is in CSS pixels; the canvas backing store is renderScale times that.
+      renderer.draw(
+        frame.mixSpectrum,
+        colorizer.update(frame, dtMs),
+        dtMs,
+        SPECTROGRAM_SCROLL_PX_PER_S * renderScale
+      );
+    },
+    { enabled: style === 'spectrum' }
+  );
+
+  useFrameLoop(
+    'stage-scopes',
+    (frame) => {
+      if (scopeRendererRef.current) scopeRendererRef.current.draw(frame);
+    },
+    { enabled: style === 'scopes' }
+  );
 
   return (
-    <div ref={containerRef} className="Stage" aria-hidden="true">
+    <div ref={containerRef} className="Stage" data-style={style} aria-hidden="true">
       <canvas ref={specRef} className="Stage-spectrogram" />
       <canvas ref={freqRef} className="Stage-analyzer" />
+      <canvas ref={scopesRef} className="Stage-scopes" />
+      {style === 'scopes' &&
+        voices.map((voice, lane) => (
+          <span
+            key={voice.index}
+            className={`Stage-scopeLabel${voice.audible ? '' : ' is-silent'}`}
+            data-channel={voice.index}
+            style={{ top: `${(lane / voices.length) * 100}%` }}
+          >
+            {voice.name}
+          </span>
+        ))}
     </div>
   );
 }

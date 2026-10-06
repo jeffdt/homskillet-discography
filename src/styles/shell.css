@@ -193,6 +193,53 @@
   z-index: 1;
 }
 
+.Stage[data-style='scopes'] .Stage-spectrogram,
+.Stage[data-style='scopes'] .Stage-analyzer,
+.Stage:not([data-style='scopes']) .Stage-scopes {
+  display: none;
+}
+
+/* Lane names sit on the right: panels open on the left. */
+.App .Stage-scopeLabel {
+  position: absolute;
+  right: 12px;
+  margin-top: 8px;
+  z-index: 1;
+  font: var(--font-small);
+  color: var(--channel, var(--neutral3));
+  pointer-events: none;
+}
+
+.Stage-scopeLabel.is-silent {
+  opacity: 0.45;
+}
+
+/* Per-channel color for any element tagged data-channel="N"; --ch-N comes from the channel palette. */
+[data-channel='0'] {
+  --channel: var(--ch-0);
+}
+[data-channel='1'] {
+  --channel: var(--ch-1);
+}
+[data-channel='2'] {
+  --channel: var(--ch-2);
+}
+[data-channel='3'] {
+  --channel: var(--ch-3);
+}
+[data-channel='4'] {
+  --channel: var(--ch-4);
+}
+[data-channel='5'] {
+  --channel: var(--ch-5);
+}
+[data-channel='6'] {
+  --channel: var(--ch-6);
+}
+[data-channel='7'] {
+  --channel: var(--ch-7);
+}
+
 /* ===== Chrome and idle fade ===== */
 
 .Chrome {
