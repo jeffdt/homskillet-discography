@@ -1,223 +1,92 @@
-import React, { PureComponent } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-
-interface Particle {
-  id: number;
-  x: number; // Starting X position (pixels from left)
-  y: number; // Starting Y position (pixels from top)
-  vx: number; // Velocity X (-1 to 1)
-  vy: number; // Velocity Y (-1 to 1)
-  gravity: number; // Gravity strength (0-2)
-  hueOffset: number; // Slight hue variation (0-30)
-  startTime: number; // Animation start time (ms)
-  lifetime: number; // Particle lifetime (ms)
-}
+import { useFrameLoop } from '../hooks/useFrameLoop';
+import { Spark, SparkSystem } from '../visuals/sparks';
 
 interface SliderParticlesProps {
-  knobX: number; // Knob X position in pixels
-  knobY: number; // Knob Y position in pixels
-  shouldSpawn: boolean; // Whether to spawn particles (only during playback, not dragging)
-  intensity: number; // Audio intensity (0-1) affects spawn rate, speed, and brightness
-
-  // Settings (all optional with defaults)
-  spawnRate?: number; // Min spawn interval in ms (lower = faster)
-  lifespan?: number; // Particle lifetime in ms
-  baseAngle?: number; // Base angle in degrees (0=right, 90=down, 180=left, 270=up)
-  angleSpread?: number; // Angle spread in degrees (cone width)
-  speed?: number; // Speed multiplier
-  speedVariance?: number; // Speed variance percentage (0-100)
-  gravity?: number; // Gravity strength (0=none, 1=normal, 2=strong)
-  hueVariation?: number; // Hue variation in degrees
-  fadeMode?: 'fade' | 'instant'; // Fade mode: 'fade' (linear) or 'instant' (sudden disappearance)
+  /** Element the sparks fly from (the slider's chisel). */
+  anchor: React.RefObject<HTMLElement>;
+  /** Spawn while true; false clears every spark. */
+  shouldSpawn: boolean;
+  spawnRate?: number;
+  lifespan?: number;
+  baseAngle?: number;
+  angleSpread?: number;
+  speed?: number;
+  speedVariance?: number;
+  gravity?: number;
+  fadeMode?: string;
 }
 
-interface SliderParticlesState {
-  particles: Particle[];
-  animationTime: number; // Current animation time for RAF updates
+const SPARKS_LOOP_ID = 'slider-sparks';
+
+/** Center of an element in viewport coordinates, or null without one. */
+function centerOf(element: HTMLElement | null): { x: number; y: number } | null {
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
 
-const MAX_PARTICLES = 15;
-const PARTICLE_LIFETIME_MS = 600;
-const MIN_SPAWN_INTERVAL_MS = 40;
-const MAX_SPAWN_INTERVAL_MS = 120;
-const NUM_SPAWNERS = 2; // Multiple independent spawners for randomness
-
-export default class SliderParticles extends PureComponent<
-  SliderParticlesProps,
-  SliderParticlesState
-> {
-  private nextId = 0;
-  private spawnerTimers: NodeJS.Timeout[] = [];
-  private animationFrameId: number | null = null;
-
-  constructor(props: SliderParticlesProps) {
-    super(props);
-    this.state = {
-      particles: [],
-      animationTime: performance.now(),
-    };
+/** Matches the container's pooled divs to the sparks: position and opacity, extras hidden. */
+function renderSparks(container: HTMLDivElement | null, sparks: readonly Spark[]): void {
+  if (!container) return;
+  while (container.childElementCount < sparks.length) {
+    const element = document.createElement('div');
+    element.className = 'SliderParticle';
+    container.appendChild(element);
   }
-
-  componentDidMount(): void {
-    this.startAnimationLoop();
-  }
-
-  componentDidUpdate(prevProps: SliderParticlesProps): void {
-    // Start spawners when shouldSpawn becomes true
-    if (!prevProps.shouldSpawn && this.props.shouldSpawn) {
-      this.startSpawners();
+  const children = container.children;
+  for (let i = 0; i < children.length; i++) {
+    const element = children[i] as HTMLElement;
+    const spark = sparks[i];
+    if (!spark) {
+      if (element.style.display !== 'none') element.style.display = 'none';
+      continue;
     }
-
-    // Stop spawners when shouldSpawn becomes false
-    if (prevProps.shouldSpawn && !this.props.shouldSpawn) {
-      this.stopSpawners();
-    }
+    element.style.display = '';
+    element.style.transform = `translate(${spark.x}px, ${spark.y}px)`;
+    element.style.opacity = String(spark.opacity);
   }
+}
 
-  componentWillUnmount(): void {
-    this.stopSpawners();
-    this.stopAnimationLoop();
-  }
+/**
+ * Sparks that fly off the progress knob while playing. A FrameLoop consumer steps the particles and
+ * moves a pool of plain divs, so sparks never re-render React. Portaled to body: a transformed or
+ * backdrop-filtered ancestor (the Dock) would otherwise offset these fixed-position elements.
+ */
+export default function SliderParticles(props: SliderParticlesProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const systemRef = useRef<SparkSystem | null>(null);
+  if (!systemRef.current) systemRef.current = new SparkSystem();
+  const system = systemRef.current;
+  system.configure({
+    spawnRate: props.spawnRate,
+    lifespan: props.lifespan,
+    baseAngle: props.baseAngle,
+    angleSpread: props.angleSpread,
+    speed: props.speed,
+    speedVariance: props.speedVariance,
+    gravity: props.gravity,
+    fadeMode: props.fadeMode === 'instant' ? 'instant' : 'fade',
+  });
 
-  startAnimationLoop(): void {
-    const animate = () => {
-      const now = performance.now();
-      // Remove expired particles and update animation time
-      this.setState((prevState) => ({
-        particles: prevState.particles.filter((p) => now - p.startTime < p.lifetime),
-        animationTime: now,
-      }));
-      this.animationFrameId = requestAnimationFrame(animate);
-    };
-    this.animationFrameId = requestAnimationFrame(animate);
-  }
+  useFrameLoop(
+    SPARKS_LOOP_ID,
+    (_frame, dtMs) => {
+      system.step(dtMs, () => centerOf(props.anchor.current));
+      renderSparks(containerRef.current, system.sparks);
+    },
+    { enabled: props.shouldSpawn }
+  );
 
-  stopAnimationLoop(): void {
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
+  useEffect(() => {
+    if (props.shouldSpawn) return;
+    system.clear();
+    renderSparks(containerRef.current, system.sparks);
+  }, [props.shouldSpawn, system]);
 
-  startSpawners(): void {
-    // Start multiple independent spawners with random intervals
-    for (let i = 0; i < NUM_SPAWNERS; i++) {
-      this.scheduleNextSpawn();
-    }
-  }
-
-  stopSpawners(): void {
-    // Clear all spawner timers
-    this.spawnerTimers.forEach((timer) => clearTimeout(timer));
-    this.spawnerTimers = [];
-    // Clear all particles
-    this.setState({ particles: [] });
-  }
-
-  scheduleNextSpawn(): void {
-    const minSpawnInterval = this.props.spawnRate ?? MIN_SPAWN_INTERVAL_MS;
-    const maxSpawnInterval = minSpawnInterval * 3; // Max is 3x the min
-    const randomDelay = minSpawnInterval + Math.random() * (maxSpawnInterval - minSpawnInterval);
-
-    const timer = setTimeout(() => {
-      if (this.props.shouldSpawn) {
-        this.spawnParticle();
-      }
-      // Schedule the next spawn if still active
-      if (this.props.shouldSpawn) {
-        this.scheduleNextSpawn();
-      }
-    }, randomDelay);
-
-    this.spawnerTimers.push(timer);
-  }
-
-  spawnParticle(): void {
-    const { knobX, knobY } = this.props;
-
-    // Get settings with defaults
-    const baseAngle = this.props.baseAngle ?? 180;
-    const angleSpread = this.props.angleSpread ?? 30;
-    const baseSpeed = this.props.speed ?? 1.0;
-    const speedVariance = this.props.speedVariance ?? 20;
-    const gravity = this.props.gravity ?? 0.5;
-    const hueVariation = this.props.hueVariation ?? 30;
-
-    // Calculate random angle: baseAngle ± angleSpread
-    const angleOffset = (Math.random() - 0.5) * 2 * angleSpread; // Random ±angleSpread
-    const angleDegrees = baseAngle + angleOffset;
-    const angleRadians = (angleDegrees * Math.PI) / 180;
-
-    // Calculate random speed with variance
-    const speedVarianceFactor = 1 + (Math.random() - 0.5) * 2 * (speedVariance / 100);
-    const speed = baseSpeed * speedVarianceFactor;
-
-    // Convert angle and speed to velocity components
-    const vx = Math.cos(angleRadians) * speed;
-    const vy = Math.sin(angleRadians) * speed;
-
-    const hueOffset = Math.random() * hueVariation;
-    const lifetime = this.props.lifespan ?? PARTICLE_LIFETIME_MS;
-
-    const particle: Particle = {
-      id: this.nextId++,
-      x: knobX,
-      y: knobY,
-      vx,
-      vy,
-      gravity,
-      hueOffset,
-      startTime: performance.now(),
-      lifetime,
-    };
-
-    this.setState((prevState) => ({
-      particles: [...prevState.particles, particle],
-    }));
-  }
-
-  render(): React.ReactNode {
-    const now = this.state.animationTime;
-
-    // Portaled to body: a transformed or backdrop-filtered ancestor (the Dock) would otherwise
-    // become the containing block for these fixed-position particles and offset them.
-    return ReactDOM.createPortal(
-      <div className="SliderParticles">
-        {this.state.particles.map((particle) => {
-          // Calculate elapsed time in seconds
-          const elapsedMs = now - particle.startTime;
-          const t = elapsedMs / 1000;
-
-          // Physics: position = initial + velocity*time + 0.5*gravity*time^2
-          const pixelScale = 80; // Base distance scale
-          const x = particle.x + particle.vx * pixelScale * t;
-          const y =
-            particle.y + particle.vy * pixelScale * t + 0.5 * particle.gravity * pixelScale * t * t;
-
-          // Calculate opacity based on fade mode
-          const progress = elapsedMs / particle.lifetime;
-          const fadeMode = this.props.fadeMode ?? 'fade';
-          const opacity =
-            fadeMode === 'instant'
-              ? progress < 0.95
-                ? 1.0
-                : 0.0 // Instant: full opacity until 95% complete
-              : Math.max(0, 1 - progress); // Fade: linear fade from 1 to 0
-
-          return (
-            <div
-              key={particle.id}
-              className="SliderParticle"
-              style={{
-                left: `${x}px`,
-                top: `${y}px`,
-                opacity,
-              }}
-            />
-          );
-        })}
-      </div>,
-      document.body
-    );
-  }
+  return ReactDOM.createPortal(
+    <div className="SliderParticles" ref={containerRef} />,
+    document.body
+  );
 }
