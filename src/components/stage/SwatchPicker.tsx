@@ -53,9 +53,10 @@ function adjacentRowTarget(cards: Array<HTMLElement | null>, index: number, dire
 }
 
 /**
- * A radio group of cards (palettes, accents, styles). Tab reaches the selected card; Left and Right
- * walk the order, Up and Down move between grid rows, Home and End select and focus another, as in any radio group. An unknown selectedId checks the
- * first card so the group always has one tab stop.
+ * A radio group of cards (palettes, accents, styles). Tab reaches the selected card. Left and Right
+ * walk the order, Up and Down move between grid rows, and Home and End jump to the ends; each
+ * selects and focuses its card, as in any radio group. An unknown selectedId checks the first card
+ * so the group always has one tab stop.
  */
 export default function SwatchPicker({
   label,
