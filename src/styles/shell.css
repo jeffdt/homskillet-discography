@@ -266,10 +266,11 @@
   animation: wordmark-roll 0.6s steps(5) infinite;
 }
 
+/* Scanlines are for the title screen only; in the top bar they pull the eye during playback. */
 .App .TopBar-logo .Wordmark-word {
-  --scan-on: 2px;
-  --scan-off: 1px;
-  animation: wordmark-roll 0.36s steps(3) infinite;
+  -webkit-mask-image: none;
+  mask-image: none;
+  animation: none;
 }
 
 /* Two offset copies of the word: a faint white one and a dark green one, glitching together. */
