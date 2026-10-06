@@ -1089,7 +1089,7 @@
   color: var(--accent);
 }
 
-/* ===== Interim lab slots (contents replaced in sub-projects 6 and 7) ===== */
+/* ===== Lab slot (Stage panel only; the Mixer has its own styles in mixer.css) ===== */
 
 .LabSlot .Settings {
   padding: 0;

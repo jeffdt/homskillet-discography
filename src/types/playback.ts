@@ -1,3 +1,4 @@
+import { VoiceMix } from '../audio/types';
 import { PlayerParamDef } from './player';
 
 /**
@@ -38,7 +39,8 @@ export interface PlaybackControls {
   getPositionMs(): number;
   setTempo(tempo: number): void;
   setSpeedRelative(delta: number): void;
-  setVoiceMask(voiceMask: boolean[]): void;
+  /** Sets per-voice mute and solo, indexed by voice; missing entries are false. Resets on each new track. */
+  setVoiceMix(mix: VoiceMix): void;
   setParam(id: string, value: any): void;
   pinParam(persistedKey: string, currentValue: any): void;
   setVolume(volume: number): void;

@@ -2,13 +2,17 @@ import autoBind from 'auto-bind';
 import { VOICE_PAIRS } from '../audio/constants';
 import { AudioEngine } from '../audio/engine/AudioEngine';
 import { LoadSupersededError } from '../audio/errors';
-import { TrackInfo } from '../audio/types';
+import { TrackInfo, VoiceMix } from '../audio/types';
 import { PlayerMetadata, PlayerParamDef } from '../types/player';
 import Player from './Player';
 
 const FILE_EXTENSIONS = ['nsf', 'nsfe', 'spc', 'ay', 'gbs'];
 
-const PARAM_DEFS: PlayerParamDef[] = [
+/** Settings namespace for this player's pinned parameters ("gme.subbass", "gme.stereoWidth"). */
+export const PLAYER_KEY = 'gme';
+
+/** Bass boost and stereo width: the engine's tunable parameters. The Mixer reads ranges and defaults from here. */
+export const ENGINE_PARAM_DEFS: PlayerParamDef[] = [
   {
     id: 'subbass',
     label: 'Bass Boost',
@@ -43,9 +47,9 @@ export default class EnginePlayer extends Player {
   constructor(private readonly engine: AudioEngine) {
     super();
     autoBind(this);
-    this.playerKey = 'gme';
+    this.playerKey = PLAYER_KEY;
     this.fileExtensions = FILE_EXTENSIONS;
-    this.paramDefs = PARAM_DEFS;
+    this.paramDefs = ENGINE_PARAM_DEFS;
     engine.on('ended', this.handleEnded);
   }
 
@@ -148,6 +152,14 @@ export default class EnginePlayer extends Player {
       muted: Array.from({ length: VOICE_PAIRS }, (_, i) => voiceMask[i] === false),
       soloed: new Array(VOICE_PAIRS).fill(false),
     });
+  }
+
+  /** Sets mute and solo per voice (missing entries are false) and keeps the voice mask in step. */
+  setVoiceMix(mix: VoiceMix): void {
+    const muted = Array.from({ length: VOICE_PAIRS }, (_, i) => !!mix.muted[i]);
+    const soloed = Array.from({ length: VOICE_PAIRS }, (_, i) => !!mix.soloed[i]);
+    this.voiceMask = Array.from({ length: this.getNumVoices() }, (_, i) => !muted[i]);
+    this.engine.setVoiceMix({ muted, soloed });
   }
 
   getParameter(id: string): any {

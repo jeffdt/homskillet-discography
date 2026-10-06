@@ -1,4 +1,5 @@
 import EventEmitter from 'events';
+import { VoiceMix } from '../audio/types';
 
 export type PlayerState = 'stopped' | 'playing' | 'paused';
 
@@ -67,6 +68,7 @@ export interface IPlayer extends EventEmitter {
   getVoiceName(index: number): string | undefined;
   getVoiceMask(): boolean[];
   setVoiceMask(voiceMask: boolean[]): void;
+  setVoiceMix(mix: VoiceMix): void;
   getNumVoices(): number;
   getVoiceNames(): (string | undefined)[];
   getVoiceGroups(): any[];

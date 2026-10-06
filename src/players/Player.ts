@@ -1,4 +1,5 @@
 import EventEmitter from 'events';
+import { VoiceMix } from '../audio/types';
 import { BasePlayerState, PlayerMetadata, PlayerParamDef } from '../types/player';
 
 //
@@ -46,6 +47,7 @@ export default abstract class Player extends EventEmitter {
   abstract getVoiceName(index: number): string | undefined;
   abstract getVoiceMask(): boolean[];
   abstract setVoiceMask(voiceMask: boolean[]): void;
+  abstract setVoiceMix(mix: VoiceMix): void;
   abstract getNumVoices(): number;
   abstract getMetadata(): PlayerMetadata;
   abstract getParameter(id: string): any;
