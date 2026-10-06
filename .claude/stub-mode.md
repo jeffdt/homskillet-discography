@@ -12,7 +12,7 @@ The application automatically detects when chip-core fails to load and falls bac
 2. **Mock Audio Engine**: The stub provides a complete mock implementation of the game-music-emu API that returns dummy values
 3. **Mock Catalog Data**: If `catalog.json` and `directories.json` fail to load, the app uses mock catalog data from `src/stub-data/mock-directories.ts`
 4. **UI Fully Functional**: All UI components work normally - you can browse folders, "play" songs, adjust controls, etc.
-5. **No Actual Audio**: The stub generates silence instead of actual music
+5. **No Audible Output**: The stub writes quiet fake per-voice waveforms, and the engine keeps its output at zero volume, so the visualizer and analysis taps move but nothing is heard
 
 ## When to Use Stub Mode
 
@@ -25,6 +25,10 @@ Stub mode is ideal for:
 - **CI/CD Pipelines**: Run UI tests in environments without WebAssembly support
 
 ## Enabling Stub Mode
+
+### Method 0: URL parameter
+
+Add `?engine=stub` to the URL. No files need to move.
 
 ### Method 1: Remove chip-core.wasm (Automatic)
 
@@ -57,11 +61,12 @@ When stub mode is active, you'll see:
 
 - **Warning Toast**: "Running in STUB MODE - no actual audio playback. UI development only."
 - **Console Warning**: "[STUB MODE] Using mock chip-core implementation - no actual audio playback"
-- **Silent Playback**: The player appears to play but produces no sound
+- **Silent Playback**: The player plays fake voices at zero volume; the visualizer still moves
 
 ## What Works in Stub Mode
 
 ✅ **Fully Functional**:
+
 - Browse catalog folders and files
 - Click to "play" tracks (no audio)
 - Adjust tempo, stereo width, and other player parameters
@@ -71,11 +76,12 @@ When stub mode is active, you'll see:
 - Playlist/shuffle/repeat modes
 - All UI components and styling
 - Time slider progression (simulated)
+- Audio visualization (fake per-voice waveforms)
 
 ❌ **Not Available**:
+
 - Actual audio playback
 - Real music files (uses mock catalog)
-- Audio visualization (visualizer disabled)
 - Real metadata from NSF files
 
 ## Architecture
@@ -84,39 +90,31 @@ When stub mode is active, you'll see:
 
 - **`src/chip-core-stub.js`**: Mock implementation of the chip-core API
 - **`src/stub-data/mock-directories.ts`**: Mock catalog and directory data
-- **`src/components/App.tsx`**: Automatic fallback logic for chip-core loading
+- **`src/audio/engine/createAudioEngine.ts`**: chooses stub mode when chip-core.wasm cannot load
 - **`src/handleShufflePlayLogic.ts`**: Fallback for catalog loading
 
 ### Mock API Surface
 
 The stub implements all game-music-emu functions used by the app:
 
-```javascript
-// Memory management
-_malloc, _free, getValue, setValue, UTF8ToString
-
-// Audio playback
-_gme_open_data, _gme_delete, _gme_play, _gme_start_track
-
-// Playback control
-_gme_seek_scaled, _gme_tell_scaled, _gme_track_ended
-
-// Metadata
-_gme_track_count, _gme_track_info, _gme_voice_count, _gme_voice_name
-
-// Audio parameters
-_gme_set_tempo, _gme_set_stereo_depth, _gme_set_fade, _gme_mute_voices
-
-// Visualization (stubs)
-_cqt_init, _cqt_calc, _cqt_render_line
+```text
+Memory management:   _malloc, _free, getValue, setValue, UTF8ToString
+Audio playback:      _gme_open_data, _gme_delete, _gme_play, _gme_start_track
+                     _gme_identify_header, _gme_identify_extension,
+                     _gme_new_emu_multi_channel, _gme_load_data, _gme_multi_channel,
+                     _gme_free_info
+Playback control:    _gme_seek_scaled, _gme_tell_scaled, _gme_track_ended
+Metadata:            _gme_track_count, _gme_track_info, _gme_voice_count, _gme_voice_name
+Audio parameters:    _gme_set_tempo, _gme_set_stereo_depth, _gme_set_fade, _gme_mute_voices
+Visualization:       _cqt_init, _cqt_calc, _cqt_render_line (stubs)
 ```
 
 ## Limitations
 
-- No actual audio playback (generates silence)
+- No actual audio playback (the stub generates fake per-voice waveforms, but the engine runs them at zero volume)
 - Mock catalog has only 3 demo tracks (vs. 100+ real tracks)
 - Metadata is generic mock data
-- Visualizer is disabled
+- The constant-Q spectrogram stays disabled (the stub's `_cqt_init` returns 0)
 - Cannot test actual audio processing or timing
 - Cannot verify NSF file compatibility
 
@@ -161,9 +159,9 @@ The stub mode is designed to match the real chip-core API as closely as possible
 
 Potential improvements to stub mode:
 
-- [ ] Environment variable to force stub mode even when WASM is available
+- [x] Environment variable to force stub mode even when WASM is available (now `?engine=stub`)
 - [ ] Configurable mock catalog (load from JSON file)
-- [ ] Simulated audio visualization (mock waveforms)
+- [x] Simulated audio visualization (mock waveforms)
 - [ ] Mock metadata generation from file names
 - [ ] Stub mode indicator in UI (badge or status bar)
-- [ ] Unit tests that run in stub mode
+- [x] Unit tests that run in stub mode

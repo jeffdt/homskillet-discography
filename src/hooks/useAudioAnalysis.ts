@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 interface AudioAnalysisOptions {
   audioCtx: AudioContext | null;
-  sourceNode: ScriptProcessorNode | null;
+  sourceNode: AudioNode | null;
   paused: boolean;
   ejected: boolean;
   enabled: boolean;
@@ -107,11 +107,12 @@ export function useAudioAnalysis(options: AudioAnalysisOptions): AudioAnalysisRe
       // Apply exponential smoothing for fluid animation
       // α = 0.2 for more responsiveness (was 0.15)
       const alpha = 0.2;
-      smoothedAmplitudeRef.current = alpha * normalized + (1 - alpha) * smoothedAmplitudeRef.current;
+      smoothedAmplitudeRef.current =
+        alpha * normalized + (1 - alpha) * smoothedAmplitudeRef.current;
 
       // Update amplitude state (only if change is significant to reduce re-renders)
       const newAmplitude = smoothedAmplitudeRef.current;
-      setAmplitude(prev => {
+      setAmplitude((prev) => {
         // Only update if change > 0.02 to reduce unnecessary re-renders
         return Math.abs(newAmplitude - prev) > 0.02 ? newAmplitude : prev;
       });

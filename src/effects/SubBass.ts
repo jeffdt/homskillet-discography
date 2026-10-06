@@ -1,7 +1,8 @@
 import { CalcCascades, IirFilter } from 'fili';
 
 export default class SubBass {
-  private process: (sample: number) => number;
+  /** Returns the synthesized sub-octave sample for one input sample. */
+  readonly process: (sample: number) => number;
 
   constructor(sampleRate: number) {
     const iirCalculator = new CalcCascades();
@@ -75,6 +76,6 @@ export default class SubBass {
 
       const sSub = highpass.singleStep(lowpass2.singleStep(sOctaves));
       return sSub * env;
-    }
+    };
   }
 }

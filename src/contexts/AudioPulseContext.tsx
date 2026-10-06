@@ -11,7 +11,7 @@ const AudioPulseContext = createContext<AudioPulseContextType>({
 
 interface AudioPulseProviderProps {
   audioCtx: AudioContext | null;
-  sourceNode: ScriptProcessorNode | null;
+  sourceNode: AudioNode | null;
   paused: boolean;
   ejected: boolean;
   enabled: boolean;
@@ -38,11 +38,7 @@ export const AudioPulseProvider: React.FC<AudioPulseProviderProps> = ({
     enabled,
   });
 
-  return (
-    <AudioPulseContext.Provider value={{ amplitude }}>
-      {children}
-    </AudioPulseContext.Provider>
-  );
+  return <AudioPulseContext.Provider value={{ amplitude }}>{children}</AudioPulseContext.Provider>;
 };
 
 /**

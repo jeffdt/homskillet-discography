@@ -13,9 +13,7 @@ const chipModules = [
   {
     name: 'visualizer',
     enabled: true,
-    sourceFiles: [
-      'src/showcqtbar.c',
-    ],
+    sourceFiles: ['src/showcqtbar.c'],
     exportedFunctions: [
       // ---- Visualizer functions: ----
       '_cqt_init',
@@ -28,9 +26,7 @@ const chipModules = [
   {
     name: 'gme',
     enabled: true,
-    sourceFiles: [
-      '../game-music-emu/build/gme/libgme.a',
-    ],
+    sourceFiles: ['../game-music-emu/build/gme/libgme.a'],
     exportedFunctions: [
       '_gme_open_data',
       '_gme_play',
@@ -49,9 +45,15 @@ const chipModules = [
       '_gme_set_fade',
       '_gme_voice_name',
       '_gme_set_stereo_depth',
+      '_gme_new_emu_multi_channel', // per-voice output: 8 stereo pairs per frame
+      '_gme_load_data',
+      '_gme_identify_header',
+      '_gme_identify_extension',
+      '_gme_multi_channel',
+      '_gme_free_info', // the engine frees gme_track_info results
     ],
     flags: [
-      '-DHAVE_ZLIB_H',    // used by game_music_emu for vgz
+      '-DHAVE_ZLIB_H', // used by game_music_emu for vgz
       '-DHAVE_STDINT_H',
     ],
   },
@@ -80,12 +82,11 @@ const runtimeMethods = [
   'HEAPF32',
   'HEAPF64',
 ];
-const exportedFns = [
-  '_malloc',
-  '_free',
-].concat(...chipModules.filter(m => m.enabled).map(m => m.exportedFunctions));
-const sourceFiles = [].concat(...chipModules.filter(m => m.enabled).map(m => m.sourceFiles));
-const moduleFlags = [].concat(...chipModules.filter(m => m.enabled).map(m => m.flags));
+const exportedFns = ['_malloc', '_free'].concat(
+  ...chipModules.filter((m) => m.enabled).map((m) => m.exportedFunctions)
+);
+const sourceFiles = [].concat(...chipModules.filter((m) => m.enabled).map((m) => m.sourceFiles));
+const moduleFlags = [].concat(...chipModules.filter((m) => m.enabled).map((m) => m.flags));
 
 const flags = [
   /*
@@ -95,23 +96,34 @@ const flags = [
   // '--llvm-lto', '3',
   // '--clear-cache',        // sometimes Emscripten cache gets "poisoned"
   '--no-heap-copy',
-  '-s', 'EXPORTED_FUNCTIONS=[' + exportedFns.join(',') + ']',
-  '-s', 'EXPORTED_RUNTIME_METHODS=[' + runtimeMethods.join(',') + ']',
-  '-s', 'ALLOW_MEMORY_GROWTH=1',
-  '-s', 'ASSERTIONS=0',      // assertions increase runtime size about 100K
-  '-s', 'STACK_OVERFLOW_CHECK=2',
+  '-s',
+  'EXPORTED_FUNCTIONS=[' + exportedFns.join(',') + ']',
+  '-s',
+  'EXPORTED_RUNTIME_METHODS=[' + runtimeMethods.join(',') + ']',
+  '-s',
+  'ALLOW_MEMORY_GROWTH=1',
+  '-s',
+  'ASSERTIONS=0', // assertions increase runtime size about 100K
+  '-s',
+  'STACK_OVERFLOW_CHECK=2',
   // '-s', 'STACK_SIZE=5MB', // support large VGM and XM files. default is 64KB
-                             // disabled after allocating file data on heap
-  '-s', 'MODULARIZE=1',
-  '-s', 'EXPORT_NAME=CHIP_CORE',
-  '-s', 'ENVIRONMENT=web',
-  '-s', 'USE_ZLIB=1',
+  // disabled after allocating file data on heap
+  '-s',
+  'MODULARIZE=1',
+  '-s',
+  'EXPORT_NAME=CHIP_CORE',
+  '-s',
+  'ENVIRONMENT=web',
+  '-s',
+  'USE_ZLIB=1',
   // '-s', 'EXPORT_ES6=1',   // Disabled - webpack not configured for ES6 modules
-  '-s', 'WASM_BIGINT',       // support passing 64 bit integers to/from JS
+  '-s',
+  'WASM_BIGINT', // support passing 64 bit integers to/from JS
   '-lidbfs.js',
-  '-Os',                     // set to O0 for fast compile during development
+  '-Os', // set to O0 for fast compile during development
   // '-g',                   // include DWARF debug symbols. Increases size ~2.5x
-  '-o', jsOutFile,
+  '-o',
+  jsOutFile,
 
   /*
    WASM Source Maps
@@ -140,10 +152,12 @@ const flags = [
 ];
 
 console.log('Compiling to %s...', jsOutFile);
-console.log(`Invocation:\n${compiler} ${chalk.blue(flags.join(' '))} ${chalk.gray(sourceFiles.join(' '))}\n`);
+console.log(
+  `Invocation:\n${compiler} ${chalk.blue(flags.join(' '))} ${chalk.gray(sourceFiles.join(' '))}\n`
+);
 const preJs = `/*eslint-disable*/`;
 const args = [].concat(flags, sourceFiles);
-const build_proc = spawn(compiler, args, {stdio: 'inherit'});
+const build_proc = spawn(compiler, args, { stdio: 'inherit' });
 build_proc.on('exit', function (code) {
   if (code === 0) {
     console.log('Moving %s to %s.', wasmOutFile, wasmDir);

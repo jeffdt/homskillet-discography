@@ -51,6 +51,18 @@ export default defineConfig(({ command, mode }) => {
       chunkSizeWarningLimit: 600,
     },
 
+    // The chip AudioWorklet is bundled through `?worker&url`. ES format makes the dev server serve
+    // it as a module, which AudioWorklet addModule requires.
+    worker: {
+      format: 'es',
+      rollupOptions: {
+        output: {
+          entryFileNames: 'static/js/[name].[hash:8].js',
+          chunkFileNames: 'static/js/[name].[hash:8].js',
+        },
+      },
+    },
+
     resolve: {
       alias: {
         'react-native': 'react-native-web',
