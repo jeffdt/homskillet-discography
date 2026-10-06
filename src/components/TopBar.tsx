@@ -12,13 +12,17 @@ const BUTTONS: Array<{ id: PanelId; shortcut: string | null; Icon: () => JSX.Ele
 interface TopBarProps {
   panels: PanelState;
   onToggle: (id: PanelId) => void;
+  /** Hidden while the title screen shows its own large logo. */
+  showLogo?: boolean;
 }
 
 /** Logo plus panel toggles; fades with the rest of the chrome when idle. */
-export default function TopBar({ panels, onToggle }: TopBarProps) {
+export default function TopBar({ panels, onToggle, showLogo = true }: TopBarProps) {
   return (
     <header className="TopBar Chrome">
-      <div className="TopBar-logo">HOMSKILLET</div>
+      <div className="TopBar-logo" style={showLogo ? undefined : { visibility: 'hidden' }}>
+        HOMSKILLET
+      </div>
       <nav className="TopBar-nav" aria-label="Panels">
         {BUTTONS.map(({ id, shortcut, Icon }) => {
           const open = isPanelOpen(panels, id);

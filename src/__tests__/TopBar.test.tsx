@@ -23,4 +23,9 @@ describe('TopBar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Stage' }));
     expect(onToggle).toHaveBeenCalledWith('stage');
   });
+
+  it('hides the logo while the title screen shows its own', () => {
+    render(<TopBar panels={{ open: [] }} onToggle={() => {}} showLogo={false} />);
+    expect(screen.getByText('HOMSKILLET').style.visibility).toBe('hidden');
+  });
 });

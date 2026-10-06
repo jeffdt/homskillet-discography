@@ -484,6 +484,12 @@
   color: var(--neutral2);
 }
 
+/* The global button rule sets align-self: start, which pins these to the left edge. */
+.App .TitleScreen-start,
+.App .TitleScreen-browse {
+  align-self: center;
+}
+
 .App .TitleScreen-start {
   min-height: 52px;
   margin-top: 16px;

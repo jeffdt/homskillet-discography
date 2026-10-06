@@ -35,7 +35,7 @@ import Toast from './Toast';
 import TopBar from './TopBar';
 import { UserContext } from './UserProvider';
 
-export const DEFAULT_TAGLINE = 'NES music by Homskillet';
+export const DEFAULT_TAGLINE = 'Original NES music';
 
 interface AppShellProps {
   playback: PlaybackState;
@@ -305,7 +305,11 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
         />
       )}
 
-      <TopBar panels={compact ? topOnly(panels) : panels} onToggle={togglePanel} />
+      <TopBar
+        panels={compact ? topOnly(panels) : panels}
+        onToggle={togglePanel}
+        showLogo={!showTitle}
+      />
 
       {!showTitle && (
         <Dock
