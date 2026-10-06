@@ -1,4 +1,5 @@
 import chroma from 'chroma-js';
+import { Rgb, parseHexColor } from './color';
 
 /** The visualizer's default palette (moved from Spectrogram.js). */
 export const DEFAULT_COLOR_PALETTE = [
@@ -65,4 +66,55 @@ export function aWeightingLut(frequencies: Float32Array): Float32Array {
 export function readCssColor(name: string, fallback: string): string {
   if (typeof document === 'undefined') return fallback;
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+}
+
+/** Value index (0..255) at which a bin shows its pure channel color. */
+export const SHADE_KNEE = 140;
+/** How far toward the highlight color the loudest values go (0..1); full would wash out the hue. */
+export const SHADE_HIGHLIGHT_MAX = 0.55;
+
+/** Per value index (0..255): the weight of the channel color and of the highlight; the background gets the rest. */
+export interface ShadeTable {
+  readonly channel: Float32Array;
+  readonly highlight: Float32Array;
+}
+
+/** Background to channel color up to the knee (eased so quiet bins stay dark), then toward the highlight. */
+export function buildShadeTable(knee = SHADE_KNEE, highlightMax = SHADE_HIGHLIGHT_MAX): ShadeTable {
+  const channel = new Float32Array(256);
+  const highlight = new Float32Array(256);
+  for (let i = 0; i < 256; i++) {
+    if (i <= knee) {
+      channel[i] = Math.pow(i / knee, 1.5);
+    } else {
+      const u = (i - knee) / (255 - knee);
+      highlight[i] = highlightMax * u * u;
+      channel[i] = 1 - highlight[i];
+    }
+  }
+  return { channel, highlight };
+}
+
+/** The bins each canvas row shows: rows [start, end), low frequencies at the bottom. */
+export interface RowBins {
+  readonly start: Int32Array;
+  readonly end: Int32Array;
+}
+
+/** Splits bins over rows: a row taller than a bin repeats it; a shorter one covers several. */
+export function rowBinRanges(height: number, bins: number): RowBins {
+  const start = new Int32Array(height);
+  const end = new Int32Array(height);
+  for (let y = 0; y < height; y++) {
+    const fromBottom = height - 1 - y;
+    const first = Math.floor((fromBottom * bins) / height);
+    start[y] = first;
+    end[y] = Math.min(bins, Math.max(first + 1, Math.floor(((fromBottom + 1) * bins) / height)));
+  }
+  return { start, end };
+}
+
+/** A palette CSS variable as RGB for pixel code; the fallback when it is missing or not hex. */
+export function readCssRgb(name: string, fallbackHex: string): Rgb {
+  return parseHexColor(readCssColor(name, fallbackHex)) || (parseHexColor(fallbackHex) as Rgb);
 }
