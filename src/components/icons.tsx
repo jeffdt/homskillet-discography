@@ -1,94 +1,107 @@
 import React from 'react';
 
-/** 16x16 pixel-grid glyph drawn in the current text color. */
-function Icon({ children }: { children: React.ReactNode }) {
+/** 24x24 line glyph stroked in the current text color; `filled` also fills closed shapes. */
+function Icon({ children, filled = false }: { children: React.ReactNode; filled?: boolean }) {
   return (
     <svg
       className="Icon"
-      viewBox="0 0 16 16"
-      fill="currentColor"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      shapeRendering="crispEdges"
     >
       {children}
     </svg>
   );
 }
 
-/** Four squares: the Albums drawer. */
+/** A record: the Albums drawer. */
 export const IconAlbums = () => (
   <Icon>
-    <path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z" />
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="2" />
+    <path d="M6 12a6 6 0 0 1 6-6" />
   </Icon>
 );
 
 /** Three faders: the Mixer panel. */
 export const IconMixer = () => (
   <Icon>
-    <path d="M4 1h1v14H4zM8 1h1v14H8zM12 1h1v14h-1zM2 9h5v3H2zM6 3h5v3H6zM10 6h5v3h-5z" />
+    <path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4" />
   </Icon>
 );
 
-/** A screen: the Stage panel. */
+/** An eye: the Visuals panel. */
 export const IconStage = () => (
   <Icon>
-    <path fillRule="evenodd" d="M1 2h14v10H1zM3 4v6h10V4zM6 13h4v2H6z" />
+    <path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0" />
+    <circle cx="12" cy="12" r="3" />
   </Icon>
 );
 
-/** Lowercase i: the About panel. */
+/** Circled i: the About panel. */
 export const IconInfo = () => (
   <Icon>
-    <path d="M7 2h2v2H7zM6 6h3v6h1v2H6v-2h1V8H6z" />
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 16v-4M12 8h.01" />
   </Icon>
 );
 
 /** Four corners: fullscreen. */
 export const IconFullscreen = () => (
   <Icon>
-    <path d="M1 1h5v2H3v3H1zM10 1h5v5h-2V3h-3zM1 10h2v3h3v2H1zM13 10h2v5h-5v-2h3z" />
+    <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3" />
   </Icon>
 );
 
 /** Previous track. */
 export const IconPrev = () => (
-  <Icon>
-    <path d="M2 2h2v12H2zM14 2v12L5 8z" />
+  <Icon filled>
+    <path d="M19 20 9 12l10-8z" />
+    <path d="M5 19V5" />
   </Icon>
 );
 
 /** Next track. */
 export const IconNext = () => (
-  <Icon>
-    <path d="M12 2h2v12h-2zM2 2l9 6-9 6z" />
+  <Icon filled>
+    <path d="m5 4 10 8-10 8z" />
+    <path d="M19 5v14" />
   </Icon>
 );
 
 /** Play. */
 export const IconPlay = () => (
-  <Icon>
-    <path d="M4 2l10 6-10 6z" />
+  <Icon filled>
+    <path d="M6 3l14 9-14 9z" />
   </Icon>
 );
 
 /** Pause. */
 export const IconPause = () => (
-  <Icon>
-    <path d="M3 2h4v12H3zM9 2h4v12H9z" />
+  <Icon filled>
+    <rect x="6" y="4" width="4" height="16" rx="1" />
+    <rect x="14" y="4" width="4" height="16" rx="1" />
   </Icon>
 );
 
 /** Crossed arrows: shuffle. */
 export const IconShuffle = () => (
   <Icon>
-    <path d="M1 3h3l6 8h2V9l3 3-3 3v-2H9L3 5H1zM1 11h2l1.5-2 1.2 1.6L4 13H1zM9 3h3V1l3 3-3 3V5h-2L8.5 7 7.3 5.4z" />
+    <path d="m18 14 4 4-4 4M18 2l4 4-4 4" />
+    <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22" />
+    <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
   </Icon>
 );
 
-/** Loop arrows: repeat track. */
+/** Loop arrows with a 1: repeat this track. */
 export const IconRepeat = () => (
   <Icon>
-    <path d="M3 4h9V2l3 3-3 3V6H5v3H3zM13 12H4v2l-3-3 3-3v2h7V7h2z" />
+    <path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3" />
+    <path d="M11 10h1v4" />
   </Icon>
 );
