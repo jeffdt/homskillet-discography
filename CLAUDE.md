@@ -113,12 +113,13 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - Stage.tsx - Full-window visualizer
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
   - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel, AboutPanel
-  - PlayerParams.tsx - Player controls (tempo, stereo width, bass boost)
+  - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
   - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`
 - **src/styles/shell.css** - Stage shell styles
+- **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
 - **src/audio/** - Audio engine (TypeScript)
   - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it
   - engine/ChipEngine.ts - The `AudioEngine` implementation (load, pause, seek, tempo, mute/solo, taps)
