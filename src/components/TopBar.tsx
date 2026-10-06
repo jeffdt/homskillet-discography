@@ -21,7 +21,7 @@ interface TopBarProps {
   takeLogoHandoff?: () => Box | null;
 }
 
-/** Logo plus panel toggles; fades with the rest of the chrome when idle. */
+/** Panel toggles on the left, above where panels open, and the logo on the right; fades when idle. */
 export default function TopBar({
   panels,
   onToggle,
@@ -47,13 +47,6 @@ export default function TopBar({
 
   return (
     <header className="TopBar Chrome">
-      <div
-        className="TopBar-logo"
-        ref={logoRef}
-        style={showLogo ? undefined : { visibility: 'hidden' }}
-      >
-        <Wordmark />
-      </div>
       <nav className="TopBar-nav" aria-label="Panels">
         {BUTTONS.map(({ id, shortcut, Icon }) => {
           const open = isPanelOpen(panels, id);
@@ -76,6 +69,13 @@ export default function TopBar({
           );
         })}
       </nav>
+      <div
+        className="TopBar-logo"
+        ref={logoRef}
+        style={showLogo ? undefined : { visibility: 'hidden' }}
+      >
+        <Wordmark />
+      </div>
     </header>
   );
 }
