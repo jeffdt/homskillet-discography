@@ -53,13 +53,13 @@ function makeControls() {
 function renderPanel(playback = PLAYING, settings: Record<string, any> = {}) {
   const data = createTestAudioData();
   const controls = makeControls();
-  const view = render(
+  render(
     withAudioData(
       data.value,
       <MixerPanel playback={playback} controls={controls} settings={settings as any} />
     )
   );
-  return { data, controls, view };
+  return { data, controls };
 }
 
 describe('MixerPanel', () => {

@@ -209,6 +209,10 @@
   margin: 2px 0 0;
 }
 
+.App[data-layout='compact'] .MixerSlider-row input[type='range'] {
+  min-height: var(--touch-target);
+}
+
 .App[data-layout='compact'] .MixerSlider-pin {
   min-height: var(--touch-target);
   min-width: var(--touch-target);
@@ -239,6 +243,7 @@
 }
 
 .App .Mixer-reset:disabled {
+  color: var(--neutral2);
   cursor: default;
 }
 

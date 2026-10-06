@@ -4,8 +4,9 @@ export const METER_FLOOR_DB = -48;
 export const SCOPE_SAMPLES = 512;
 /** Points per scope trace. */
 export const SCOPE_POINTS = 128;
-/** The scope's SVG viewBox size; the SVG stretches it to the strip. */
+/** The scope's SVG viewBox width; the SVG stretches it to the strip. */
 export const SCOPE_WIDTH = 128;
+/** The scope's SVG viewBox height; the SVG stretches it to the strip. */
 export const SCOPE_HEIGHT = 32;
 
 const MID = SCOPE_HEIGHT / 2;

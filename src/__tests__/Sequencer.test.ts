@@ -418,6 +418,15 @@ describe('Sequencer', () => {
     });
   });
 
+  describe('track change', () => {
+    it('resets mute and solo by unmasking every voice after loading a song', async () => {
+      sequencer.playSongFile('song.nsf', new ArrayBuffer(0));
+
+      await vi.waitFor(() => expect(mockPlayer.setVoiceMask).toHaveBeenCalled());
+      expect(mockPlayer.setVoiceMask).toHaveBeenCalledWith(Array(8).fill(true));
+    });
+  });
+
   describe('play plans used by the stage shell', () => {
     it('with shuffle on, plays the requested track first, then every other track once', () => {
       const played: string[] = [];
