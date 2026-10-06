@@ -6,7 +6,11 @@ import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import Dock from '../components/Dock';
 
-vi.mock('../components/TimeSlider', () => ({ default: () => <div data-testid="time-slider" /> }));
+vi.mock('../components/TimeSlider', () => ({
+  default: ({ particleEnabled }: { particleEnabled?: boolean }) => (
+    <div data-testid="time-slider" data-sparks={String(particleEnabled)} />
+  ),
+}));
 
 const catalog = buildCatalog(
   {
@@ -81,6 +85,16 @@ function renderDock(
 }
 
 describe('Dock', () => {
+  it('stops spawning sparks while the dock is faded out', () => {
+    renderDock({}, { settings: { sliderSparksEnabled: true }, faded: true });
+    expect(screen.getByTestId('time-slider').getAttribute('data-sparks')).toBe('false');
+  });
+
+  it('spawns sparks when enabled and visible', () => {
+    renderDock({}, { settings: { sliderSparksEnabled: true } });
+    expect(screen.getByTestId('time-slider').getAttribute('data-sparks')).toBe('true');
+  });
+
   it('shows the title and album and opens the album on click', () => {
     const { onShowInAlbums } = renderDock();
     expect(screen.getByText('Groove')).toBeTruthy();

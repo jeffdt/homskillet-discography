@@ -25,6 +25,8 @@ interface DockProps {
   settings: Partial<UserSettings>;
   onShowInAlbums: (albumId: string) => void;
   showFullscreen: boolean;
+  /** The dock has faded out for idle; sparks stop spawning so none float over an empty screen. */
+  faded?: boolean;
 }
 
 /** Title for a song that is not in the catalog, derived from its URL. */
@@ -39,9 +41,9 @@ function fallbackTitle(songUrl: string | null): string {
 }
 
 /** Maps user settings to the slider particle props. */
-function sparkSettings(settings: Partial<UserSettings>) {
+function sparkSettings(settings: Partial<UserSettings>, faded: boolean) {
   return {
-    particleEnabled: settings.sliderSparksEnabled ?? false,
+    particleEnabled: !faded && (settings.sliderSparksEnabled ?? false),
     particleSpawnRate: settings.particleSpawnRate,
     particleLifespan: settings.particleLifespan,
     particleBaseAngle: settings.particleBaseAngle,
@@ -114,6 +116,7 @@ export default function Dock({
   settings,
   onShowInAlbums,
   showFullscreen,
+  faded = false,
 }: DockProps) {
   const disabled = playback.ejected;
   const title = track ? track.title : fallbackTitle(playback.songUrl);
@@ -163,7 +166,7 @@ export default function Dock({
           getCurrentPositionMs={controls.getPositionMs}
           onChange={controls.seekToFraction}
           looping={playback.repeat}
-          {...sparkSettings(settings)}
+          {...sparkSettings(settings, faded)}
         />
       </div>
 

@@ -320,6 +320,7 @@ export default function AppShell({ playback, controls, audioGraph }: AppShellPro
           settings={settings}
           onShowInAlbums={showInAlbums}
           showFullscreen={showFullscreen}
+          faded={idle && !compact}
         />
       )}
 
