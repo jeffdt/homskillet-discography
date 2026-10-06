@@ -3,13 +3,13 @@ import autoBindReact from 'auto-bind/react';
 import isMobile from 'ismobilejs';
 import clamp from 'lodash/clamp';
 
-import ChipCore from '../chip-core';
-import ChipCoreStub from '../chip-core-stub';
-import { MAX_VOICES, MAX_SAMPLE_RATE, REPLACE_STATE_ON_SEEK } from '../config';
-import { unlockAudioContext } from '../util';
+import { MAX_VOICES, REPLACE_STATE_ON_SEEK } from '../config';
 import Sequencer, { SHUFFLE_OFF, SHUFFLE_ON } from '../Sequencer';
 
-import GMEPlayer from '../players/GMEPlayer';
+import { AudioEngine } from '../audio/engine/AudioEngine';
+import { createAudioEngine } from '../audio/engine/createAudioEngine';
+import { parseEngineOverrides } from '../audio/engine/engineKind';
+import EnginePlayer from '../players/EnginePlayer';
 import { UI_PALETTES } from '../config/uiPalettes';
 import { updateAccentColors } from '../util/cssVariables';
 
@@ -30,10 +30,10 @@ const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.
  * a PlaybackState snapshot plus stable PlaybackControls.
  */
 class App extends React.Component<AppProps, AppState> {
+  private engine: AudioEngine | null = null;
   private chipCore: any;
-  private audioCtx: AudioContext;
-  private gainNode: GainNode;
-  private playerNode: ScriptProcessorNode;
+  private audioCtx!: AudioContext;
+  private playerNode!: AudioNode;
   private sequencer!: Sequencer;
   private mediaSessionAudio?: HTMLAudioElement;
   private audioGraph: AudioGraph | null = null;
@@ -46,60 +46,7 @@ class App extends React.Component<AppProps, AppState> {
     this.attachMediaKeyHandlers();
     (window as any).ChipPlayer = this;
 
-    // ===== Audio wiring: sub-project 2 replaces this region with AudioEngine =====
-    // Initialize audio graph
-    // ┌────────────┐      ┌────────────┐      ┌─────────────┐
-    // │ playerNode ├─────>│  gainNode  ├─────>│ destination │
-    // └────────────┘      └────────────┘      └─────────────┘
-
-    // Smaller buffer for mobile devices. 'interactive' yields 128 samples on iOS/Android.
-    const latencyHint = isMobile.any ? 'interactive' : 'playback';
-    let audioCtx =
-      (this.audioCtx =
-      (window as any).audioCtx =
-        new ((window as any).AudioContext || (window as any).webkitAudioContext)({
-          latencyHint,
-        }));
-
-    // Limit the sample rate if needed
-    if (audioCtx.sampleRate > MAX_SAMPLE_RATE) {
-      console.warn(
-        'AudioContext default sample rate was too high (%s). Limiting to %s.',
-        audioCtx.sampleRate,
-        MAX_SAMPLE_RATE
-      );
-      let targetRate = audioCtx.sampleRate;
-      while (targetRate > MAX_SAMPLE_RATE) {
-        targetRate /= 2;
-      }
-      audioCtx =
-        this.audioCtx =
-        (window as any).audioCtx =
-          new ((window as any).AudioContext || (window as any).webkitAudioContext)({
-            latencyHint,
-            sampleRate: targetRate,
-          });
-    }
-
-    const bufferSize = Math.max(
-      // Make sure script node bufferSize is at least baseLatency
-      Math.pow(2, Math.ceil(Math.log2((audioCtx.baseLatency || 0.001) * audioCtx.sampleRate))),
-      2048
-    );
-    const gainNode = (this.gainNode = audioCtx.createGain());
-    gainNode.gain.value = 1;
-    gainNode.connect(audioCtx.destination);
-    const playerNode = (this.playerNode = audioCtx.createScriptProcessor(bufferSize, 0, 2));
-    playerNode.connect(gainNode);
-
-    unlockAudioContext(audioCtx);
-    console.log(
-      'Sample rate: %d hz. Base latency: %d. Buffer size: %d.',
-      audioCtx.sampleRate,
-      audioCtx.baseLatency * audioCtx.sampleRate,
-      bufferSize
-    );
-    // ===== End audio wiring =====
+    // The AudioEngine is created asynchronously in initAudioEngine (below).
 
     const { shuffle, repeat } = props.userContext.settings;
     this.state = {
@@ -143,79 +90,51 @@ class App extends React.Component<AppProps, AppState> {
       resumeAudio: this.resumeAudio,
     };
 
-    this.initChipCore(audioCtx, playerNode, bufferSize);
+    this.initAudioEngine();
   }
 
   // ===== Audio wiring (continued): engine startup, media session, sequencer state =====
 
-  async initChipCore(audioCtx: AudioContext, playerNode: ScriptProcessorNode, bufferSize: number) {
-    // Load the chip-core Emscripten runtime
-
+  /**
+   * Creates the AudioEngine and, once it resolves, the Sequencer and AudioGraph. The promise can
+   * stay pending until the first user gesture (suspended AudioContext), so nothing waits on it.
+   */
+  async initAudioEngine() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const { forcedKind, forcedTapTransport } = parseEngineOverrides(window.location.search);
+    let engine: AudioEngine;
     try {
-      this.chipCore = await ChipCore({
-        // Look for .wasm file in web root, not the same location as the app bundle (static/js).
-        locateFile: (path: string, prefix: string) => {
-          const url =
-            path.endsWith('.wasm') || path.endsWith('.wast')
-              ? `${BASE_URL}/${path}`
-              : prefix + path;
-          return url;
-        },
-        print: (msg: string) => console.debug('[stdout] ' + msg),
-        printErr: (msg: string) => console.debug('[stderr] ' + msg),
+      engine = await createAudioEngine({
+        // Smaller buffers on mobile; 'interactive' yields 128-frame callbacks on iOS/Android.
+        latencyHint: isMobile.any ? 'interactive' : 'playback',
+        wasmUrl: `${import.meta.env.BASE_URL}chip-core.wasm`,
+        forcedKind,
+        forcedTapTransport,
+        debug: urlParams.get('debug') !== null,
       });
     } catch (e) {
-      // Fallback to stub mode if chip-core fails to load
-      console.warn('Failed to load chip-core, falling back to stub mode:', e);
-      try {
-        this.chipCore = await ChipCoreStub();
-        this.props.toastContext.enqueueToast(
-          'Running in STUB MODE - no actual audio playback. UI development only.',
-          ToastLevels.WARNING
-        );
-      } catch (stubError) {
-        // If even the stub fails, we're in trouble
-        this.setState({ loading: false });
-        this.props.toastContext.enqueueToast(
-          'Error loading player engine. Old browser?',
-          ToastLevels.ERROR
-        );
-        return;
-      }
+      console.error('Error creating the audio engine:', e);
+      this.setState({ loading: false });
+      this.props.toastContext.enqueueToast(
+        'Error loading player engine. Old browser?',
+        ToastLevels.ERROR
+      );
+      return;
     }
 
-    // Get debug from location.search
-    const urlParams = new URLSearchParams(window.location.search);
-    const debug = urlParams.get('debug');
-    // Create GME player only
-    const players = [GMEPlayer].map(
-      (P) => new P(this.chipCore, audioCtx.sampleRate, bufferSize, debug)
-    );
-    players.forEach((p) => {
-      p.audioNode = this.playerNode;
-    });
+    this.engine = engine;
+    this.audioCtx = (window as any).audioCtx = engine.context;
+    this.playerNode = engine.outputNode;
+    this.chipCore = engine.mainThreadCore;
+    if (engine.kind === 'stub') {
+      this.props.toastContext.enqueueToast(
+        'Running in STUB MODE - no actual audio playback. UI development only.',
+        ToastLevels.WARNING
+      );
+    }
 
-    // Set up the central audio processing callback. This is where the magic happens.
-    playerNode.onaudioprocess = (e) => {
-      const channels = [];
-      for (let i = 0; i < e.outputBuffer.numberOfChannels; i++) {
-        channels.push(e.outputBuffer.getChannelData(i));
-      }
-      for (let player of players) {
-        if (player.stopped) continue;
-        player.processAudio(channels);
-      }
-    };
-
-    // Populate all mounted IDBFS file systems from IndexedDB.
-    this.chipCore.FS.syncfs(true, (err: any) => {
-      if (err) {
-        console.log('Error populating FS from indexeddb.', err);
-      }
-      players.forEach((player) => player.handleFileSystemReady());
-    });
-
-    this.sequencer = new Sequencer(players, null, () => this.props.userContext.settings);
+    const player = new EnginePlayer(engine);
+    this.sequencer = new Sequencer([player], null, () => this.props.userContext.settings);
     this.sequencer.on('sequencerStateUpdate', this.handleSequencerStateUpdate);
     this.sequencer.on('playerError', (message: string) =>
       this.props.toastContext.enqueueToast(message, ToastLevels.ERROR)
@@ -223,7 +142,11 @@ class App extends React.Component<AppProps, AppState> {
 
     this.sequencer.setShuffle(this.state.shuffle);
     this.sequencer.setLocked(this.state.isLocked);
-    this.audioGraph = { audioCtx, sourceNode: playerNode, chipCore: this.chipCore };
+    this.audioGraph = {
+      audioCtx: engine.context,
+      sourceNode: engine.outputNode,
+      chipCore: engine.mainThreadCore,
+    };
     this.setState({ loading: false });
   }
 
@@ -481,7 +404,7 @@ class App extends React.Component<AppProps, AppState> {
 
   handleVolumeChange(volume: number) {
     this.setState({ volume });
-    this.gainNode.gain.value = Math.max(0, Math.min(2, volume * 0.01));
+    this.engine?.setVolume(Math.max(0, Math.min(2, volume * 0.01)));
   }
 
   /** Turns shuffle on or off and persists the choice. */
@@ -501,7 +424,8 @@ class App extends React.Component<AppProps, AppState> {
 
   /** Resumes a suspended AudioContext; must be called inside a user gesture. */
   resumeAudio() {
-    if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+    const context = this.engine?.context;
+    if (context && context.state === 'suspended') context.resume();
   }
 
   // ===== End playback commands =====
