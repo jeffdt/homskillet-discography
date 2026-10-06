@@ -5,7 +5,7 @@ import { IconAlbums, IconInfo, IconMixer, IconStage } from './icons';
 const BUTTONS: Array<{ id: PanelId; shortcut: string | null; Icon: () => JSX.Element }> = [
   { id: 'albums', shortcut: 'A', Icon: IconAlbums },
   { id: 'mixer', shortcut: 'M', Icon: IconMixer },
-  { id: 'stage', shortcut: 'S', Icon: IconStage },
+  { id: 'stage', shortcut: 'V', Icon: IconStage },
   { id: 'about', shortcut: null, Icon: IconInfo },
 ];
 

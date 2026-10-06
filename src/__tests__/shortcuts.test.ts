@@ -22,7 +22,7 @@ describe('resolveShortcut', () => {
     expect(resolveShortcut(key('F', { shiftKey: true }))).toBe('toggleFullscreen');
     expect(resolveShortcut(key('Escape'))).toBe('closeTopmost');
     expect(resolveShortcut(key('m'))).toBe('toggleMixer');
-    expect(resolveShortcut(key('s'))).toBe('toggleStage');
+    expect(resolveShortcut(key('v'))).toBe('toggleStage');
     expect(resolveShortcut(key('a'))).toBe('toggleAlbums');
   });
 

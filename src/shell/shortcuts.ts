@@ -117,7 +117,7 @@ function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
       return 'toggleFullscreen';
     case 'm':
       return 'toggleMixer';
-    case 's':
+    case 'v':
       return 'toggleStage';
     case 'a':
       return 'toggleAlbums';

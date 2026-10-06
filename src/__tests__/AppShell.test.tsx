@@ -294,16 +294,16 @@ describe('AppShell', () => {
       renderShell();
       await screen.findByText('or browse 2 albums');
       fireEvent.keyDown(document.body, { key: 'a' });
-      fireEvent.keyDown(document.body, { key: 's' });
+      fireEvent.keyDown(document.body, { key: 'v' });
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
-      expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Visuals' })).toBeTruthy();
 
       setCompact(true);
       expect(screen.queryByRole('dialog', { name: 'Albums' })).toBeNull();
-      expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Visuals' })).toBeTruthy();
 
       fireEvent.keyDown(document.body, { key: 'Escape' });
-      expect(screen.queryByRole('dialog', { name: 'Stage' })).toBeNull();
+      expect(screen.queryByRole('dialog', { name: 'Visuals' })).toBeNull();
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
     });
 
@@ -312,11 +312,11 @@ describe('AppShell', () => {
       renderShell();
       await screen.findByText('or browse 2 albums');
       fireEvent.keyDown(document.body, { key: 'a' });
-      fireEvent.keyDown(document.body, { key: 's' });
+      fireEvent.keyDown(document.body, { key: 'v' });
       setCompact(true);
       setCompact(false);
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
-      expect(screen.getByRole('dialog', { name: 'Stage' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Visuals' })).toBeTruthy();
     });
 
     it('marks only the visible panel in the top bar and raises a hidden one instead of closing it', async () => {

@@ -11,7 +11,7 @@ export const PANEL_SLOTS: Record<PanelId, PanelSlot> = {
 export const PANEL_TITLES: Record<PanelId, string> = {
   albums: 'Albums',
   mixer: 'Mixer',
-  stage: 'Stage',
+  stage: 'Visuals',
   about: 'About',
 };
 

@@ -26,7 +26,7 @@ describe('PanelHost', () => {
   it('shows left, right and center panels together on wide layouts', () => {
     renderHost({ open: ['albums', 'stage', 'about'] }, false);
     expect(screen.getByRole('dialog', { name: 'Albums' }).className).toContain('Panel--left');
-    expect(screen.getByRole('dialog', { name: 'Stage' }).className).toContain('Panel--right');
+    expect(screen.getByRole('dialog', { name: 'Visuals' }).className).toContain('Panel--right');
     expect(screen.getByRole('dialog', { name: 'About' }).className).toContain('Panel--center');
   });
 

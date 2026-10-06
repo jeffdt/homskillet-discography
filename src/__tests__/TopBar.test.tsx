@@ -13,14 +13,14 @@ describe('TopBar', () => {
     expect(screen.getByRole('button', { name: 'Mixer' }).getAttribute('aria-pressed')).toBe(
       'false'
     );
-    expect(screen.getByRole('button', { name: 'Stage' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Visuals' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'About' })).toBeTruthy();
   });
 
   it('toggles panels', () => {
     const onToggle = vi.fn();
     render(<TopBar panels={{ open: [] }} onToggle={onToggle} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Stage' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Visuals' }));
     expect(onToggle).toHaveBeenCalledWith('stage');
   });
 
