@@ -45,6 +45,18 @@
   /* Light Gray - emphasized text */
   --neutral4: #fefefe;
   /* White - headings, high contrast */
+
+  /* CHANNEL COLORS - one per voice: --ch-0 colors voice index 0, and so on. */
+  /* The active channel palette (src/config/channelPalettes.ts) overrides these at runtime; */
+  /* these defaults are the Chromatic palette. Use var(--ch-N) for anything per-channel. */
+  --ch-0: #56b4e9;
+  --ch-1: #f0e442;
+  --ch-2: #009e73;
+  --ch-3: #c3c3c3;
+  --ch-4: #cc79a7;
+  --ch-5: #e69f00;
+  --ch-6: #d55e00;
+  --ch-7: #0072b2;
 }
 
 .grid {

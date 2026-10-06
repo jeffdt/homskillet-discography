@@ -5,7 +5,9 @@ import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import AppShell from '../components/AppShell';
 import { UserProvider } from '../components/UserProvider';
+import { channelPaletteById } from '../config/channelPalettes';
 import { COMPACT_LAYOUT_QUERY } from '../hooks/useMediaQuery';
+import { channelColors } from '../visuals/channelColors';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 const { FIXTURE } = vi.hoisted(() => ({
@@ -426,5 +428,28 @@ describe('AppShell and the frame loop', () => {
       </UserProvider>
     );
     expect(setEnabled).toHaveBeenLastCalledWith(false);
+  });
+});
+
+describe('AppShell channel palette', () => {
+  afterEach(() => {
+    channelColors.set(channelPaletteById('chromatic').channels);
+  });
+
+  it('applies the persisted channel palette to the channel color variables', async () => {
+    window.localStorage.setItem('settings', JSON.stringify({ channelPalette: 'game-boy' }));
+    renderShell();
+    await screen.findByText('or browse 2 albums');
+    const gameBoy = channelPaletteById('game-boy').channels;
+    expect(channelColors.get()).toEqual(gameBoy);
+    expect(document.documentElement.style.getPropertyValue('--ch-3')).toBe(gameBoy[3]);
+  });
+
+  it('falls back to Chromatic for an unknown palette id', async () => {
+    channelColors.set(channelPaletteById('vapor').channels);
+    window.localStorage.setItem('settings', JSON.stringify({ channelPalette: 'retired-palette' }));
+    renderShell();
+    await screen.findByText('or browse 2 albums');
+    expect(channelColors.get()).toEqual(channelPaletteById('chromatic').channels);
   });
 });
