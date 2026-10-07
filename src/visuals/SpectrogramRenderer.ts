@@ -1,25 +1,18 @@
 import { SpectrumLayout } from '../audio/data/contract';
-import { Rgb, packPixel } from './color';
 import {
   RowBins,
   ScrollAccumulator,
-  ShadeTable,
   aWeightingLut,
-  buildShadeTable,
   peakDecayFactor,
   rowBinRanges,
+  valueIndex,
 } from './spectrogramMath';
+import { BinPainter } from './spectrumPainters';
 
 /** The two canvases the stage draws on. */
 export interface SpectrogramCanvases {
   analyzer: HTMLCanvasElement;
   spectrogram: HTMLCanvasElement;
-}
-
-/** The fixed colors every channel color is shaded between: silence and the loudest peaks. */
-export interface StageShades {
-  background: Rgb;
-  highlight: Rgb;
 }
 
 /** Peak marker width in backing pixels. */
@@ -40,10 +33,6 @@ function createPixelImage(
   return { image, pixels: new Uint32Array(image.data.buffer) };
 }
 
-function valueIndex(value: number): number {
-  return value <= 0 ? 0 : value >= 255 ? 255 : value | 0;
-}
-
 function isSilent(spectrum: Float32Array): boolean {
   for (let i = 0; i < spectrum.length; i++) if (spectrum[i] !== 0) return false;
   return true;
@@ -52,8 +41,7 @@ function isSilent(spectrum: Float32Array): boolean {
 /**
  * Draws the stage visualizer: analyzer bars with peak hold at the right edge, and a waterfall that
  * scrolls right to left at a fixed speed in pixels per second. The mix spectrum decides how loud
- * each row is; the per-bin channel colors (BinColorizer) decide its color, shaded from the
- * background through the channel color toward the highlight as it gets louder. Pixels go through
+ * each row is; a BinPainter (spectrumPainters.ts) decides its color. Pixels go through
  * ImageData, so no per-bin color strings are built. Both canvases share one backing height.
  */
 export class SpectrogramRenderer {
@@ -62,9 +50,7 @@ export class SpectrogramRenderer {
   private readonly scratch: HTMLCanvasElement;
   private readonly scratchCtx: CanvasRenderingContext2D | null;
   private readonly weighting: Float32Array;
-  private readonly shade: ShadeTable = buildShadeTable();
   private readonly scroll = new ScrollAccumulator();
-  private readonly backgroundPixel: number;
   private readonly columnImages = new Map<number, PixelImage>();
   private analyzerImage: PixelImage | null = null;
   private rows: RowBins = rowBinRanges(0, 0);
@@ -78,7 +64,6 @@ export class SpectrogramRenderer {
   constructor(
     private readonly canvases: SpectrogramCanvases,
     private readonly layout: SpectrumLayout,
-    private readonly shades: StageShades,
     createCanvas: () => HTMLCanvasElement = () => document.createElement('canvas')
   ) {
     this.analyzerCtx = canvases.analyzer.getContext('2d', { alpha: true });
@@ -86,8 +71,6 @@ export class SpectrogramRenderer {
     this.scratch = createCanvas();
     this.scratchCtx = this.scratch.getContext('2d', { alpha: true });
     this.weighting = aWeightingLut(layout.frequencies);
-    const [r, g, b] = shades.background;
-    this.backgroundPixel = packPixel(r, g, b, 255);
     this.resize();
   }
 
@@ -124,10 +107,10 @@ export class SpectrogramRenderer {
   }
 
   /**
-   * Draws one frame from the mix spectrum and the per-bin colors (r, g, b per bin, 0..255); the
-   * waterfall moves pxPerSecond * dtMs / 1000 backing pixels.
+   * Draws one frame from the mix spectrum, colored by the painter (already updated for this
+   * frame); the waterfall moves pxPerSecond * dtMs / 1000 backing pixels.
    */
-  draw(spectrum: Float32Array, binColors: Float32Array, dtMs: number, pxPerSecond: number): void {
+  draw(spectrum: Float32Array, painter: BinPainter, dtMs: number, pxPerSecond: number): void {
     const analyzerCtx = this.analyzerCtx;
     const spectrogramCtx = this.spectrogramCtx;
     const scratchCtx = this.scratchCtx;
@@ -144,21 +127,22 @@ export class SpectrogramRenderer {
       spectrogramCtx.drawImage(this.scratch, 0, 0);
     }
 
-    analyzerImage.pixels.fill(this.backgroundPixel);
+    analyzerImage.pixels.fill(painter.analyzerBackground);
     if (isSilent(spectrum)) {
       // Keep painting so peak markers fall; rowBins keeps the last bin, so a marker keeps its color.
       this.rowValues.fill(0);
-      this.paintBars(analyzerImage, binColors, dtMs);
+      this.paintBars(analyzerImage, painter, dtMs);
+      if (step > 0 && painter.emptyPixel !== 0) this.paintColumn(spectrogramCtx, step, painter);
     } else {
-      this.measureRows(spectrum, binColors);
-      this.paintBars(analyzerImage, binColors, dtMs);
-      if (step > 0) this.paintColumn(spectrogramCtx, step);
+      this.measureRows(spectrum, painter);
+      this.paintBars(analyzerImage, painter, dtMs);
+      if (step > 0) this.paintColumn(spectrogramCtx, step, painter);
     }
     analyzerCtx.putImageData(analyzerImage.image, 0, 0);
   }
 
   /** For each row: the loudest bin it covers, that bin's value index and its shaded pixel. */
-  private measureRows(spectrum: Float32Array, binColors: Float32Array): void {
+  private measureRows(spectrum: Float32Array, painter: BinPainter): void {
     const { start, end } = this.rows;
     for (let y = 0; y < this.rowValues.length; y++) {
       let best = start[y];
@@ -173,11 +157,11 @@ export class SpectrogramRenderer {
       const index = valueIndex(bestValue);
       this.rowBins[y] = best;
       this.rowValues[y] = index;
-      this.rowPixels[y] = this.shadePixel(binColors, best, index);
+      this.rowPixels[y] = painter.pixel(best, index);
     }
   }
 
-  private paintBars(target: PixelImage, binColors: Float32Array, dtMs: number): void {
+  private paintBars(target: PixelImage, painter: BinPainter, dtMs: number): void {
     const { pixels, image } = target;
     const width = image.width;
     const widthPerValue = width / 256;
@@ -195,17 +179,21 @@ export class SpectrogramRenderer {
       const markerStart = Math.max(0, peakWidth - PEAK_MARKER_PX);
       const markerEnd = Math.min(width, peakWidth);
       if (markerEnd > markerStart) {
-        const peakPixel = this.shadePixel(binColors, this.rowBins[y], valueIndex(this.peaks[y]));
+        const peakPixel = painter.peakPixel(this.rowBins[y], valueIndex(this.peaks[y]));
         pixels.fill(peakPixel, rowStart + markerStart, rowStart + markerEnd);
       }
     }
   }
 
-  private paintColumn(ctx: CanvasRenderingContext2D, step: number): void {
+  private paintColumn(ctx: CanvasRenderingContext2D, step: number, painter: BinPainter): void {
     const { image, pixels } = this.columnImage(ctx, step);
     for (let y = 0; y < this.rowValues.length; y++) {
-      // A silent row stays transparent, so the stage background shows through.
-      pixels.fill(this.rowValues[y] > 0 ? this.rowPixels[y] : 0, y * step, y * step + step);
+      // A silent row takes the painter's empty pixel: transparent shows the stage background.
+      pixels.fill(
+        this.rowValues[y] > 0 ? this.rowPixels[y] : painter.emptyPixel,
+        y * step,
+        y * step + step
+      );
     }
     ctx.putImageData(image, this.canvases.spectrogram.width - step, 0);
   }
@@ -217,21 +205,5 @@ export class SpectrogramRenderer {
       this.columnImages.set(step, entry);
     }
     return entry;
-  }
-
-  /** The opaque pixel for a bin's color at a value index. */
-  private shadePixel(binColors: Float32Array, bin: number, index: number): number {
-    const c = this.shade.channel[index];
-    const h = this.shade.highlight[index];
-    const k = 1 - c - h;
-    const o = bin * 3;
-    const background = this.shades.background;
-    const highlight = this.shades.highlight;
-    return packPixel(
-      (background[0] * k + binColors[o] * c + highlight[0] * h + 0.5) | 0,
-      (background[1] * k + binColors[o + 1] * c + highlight[1] * h + 0.5) | 0,
-      (background[2] * k + binColors[o + 2] * c + highlight[2] * h + 0.5) | 0,
-      255
-    );
   }
 }
