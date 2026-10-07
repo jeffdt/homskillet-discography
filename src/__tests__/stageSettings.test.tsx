@@ -51,6 +51,7 @@ describe('stage defaults', () => {
       peakDecayRate: 0.98,
       peakQuantization: 4,
       audioReactivePulse: true,
+      reactiveStrength: 100,
       filmGrainAmount: 50,
       sliderSparksEnabled: false,
       particleSpawnRate: 20,

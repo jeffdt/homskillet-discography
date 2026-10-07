@@ -114,9 +114,72 @@ describe('SwatchPicker', () => {
     fireEvent.keyDown(radios[0], { key: 'ArrowLeft' });
     expect(onSelect).toHaveBeenLastCalledWith('c');
     expect(document.activeElement).toBe(radios[2]);
-    fireEvent.keyDown(radios[2], { key: 'ArrowDown' });
-    expect(onSelect).toHaveBeenLastCalledWith('a');
-    fireEvent.keyDown(radios[1], { key: 'ArrowUp' });
+  });
+
+  describe('Up and Down in a wrapped grid', () => {
+    // Two rows of three: a b c / d e f. Column centers differ slightly so "nearest" is exercised.
+    const GRID = ['a', 'b', 'c', 'd', 'e', 'f'].map((id) => ({ id, label: id }));
+    const POSITIONS = [
+      [0, 0],
+      [100, 0],
+      [200, 0],
+      [10, 50],
+      [110, 50],
+      [210, 50],
+    ];
+
+    function renderGrid(selectedId = 'a') {
+      const onSelect = vi.fn();
+      render(
+        <SwatchPicker label="Grid" options={GRID} selectedId={selectedId} onSelect={onSelect} />
+      );
+      const radios = screen.getAllByRole('radio');
+      radios.forEach((radio, i) => {
+        const [left, top] = POSITIONS[i];
+        radio.getBoundingClientRect = () =>
+          ({ left, top, width: 80, height: 40, right: left + 80, bottom: top + 40 }) as DOMRect;
+      });
+      return { onSelect, radios };
+    }
+
+    it('moves to the card below in the same column and focuses it', () => {
+      const { onSelect, radios } = renderGrid('b');
+      expect(fireEvent.keyDown(radios[1], { key: 'ArrowDown' })).toBe(false);
+      expect(onSelect).toHaveBeenLastCalledWith('e');
+      expect(document.activeElement).toBe(radios[4]);
+    });
+
+    it('moves to the card above in the same column', () => {
+      const { onSelect, radios } = renderGrid('f');
+      fireEvent.keyDown(radios[5], { key: 'ArrowUp' });
+      expect(onSelect).toHaveBeenLastCalledWith('c');
+    });
+
+    it('wraps to the opposite row at the grid edges', () => {
+      const { onSelect, radios } = renderGrid('a');
+      fireEvent.keyDown(radios[0], { key: 'ArrowUp' });
+      expect(onSelect).toHaveBeenLastCalledWith('d');
+      fireEvent.keyDown(radios[4], { key: 'ArrowDown' });
+      expect(onSelect).toHaveBeenLastCalledWith('b');
+    });
+
+    it('picks the nearest column when the last row is shorter', () => {
+      const { onSelect, radios } = renderGrid('c');
+      radios[5].getBoundingClientRect = () => ({ left: 0, top: 999 }) as DOMRect;
+      fireEvent.keyDown(radios[2], { key: 'ArrowDown' });
+      expect(onSelect).toHaveBeenLastCalledWith('e');
+    });
+
+    it('keeps Left and Right moving through the order', () => {
+      const { onSelect, radios } = renderGrid('c');
+      fireEvent.keyDown(radios[2], { key: 'ArrowRight' });
+      expect(onSelect).toHaveBeenLastCalledWith('d');
+    });
+  });
+
+  it('keeps Up and Down on the card in a single row', () => {
+    const { onSelect, radios } = renderPicker('a');
+    expect(fireEvent.keyDown(radios[0], { key: 'ArrowDown' })).toBe(false);
     expect(onSelect).toHaveBeenLastCalledWith('a');
   });
 

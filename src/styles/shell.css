@@ -289,16 +289,31 @@
   line-height: 1;
 }
 
-/* Reactive UI: the logo swells slightly with the music. Transform only, so it never repaints. */
-.App .TopBar-logo {
-  transform: scale(calc(1 + var(--pulse-intensity, 0) * 0.04));
-  transform-origin: right center;
+/*
+ * Reactive UI. --pulse-intensity (0..1) comes from the audio; --reactive-strength is the Visuals
+ * panel slider. Reduced motion turns every reactive effect off.
+ */
+.AppShell {
+  --reactive: calc(var(--reactive-strength, 1) * var(--reactive-motion, 1));
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .App .TopBar-logo {
-    transform: none;
+  .AppShell {
+    --reactive-motion: 0;
   }
+}
+
+/* Glows repaint every frame; low-power devices keep only the transform swells. */
+.AppShell[data-perf='low'] {
+  --reactive-glow: 0;
+}
+
+/* The logo swells and glows with the music. */
+.App .TopBar-logo {
+  transform: scale(calc(1 + var(--pulse-intensity, 0) * 0.3 * var(--reactive)));
+  transform-origin: right center;
+  text-shadow: 0 0
+    calc(var(--pulse-intensity, 0) * 20px * var(--reactive) * var(--reactive-glow, 1)) var(--accent);
 }
 
 /* ===== Wordmark ===== */
@@ -471,7 +486,11 @@
   backdrop-filter: var(--panel-blur);
   border: 1px solid var(--hairline);
   border-radius: 999px;
-  box-shadow: 0 8px 32px var(--shadow);
+  box-shadow:
+    0 8px 32px var(--shadow),
+    0 0 calc(var(--pulse-intensity, 0) * 44px * var(--reactive) * var(--reactive-glow, 1))
+      calc(var(--pulse-intensity, 0) * 3px * var(--reactive) * var(--reactive-glow, 1))
+      var(--accent-dark);
   box-sizing: border-box;
 }
 
@@ -511,7 +530,9 @@
   height: 44px;
   background: var(--accent);
   color: var(--neutral0);
-  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 10px) var(--accent-dark);
+  box-shadow: 0 0 calc(var(--pulse-intensity, 0) * 28px * var(--reactive))
+    calc(var(--pulse-intensity, 0) * 6px * var(--reactive)) var(--accent);
+  transform: scale(calc(1 + var(--pulse-intensity, 0) * 0.12 * var(--reactive)));
 }
 
 .Dock-play:hover:not(:disabled) {

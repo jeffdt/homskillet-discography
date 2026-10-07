@@ -13,6 +13,7 @@ import StageToggle from './stage/StageToggle';
 import SwatchPicker from './stage/SwatchPicker';
 import {
   FILM_GRAIN,
+  REACTIVE_STRENGTH,
   MORE_SPARK_SLIDERS,
   PEAK_SLIDERS,
   REACTIVE_UI,
@@ -122,6 +123,7 @@ export default function StagePanel() {
           {STAGE_COPY.accent}
         </p>
         {toggle(REACTIVE_UI)}
+        {slider(REACTIVE_STRENGTH, !toggleSetting(settings, REACTIVE_UI))}
         {slider(FILM_GRAIN)}
       </section>
 

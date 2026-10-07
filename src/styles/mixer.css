@@ -83,7 +83,7 @@
   grid-area: scope;
   display: block;
   width: 100%;
-  height: 32px;
+  height: 48px;
   color: var(--strip-color, var(--accent));
 }
 

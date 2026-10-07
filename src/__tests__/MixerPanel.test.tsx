@@ -158,7 +158,7 @@ describe('MixerPanel', () => {
       data.source.frame.voices[0].rms = frame / 10;
       data.scheduler.tick(frame * 16);
     }
-    expect(path.getAttribute('d')!.startsWith('M0 23.5L')).toBe(true);
+    expect(path.getAttribute('d')!.startsWith('M0 47L')).toBe(true);
     expect(onRender.mock.calls.length).toBe(commits);
   });
 });

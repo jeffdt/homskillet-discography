@@ -63,20 +63,41 @@ describe('ChannelStrip', () => {
     data.source.frame.voices[2].waveform.fill(0.5);
     data.source.frame.voices[2].rms = 1;
     data.scheduler.tick(16);
-    expect(path.getAttribute('d')!.startsWith('M0 8.5L1 8.5')).toBe(true);
+    expect(path.getAttribute('d')!.startsWith('M0 1L1 1')).toBe(true);
     expect(fill.style.getPropertyValue('--level')).toBe('1.00');
+  });
+
+  it('fills the scope height with a quiet waveform from the first frame', () => {
+    const { data, path } = renderStrip();
+    data.source.frame.voices[2].waveform.fill(0.25);
+    data.scheduler.tick(16);
+    expect(path.getAttribute('d')!.startsWith('M0 1L')).toBe(true);
+  });
+
+  it('grows a waveform back up slowly after a loud passage', () => {
+    const { data, path } = renderStrip();
+    const waveform = data.source.frame.voices[2].waveform;
+    waveform.fill(1);
+    data.scheduler.tick(16);
+    waveform.fill(0.25);
+    data.scheduler.tick(32);
+    const firstY = (d: string) => Number(d.match(/^M0 ([\d.]+)/)![1]);
+    const justAfter = firstY(path.getAttribute('d')!);
+    expect(justAfter).toBeGreaterThan(15);
+    for (let i = 3; i <= 300; i++) data.scheduler.tick(i * 16);
+    expect(firstY(path.getAttribute('d')!)).toBeLessThan(2);
   });
 
   it('keeps drawing a muted channel from its pre-mute waveform', () => {
     const { data, path } = renderStrip(voiceInfo(2, 'Triangle', { muted: true, audible: false }));
     data.source.frame.voices[2].waveform.fill(-1);
     data.scheduler.tick(16);
-    expect(path.getAttribute('d')!.startsWith('M0 31L')).toBe(true);
+    expect(path.getAttribute('d')!.startsWith('M0 47L')).toBe(true);
   });
 
   it('skips DOM writes when nothing changed', () => {
     const { data, path, fill } = renderStrip();
-    data.source.frame.voices[2].waveform.fill(0.25);
+    data.source.frame.voices[2].waveform.fill(1);
     data.source.frame.voices[2].rms = 0.5;
     data.scheduler.tick(16);
     const setAttribute = vi.spyOn(path, 'setAttribute');
@@ -131,7 +152,7 @@ describe('ChannelStrip', () => {
 
     data.frameLoop.setPlaying(true);
     data.scheduler.tick(48);
-    expect(path.getAttribute('d')!.startsWith('M0 31L')).toBe(true);
+    expect(path.getAttribute('d')!.startsWith('M0 47L')).toBe(true);
     expect(fill.style.getPropertyValue('--level')).toBe('0.00');
   });
 });

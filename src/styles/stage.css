@@ -76,6 +76,13 @@
   accent-color: var(--accent);
 }
 
+/* The global checkbox draws its box in ::before; fill the input so the focus ring hugs the box. */
+.StageToggle input[type='checkbox']::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 /* ===== Swatch picker ===== */
 
 .SwatchPicker {
