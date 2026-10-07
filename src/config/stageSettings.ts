@@ -1,4 +1,5 @@
 import { DEFAULT_CHANNEL_PALETTE_ID } from './channelPalettes';
+import { DEFAULT_SPECTRUM_GRADIENT_ID } from './spectrumGradients';
 
 /** How the stage draws the music. */
 export type VisualizerStyleId = 'spectrum' | 'scopes';
@@ -39,6 +40,140 @@ export function visualizerStyleById(id?: string | null): VisualizerStyle {
   );
 }
 
+/** How the Spectrum style colors its bands. */
+export type SpectrumColoringId = 'additive' | 'average' | 'unified';
+
+/** A spectrum coloring the Visuals panel offers. */
+export interface SpectrumColoring {
+  /** Stable key persisted in settings.spectrumColoring. Never rename or reuse one. */
+  id: SpectrumColoringId;
+  label: string;
+  /** Shown under the coloring picker. */
+  description: string;
+}
+
+/** Every spectrum coloring, default first. */
+export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
+  {
+    id: 'additive',
+    label: 'By channel: add like light',
+    description:
+      'Each channel shines its own color at its own loudness, and where channels overlap their light adds up, like colored stage lights. Overlaps get brighter instead of grayer.',
+  },
+  {
+    id: 'average',
+    label: 'By channel: average',
+    description:
+      'Each band takes the average color of the channels playing in it, weighted by how loud each one is. Overlapping channels blend toward gray.',
+  },
+  {
+    id: 'unified',
+    label: 'Unified',
+    description:
+      'Colors come from how loud each band is, not which channel plays it, using one gradient: quiet at the left of the strip, loud at the right. The original visualizer worked this way.',
+  },
+];
+
+/** The coloring new visitors see, and the fallback for unknown ids. */
+export const DEFAULT_SPECTRUM_COLORING: SpectrumColoringId = 'additive';
+
+/** The spectrum coloring with this id, or the default. */
+export function spectrumColoringById(id?: unknown): SpectrumColoring {
+  return (
+    SPECTRUM_COLORINGS.find((coloring) => coloring.id === id) ||
+    (SPECTRUM_COLORINGS.find(
+      (coloring) => coloring.id === DEFAULT_SPECTRUM_COLORING
+    ) as SpectrumColoring)
+  );
+}
+
+/** Where the channel scopes put each voice's trace. */
+export type ScopeLayoutId = 'stacked' | 'overlaid' | 'rings' | 'phase';
+
+/** A scope layout the Visuals panel offers. */
+export interface ScopeLayout {
+  /** Stable key persisted in settings.scopeLayout. Never rename or reuse one. */
+  id: ScopeLayoutId;
+  label: string;
+  /** Shown under the layout picker. */
+  description: string;
+}
+
+/** Every scope layout, in panel order. */
+export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
+  { id: 'stacked', label: 'Stacked', description: 'One lane per channel, top to bottom.' },
+  {
+    id: 'overlaid',
+    label: 'Overlaid',
+    description: 'Every channel on one shared line. Where traces cross, their light adds up.',
+  },
+  {
+    id: 'rings',
+    label: 'Rings',
+    description: 'Each channel wraps around a slowly turning circle, the first channel innermost.',
+  },
+  {
+    id: 'phase',
+    label: 'Phase portraits',
+    description:
+      'Each channel plotted against itself a millisecond earlier, like an X-Y oscilloscope. Square waves draw boxes, the triangle draws a loop, and noise draws a cloud.',
+  },
+];
+
+/** How the channel scopes color their traces. */
+export type ScopeColoringId = 'channel' | 'unified';
+
+/** A scope trace coloring the Visuals panel offers. */
+export interface ScopeColoring {
+  /** Stable key persisted in settings.scopeColoring. Never rename or reuse one. */
+  id: ScopeColoringId;
+  label: string;
+  /** Shown under the trace color picker. */
+  description: string;
+}
+
+/** Every scope trace coloring, in panel order. */
+export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
+  {
+    id: 'channel',
+    label: 'By channel',
+    description: 'Each channel in its own palette color, to tell the voices apart.',
+  },
+  {
+    id: 'unified',
+    label: 'Unified',
+    description: 'Every trace in the accent color, like a one-color phosphor screen.',
+  },
+];
+
+/** Everything the channel scopes draw with; every key is a persisted setting. */
+export interface ScopeSettings {
+  scopeLayout: ScopeLayoutId;
+  scopeColoring: ScopeColoringId;
+  /** 0..SCOPE_TRAILS_MAX: share of the picture kept per 60 fps frame. */
+  scopeTrails: number;
+  /** 0..1 */
+  scopeGlow: number;
+  /** 0..1: opacity of the blurred copy. */
+  scopeBloom: number;
+  /** 0..1 */
+  scopeReactivity: number;
+  /** CSS pixels, SCOPE_LINE_WIDTH_MIN..SCOPE_LINE_WIDTH_MAX. */
+  scopeLineWidth: number;
+  scopeCore: boolean;
+  scopeFill: boolean;
+  scopeCrt: boolean;
+  /** One of SCOPE_SPANS. */
+  scopeSpan: number;
+}
+
+/** Trails stop short of 1 so the picture always fades. */
+export const SCOPE_TRAILS_MAX = 0.9;
+/** Thinnest scope line in CSS pixels. */
+export const SCOPE_LINE_WIDTH_MIN = 1;
+/** Thickest scope line in CSS pixels. */
+export const SCOPE_LINE_WIDTH_MAX = 5;
+
 /**
  * Samples per channel scope trace the zoom offers: about 11, 21 and 32 ms at the 24 kHz tap rate.
  * The largest leaves 256 of the 1024 tap samples free to search for a trigger.
@@ -51,6 +186,170 @@ export const DEFAULT_SCOPE_SPAN = 512;
 /** A stored scope span if it is one the zoom offers, else the default. */
 export function scopeSpanOf(value: unknown): number {
   return typeof value === 'number' && SCOPE_SPANS.includes(value) ? value : DEFAULT_SCOPE_SPAN;
+}
+
+/** A named set of every scope setting, offered as a starting point in the panel. */
+export interface ScopePreset {
+  id: string;
+  label: string;
+  settings: ScopeSettings;
+}
+
+const TODAY_SCOPES: ScopeSettings = {
+  scopeLayout: 'stacked',
+  scopeColoring: 'channel',
+  scopeTrails: 0,
+  scopeGlow: 0,
+  scopeBloom: 0,
+  scopeReactivity: 0,
+  scopeLineWidth: 2,
+  scopeCore: false,
+  scopeFill: false,
+  scopeCrt: false,
+  scopeSpan: DEFAULT_SCOPE_SPAN,
+};
+
+/** The scope presets, in panel order. Values chosen with the owner in the viz lab (spec 4.4). */
+export const SCOPE_PRESETS: readonly ScopePreset[] = [
+  {
+    id: 'green-crt',
+    label: 'Green CRT',
+    settings: {
+      ...TODAY_SCOPES,
+      scopeColoring: 'unified',
+      scopeTrails: 0.8,
+      scopeGlow: 0.6,
+      scopeBloom: 0.45,
+      scopeReactivity: 0.25,
+      scopeLineWidth: 1.5,
+      scopeCore: true,
+      scopeCrt: true,
+    },
+  },
+  {
+    id: 'halo',
+    label: 'Halo',
+    settings: {
+      ...TODAY_SCOPES,
+      scopeLayout: 'rings',
+      scopeTrails: 0.6,
+      scopeGlow: 0.5,
+      scopeBloom: 0.4,
+      scopeReactivity: 0.55,
+      scopeCore: true,
+      scopeSpan: 768,
+    },
+  },
+  {
+    id: 'neon',
+    label: 'Neon',
+    settings: {
+      ...TODAY_SCOPES,
+      scopeLayout: 'overlaid',
+      scopeTrails: 0.45,
+      scopeGlow: 0.6,
+      scopeBloom: 0.45,
+      scopeReactivity: 0.5,
+      scopeLineWidth: 2.5,
+      scopeCore: true,
+    },
+  },
+  {
+    id: 'phosphor',
+    label: 'Phosphor',
+    settings: {
+      ...TODAY_SCOPES,
+      scopeTrails: 0.85,
+      scopeGlow: 0.5,
+      scopeBloom: 0.3,
+      scopeReactivity: 0.3,
+      scopeCore: true,
+    },
+  },
+  {
+    id: 'xy',
+    label: 'X-Y',
+    settings: {
+      ...TODAY_SCOPES,
+      scopeLayout: 'phase',
+      scopeTrails: 0.88,
+      scopeGlow: 0.6,
+      scopeBloom: 0.4,
+      scopeReactivity: 0.4,
+      scopeLineWidth: 1.5,
+      scopeCore: true,
+    },
+  },
+  { id: 'today', label: 'Today', settings: TODAY_SCOPES },
+];
+
+/** What the channel scopes look like until the visitor changes them: the Green CRT preset (owner's choice). */
+export const SCOPE_DEFAULTS: ScopeSettings = { ...SCOPE_PRESETS[0].settings };
+
+/** The scope layout with this id, or the default layout. */
+export function scopeLayoutById(id?: unknown): ScopeLayout {
+  return (
+    SCOPE_LAYOUTS.find((layout) => layout.id === id) ||
+    (SCOPE_LAYOUTS.find((layout) => layout.id === SCOPE_DEFAULTS.scopeLayout) as ScopeLayout)
+  );
+}
+
+/** The scope trace coloring with this id, or the default coloring. */
+export function scopeColoringById(id?: unknown): ScopeColoring {
+  return (
+    SCOPE_COLORINGS.find((coloring) => coloring.id === id) ||
+    (SCOPE_COLORINGS.find(
+      (coloring) => coloring.id === SCOPE_DEFAULTS.scopeColoring
+    ) as ScopeColoring)
+  );
+}
+
+function rangeOf(value: unknown, min: number, max: number, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Math.min(max, Math.max(min, value))
+    : fallback;
+}
+
+function flagOf(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback;
+}
+
+/** Every scope setting from stored settings, each one valid: junk and missing values take the default. */
+export function scopeSettingsOf(settings: Record<string, unknown>): ScopeSettings {
+  const d = SCOPE_DEFAULTS;
+  return {
+    scopeLayout: scopeLayoutById(settings.scopeLayout).id,
+    scopeColoring: scopeColoringById(settings.scopeColoring).id,
+    scopeTrails: rangeOf(settings.scopeTrails, 0, SCOPE_TRAILS_MAX, d.scopeTrails),
+    scopeGlow: rangeOf(settings.scopeGlow, 0, 1, d.scopeGlow),
+    scopeBloom: rangeOf(settings.scopeBloom, 0, 1, d.scopeBloom),
+    scopeReactivity: rangeOf(settings.scopeReactivity, 0, 1, d.scopeReactivity),
+    scopeLineWidth: rangeOf(
+      settings.scopeLineWidth,
+      SCOPE_LINE_WIDTH_MIN,
+      SCOPE_LINE_WIDTH_MAX,
+      d.scopeLineWidth
+    ),
+    scopeCore: flagOf(settings.scopeCore, d.scopeCore),
+    scopeFill: flagOf(settings.scopeFill, d.scopeFill),
+    scopeCrt: flagOf(settings.scopeCrt, d.scopeCrt),
+    scopeSpan: scopeSpanOf(settings.scopeSpan),
+  };
+}
+
+/** The preset whose every value matches the stored settings, or null for a custom mix. */
+export function matchingScopePreset(settings: Record<string, unknown>): ScopePreset | null {
+  const current = scopeSettingsOf(settings);
+  const keys = Object.keys(current) as Array<keyof ScopeSettings>;
+  return (
+    SCOPE_PRESETS.find((preset) =>
+      keys.every((key) => {
+        const want = preset.settings[key];
+        const have = current[key];
+        return typeof want === 'number' ? Math.abs(want - (have as number)) < 1e-6 : want === have;
+      })
+    ) || null
+  );
 }
 
 /** Spark tuning defaults, written by "Reset sparks"; the sparks on/off switch is separate. */
@@ -68,7 +367,9 @@ export const SPARK_DEFAULTS = {
 /** Every Stage panel setting and its default. "Reset stage" writes exactly these. */
 export const STAGE_DEFAULTS = {
   visualizerStyle: DEFAULT_VISUALIZER_STYLE as string,
-  scopeSpan: DEFAULT_SCOPE_SPAN,
+  spectrumColoring: DEFAULT_SPECTRUM_COLORING as string,
+  spectrumGradient: DEFAULT_SPECTRUM_GRADIENT_ID as string,
+  ...SCOPE_DEFAULTS,
   channelPalette: DEFAULT_CHANNEL_PALETTE_ID,
   uiPalette: 0,
   peakDecayRate: 0.98,
