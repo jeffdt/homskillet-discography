@@ -4,6 +4,8 @@ import { act, render } from '@testing-library/react';
 import { VoiceInfo } from '../audio/data/contract';
 import Stage from '../components/Stage';
 import { channelPaletteById } from '../config/channelPalettes';
+import { SCOPE_DEFAULTS, SCOPE_PRESETS } from '../config/stageSettings';
+import { UI_PALETTES } from '../config/uiPalettes';
 import { channelColors } from '../visuals/channelColors';
 import { spectrumGradientById } from '../config/spectrumGradients';
 import { parseHexColor, unpackPixel } from '../visuals/color';
@@ -22,15 +24,22 @@ const { RendererMock, ScopeRendererMock } = vi.hoisted(() => {
   const ScopeRendererMock = vi.fn(function (
     this: any,
     canvas: unknown,
-    background: unknown,
-    lineWidth: unknown
+    bloomCanvas: unknown,
+    renderScale: unknown,
+    coreColor: unknown
   ) {
     this.canvas = canvas;
-    this.background = background;
-    this.lineWidth = lineWidth;
+    this.bloomCanvas = bloomCanvas;
+    this.renderScale = renderScale;
+    this.coreColor = coreColor;
     this.setColors = vi.fn();
     this.setVoices = vi.fn();
     this.setSpan = vi.fn();
+    this.setLayout = vi.fn();
+    this.setEffects = vi.fn();
+    this.setMotion = vi.fn();
+    this.resize = vi.fn();
+    this.clear = vi.fn();
     this.draw = vi.fn();
   });
   return { RendererMock, ScopeRendererMock };
@@ -89,9 +98,9 @@ describe('Stage', () => {
     channelColors.set(CHROMATIC);
   });
 
-  it('renders three canvases and builds one renderer on the shared spectrum layout', () => {
+  it('renders four canvases and builds one renderer on the shared spectrum layout', () => {
     const { utils, renderer, data } = renderStage();
-    expect(utils.container.querySelectorAll('canvas')).toHaveLength(3);
+    expect(utils.container.querySelectorAll('canvas')).toHaveLength(4);
     expect(RendererMock).toHaveBeenCalledTimes(1);
     expect(renderer.layout).toBe(data.source.layout);
   });
@@ -198,18 +207,23 @@ describe('Stage', () => {
   });
 
   it('draws channel scopes instead of the spectrum in the scopes style', () => {
-    const { data, utils, renderer } = renderStage({ visualizerStyle: 'scopes', scopeSpan: 256 });
+    const { data, utils, renderer } = renderStage({
+      visualizerStyle: 'scopes',
+      scopeSpan: 256,
+      scopeColoring: 'channel',
+    });
     const voices = [voice(0, 'Square 1'), voice(2, 'Triangle', false)];
     act(() => data.source.setVoices(voices));
     data.frameLoop.setPlaying(true);
     act(() => data.scheduler.tick(0));
     const scope = latestScope();
-    expect(scope.draw).toHaveBeenCalledWith(data.source.frame);
+    expect(scope.draw).toHaveBeenCalledWith(data.source.frame, 0);
     expect(renderer.draw).not.toHaveBeenCalled();
     expect(scope.setSpan).toHaveBeenLastCalledWith(256);
     expect(scope.setVoices).toHaveBeenLastCalledWith(voices);
     expect(scope.setColors).toHaveBeenLastCalledWith(CHROMATIC);
-    expect(scope.lineWidth).toBe(2);
+    expect(scope.renderScale).toBe(1);
+    expect(scope.bloomCanvas).toBe(utils.container.querySelector('.Stage-scopeBloom'));
     expect(utils.container.querySelector('.Stage')!.getAttribute('data-style')).toBe('scopes');
   });
 
@@ -257,8 +271,94 @@ describe('Stage', () => {
     expect(renderer.resize.mock.calls.length).toBeGreaterThan(before);
   });
 
-  it('thins the scope line with the render scale', () => {
+  it('passes the render scale to the scope renderer', () => {
     renderStage({ visualizerStyle: 'scopes' }, 0.5);
-    expect(latestScope().lineWidth).toBe(1);
+    expect(latestScope().renderScale).toBe(0.5);
+  });
+
+  it('starts the scopes as Green CRT in the accent color', () => {
+    const { utils } = renderStage({ visualizerStyle: 'scopes' });
+    const scope = latestScope();
+    expect(scope.setColors).toHaveBeenLastCalledWith(new Array(8).fill(UI_PALETTES[0].accent));
+    expect(scope.setLayout).toHaveBeenLastCalledWith('stacked');
+    expect(scope.setEffects).toHaveBeenLastCalledWith({
+      trails: SCOPE_DEFAULTS.scopeTrails,
+      glow: SCOPE_DEFAULTS.scopeGlow,
+      bloom: SCOPE_DEFAULTS.scopeBloom,
+      reactivity: SCOPE_DEFAULTS.scopeReactivity,
+      lineWidth: SCOPE_DEFAULTS.scopeLineWidth,
+      core: true,
+      fill: false,
+    });
+    expect(utils.container.querySelector('.Stage-crt')).not.toBeNull();
+    expect(utils.container.querySelector('.Stage')!.getAttribute('data-scope-coloring')).toBe(
+      'unified'
+    );
+  });
+
+  it('recolors unified traces when the accent changes', () => {
+    const { data, utils } = renderStage({ visualizerStyle: 'scopes', uiPalette: 0 });
+    utils.rerender(
+      withAudioData(
+        data.value,
+        <Stage settings={{ visualizerStyle: 'scopes', uiPalette: 2 }} renderScale={1} />
+      )
+    );
+    expect(latestScope().setColors).toHaveBeenLastCalledWith(
+      new Array(8).fill(UI_PALETTES[2].accent)
+    );
+  });
+
+  it('applies a preset\u2019s layout and effects, and drops the CRT overlay when off', () => {
+    const halo = SCOPE_PRESETS.find((p) => p.id === 'halo')!.settings;
+    const { utils } = renderStage({ visualizerStyle: 'scopes', ...halo });
+    const scope = latestScope();
+    expect(scope.setLayout).toHaveBeenLastCalledWith('rings');
+    expect(scope.setSpan).toHaveBeenLastCalledWith(768);
+    expect(scope.setColors).toHaveBeenLastCalledWith(CHROMATIC);
+    const lastEffects = scope.setEffects.mock.calls[scope.setEffects.mock.calls.length - 1][0];
+    expect(lastEffects).toMatchObject({ glow: 0.5, bloom: 0.4 });
+    expect(utils.container.querySelector('.Stage-crt')).toBeNull();
+    const bloom = utils.container.querySelector('.Stage-scopeBloom') as HTMLCanvasElement;
+    expect(bloom.style.opacity).toBe('0.4');
+  });
+
+  it('hides the bloom layer in low power and the CRT overlay outside the scopes', () => {
+    const low = renderStage({ visualizerStyle: 'scopes' }, 0.5);
+    expect(
+      (low.utils.container.querySelector('.Stage-scopeBloom') as HTMLCanvasElement).style.opacity
+    ).toBe('0');
+    low.utils.unmount();
+    const spectrum = renderStage({ visualizerStyle: 'spectrum', scopeCrt: true });
+    expect(spectrum.utils.container.querySelector('.Stage-crt')).toBeNull();
+  });
+
+  it('stops the rings turning under reduced motion', () => {
+    const original = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('reduce'),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+    try {
+      renderStage({ visualizerStyle: 'scopes' });
+      expect(latestScope().setMotion).toHaveBeenLastCalledWith(false);
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
+  it('labels lanes only in stacked and phase layouts', () => {
+    const voices = [voice(0, 'Square 1'), voice(1, 'Square 2'), voice(2, 'Triangle')];
+    const rings = renderStage({ visualizerStyle: 'scopes', scopeLayout: 'rings' });
+    act(() => rings.data.source.setVoices(voices));
+    expect(rings.utils.queryByText('Square 1')).toBeNull();
+    rings.utils.unmount();
+    const phase = renderStage({ visualizerStyle: 'scopes', scopeLayout: 'phase' });
+    act(() => phase.data.source.setVoices(voices));
+    // jsdom has no layout size, so the grid is one column: lane 2 sits in row 3 of 3.
+    const triangle = phase.utils.getByText('Triangle');
+    expect(triangle.style.top).toBe(`${(2 / 3) * 100}%`);
+    expect(triangle.style.right).toBe('0%');
   });
 });

@@ -202,7 +202,8 @@
 
 .Stage[data-style='scopes'] .Stage-spectrogram,
 .Stage[data-style='scopes'] .Stage-analyzer,
-.Stage:not([data-style='scopes']) .Stage-scopes {
+.Stage:not([data-style='scopes']) .Stage-scopes,
+.Stage:not([data-style='scopes']) .Stage-scopeBloom {
   display: none;
 }
 
@@ -219,6 +220,43 @@
 
 .Stage-scopeLabel.is-silent {
   opacity: 0.45;
+}
+
+/* A quarter-size copy of the scopes, blurred and brightened by the compositor: the bloom. */
+.Stage .Stage-scopeBloom {
+  image-rendering: auto;
+  filter: blur(10px) brightness(1.5);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* CRT screen: scanlines every 3px, a dark vignette and an inner shadow. No canvas work. */
+.Stage-crt {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      color-mix(in srgb, var(--shadow) 45%, transparent) 2px 3px
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      color-mix(in srgb, var(--shadow) 75%, transparent) 100%
+    );
+  box-shadow: inset 0 0 80px color-mix(in srgb, var(--shadow) 80%, transparent);
+}
+
+.App .Stage[data-scope-coloring='unified'] .Stage-scopeLabel {
+  color: var(--accent);
+}
+
+/* Phase labels sit at the top right of their cell; the inline right is the cell edge. */
+.App .Stage[data-scope-layout='phase'] .Stage-scopeLabel {
+  margin-right: 12px;
 }
 
 /* Per-channel color for any element tagged data-channel="N"; --ch-N comes from the channel palette. */

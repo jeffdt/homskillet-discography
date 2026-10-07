@@ -1,18 +1,22 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAudioData } from '../contexts/AudioDataContext';
+import { CHANNEL_COUNT } from '../config/channelPalettes';
 import { useChannelColors } from '../hooks/useChannelColors';
 import { useFrameLoop } from '../hooks/useFrameLoop';
+import { REDUCED_MOTION_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { useVoices } from '../hooks/useVoices';
 import {
   SpectrumColoringId,
-  scopeSpanOf,
+  scopeSettingsOf,
   spectrumColoringById,
   visualizerStyleById,
 } from '../config/stageSettings';
 import { spectrumGradientById } from '../config/spectrumGradients';
+import { uiPaletteAt } from '../config/uiPalettes';
 import { CanvasBox, computeStageLayout } from '../shell/stageLayout';
 import { BinColorizer } from '../visuals/BinColorizer';
-import { ScopeRenderer } from '../visuals/ScopeRenderer';
+import { ScopeEffects, ScopeRenderer } from '../visuals/ScopeRenderer';
+import { phaseGrid } from '../visuals/scopeMath';
 import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor, readCssRgb } from '../visuals/spectrogramMath';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
 import {
@@ -44,7 +48,37 @@ export default function Stage({ settings, renderScale }: StageProps) {
   const voices = useVoices();
   const channelColors = useChannelColors();
   const style = visualizerStyleById(settings.visualizerStyle).id;
-  const scopeSpan = scopeSpanOf(settings.scopeSpan);
+  const scope = scopeSettingsOf(settings);
+  const accent = uiPaletteAt(settings.uiPalette).accent;
+  const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
+  const lowPower = renderScale < 1;
+  const bloomRef = useRef<HTMLCanvasElement>(null);
+  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+  const scopeColors = useMemo(
+    () =>
+      scope.scopeColoring === 'unified' ? new Array(CHANNEL_COUNT).fill(accent) : channelColors,
+    [scope.scopeColoring, accent, channelColors]
+  );
+  const effects: ScopeEffects = useMemo(
+    () => ({
+      trails: scope.scopeTrails,
+      glow: scope.scopeGlow,
+      bloom: scope.scopeBloom,
+      reactivity: scope.scopeReactivity,
+      lineWidth: scope.scopeLineWidth,
+      core: scope.scopeCore,
+      fill: scope.scopeFill,
+    }),
+    [
+      scope.scopeTrails,
+      scope.scopeGlow,
+      scope.scopeBloom,
+      scope.scopeReactivity,
+      scope.scopeLineWidth,
+      scope.scopeCore,
+      scope.scopeFill,
+    ]
+  );
   const spectrumColoring = spectrumColoringById(settings.spectrumColoring).id;
   const gradientStops = spectrumGradientById(settings.spectrumGradient).stops;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -84,22 +118,35 @@ export default function Stage({ settings, renderScale }: StageProps) {
     if (!scopesRef.current) return;
     scopeRendererRef.current = new ScopeRenderer(
       scopesRef.current,
-      readCssColor('--neutral0', '#101010'),
-      Math.max(1, 2 * renderScale)
+      bloomRef.current,
+      renderScale,
+      readCssColor('--neutral4', '#fefefe')
     );
   }, [renderScale]);
 
   useEffect(() => {
-    if (scopeRendererRef.current) scopeRendererRef.current.setColors(channelColors);
-  }, [renderScale, channelColors]);
+    scopeRendererRef.current?.setColors(scopeColors);
+  }, [renderScale, scopeColors]);
 
   useEffect(() => {
-    if (scopeRendererRef.current) scopeRendererRef.current.setVoices(voices);
+    scopeRendererRef.current?.setVoices(voices);
   }, [renderScale, voices]);
 
   useEffect(() => {
-    if (scopeRendererRef.current) scopeRendererRef.current.setSpan(scopeSpan);
-  }, [renderScale, scopeSpan]);
+    scopeRendererRef.current?.setSpan(scope.scopeSpan);
+  }, [renderScale, scope.scopeSpan]);
+
+  useEffect(() => {
+    scopeRendererRef.current?.setLayout(scope.scopeLayout);
+  }, [renderScale, scope.scopeLayout]);
+
+  useEffect(() => {
+    scopeRendererRef.current?.setEffects(effects);
+  }, [renderScale, effects]);
+
+  useEffect(() => {
+    scopeRendererRef.current?.setMotion(!reducedMotion);
+  }, [renderScale, reducedMotion]);
 
   const applyLayout = useCallback(() => {
     const container = containerRef.current;
@@ -110,6 +157,14 @@ export default function Stage({ settings, renderScale }: StageProps) {
     applyBox(spec, layout.spectrogram);
     applyBox(freq, layout.analyzer);
     if (scopesRef.current) applyBox(scopesRef.current, layout.full);
+    if (bloomRef.current) applyBox(bloomRef.current, layout.full);
+    if (scopeRendererRef.current) scopeRendererRef.current.resize();
+    const { clientWidth, clientHeight } = container;
+    setStageSize((size) =>
+      size.width === clientWidth && size.height === clientHeight
+        ? size
+        : { width: clientWidth, height: clientHeight }
+    );
     if (rendererRef.current) rendererRef.current.resize();
   }, [renderScale]);
 
@@ -172,26 +227,46 @@ export default function Stage({ settings, renderScale }: StageProps) {
     { enabled: style === 'spectrum' }
   );
 
-  useFrameLoop(
-    'stage-scopes',
-    (frame) => {
-      if (scopeRendererRef.current) scopeRendererRef.current.draw(frame);
-    },
-    { enabled: style === 'scopes' }
-  );
+  useFrameLoop('stage-scopes', (frame, dtMs) => scopeRendererRef.current?.draw(frame, dtMs), {
+    enabled: style === 'scopes',
+  });
+
+  const showLabels =
+    style === 'scopes' && (scope.scopeLayout === 'stacked' || scope.scopeLayout === 'phase');
+  const grid = phaseGrid(voices.length, stageSize.width, stageSize.height);
+  const labelPosition = (lane: number): React.CSSProperties =>
+    scope.scopeLayout === 'phase'
+      ? {
+          top: `${(Math.floor(lane / grid.cols) / grid.rows) * 100}%`,
+          right: `${((grid.cols - 1 - (lane % grid.cols)) / grid.cols) * 100}%`,
+        }
+      : { top: `${(lane / voices.length) * 100}%` };
 
   return (
-    <div ref={containerRef} className="Stage" data-style={style} aria-hidden="true">
+    <div
+      ref={containerRef}
+      className="Stage"
+      data-style={style}
+      data-scope-layout={scope.scopeLayout}
+      data-scope-coloring={scope.scopeColoring}
+      aria-hidden="true"
+    >
       <canvas ref={specRef} className="Stage-spectrogram" />
       <canvas ref={freqRef} className="Stage-analyzer" />
       <canvas ref={scopesRef} className="Stage-scopes" />
-      {style === 'scopes' &&
+      <canvas
+        ref={bloomRef}
+        className="Stage-scopeBloom"
+        style={{ opacity: lowPower ? 0 : scope.scopeBloom }}
+      />
+      {style === 'scopes' && scope.scopeCrt && <div className="Stage-crt" />}
+      {showLabels &&
         voices.map((voice, lane) => (
           <span
             key={voice.index}
             className={`Stage-scopeLabel${voice.audible ? '' : ' is-silent'}`}
             data-channel={voice.index}
-            style={{ top: `${(lane / voices.length) * 100}%` }}
+            style={labelPosition(lane)}
           >
             {voice.name}
           </span>
