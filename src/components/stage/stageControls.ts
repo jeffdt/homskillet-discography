@@ -55,7 +55,7 @@ export function nearestIndex(values: readonly number[], value: number): number {
 }
 
 /** Mapping for a slider whose position is the stored value. */
-function direct(min: number, max: number, decimals: number) {
+export function direct(min: number, max: number, decimals: number) {
   return {
     min,
     max,
@@ -111,7 +111,7 @@ export const SCOPE_ZOOM: StageSliderDef = {
   key: 'scopeSpan',
   label: 'Scope zoom',
   explanation:
-    'How much time each trace shows. Zoom in to see the shape of single waves; zoom out to watch notes change.',
+    'How much time each trace shows. Zoom in to see the shape of single waves; zoom out to watch notes change. Phase portraits ignore it.',
   step: 1,
   ...stepped(SCOPE_SPANS),
   toSlider: (value) => SCOPE_SPANS.indexOf(scopeSpanOf(value)),
@@ -278,7 +278,7 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, SPARKS, SP
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
   channelColors:
-    'Each sound channel of the chip gets its own color, here and in the Mixer. Where channels overlap in the spectrum, the louder one wins more of the color.',
+    "Each sound channel of the chip gets its own color: in the Mixer, in the spectrum's By channel colorings, and in the scopes' By channel traces.",
   accent:
     'The color of buttons, highlights and the play button glow. It leaves the channel colors alone.',
   reset: 'Puts everything in this panel back the way the site starts.',

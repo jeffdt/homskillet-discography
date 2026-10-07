@@ -207,3 +207,34 @@
 .App[data-layout='compact'] .StagePanel-more summary {
   min-height: var(--touch-target);
 }
+
+.App .StagePresets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.App .StagePresets-button {
+  padding: 6px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--button);
+  color: var(--clickable);
+  font: var(--font-small);
+  cursor: pointer;
+}
+
+.App .StagePresets-button:hover {
+  border-color: var(--accent);
+  color: var(--neutral4);
+}
+
+.App .StagePresets-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--neutral0);
+}
+
+.App[data-layout='compact'] .StagePresets-button {
+  min-height: var(--touch-target);
+}
