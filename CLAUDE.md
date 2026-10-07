@@ -120,8 +120,9 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
 - **src/styles/stage.css** - Visuals panel styles
-- **src/config/stageSettings.ts** - Every Visuals panel setting and default ("Reset stage" writes them); visualizer styles (Spectrum, Channel scopes)
-- **src/visuals/ScopeRenderer.ts** - The Channel scopes style: one oscilloscope lane per voice, triggered on rising zero crossings
+- **src/config/stageSettings.ts** - Every Visuals panel setting and default ("Reset stage" writes them); visualizer styles (Spectrum, Channel scopes); spectrum colorings (add like light, average, unified); scope layouts, trace colorings and presets (Green CRT is the default); `scopeSettingsOf` guards stored scope values
+- **src/config/spectrumGradients.ts** - The 23 loudness gradients for the Unified spectrum
+- **src/visuals/ScopeRenderer.ts** - The Channel scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
 - **src/audio/** - Audio engine (TypeScript)
   - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it
@@ -132,7 +133,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - data/ - The visual data contract (contract.ts), TapAudioDataSource, FrameLoop, PulseChannel, spectra
 - **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
-- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), BinColorizer (per-bin channel colors), channelColors (channel color store and --ch-N variables), sparks physics
+- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), BinColorizer (per-bin channel colors), channelColors (channel color store and --ch-N variables), sparks physics, spectrumPainters (the three spectrum colorings)
 - **src/config/channelPalettes.ts** - Channel palettes: one color per voice, Chromatic by default
 - **src/contexts/AudioDataContext.tsx** - AudioDataSource, FrameLoop and PulseChannel for React
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)

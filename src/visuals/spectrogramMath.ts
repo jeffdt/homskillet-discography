@@ -98,3 +98,8 @@ export function rowBinRanges(height: number, bins: number): RowBins {
 export function readCssRgb(name: string, fallbackHex: string): Rgb {
   return parseHexColor(readCssColor(name, fallbackHex)) || (parseHexColor(fallbackHex) as Rgb);
 }
+
+/** A spectrum value (0..255 scale) as an integer value index 0..255. */
+export function valueIndex(value: number): number {
+  return value <= 0 ? 0 : value >= 255 ? 255 : value | 0;
+}

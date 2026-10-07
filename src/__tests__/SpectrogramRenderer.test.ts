@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createSpectrumLayout } from '../audio/data/spectrumLayout';
-import { Rgb } from '../visuals/color';
+import { VoiceFrame } from '../audio/data/contract';
+import { Rgb, unpackPixel } from '../visuals/color';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
+import { AveragePainter, GradientPainter } from '../visuals/spectrumPainters';
 import {
   SHADE_KNEE,
   aWeightingLut,
@@ -45,11 +47,17 @@ function setup(height = 448) {
   const renderer = new SpectrogramRenderer(
     { analyzer: analyzer.canvas, spectrogram: spectrogram.canvas },
     layout,
-    { background: BACKGROUND, highlight: HIGHLIGHT },
     () => scratch.canvas
   );
   const binColors = new Float32Array(layout.bins * 3).fill(195);
-  return { renderer, analyzer, spectrogram, scratch, binColors };
+  // The painter keeps a reference to binColors, so tests can recolor bins after this.
+  const painter = new AveragePainter(
+    { update: () => binColors },
+    { background: BACKGROUND, highlight: HIGHLIGHT },
+    layout.bins
+  );
+  painter.update(null as unknown as VoiceFrame, 0);
+  return { renderer, analyzer, spectrogram, scratch, binColors, painter };
 }
 
 /** A spectrum value that lands bin b on value index `index` after A-weighting. */
@@ -75,33 +83,33 @@ const BG_PIXEL = [...BACKGROUND, 255];
 
 describe('SpectrogramRenderer', () => {
   it('scrolls by speed times elapsed time, not per frame', () => {
-    const { renderer, spectrogram, binColors } = setup();
+    const { renderer, spectrogram, binColors, painter } = setup();
     const loud = new Float32Array(layout.bins).fill(0.5);
-    renderer.draw(loud, binColors, 1000 / 60, 120);
+    renderer.draw(loud, painter, 1000 / 60, 120);
     expect(spectrogram.ctx.putImageData).toHaveBeenCalledTimes(1);
     let [image, x] = spectrogram.ctx.putImageData.mock.calls[0];
     expect(x).toBe(798);
     expect(image.width).toBe(2);
-    renderer.draw(loud, binColors, 1000 / 120, 120);
+    renderer.draw(loud, painter, 1000 / 120, 120);
     [image, x] = spectrogram.ctx.putImageData.mock.calls[1];
     expect(x).toBe(799);
     expect(image.width).toBe(1);
   });
 
   it('leaves the waterfall alone on a frame shorter than one pixel', () => {
-    const { renderer, spectrogram, scratch, binColors } = setup();
+    const { renderer, spectrogram, scratch, binColors, painter } = setup();
     const loud = new Float32Array(layout.bins).fill(0.5);
     scratch.ctx.drawImage.mockClear();
-    renderer.draw(loud, binColors, 1000 / 120, 60);
+    renderer.draw(loud, painter, 1000 / 120, 60);
     expect(scratch.ctx.drawImage).not.toHaveBeenCalled();
     expect(spectrogram.ctx.putImageData).not.toHaveBeenCalled();
-    renderer.draw(loud, binColors, 1000 / 120, 60);
+    renderer.draw(loud, painter, 1000 / 120, 60);
     expect(spectrogram.ctx.putImageData).toHaveBeenCalledTimes(1);
   });
 
   it('paints only the background for a silent spectrum', () => {
-    const { renderer, analyzer, spectrogram, binColors } = setup();
-    renderer.draw(new Float32Array(layout.bins), binColors, 1000 / 60, 120);
+    const { renderer, analyzer, spectrogram, binColors, painter } = setup();
+    renderer.draw(new Float32Array(layout.bins), painter, 1000 / 60, 120);
     expect(analyzer.ctx.putImageData).toHaveBeenCalledTimes(1);
     const image = lastImage(analyzer.ctx);
     for (let y = 0; y < image.height; y += 37) {
@@ -111,11 +119,11 @@ describe('SpectrogramRenderer', () => {
   });
 
   it('colors each row with its bin color at the knee, in the bars and the waterfall', () => {
-    const { renderer, analyzer, spectrogram, binColors } = setup();
+    const { renderer, analyzer, spectrogram, binColors, painter } = setup();
     const spectrum = new Float32Array(layout.bins);
     spectrum[100] = valueFor(SHADE_KNEE, 100);
     setColor(binColors, 100, BLUE);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const row = 447 - 100;
     const bars = lastImage(analyzer.ctx);
     const barWidth = Math.floor((SHADE_KNEE * 64) / 256);
@@ -130,11 +138,11 @@ describe('SpectrogramRenderer', () => {
   });
 
   it('shades the loudest values toward the highlight', () => {
-    const { renderer, analyzer, binColors } = setup();
+    const { renderer, analyzer, binColors, painter } = setup();
     const spectrum = new Float32Array(layout.bins);
     spectrum[100] = 10;
     setColor(binColors, 100, BLUE);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const { channel, highlight } = buildShadeTable();
     const c = channel[255];
     const h = highlight[255];
@@ -145,25 +153,25 @@ describe('SpectrogramRenderer', () => {
   });
 
   it('takes the loudest bin when rows are fewer than bins', () => {
-    const { renderer, analyzer, binColors } = setup(224);
+    const { renderer, analyzer, binColors, painter } = setup(224);
     const spectrum = new Float32Array(layout.bins);
     spectrum[100] = valueFor(60, 100);
     spectrum[101] = valueFor(SHADE_KNEE, 101);
     setColor(binColors, 100, BLUE);
     setColor(binColors, 101, YELLOW);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const row = 223 - 50; // the row covering bins 100 and 101
     expect(pixelAt(lastImage(analyzer.ctx), 0, row)).toEqual([...YELLOW, 255]);
   });
 
   it('keeps a peak marker where the bar was and lets it fall with time', () => {
-    const { renderer, analyzer, binColors } = setup();
+    const { renderer, analyzer, binColors, painter } = setup();
     const spectrum = new Float32Array(layout.bins);
     setColor(binColors, 100, BLUE);
     spectrum[100] = valueFor(SHADE_KNEE, 100);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     spectrum[100] = valueFor(8, 100);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const peak = SHADE_KNEE * peakDecayFactor(0.98, 1000 / 60);
     const peakWidth = Math.floor(Math.floor((peak * 64) / 256) / 4) * 4;
     const bars = lastImage(analyzer.ctx);
@@ -175,18 +183,18 @@ describe('SpectrogramRenderer', () => {
   });
 
   it('keeps decaying the peak hold through silence without reviving it when sound returns', () => {
-    const { renderer, analyzer, binColors } = setup();
+    const { renderer, analyzer, binColors, painter } = setup();
     const spectrum = new Float32Array(layout.bins);
     const silence = new Float32Array(layout.bins);
     const row = 447 - 100;
     setColor(binColors, 100, BLUE);
     spectrum[100] = valueFor(255, 100);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const initialPeakWidth = Math.floor(Math.floor((255 * 64) / 256) / 4) * 4;
     expect(pixelAt(lastImage(analyzer.ctx), initialPeakWidth - 1, row)[3]).toBe(255);
 
     const silentFrames = 10;
-    for (let i = 0; i < silentFrames; i++) renderer.draw(silence, binColors, 1000 / 60, 120);
+    for (let i = 0; i < silentFrames; i++) renderer.draw(silence, painter, 1000 / 60, 120);
     const afterOneFrame = lastImage(analyzer.ctx);
     const fallenPeak = 255 * peakDecayFactor(0.98, 1000 / 60) ** silentFrames;
     const fallenWidth = Math.floor(Math.floor((fallenPeak * 64) / 256) / 4) * 4;
@@ -194,22 +202,65 @@ describe('SpectrogramRenderer', () => {
     expect(pixelAt(afterOneFrame, fallenWidth - 1, row)).not.toEqual(BG_PIXEL);
     expect(pixelAt(afterOneFrame, initialPeakWidth - 1, row)).toEqual(BG_PIXEL);
 
-    for (let i = 0; i < 600; i++) renderer.draw(silence, binColors, 1000 / 60, 120);
+    for (let i = 0; i < 600; i++) renderer.draw(silence, painter, 1000 / 60, 120);
     spectrum[100] = valueFor(8, 100);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const resumed = lastImage(analyzer.ctx);
     for (let x = 4; x < resumed.width; x++) expect(pixelAt(resumed, x, row)).toEqual(BG_PIXEL);
   });
 
+  it('paints silent waterfall rows and the analyzer with an opaque empty pixel', () => {
+    const { renderer, spectrogram, analyzer } = setup();
+    const painter = new GradientPainter(['#e0e0e0', '#000000']);
+    renderer.draw(new Float32Array(layout.bins), painter, 1000 / 60, 120);
+    const column = lastImage(spectrogram.ctx);
+    expect(pixelAt(column, 0, 10)).toEqual([224, 224, 224, 255]);
+    expect(pixelAt(lastImage(analyzer.ctx), 5, 10)).toEqual([224, 224, 224, 255]);
+  });
+
+  it('keeps the waterfall scrolling in the gradient zero color through silence', () => {
+    const { renderer, spectrogram } = setup();
+    const painter = new GradientPainter(['#e0e0e0', '#000000']);
+    const loud = new Float32Array(layout.bins).fill(0.5);
+    renderer.draw(loud, painter, 1000 / 60, 120);
+    const silence = new Float32Array(layout.bins);
+    for (let i = 0; i < 5; i++) renderer.draw(silence, painter, 1000 / 60, 120);
+    expect(spectrogram.ctx.putImageData).toHaveBeenCalledTimes(6);
+    for (const [column] of spectrogram.ctx.putImageData.mock.calls.slice(1)) {
+      for (let y = 0; y < column.height; y += 29) {
+        for (let x = 0; x < column.width; x++) {
+          expect(pixelAt(column, x, y)).toEqual([224, 224, 224, 255]);
+        }
+      }
+    }
+  });
+
+  it('adds no column for silence when the empty pixel is transparent', () => {
+    const { renderer, spectrogram, painter } = setup();
+    renderer.draw(new Float32Array(layout.bins), painter, 1000 / 60, 120);
+    expect(spectrogram.ctx.putImageData).not.toHaveBeenCalled();
+  });
+
+  it('asks the painter for row and peak pixels', () => {
+    const { renderer, analyzer } = setup();
+    const painter = new GradientPainter(['#000000', '#ff0000']);
+    const spectrum = new Float32Array(layout.bins);
+    spectrum[100] = valueFor(255, 100);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
+    const image = lastImage(analyzer.ctx);
+    const row = image.height - 1 - Math.floor((100 * image.height) / layout.bins);
+    expect(pixelAt(image, 0, row)).toEqual([...unpackPixel(painter.pixel(100, 255))]);
+  });
+
   it('rebuilds rows and images on resize', () => {
-    const { renderer, analyzer, spectrogram, binColors } = setup(448);
+    const { renderer, analyzer, spectrogram, binColors, painter } = setup(448);
     (analyzer.canvas as { height: number }).height = 224;
     (spectrogram.canvas as { height: number }).height = 224;
     renderer.resize();
     const spectrum = new Float32Array(layout.bins);
     spectrum[101] = valueFor(SHADE_KNEE, 101);
     setColor(binColors, 101, YELLOW);
-    renderer.draw(spectrum, binColors, 1000 / 60, 120);
+    renderer.draw(spectrum, painter, 1000 / 60, 120);
     const bars = lastImage(analyzer.ctx);
     expect(bars.height).toBe(224);
     expect(pixelAt(bars, 0, 223 - 50)).toEqual([...YELLOW, 255]);
@@ -220,10 +271,13 @@ describe('SpectrogramRenderer', () => {
     const renderer = new SpectrogramRenderer(
       { analyzer: none, spectrogram: none },
       layout,
-      { background: BACKGROUND, highlight: HIGHLIGHT },
       () => none
     );
-    const binColors = new Float32Array(layout.bins * 3);
-    expect(() => renderer.draw(new Float32Array(448).fill(1), binColors, 16, 120)).not.toThrow();
+    const painter = new AveragePainter(
+      { update: () => new Float32Array(layout.bins * 3) },
+      { background: BACKGROUND, highlight: HIGHLIGHT },
+      layout.bins
+    );
+    expect(() => renderer.draw(new Float32Array(448).fill(1), painter, 16, 120)).not.toThrow();
   });
 });

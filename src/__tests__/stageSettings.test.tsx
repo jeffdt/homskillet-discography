@@ -45,6 +45,18 @@ describe('stage defaults', () => {
   it('keep the existing defaults and add the style and zoom', () => {
     expect(STAGE_DEFAULTS).toEqual({
       visualizerStyle: 'spectrum',
+      spectrumColoring: 'additive',
+      spectrumGradient: 'mw-green',
+      scopeLayout: 'stacked',
+      scopeColoring: 'unified',
+      scopeTrails: 0.8,
+      scopeGlow: 0.6,
+      scopeBloom: 0.45,
+      scopeReactivity: 0.25,
+      scopeLineWidth: 1.5,
+      scopeCore: true,
+      scopeFill: false,
+      scopeCrt: true,
       scopeSpan: 512,
       channelPalette: DEFAULT_CHANNEL_PALETTE_ID,
       uiPalette: 0,
