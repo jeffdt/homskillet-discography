@@ -4,8 +4,15 @@ import { VOICE_PAIRS } from '../audio/constants';
 import { VoiceFrame, VoiceInfo } from '../audio/data/contract';
 import { createSpectrumLayout } from '../audio/data/spectrumLayout';
 import { Rgb, unpackPixel } from '../visuals/color';
-import { SHADE_BLACK_POINT, SHADE_KNEE, aWeightingLut } from '../visuals/spectrogramMath';
 import {
+  SHADE_BLACK_POINT,
+  SHADE_HIGHLIGHT_MAX,
+  SHADE_KNEE,
+  aWeightingLut,
+} from '../visuals/spectrogramMath';
+import {
+  ADDITIVE_DOMINANCE,
+  ADDITIVE_GAIN,
   AdditivePainter,
   AveragePainter,
   GradientPainter,
@@ -64,17 +71,65 @@ describe('AdditivePainter', () => {
     const f = frame();
     sound(f, 0, 50, SHADE_KNEE);
     painter.update(f, 16);
-    expect(rgb(painter.pixel(50, 0))).toEqual([16 + 86, 16 + 180, 16 + 233]);
+    // 16 + 0.85 * (86, 180, 233), rounded.
+    expect(rgb(painter.pixel(50, 0))).toEqual([89, 169, 214]);
     expect(rgb(painter.pixel(51, 0))).toEqual([16, 16, 16]);
   });
 
-  it('adds overlapping voices and clamps at 255', () => {
+  it('keeps a bin dark until a voice passes the black point', () => {
+    const painter = additive();
+    const f = frame();
+    sound(f, 0, 50, SHADE_BLACK_POINT);
+    painter.update(f, 16);
+    expect(rgb(painter.pixel(50, 0))).toEqual([16, 16, 16]);
+  });
+
+  it('adds equal overlapping voices and scales the sum down together instead of clipping to white', () => {
     const painter = additive();
     const f = frame();
     sound(f, 0, 50, SHADE_KNEE);
     sound(f, 1, 50, SHADE_KNEE);
     painter.update(f, 16);
-    expect(rgb(painter.pixel(50, 200))).toEqual([255, 255, 255]);
+    // 0.85 * (326, 408, 299) = (277.1, 346.8, 254.15), scaled by 255 / 346.8, plus 16, clamped.
+    expect(rgb(painter.pixel(50, 0))).toEqual([220, 255, 203]);
+  });
+
+  it('lets a much quieter voice add only a trace of its light', () => {
+    const painter = additive();
+    const f = frame();
+    sound(f, 0, 50, SHADE_KNEE);
+    sound(f, 1, 50, 90);
+    painter.update(f, 16);
+    const quiet =
+      ADDITIVE_GAIN *
+      ((90 - SHADE_BLACK_POINT) / (SHADE_KNEE - SHADE_BLACK_POINT)) *
+      Math.pow(90 / SHADE_KNEE, ADDITIVE_DOMINANCE);
+    const expected = [86, 180, 233].map((c, i) =>
+      Math.round(16 + ADDITIVE_GAIN * c + quiet * [240, 228, 66][i])
+    );
+    expect(rgb(painter.pixel(50, 0))).toEqual(expected);
+  });
+
+  it('mixes toward the highlight once, by the loudest voice', () => {
+    const painter = additive();
+    const f = frame();
+    sound(f, 0, 50, 255);
+    painter.update(f, 16);
+    const h = SHADE_HIGHLIGHT_MAX;
+    const expected = [86, 180, 233].map((c) =>
+      Math.round((16 + ADDITIVE_GAIN * c) * (1 - h) + 254 * h)
+    );
+    expect(rgb(painter.pixel(50, 0))).toEqual(expected);
+  });
+
+  it('does not let an inaudible loud voice dim the audible one', () => {
+    const painter = additive();
+    painter.setVoices([voice(0), voice(1, false)]);
+    const f = frame();
+    sound(f, 0, 50, SHADE_KNEE);
+    sound(f, 1, 50, 255);
+    painter.update(f, 16);
+    expect(rgb(painter.pixel(50, 0))).toEqual([89, 169, 214]);
   });
 
   it('leaves out muted voices', () => {
@@ -84,9 +139,7 @@ describe('AdditivePainter', () => {
     sound(f, 0, 50, SHADE_KNEE);
     sound(f, 1, 50, SHADE_KNEE);
     painter.update(f, 16);
-    expect(rgb(painter.pixel(50, 0))).toEqual(
-      [16 + 240, 16 + 228, 16 + 66].map((c) => Math.min(255, c))
-    );
+    expect(rgb(painter.pixel(50, 0))).toEqual([220, 210, 72]);
   });
 
   it('never reads the spectrum of a silent voice', () => {
