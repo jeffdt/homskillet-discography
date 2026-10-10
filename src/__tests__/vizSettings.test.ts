@@ -38,6 +38,7 @@ describe('scope layouts and colorings', () => {
     expect(SCOPE_COLORINGS.map((c) => c.id)).toEqual(['channel', 'unified']);
     expect(scopeLayoutById('milkdrop').id).toBe('stacked');
     expect(scopeColoringById(null).id).toBe('unified');
+    expect(scopeColoringById('unified').label).toBe('Accent color');
   });
 });
 

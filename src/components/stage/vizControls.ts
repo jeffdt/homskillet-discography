@@ -107,6 +107,12 @@ export const MORE_SCOPE_TOGGLES: readonly StageToggleDef[] = [SCOPE_CORE, SCOPE_
 
 /** Visuals panel text for the spectrum colorings and scope presets. */
 export const VIZ_COPY = {
+  scopesIgnoreChannels:
+    'The scopes are set to Accent color, so every trace takes the accent from Interface below and these colors do not show there. The Mixer still uses them.',
+  colorScopesByChannel: 'Color the scopes by channel',
+  spectrumIgnoresChannels:
+    'The Unified spectrum takes its colors from its gradient, so these colors do not show there. The Mixer still uses them.',
+  colorSpectrumByChannel: 'Color the spectrum by channel',
   gradient:
     'The gradients the site had before channel colors. Quiet sounds take the left color, the loudest take the right.',
   presets: 'Starting points. Pick one, then change anything below.',

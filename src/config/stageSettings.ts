@@ -141,8 +141,9 @@ export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
   },
   {
     id: 'unified',
-    label: 'Unified',
-    description: 'Every trace in the accent color, like a one-color phosphor screen.',
+    label: 'Accent color',
+    description:
+      'Every trace in the accent color you pick under Interface, like a one-color phosphor screen. The channel palette does not apply.',
   },
 ];
 

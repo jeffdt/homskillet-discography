@@ -205,6 +205,22 @@
   cursor: pointer;
 }
 
+/* A visual on screen that ignores the channel palette says so, with a way back. */
+.App .StagePanel-notice {
+  margin: 4px 0 12px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--accent);
+  background: var(--button);
+}
+
+.App .StagePanel-notice .StagePanel-note {
+  margin: 0;
+}
+
+.App .StagePanel-notice .StagePanel-button {
+  margin-top: 8px;
+}
+
 .App .StagePanel-button:hover {
   border-color: var(--accent);
   color: var(--neutral4);

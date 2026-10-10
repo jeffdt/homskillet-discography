@@ -71,7 +71,7 @@ describe('StagePanel channel scopes', () => {
     ).toBe('true');
     expect(screen.getByText(VIZ_COPY.presets)).toBeTruthy();
     expect(checkedIn('Scope layout')).toBe('Stacked');
-    expect(checkedIn('Trace color')).toBe('Unified');
+    expect(checkedIn('Trace color')).toBe('Accent color');
     [...SCOPE_EFFECT_SLIDERS, SCOPE_ZOOM, ...MORE_SCOPE_SLIDERS].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
@@ -128,5 +128,19 @@ describe('SwatchPicker labels', () => {
     expect(rule![1]).toMatch(/text-wrap:\s*balance/);
     expect(rule![1]).toMatch(/overflow-wrap:\s*anywhere/);
     expect(rule![1]).toMatch(/min-width:\s*0/);
+  });
+});
+
+describe('StagePanel channel colors notice', () => {
+  it('appears for the default Green CRT scopes, and switching clears it', () => {
+    const { updateSettings } = renderPanel({ visualizerStyle: 'scopes' });
+    fireEvent.click(screen.getByRole('button', { name: VIZ_COPY.colorScopesByChannel }));
+    expect(updateSettings).toHaveBeenCalledWith({ scopeColoring: 'channel' });
+  });
+
+  it('does not appear for the default Add light spectrum', () => {
+    renderPanel();
+    expect(screen.queryByText(VIZ_COPY.spectrumIgnoresChannels)).toBeNull();
+    expect(screen.queryByText(VIZ_COPY.scopesIgnoreChannels)).toBeNull();
   });
 });
