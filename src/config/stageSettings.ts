@@ -166,6 +166,8 @@ export interface ScopeSettings {
   scopeCrt: boolean;
   /** One of SCOPE_SPANS. */
   scopeSpan: number;
+  /** Each trace scales to its own wave's peak (on) or one fixed gain (off). */
+  scopeAutoGain: boolean;
 }
 
 /** Trails stop short of 1 so the picture always fades. */
@@ -208,6 +210,7 @@ const TODAY_SCOPES: ScopeSettings = {
   scopeFill: false,
   scopeCrt: false,
   scopeSpan: DEFAULT_SCOPE_SPAN,
+  scopeAutoGain: true,
 };
 
 /** The scope presets, in panel order. Values chosen with the owner in the viz lab (spec 4.4). */
@@ -335,6 +338,7 @@ export function scopeSettingsOf(settings: Record<string, unknown>): ScopeSetting
     scopeFill: flagOf(settings.scopeFill, d.scopeFill),
     scopeCrt: flagOf(settings.scopeCrt, d.scopeCrt),
     scopeSpan: scopeSpanOf(settings.scopeSpan),
+    scopeAutoGain: flagOf(settings.scopeAutoGain, d.scopeAutoGain),
   };
 }
 

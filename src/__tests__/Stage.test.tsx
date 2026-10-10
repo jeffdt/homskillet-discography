@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { VoiceInfo } from '../audio/data/contract';
 import Stage from '../components/Stage';
 import { channelPaletteById } from '../config/channelPalettes';
@@ -35,6 +35,7 @@ const { RendererMock, ScopeRendererMock } = vi.hoisted(() => {
     this.setColors = vi.fn();
     this.setVoices = vi.fn();
     this.setSpan = vi.fn();
+    this.setAutoGain = vi.fn();
     this.setLayout = vi.fn();
     this.setEffects = vi.fn();
     this.setMotion = vi.fn();
@@ -204,6 +205,14 @@ describe('Stage', () => {
     expect(data.scheduler.scheduled).toBe(0);
     act(() => data.scheduler.tick(0));
     expect(renderer.draw).not.toHaveBeenCalled();
+  });
+
+  it('turns scope auto gain on by default and off when the setting says so', () => {
+    renderStage({ visualizerStyle: 'scopes' });
+    expect(latestScope().setAutoGain).toHaveBeenLastCalledWith(true);
+    cleanup();
+    renderStage({ visualizerStyle: 'scopes', scopeAutoGain: false });
+    expect(latestScope().setAutoGain).toHaveBeenLastCalledWith(false);
   });
 
   it('draws channel scopes instead of the spectrum in the scopes style', () => {

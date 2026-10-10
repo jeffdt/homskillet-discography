@@ -326,3 +326,53 @@ describe('ScopeRenderer resize and low power', () => {
     expect(strokes(ops)[0].path!.points[0]).toEqual(first);
   });
 });
+
+const swing = (path: FakePath) => Math.max(...path.points.map(([, y]) => Math.abs(y - 150)));
+const quietSine = (amplitude: number) => (_v: number, i: number) =>
+  amplitude * Math.sin((2 * Math.PI * i) / 64);
+
+describe('ScopeRenderer auto gain', () => {
+  it('scales a quiet voice up so its peak reaches 0.9 of the lane', () => {
+    const { renderer, ops } = setup();
+    renderer.setVoices([voice(0)]);
+    ops.length = 0;
+    renderer.draw(frame(quietSine(0.1)), 16);
+    expect(swing(strokes(ops)[0].path!)).toBeCloseTo(0.9 * 120, 0);
+  });
+
+  it('keeps a voice at the silence threshold flat', () => {
+    const { renderer, ops } = setup();
+    renderer.setVoices([voice(0)]);
+    ops.length = 0;
+    renderer.draw(frame(quietSine(0.0015)), 16);
+    expect(swing(strokes(ops)[0].path!)).toBeLessThan(0.04 * 120);
+  });
+
+  it('drops the gain at once when the voice gets loud, so it never clips', () => {
+    const { renderer, ops } = setup();
+    renderer.setVoices([voice(0)]);
+    renderer.draw(frame(quietSine(0.02)), 16);
+    ops.length = 0;
+    renderer.draw(frame(quietSine(0.3)), 16);
+    expect(swing(strokes(ops)[0].path!)).toBeCloseTo(0.9 * 120, 0);
+  });
+
+  it('starts fresh for a new voice list', () => {
+    const { renderer, ops } = setup();
+    renderer.setVoices([voice(0)]);
+    renderer.draw(frame(quietSine(0.3)), 16);
+    renderer.setVoices([voice(0)]);
+    ops.length = 0;
+    renderer.draw(frame(quietSine(0.05)), 16);
+    expect(swing(strokes(ops)[0].path!)).toBeCloseTo(0.9 * 120, 0);
+  });
+
+  it('uses the fixed gain when auto gain is off', () => {
+    const { renderer, ops } = setup();
+    renderer.setVoices([voice(0)]);
+    renderer.setAutoGain(false);
+    ops.length = 0;
+    renderer.draw(frame(quietSine(0.1)), 16);
+    expect(swing(strokes(ops)[0].path!)).toBeCloseTo(0.35 * 120, 0);
+  });
+});

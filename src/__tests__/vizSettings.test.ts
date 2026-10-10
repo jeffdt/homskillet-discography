@@ -71,6 +71,7 @@ describe('scope presets', () => {
       scopeFill: false,
       scopeCrt: true,
       scopeSpan: 512,
+      scopeAutoGain: true,
     });
     expect(preset('halo').settings).toMatchObject({
       scopeLayout: 'rings',
@@ -118,6 +119,7 @@ describe('scopeSettingsOf', () => {
       scopeFill: 1,
       scopeCrt: null,
       scopeSpan: 300,
+      scopeAutoGain: 'no',
     });
     expect(settings).toEqual({
       ...SCOPE_DEFAULTS,
@@ -137,5 +139,11 @@ describe('matchingScopePreset', () => {
     expect(matchingScopePreset({})!.id).toBe('green-crt');
     expect(matchingScopePreset({ ...preset('halo').settings })!.id).toBe('halo');
     expect(matchingScopePreset({ ...preset('halo').settings, scopeGlow: 0.55 })).toBeNull();
+  });
+
+  it('matches Green CRT for settings stored before auto gain existed', () => {
+    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: undefined })!.id).toBe(
+      'green-crt'
+    );
   });
 });

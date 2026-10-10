@@ -1,4 +1,5 @@
 import { ScopeLayoutId } from '../config/stageSettings';
+import type { AutoGainTuning } from './autoGain';
 
 /** Horizontal backing-store pixels between scope trace points. */
 export const SCOPE_POINT_PX = 2;
@@ -86,6 +87,19 @@ export function traceCapacity(width: number): number {
   return Math.max(Math.floor(width / SCOPE_POINT_PX) + 1, RING_POINTS, PHASE_WINDOW_SAMPLES);
 }
 
+/**
+ * Stage scope auto gain. Measured 2026-10-10 over the 120-track catalog: voice windows peak at 0.03
+ * to 0.14 of full scale (median), so a gain of 1 filled a few percent of a lane. Target 0.9 fills it;
+ * the 0.05 floor lifts every voice's median window past half height while a voice at the silence
+ * threshold (peak about 0.0015) stays under 3 percent.
+ */
+export const SCOPE_AUTO_GAIN: AutoGainTuning = { floorPeak: 0.05, targetPeak: 0.9, releaseMs: 500 };
+/**
+ * Gain with auto gain off: the pulse and VRC6 voices' p99 window peak is 0.22 to 0.30, so 3.5 puts
+ * their loudest notes near full height and keeps channels' relative loudness; DMC hits may clip.
+ */
+export const SCOPE_FIXED_GAIN = 3.5;
+
 /** What buildTrace needs to place one voice's trace. */
 export interface TraceArgs {
   layout: ScopeLayoutId;
@@ -98,6 +112,8 @@ export interface TraceArgs {
   height: number;
   /** Ring rotation in radians. */
   angle: number;
+  /** Multiplies every sample before clamping to -1..1 (auto gain); 1 when omitted. */
+  gain?: number;
 }
 
 function unit(sample: number | undefined): number {
@@ -151,6 +167,7 @@ export function ringRadius(
 /** Fills out with one voice's trace for the layout (spec 4.1). */
 export function buildTrace(args: TraceArgs, out: TraceBuffer): void {
   const { layout, waveform, span, lane, lanes, width, height, angle } = args;
+  const gain = args.gain ?? 1;
   const last = waveform.length - 1;
   if (layout === 'phase') {
     const { cx, cy, half } = phaseCell(lane, lanes, width, height);
@@ -161,8 +178,8 @@ export function buildTrace(args: TraceArgs, out: TraceBuffer): void {
     const from = waveform.length - count;
     for (let k = 0; k < count; k++) {
       const i = from + k;
-      out.xs[k] = cx + unit(waveform[i]) * half;
-      out.ys[k] = cy - unit(waveform[i - PHASE_DELAY_SAMPLES]) * half;
+      out.xs[k] = cx + unit(waveform[i] * gain) * half;
+      out.ys[k] = cy - unit(waveform[i - PHASE_DELAY_SAMPLES] * gain) * half;
     }
     out.count = count;
     out.closed = false;
@@ -175,7 +192,7 @@ export function buildTrace(args: TraceArgs, out: TraceBuffer): void {
     const cx = width / 2;
     const cy = height / 2;
     for (let k = 0; k < RING_POINTS; k++) {
-      const s = unit(waveform[Math.min(last, start + Math.floor((k * span) / RING_POINTS))]);
+      const s = unit(waveform[Math.min(last, start + Math.floor((k * span) / RING_POINTS))] * gain);
       const a = angle + (2 * Math.PI * k) / RING_POINTS;
       const r = radius + s * band * RING_SWING;
       out.xs[k] = cx + Math.cos(a) * r;
@@ -202,7 +219,7 @@ export function buildTrace(args: TraceArgs, out: TraceBuffer): void {
   for (let p = 0; p < points; p++) {
     out.xs[p] = p * xStep;
     out.ys[p] =
-      mid - unit(waveform[Math.min(last, start + Math.floor(p * sampleStep))]) * amplitude;
+      mid - unit(waveform[Math.min(last, start + Math.floor(p * sampleStep))] * gain) * amplitude;
   }
   out.count = points;
   out.closed = false;

@@ -93,6 +93,16 @@ export const SCOPE_FILL: StageToggleDef = {
   ...flag,
 };
 
+/** Scale each scope trace to its own wave, or show every channel at one fixed gain. */
+export const SCOPE_AUTO_GAIN: StageToggleDef = {
+  id: 'scope-auto-gain',
+  key: 'scopeAutoGain',
+  label: 'Auto gain',
+  explanation:
+    "Scales each channel's trace to fill its space, like an oscilloscope's auto-set, so quiet channels are as easy to read as loud ones. Off draws every channel at one fixed gain, so you can compare how loud they really are.",
+  ...flag,
+};
+
 /** Always visible with the Channel scopes style, in panel order. */
 export const SCOPE_EFFECT_SLIDERS: readonly StageSliderDef[] = [
   SCOPE_TRAILS,
@@ -103,7 +113,11 @@ export const SCOPE_EFFECT_SLIDERS: readonly StageSliderDef[] = [
 /** Inside "More scope settings", after the zoom. */
 export const MORE_SCOPE_SLIDERS: readonly StageSliderDef[] = [SCOPE_LINE_WIDTH];
 /** Inside "More scope settings", after the sliders. */
-export const MORE_SCOPE_TOGGLES: readonly StageToggleDef[] = [SCOPE_CORE, SCOPE_FILL];
+export const MORE_SCOPE_TOGGLES: readonly StageToggleDef[] = [
+  SCOPE_AUTO_GAIN,
+  SCOPE_CORE,
+  SCOPE_FILL,
+];
 
 /** Visuals panel text for the spectrum colorings and scope presets. */
 export const VIZ_COPY = {

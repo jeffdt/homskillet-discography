@@ -7,6 +7,8 @@ import {
   PHASE_DELAY_SAMPLES,
   PHASE_WINDOW_SAMPLES,
   RING_POINTS,
+  SCOPE_AUTO_GAIN,
+  SCOPE_FIXED_GAIN,
   TRAIL_REFERENCE_MS,
   TraceArgs,
   buildTrace,
@@ -165,5 +167,24 @@ describe('effect math', () => {
     expect(flash.update(1, 0.05, 16)).toBe(0);
     flash.reset();
     expect(flash.update(0, 0, 16)).toBe(0);
+  });
+});
+
+describe('scope gain', () => {
+  const stackedArgs = (waveform: Float32Array) => args({ waveform, lanes: 1 });
+
+  it('multiplies samples by the gain before clamping', () => {
+    const out = createTraceBuffer(traceCapacity(200));
+    const wave = new Float32Array(1024).fill(0.1);
+    buildTrace({ ...stackedArgs(wave), gain: 5 }, out);
+    // One lane of 300 px: middle 150, amplitude 0.8 * 300 / 2 = 120; 0.1 * 5 = 0.5 of it.
+    expect(out.ys[0]).toBeCloseTo(150 - 60);
+    buildTrace({ ...stackedArgs(wave), gain: 50 }, out);
+    expect(out.ys[0]).toBeCloseTo(150 - 120);
+  });
+
+  it('uses the measured stage tuning', () => {
+    expect(SCOPE_AUTO_GAIN).toEqual({ floorPeak: 0.05, targetPeak: 0.9, releaseMs: 500 });
+    expect(SCOPE_FIXED_GAIN).toBe(3.5);
   });
 });

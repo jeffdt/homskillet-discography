@@ -141,6 +141,10 @@ export default function Stage({ settings, renderScale }: StageProps) {
   }, [renderScale, scope.scopeLayout]);
 
   useEffect(() => {
+    scopeRendererRef.current?.setAutoGain(scope.scopeAutoGain);
+  }, [renderScale, scope.scopeAutoGain]);
+
+  useEffect(() => {
     scopeRendererRef.current?.setEffects(effects);
   }, [renderScale, effects]);
 
