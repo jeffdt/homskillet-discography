@@ -49,9 +49,9 @@ describe('StagePanel spectrum coloring', () => {
     const { updateSettings } = renderPanel({ spectrumColoring: 'unified' });
     const group = screen.getByRole('radiogroup', { name: 'Gradient' });
     expect(within(group).getAllByRole('radio')).toHaveLength(SPECTRUM_GRADIENTS.length);
-    expect(checkedIn('Gradient')).toBe('Green');
+    expect(checkedIn('Gradient')).toBe('MW Green');
     expect(screen.getByText(VIZ_COPY.gradient)).toBeTruthy();
-    fireEvent.click(within(group).getByRole('radio', { name: 'Inferno' }));
+    fireEvent.click(within(group).getByRole('radio', { name: 'bz Inferno' }));
     expect(updateSettings).toHaveBeenCalledWith({ spectrumGradient: 'bz-inferno' });
   });
 
