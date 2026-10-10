@@ -1,12 +1,18 @@
 import { VOICE_PAIRS } from '../audio/constants';
 import { VoiceFrame, VoiceInfo } from '../audio/data/contract';
 import { DEFAULT_SCOPE_SPAN, ScopeLayoutId, scopeSpanOf } from '../config/stageSettings';
+import { nextGain, targetGain, windowPeak } from './autoGain';
 import {
   FlashFollower,
   GHOST_ALPHA,
+  PHASE_DELAY_SAMPLES,
+  PHASE_WINDOW_SAMPLES,
   RING_SPEED_RAD_PER_MS,
+  SCOPE_AUTO_GAIN,
+  SCOPE_FIXED_GAIN,
   TraceBuffer,
   buildTrace,
+  findTrigger,
   createTraceBuffer,
   reactiveEnergy,
   traceCapacity,
@@ -62,7 +68,7 @@ export interface ScopeRendererDeps {
 
 /**
  * Full-window oscilloscopes, one trace per voice of the loaded track, in four layouts. Each trace is
- * built once per frame and stroked in passes that add light ('lighter'): glow, the line, a white
+ * scaled by its own auto gain (or one fixed gain), built once per frame and stroked in passes that add light ('lighter'): glow, the line, a white
  * core. Trails fade the transparent canvas instead of wiping it; bloom copies a small version of
  * it to a canvas the stylesheet blurs. Low power (renderScale below 1) skips bloom and draws one
  * glow pass.
@@ -83,6 +89,9 @@ export class ScopeRenderer {
   private effects: ScopeEffects = NO_EFFECTS;
   private motion = true;
   private angle = 0;
+  /** Each voice's current auto gain, by voice index; 0 means not measured yet. */
+  private readonly gains = new Float32Array(VOICE_PAIRS);
+  private autoGain = true;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -111,7 +120,14 @@ export class ScopeRenderer {
   setVoices(voices: readonly VoiceInfo[]): void {
     this.lanes = voices.map((voice) => ({ index: voice.index, audible: voice.audible }));
     this.flash.reset();
+    this.gains.fill(0);
     this.clear();
+  }
+
+  /** On: each trace follows its own wave's peak (SCOPE_AUTO_GAIN). Off: every trace at SCOPE_FIXED_GAIN. */
+  setAutoGain(enabled: boolean): void {
+    this.autoGain = enabled;
+    this.gains.fill(0);
   }
 
   /** Samples per trace; values the zoom does not offer fall back to the default. */
@@ -189,6 +205,29 @@ export class ScopeRenderer {
     ctx.fillRect(0, 0, width, height);
   }
 
+  /** This frame's gain for voice index: auto gain measured over the window the layout draws. */
+  private traceGain(index: number, waveform: Float32Array, dtMs: number): number {
+    if (!this.autoGain) return SCOPE_FIXED_GAIN;
+    let start: number;
+    let span: number;
+    if (this.layout === 'phase') {
+      span = PHASE_WINDOW_SAMPLES + PHASE_DELAY_SAMPLES;
+      start = waveform.length - span;
+    } else {
+      // The same window buildTrace draws, so a loud stretch just before the newest samples is counted.
+      span = this.span;
+      start = findTrigger(waveform, span);
+    }
+    const peak = windowPeak(waveform, start, span);
+    const current = this.gains[index];
+    const gain =
+      current === 0
+        ? targetGain(peak, SCOPE_AUTO_GAIN)
+        : nextGain(current, peak, dtMs, SCOPE_AUTO_GAIN);
+    this.gains[index] = gain;
+    return gain;
+  }
+
   private drawLane(
     ctx: CanvasRenderingContext2D,
     frame: VoiceFrame,
@@ -211,6 +250,7 @@ export class ScopeRenderer {
         width,
         height,
         angle: this.angle,
+        gain: this.traceGain(index, voice.waveform, dtMs),
       },
       this.trace
     );

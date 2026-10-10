@@ -74,7 +74,11 @@ export default function AppShell({ playback, controls }: AppShellProps) {
   useEffect(() => {
     channelColors.set(channelPaletteById(settings.channelPalette).channels);
   }, [settings.channelPalette]);
-  const reactiveStrength = sliderSetting(settings, REACTIVE_STRENGTH) / 100;
+  // The step the panel shows: a value stored before the steps existed applies as its nearest step.
+  const reactiveStrength =
+    REACTIVE_STRENGTH.fromSlider(
+      REACTIVE_STRENGTH.toSlider(sliderSetting(settings, REACTIVE_STRENGTH))
+    ) / 100;
   const [panels, dispatch] = useReducer(panelsReducer, INITIAL_PANELS);
   const [albumsAlbumId, setAlbumsAlbumId] = useState<string | null>(null);
   const [albumsFocusTrackId, setAlbumsFocusTrackId] = useState<string | null>(null);

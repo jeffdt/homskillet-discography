@@ -118,15 +118,18 @@ export const SCOPE_ZOOM: StageSliderDef = {
   format: (value) => `${Math.round(value / TAP_SAMPLES_PER_MS)} ms`,
 };
 
+/** Reactive UI strengths in percent: fine steps up to 100%, then big ones for a dramatic top end. */
+export const REACTIVE_STRENGTH_VALUES = [0, 25, 50, 75, 100, 150, 200, 300, 400, 500];
+
 /** How strongly the dock, play button and logo react to the music. */
 export const REACTIVE_STRENGTH: StageSliderDef = {
   id: 'reactive-strength',
   key: 'reactiveStrength',
   label: 'Reactive UI strength',
   explanation:
-    'How big the glow on the dock and play button and the swell of the logo get when the music hits. At 100% it is easy to see; turn it down for a calmer screen.',
-  step: 10,
-  ...direct(0, 150, 0),
+    'How big the glow on the dock and play button and the swell of the logo get when the music hits. At 100% it is easy to see; past 200% everything throbs on every hit. Turn it down for a calmer screen.',
+  step: 1,
+  ...stepped(REACTIVE_STRENGTH_VALUES),
   format: (value) => (value === 0 ? 'Off' : `${value}%`),
 };
 
@@ -278,7 +281,7 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, SPARKS, SP
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
   channelColors:
-    "Each sound channel of the chip gets its own color: in the Mixer, in the spectrum's By channel colorings, and in the scopes' By channel traces.",
+    "Each sound channel of the chip gets its own color: in the Mixer, in the spectrum's Add light and Average colorings, and in the scopes' By channel traces.",
   accent:
     'The color of buttons, highlights and the play button glow. It leaves the channel colors alone.',
   reset: 'Puts everything in this panel back the way the site starts.',

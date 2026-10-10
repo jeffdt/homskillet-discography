@@ -17,8 +17,13 @@ import {
 const preset = (id: string) => SCOPE_PRESETS.find((p) => p.id === id)!;
 
 describe('spectrum colorings', () => {
-  it('offers add like light (default), average and unified', () => {
-    expect(SPECTRUM_COLORINGS.map((c) => c.id)).toEqual(['additive', 'average', 'unified']);
+  it('offers Add light (default), Average and Unified, with short labels that fit a card', () => {
+    expect(SPECTRUM_COLORINGS.map((c) => [c.id, c.label])).toEqual([
+      ['additive', 'Add light'],
+      ['average', 'Average'],
+      ['unified', 'Unified'],
+    ]);
+    SPECTRUM_COLORINGS.forEach((c) => expect(c.label.length).toBeLessThanOrEqual(12));
     expect(STAGE_DEFAULTS.spectrumColoring).toBe('additive');
     expect(STAGE_DEFAULTS.spectrumGradient).toBe('mw-green');
     expect(spectrumColoringById('unified').label).toBe('Unified');
@@ -33,6 +38,7 @@ describe('scope layouts and colorings', () => {
     expect(SCOPE_COLORINGS.map((c) => c.id)).toEqual(['channel', 'unified']);
     expect(scopeLayoutById('milkdrop').id).toBe('stacked');
     expect(scopeColoringById(null).id).toBe('unified');
+    expect(scopeColoringById('unified').label).toBe('Accent color');
   });
 });
 
@@ -46,7 +52,7 @@ describe('scope presets', () => {
       'xy',
       'today',
     ]);
-    expect(SCOPE_DEFAULTS).toEqual(preset('green-crt').settings);
+    expect(SCOPE_DEFAULTS).toEqual({ ...preset('green-crt').settings, scopeAutoGain: true });
     Object.entries(SCOPE_DEFAULTS).forEach(([key, value]) =>
       expect((STAGE_DEFAULTS as Record<string, unknown>)[key]).toBe(value)
     );
@@ -88,7 +94,10 @@ describe('scope presets', () => {
 
   it('keeps every preset value inside its control range', () => {
     SCOPE_PRESETS.forEach(({ settings }) => {
-      expect(scopeSettingsOf(settings as unknown as Record<string, unknown>)).toEqual(settings);
+      expect(scopeSettingsOf(settings as unknown as Record<string, unknown>)).toEqual({
+        ...settings,
+        scopeAutoGain: true,
+      });
       expect(SCOPE_SPANS).toContain(settings.scopeSpan);
     });
   });
@@ -112,6 +121,7 @@ describe('scopeSettingsOf', () => {
       scopeFill: 1,
       scopeCrt: null,
       scopeSpan: 300,
+      scopeAutoGain: 'no',
     });
     expect(settings).toEqual({
       ...SCOPE_DEFAULTS,
@@ -131,5 +141,16 @@ describe('matchingScopePreset', () => {
     expect(matchingScopePreset({})!.id).toBe('green-crt');
     expect(matchingScopePreset({ ...preset('halo').settings })!.id).toBe('halo');
     expect(matchingScopePreset({ ...preset('halo').settings, scopeGlow: 0.55 })).toBeNull();
+  });
+
+  it('leaves Auto gain out of presets, so switching it off keeps the preset', () => {
+    SCOPE_PRESETS.forEach((p) => expect('scopeAutoGain' in p.settings).toBe(false));
+    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: false })!.id).toBe('green-crt');
+  });
+
+  it('matches Green CRT for settings stored before auto gain existed', () => {
+    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: undefined })!.id).toBe(
+      'green-crt'
+    );
   });
 });

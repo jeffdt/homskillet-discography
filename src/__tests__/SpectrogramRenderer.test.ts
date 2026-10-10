@@ -5,6 +5,7 @@ import { Rgb, unpackPixel } from '../visuals/color';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
 import { AveragePainter, GradientPainter } from '../visuals/spectrumPainters';
 import {
+  SHADE_BLACK_POINT,
   SHADE_KNEE,
   aWeightingLut,
   buildShadeTable,
@@ -170,13 +171,13 @@ describe('SpectrogramRenderer', () => {
     setColor(binColors, 100, BLUE);
     spectrum[100] = valueFor(SHADE_KNEE, 100);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
-    spectrum[100] = valueFor(8, 100);
+    spectrum[100] = valueFor(SHADE_BLACK_POINT + 8, 100);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
     const peak = SHADE_KNEE * peakDecayFactor(0.98, 1000 / 60);
     const peakWidth = Math.floor(Math.floor((peak * 64) / 256) / 4) * 4;
     const bars = lastImage(analyzer.ctx);
     const row = 447 - 100;
-    expect(pixelAt(bars, 0, row)).not.toEqual(BG_PIXEL); // the quiet bar, 2 px wide
+    expect(pixelAt(bars, 0, row)).not.toEqual(BG_PIXEL); // the quiet bar, 14 px wide
     expect(pixelAt(bars, peakWidth - 1, row)).not.toEqual(BG_PIXEL);
     expect(pixelAt(bars, peakWidth - 1, row)[3]).toBe(255);
     expect(pixelAt(bars, peakWidth - 3, row)).toEqual(BG_PIXEL);

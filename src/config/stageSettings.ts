@@ -56,15 +56,15 @@ export interface SpectrumColoring {
 export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
   {
     id: 'additive',
-    label: 'By channel: add like light',
+    label: 'Add light',
     description:
-      'Each channel shines its own color at its own loudness, and where channels overlap their light adds up, like colored stage lights. Overlaps get brighter instead of grayer.',
+      'Each channel shines its own color at its own loudness, and where channels overlap their light adds up, like colored stage lights. Faint spill from other channels is left out, so every note keeps its own color.',
   },
   {
     id: 'average',
-    label: 'By channel: average',
+    label: 'Average',
     description:
-      'Each band takes the average color of the channels playing in it, weighted by how loud each one is. Overlapping channels blend toward gray.',
+      'Each band takes the average color of the channels playing in it, weighted toward the loudest one, and keeps their saturation, so overlaps mix like paint instead of turning gray.',
   },
   {
     id: 'unified',
@@ -141,8 +141,9 @@ export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
   },
   {
     id: 'unified',
-    label: 'Unified',
-    description: 'Every trace in the accent color, like a one-color phosphor screen.',
+    label: 'Accent color',
+    description:
+      'Every trace in the accent color you pick under Interface, like a one-color phosphor screen. The channel palette does not apply.',
   },
 ];
 
@@ -165,6 +166,8 @@ export interface ScopeSettings {
   scopeCrt: boolean;
   /** One of SCOPE_SPANS. */
   scopeSpan: number;
+  /** Each trace scales to its own wave's peak (on) or one fixed gain (off). */
+  scopeAutoGain: boolean;
 }
 
 /** Trails stop short of 1 so the picture always fades. */
@@ -188,14 +191,17 @@ export function scopeSpanOf(value: unknown): number {
   return typeof value === 'number' && SCOPE_SPANS.includes(value) ? value : DEFAULT_SCOPE_SPAN;
 }
 
-/** A named set of every scope setting, offered as a starting point in the panel. */
+/** The scope settings a preset sets: every look setting; Auto gain is a measuring mode, not a look. */
+export type ScopeLookSettings = Omit<ScopeSettings, 'scopeAutoGain'>;
+
+/** A named set of every scope look setting, offered as a starting point in the panel. */
 export interface ScopePreset {
   id: string;
   label: string;
-  settings: ScopeSettings;
+  settings: ScopeLookSettings;
 }
 
-const TODAY_SCOPES: ScopeSettings = {
+const TODAY_SCOPES: ScopeLookSettings = {
   scopeLayout: 'stacked',
   scopeColoring: 'channel',
   scopeTrails: 0,
@@ -284,7 +290,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
 ];
 
 /** What the channel scopes look like until the visitor changes them: the Green CRT preset (owner's choice). */
-export const SCOPE_DEFAULTS: ScopeSettings = { ...SCOPE_PRESETS[0].settings };
+export const SCOPE_DEFAULTS: ScopeSettings = { ...SCOPE_PRESETS[0].settings, scopeAutoGain: true };
 
 /** The scope layout with this id, or the default layout. */
 export function scopeLayoutById(id?: unknown): ScopeLayout {
@@ -334,16 +340,16 @@ export function scopeSettingsOf(settings: Record<string, unknown>): ScopeSetting
     scopeFill: flagOf(settings.scopeFill, d.scopeFill),
     scopeCrt: flagOf(settings.scopeCrt, d.scopeCrt),
     scopeSpan: scopeSpanOf(settings.scopeSpan),
+    scopeAutoGain: flagOf(settings.scopeAutoGain, d.scopeAutoGain),
   };
 }
 
 /** The preset whose every value matches the stored settings, or null for a custom mix. */
 export function matchingScopePreset(settings: Record<string, unknown>): ScopePreset | null {
   const current = scopeSettingsOf(settings);
-  const keys = Object.keys(current) as Array<keyof ScopeSettings>;
   return (
     SCOPE_PRESETS.find((preset) =>
-      keys.every((key) => {
+      (Object.keys(preset.settings) as Array<keyof ScopeLookSettings>).every((key) => {
         const want = preset.settings[key];
         const have = current[key];
         return typeof want === 'number' ? Math.abs(want - (have as number)) < 1e-6 : want === have;

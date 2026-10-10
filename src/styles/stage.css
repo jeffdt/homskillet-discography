@@ -125,6 +125,13 @@
   flex: 1;
 }
 
+/* Buttons do not wrap by default (index.css); card labels must, so long names never spill into the next card. */
+.App .SwatchPicker-label {
+  min-width: 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
 /* ===== Compact: 44px touch targets ===== */
 
 .App[data-layout='compact'] .SwatchPicker-card,
@@ -196,6 +203,22 @@
   color: var(--clickable);
   font: var(--font-strong);
   cursor: pointer;
+}
+
+/* A visual on screen that ignores the channel palette says so, with a way back. */
+.App .StagePanel-notice {
+  margin: 4px 0 12px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--accent);
+  background: var(--button);
+}
+
+.App .StagePanel-notice .StagePanel-note {
+  margin: 0;
+}
+
+.App .StagePanel-notice .StagePanel-button {
+  margin-top: 8px;
 }
 
 .App .StagePanel-button:hover {

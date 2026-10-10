@@ -4,6 +4,7 @@ import {
   ALL_STAGE_SLIDERS,
   FILM_GRAIN,
   REACTIVE_STRENGTH,
+  REACTIVE_STRENGTH_VALUES,
   MORE_SPARK_SLIDERS,
   PEAK_DECAY,
   PEAK_QUANTIZATION,
@@ -68,10 +69,17 @@ describe('stage controls', () => {
     ]);
   });
 
-  it('format the reactive UI strength as a percentage with an Off at zero', () => {
-    expect(REACTIVE_STRENGTH.format(0)).toBe('Off');
-    expect(REACTIVE_STRENGTH.format(100)).toBe('100%');
+  it('step the reactive UI strength from Off to a dramatic 500%', () => {
+    expect(REACTIVE_STRENGTH_VALUES).toEqual([0, 25, 50, 75, 100, 150, 200, 300, 400, 500]);
+    expect(REACTIVE_STRENGTH.min).toBe(0);
+    expect(REACTIVE_STRENGTH.max).toBe(9);
+    expect(REACTIVE_STRENGTH.fromSlider(9)).toBe(500);
+    expect(REACTIVE_STRENGTH.toSlider(100)).toBe(4);
+    expect(REACTIVE_STRENGTH.toSlider(60)).toBe(2); // a value stored before: nearest step, 50
     expect(REACTIVE_STRENGTH.toSlider(500)).toBe(REACTIVE_STRENGTH.max);
+    expect(REACTIVE_STRENGTH.format(0)).toBe('Off');
+    expect(REACTIVE_STRENGTH.format(500)).toBe('500%');
+    expect(displayValue(REACTIVE_STRENGTH, 60)).toBe('50%');
     expect(sliderSetting({}, REACTIVE_STRENGTH)).toBe(100);
   });
 

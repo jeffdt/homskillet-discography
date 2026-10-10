@@ -15,6 +15,7 @@ import {
 } from '../config/stageSettings';
 import { SPECTRUM_GRADIENTS, spectrumGradientById } from '../config/spectrumGradients';
 import { UI_PALETTES, uiPaletteAt } from '../config/uiPalettes';
+import ChannelColorsNotice from './stage/ChannelColorsNotice';
 import ChannelLegend from './stage/ChannelLegend';
 import ScopePresets from './stage/ScopePresets';
 import StageSlider from './stage/StageSlider';
@@ -185,6 +186,12 @@ export default function StagePanel() {
           Channel colors
         </h3>
         <p className="StagePanel-note">{STAGE_COPY.channelColors}</p>
+        <ChannelColorsNotice
+          visualizerStyle={style.id}
+          spectrumColoring={coloring.id}
+          scopeColoring={scope.scopeColoring}
+          onUpdate={updateSettings}
+        />
         <SwatchPicker
           label="Channel palette"
           options={CHANNEL_OPTIONS}

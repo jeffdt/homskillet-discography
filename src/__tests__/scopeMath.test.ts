@@ -2,11 +2,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   FLASH_DECAY_MS,
+  FLASH_RISE,
   FlashFollower,
+  LEVEL_FULL_RMS,
   MIN_TRAIL_FADE,
   PHASE_DELAY_SAMPLES,
   PHASE_WINDOW_SAMPLES,
   RING_POINTS,
+  SCOPE_AUTO_GAIN,
+  SCOPE_FIXED_GAIN,
   TRAIL_REFERENCE_MS,
   TraceArgs,
   buildTrace,
@@ -149,21 +153,42 @@ describe('effect math', () => {
     expect(trailFade(0.5, 0)).toBe(MIN_TRAIL_FADE);
   });
 
-  it('turns rms into a 0..1 level and energy', () => {
-    expect(voiceLevel(0.3)).toBeCloseTo(0.5);
-    expect(voiceLevel(2)).toBe(1);
+  it('turns rms into a 0..1 level on the measured scale', () => {
+    expect(LEVEL_FULL_RMS).toBe(0.12);
+    expect(voiceLevel(0.06)).toBeCloseTo(0.5);
+    expect(voiceLevel(0.3)).toBe(1);
     expect(voiceLevel(-1)).toBe(0);
     expect(reactiveEnergy(0, 1, 1)).toBe(0);
     expect(reactiveEnergy(0.5, 1, 1)).toBeCloseTo(1.2);
   });
 
-  it('flashes on a sudden rise and decays over 120 ms', () => {
+  it('flashes on a note-sized rise and decays over 120 ms', () => {
+    expect(FLASH_RISE).toBe(0.024);
     const flash = new FlashFollower(8);
     expect(flash.update(0, 0, 16)).toBe(0);
-    expect(flash.update(0, 0.5, 16)).toBe(1);
+    expect(flash.update(0, 0.05, 16)).toBe(1);
     expect(flash.update(0, 0, FLASH_DECAY_MS)).toBeCloseTo(Math.exp(-1));
-    expect(flash.update(1, 0.05, 16)).toBe(0);
+    expect(flash.update(1, 0.01, 16)).toBe(0);
     flash.reset();
     expect(flash.update(0, 0, 16)).toBe(0);
+  });
+});
+
+describe('scope gain', () => {
+  const stackedArgs = (waveform: Float32Array) => args({ waveform, lanes: 1 });
+
+  it('multiplies samples by the gain before clamping', () => {
+    const out = createTraceBuffer(traceCapacity(200));
+    const wave = new Float32Array(1024).fill(0.1);
+    buildTrace({ ...stackedArgs(wave), gain: 5 }, out);
+    // One lane of 300 px: middle 150, amplitude 0.8 * 300 / 2 = 120; 0.1 * 5 = 0.5 of it.
+    expect(out.ys[0]).toBeCloseTo(150 - 60);
+    buildTrace({ ...stackedArgs(wave), gain: 50 }, out);
+    expect(out.ys[0]).toBeCloseTo(150 - 120);
+  });
+
+  it('uses the measured stage tuning', () => {
+    expect(SCOPE_AUTO_GAIN).toEqual({ floorPeak: 0.05, targetPeak: 0.9, releaseMs: 500 });
+    expect(SCOPE_FIXED_GAIN).toBe(3.5);
   });
 });

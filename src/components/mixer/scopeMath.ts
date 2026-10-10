@@ -1,4 +1,5 @@
-import { smoothToward } from '../../audio/data/levels';
+import { AutoGainTuning, nextGain, targetGain } from '../../visuals/autoGain';
+export { windowPeak } from '../../visuals/autoGain';
 
 /** The quietest level the meter shows; anything below reads as empty. */
 export const METER_FLOOR_DB = -48;
@@ -15,6 +16,12 @@ export const SCOPE_HEIGHT = 48;
 export const SCOPE_GAIN_FLOOR_PEAK = 0.08;
 /** How long the scope gain takes to rise by a factor of e when the wave gets quieter. */
 export const SCOPE_GAIN_RELEASE_MS = 500;
+
+const MIXER_GAIN: AutoGainTuning = {
+  floorPeak: SCOPE_GAIN_FLOOR_PEAK,
+  targetPeak: 1,
+  releaseMs: SCOPE_GAIN_RELEASE_MS,
+};
 
 const MID = SCOPE_HEIGHT / 2;
 const X_STEP = SCOPE_WIDTH / (SCOPE_POINTS - 1);
@@ -43,30 +50,14 @@ export function findTrigger(waveform: ArrayLike<number>, span: number): number {
   return latest;
 }
 
-/** The largest absolute sample in the span samples of waveform from start. */
-export function windowPeak(waveform: ArrayLike<number>, start: number, span: number): number {
-  let peak = 0;
-  const end = Math.min(waveform.length, start + span);
-  for (let i = start; i < end; i++) {
-    const magnitude = Math.abs(waveform[i]);
-    if (magnitude > peak) peak = magnitude;
-  }
-  return peak;
-}
-
 /** The scope gain that would just fill the height for this window peak (capped for near-silence). */
 export function targetScopeGain(peak: number): number {
-  return 1 / Math.max(peak, SCOPE_GAIN_FLOOR_PEAK);
+  return targetGain(peak, MIXER_GAIN);
 }
 
-/**
- * The scope's auto-gain after dtMs: it drops at once when the wave gets louder, so a trace never
- * clips, and climbs back slowly when it gets quieter, so the trace does not pump.
- */
+/** The Mixer scope's auto gain after dtMs (see nextGain). */
 export function nextScopeGain(current: number, peak: number, dtMs: number): number {
-  const target = targetScopeGain(peak);
-  if (target <= current) return target;
-  return smoothToward(current, target, dtMs, SCOPE_GAIN_RELEASE_MS, SCOPE_GAIN_RELEASE_MS);
+  return nextGain(current, peak, dtMs, MIXER_GAIN);
 }
 
 /**

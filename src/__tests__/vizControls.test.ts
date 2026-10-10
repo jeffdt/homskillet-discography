@@ -4,6 +4,7 @@ import { displayValue } from '../components/stage/stageControls';
 import {
   MORE_SCOPE_SLIDERS,
   MORE_SCOPE_TOGGLES,
+  SCOPE_AUTO_GAIN,
   SCOPE_BLOOM,
   SCOPE_CRT,
   SCOPE_EFFECT_SLIDERS,
@@ -13,6 +14,12 @@ import {
 
 describe('scope controls', () => {
   const all = [...SCOPE_EFFECT_SLIDERS, ...MORE_SCOPE_SLIDERS, SCOPE_CRT, ...MORE_SCOPE_TOGGLES];
+
+  it('offers Auto gain first among the extra scope switches, on by default', () => {
+    expect(MORE_SCOPE_TOGGLES[0]).toBe(SCOPE_AUTO_GAIN);
+    expect(SCOPE_AUTO_GAIN.key).toBe('scopeAutoGain');
+    expect(SCOPE_AUTO_GAIN.isOn(STAGE_DEFAULTS.scopeAutoGain)).toBe(true);
+  });
 
   it('writes settings the stage defaults know, with unique ids and explanations', () => {
     all.forEach((def) => {

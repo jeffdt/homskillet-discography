@@ -58,6 +58,7 @@ describe('stage defaults', () => {
       scopeFill: false,
       scopeCrt: true,
       scopeSpan: 512,
+      scopeAutoGain: true,
       channelPalette: DEFAULT_CHANNEL_PALETTE_ID,
       uiPalette: 0,
       peakDecayRate: 0.98,
