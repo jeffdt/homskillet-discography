@@ -6,11 +6,11 @@ import {
 } from '../config/spectrumGradients';
 
 describe('spectrum gradients', () => {
-  it('brings back all 23 old gradients, MW Green first', () => {
+  it('brings back all 23 old gradients, Green first', () => {
     expect(SPECTRUM_GRADIENTS).toHaveLength(23);
     expect(SPECTRUM_GRADIENTS[0].id).toBe('mw-green');
     expect(DEFAULT_SPECTRUM_GRADIENT_ID).toBe('mw-green');
-    expect(SPECTRUM_GRADIENTS.map((g) => g.label)).toContain('bz Negative');
+    expect(SPECTRUM_GRADIENTS.map((g) => g.label)).toContain('Negative');
   });
 
   it('has unique kebab-case ids and lowercase hex stops', () => {
@@ -23,8 +23,8 @@ describe('spectrum gradients', () => {
     });
   });
 
-  it('finds by id and falls back to MW Green', () => {
-    expect(spectrumGradientById('bz-inferno').label).toBe('bz Inferno');
+  it('finds by id and falls back to Green', () => {
+    expect(spectrumGradientById('bz-inferno').label).toBe('Inferno');
     expect(spectrumGradientById('nope').id).toBe('mw-green');
     expect(spectrumGradientById(7).id).toBe('mw-green');
     expect(spectrumGradientById(undefined).id).toBe('mw-green');

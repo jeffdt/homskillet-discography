@@ -23,6 +23,7 @@ describe('resolveShortcut', () => {
     expect(resolveShortcut(key('Escape'))).toBe('closeTopmost');
     expect(resolveShortcut(key('m'))).toBe('toggleMixer');
     expect(resolveShortcut(key('v'))).toBe('toggleStage');
+    expect(resolveShortcut(key('i'))).toBe('toggleInterface');
     expect(resolveShortcut(key('a'))).toBe('toggleAlbums');
   });
 

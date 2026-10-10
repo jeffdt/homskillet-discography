@@ -35,7 +35,7 @@ describe('StagePanel spectrum coloring', () => {
   it('offers the three colorings with add like light checked', () => {
     renderPanel();
     expect(checkedIn('Spectrum coloring')).toBe('Add light');
-    expect(screen.getByText(/their light adds up, like colored stage lights/)).toBeTruthy();
+    expect(screen.getByText(/their light adds up like colored stage lights/)).toBeTruthy();
     expect(screen.queryByRole('radiogroup', { name: 'Gradient' })).toBeNull();
   });
 
@@ -49,9 +49,9 @@ describe('StagePanel spectrum coloring', () => {
     const { updateSettings } = renderPanel({ spectrumColoring: 'unified' });
     const group = screen.getByRole('radiogroup', { name: 'Gradient' });
     expect(within(group).getAllByRole('radio')).toHaveLength(SPECTRUM_GRADIENTS.length);
-    expect(checkedIn('Gradient')).toBe('MW Green');
+    expect(checkedIn('Gradient')).toBe('Green');
     expect(screen.getByText(VIZ_COPY.gradient)).toBeTruthy();
-    fireEvent.click(within(group).getByRole('radio', { name: 'bz Inferno' }));
+    fireEvent.click(within(group).getByRole('radio', { name: 'Inferno' }));
     expect(updateSettings).toHaveBeenCalledWith({ spectrumGradient: 'bz-inferno' });
   });
 
@@ -115,8 +115,8 @@ describe('StagePanel channel colors note', () => {
   it('says where channel colors show', () => {
     renderPanel();
     expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
-    expect(STAGE_COPY.channelColors).toContain("scopes' By channel traces");
-    expect(STAGE_COPY.channelColors).toContain("spectrum's Add light and Average colorings");
+    expect(STAGE_COPY.channelColors).toContain('Mixer');
+    expect(STAGE_COPY.channelColors).toContain('wherever the visualizer colors by channel');
   });
 });
 

@@ -78,7 +78,7 @@
   left: var(--chrome-gap);
 }
 
-/* With Albums open, Mixer or Visuals sits beside it; the right edge stays clear for the visualizer. */
+/* With Albums open, Mixer, Visualizer or Interface sits beside it; the right edge stays clear for the visualizer. */
 .Panel--outer ~ .Panel--inner {
   left: calc(2 * var(--chrome-gap) + var(--panel-width));
 }
@@ -328,7 +328,7 @@
 }
 
 /*
- * Reactive UI. --pulse-intensity (0..1) comes from the audio; --reactive-strength is the Visuals
+ * Reactive UI. --pulse-intensity (0..1) comes from the audio; --reactive-strength is the Interface
  * panel slider. Reduced motion turns every reactive effect off.
  */
 .AppShell {

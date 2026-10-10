@@ -4,7 +4,7 @@ import { DEFAULT_SPECTRUM_GRADIENT_ID } from './spectrumGradients';
 /** How the stage draws the music. */
 export type VisualizerStyleId = 'spectrum' | 'scopes';
 
-/** A visualizer style the Stage panel offers. */
+/** A visualizer style the Visualizer panel offers. */
 export interface VisualizerStyle {
   /** Stable key persisted in settings.visualizerStyle. Never rename or reuse one. */
   id: VisualizerStyleId;
@@ -43,7 +43,7 @@ export function visualizerStyleById(id?: string | null): VisualizerStyle {
 /** How the Spectrum style colors its bands. */
 export type SpectrumColoringId = 'additive' | 'average' | 'unified';
 
-/** A spectrum coloring the Visuals panel offers. */
+/** A spectrum coloring the Visualizer panel offers. */
 export interface SpectrumColoring {
   /** Stable key persisted in settings.spectrumColoring. Never rename or reuse one. */
   id: SpectrumColoringId;
@@ -58,19 +58,19 @@ export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
     id: 'additive',
     label: 'Add light',
     description:
-      'Each channel shines its own color at its own loudness, and where channels overlap their light adds up, like colored stage lights. Faint spill from other channels is left out, so every note keeps its own color.',
+      'Each channel shines its own color, as bright as it is loud. Where channels overlap, their light adds up like colored stage lights.',
   },
   {
     id: 'average',
     label: 'Average',
     description:
-      'Each band takes the average color of the channels playing in it, weighted toward the loudest one, and keeps their saturation, so overlaps mix like paint instead of turning gray.',
+      'Each band takes a blend of the channels playing in it, leaning toward the loudest, so overlaps mix like paint.',
   },
   {
     id: 'unified',
     label: 'Unified',
     description:
-      'Colors come from how loud each band is, not which channel plays it, using one gradient: quiet at the left of the strip, loud at the right. The original visualizer worked this way.',
+      'Colors come from how loud each band is, not which channel plays it, using one gradient you pick below: quiet sounds take its left end, loud ones its right.',
   },
 ];
 
@@ -90,7 +90,7 @@ export function spectrumColoringById(id?: unknown): SpectrumColoring {
 /** Where the channel scopes put each voice's trace. */
 export type ScopeLayoutId = 'stacked' | 'overlaid' | 'rings' | 'phase';
 
-/** A scope layout the Visuals panel offers. */
+/** A scope layout the Visualizer panel offers. */
 export interface ScopeLayout {
   /** Stable key persisted in settings.scopeLayout. Never rename or reuse one. */
   id: ScopeLayoutId;
@@ -123,7 +123,7 @@ export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
 /** How the channel scopes color their traces. */
 export type ScopeColoringId = 'channel' | 'unified';
 
-/** A scope trace coloring the Visuals panel offers. */
+/** A scope trace coloring the Visualizer panel offers. */
 export interface ScopeColoring {
   /** Stable key persisted in settings.scopeColoring. Never rename or reuse one. */
   id: ScopeColoringId;
@@ -143,7 +143,7 @@ export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
     id: 'unified',
     label: 'Accent color',
     description:
-      'Every trace in the accent color you pick under Interface, like a one-color phosphor screen. The channel palette does not apply.',
+      'Every trace in your accent color (set in the Interface panel), like a one-color phosphor screen.',
   },
 ];
 
@@ -201,7 +201,8 @@ export interface ScopePreset {
   settings: ScopeLookSettings;
 }
 
-const TODAY_SCOPES: ScopeLookSettings = {
+/** Plain lines with no effects: the base every other preset builds on. */
+const PLAIN_SCOPES: ScopeLookSettings = {
   scopeLayout: 'stacked',
   scopeColoring: 'channel',
   scopeTrails: 0,
@@ -221,7 +222,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     id: 'green-crt',
     label: 'Green CRT',
     settings: {
-      ...TODAY_SCOPES,
+      ...PLAIN_SCOPES,
       scopeColoring: 'unified',
       scopeTrails: 0.8,
       scopeGlow: 0.6,
@@ -236,7 +237,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     id: 'halo',
     label: 'Halo',
     settings: {
-      ...TODAY_SCOPES,
+      ...PLAIN_SCOPES,
       scopeLayout: 'rings',
       scopeTrails: 0.6,
       scopeGlow: 0.5,
@@ -250,7 +251,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     id: 'neon',
     label: 'Neon',
     settings: {
-      ...TODAY_SCOPES,
+      ...PLAIN_SCOPES,
       scopeLayout: 'overlaid',
       scopeTrails: 0.45,
       scopeGlow: 0.6,
@@ -264,7 +265,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     id: 'phosphor',
     label: 'Phosphor',
     settings: {
-      ...TODAY_SCOPES,
+      ...PLAIN_SCOPES,
       scopeTrails: 0.85,
       scopeGlow: 0.5,
       scopeBloom: 0.3,
@@ -276,7 +277,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     id: 'xy',
     label: 'X-Y',
     settings: {
-      ...TODAY_SCOPES,
+      ...PLAIN_SCOPES,
       scopeLayout: 'phase',
       scopeTrails: 0.88,
       scopeGlow: 0.6,
@@ -286,7 +287,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
       scopeCore: true,
     },
   },
-  { id: 'today', label: 'Today', settings: TODAY_SCOPES },
+  { id: 'plain', label: 'Plain', settings: PLAIN_SCOPES },
 ];
 
 /** What the channel scopes look like until the visitor changes them: the Green CRT preset (owner's choice). */
@@ -370,16 +371,20 @@ export const SPARK_DEFAULTS = {
   particleFadeMode: 'fade' as string,
 };
 
-/** Every Stage panel setting and its default. "Reset stage" writes exactly these. */
-export const STAGE_DEFAULTS = {
+/** Every Visualizer panel setting and its default. "Reset visualizer" writes exactly these. */
+export const VISUALIZER_DEFAULTS = {
   visualizerStyle: DEFAULT_VISUALIZER_STYLE as string,
   spectrumColoring: DEFAULT_SPECTRUM_COLORING as string,
   spectrumGradient: DEFAULT_SPECTRUM_GRADIENT_ID as string,
   ...SCOPE_DEFAULTS,
   channelPalette: DEFAULT_CHANNEL_PALETTE_ID,
-  uiPalette: 0,
   peakDecayRate: 0.98,
   peakQuantization: 4,
+};
+
+/** Every Interface panel setting and its default. "Reset interface" writes exactly these. */
+export const INTERFACE_DEFAULTS = {
+  uiPalette: 0,
   audioReactivePulse: true,
   reactiveStrength: 100,
   filmGrainAmount: 50,
@@ -387,5 +392,8 @@ export const STAGE_DEFAULTS = {
   ...SPARK_DEFAULTS,
 };
 
-/** A user-settings key the Stage panel owns. */
+/** Every setting the Visualizer and Interface panels own, with its default. */
+export const STAGE_DEFAULTS = { ...VISUALIZER_DEFAULTS, ...INTERFACE_DEFAULTS };
+
+/** A user-settings key the Visualizer or Interface panel owns. */
 export type StageSettingKey = keyof typeof STAGE_DEFAULTS;

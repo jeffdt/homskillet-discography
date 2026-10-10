@@ -26,7 +26,7 @@ describe('ChannelStrips', () => {
   it('asks for a track while nothing is loaded', () => {
     renderStrips();
     expect(screen.getByText(EMPTY_CHANNELS_HINT)).toBeTruthy();
-    expect(EMPTY_CHANNELS_HINT).toBe('Play something to see channels');
+    expect(EMPTY_CHANNELS_HINT).toBe('Play a song to see its channels.');
   });
 
   it('shows one strip per voice, grouped and described by chip', () => {

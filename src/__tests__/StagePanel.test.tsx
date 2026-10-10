@@ -7,18 +7,15 @@ import { UserContext, UserSettings } from '../components/UserProvider';
 import {
   FILM_GRAIN,
   REACTIVE_STRENGTH,
-  MORE_SPARK_SLIDERS,
+  PEAK_QUANTIZATION,
   PEAK_SLIDERS,
   REACTIVE_UI,
   SCOPE_ZOOM,
   SPARKS,
-  SPARK_FADE,
-  SPARK_SLIDERS,
   STAGE_COPY,
 } from '../components/stage/stageControls';
 import { CHANNEL_PALETTES } from '../config/channelPalettes';
-import { SPARK_DEFAULTS, STAGE_DEFAULTS } from '../config/stageSettings';
-import { UI_PALETTES } from '../config/uiPalettes';
+import { STAGE_DEFAULTS, VISUALIZER_DEFAULTS } from '../config/stageSettings';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 function renderPanel(
@@ -52,32 +49,30 @@ function voice(index: number, name: string, state: Partial<VoiceInfo> = {}): Voi
 describe('StagePanel', () => {
   it('shows every Stage control with its explanation', () => {
     renderPanel();
-    ['Style', 'Channel colors', 'Interface', 'Sparks'].forEach((heading) =>
+    ['Style', 'Channel colors'].forEach((heading) =>
       expect(screen.getByRole('heading', { name: heading })).toBeTruthy()
     );
-    [
-      ...PEAK_SLIDERS,
-      REACTIVE_STRENGTH,
-      FILM_GRAIN,
-      ...SPARK_SLIDERS,
-      ...MORE_SPARK_SLIDERS,
-    ].forEach((def) => {
+    PEAK_SLIDERS.forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
-    [REACTIVE_UI, SPARKS, SPARK_FADE].forEach((def) => {
-      expect(screen.getByRole('switch', { name: def.label })).toBeTruthy();
-      expect(screen.getByText(def.explanation)).toBeTruthy();
-    });
-    ['Visualizer style', 'Channel palette', 'Accent color'].forEach((group) =>
+    ['Visualizer style', 'Channel palette'].forEach((group) =>
       expect(screen.getByRole('radiogroup', { name: group })).toBeTruthy()
     );
     expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
-    expect(screen.getByText(STAGE_COPY.accent)).toBeTruthy();
-    expect(screen.getByText(STAGE_COPY.reset)).toBeTruthy();
-    expect(screen.getByText('More spark settings')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Reset sparks' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Reset stage' })).toBeTruthy();
+    expect(screen.getByText(STAGE_COPY.resetVisualizer)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Reset visualizer' })).toBeTruthy();
+  });
+
+  it('leaves the interface controls to the Interface panel', () => {
+    renderPanel();
+    expect(screen.queryByRole('radiogroup', { name: 'Accent color' })).toBeNull();
+    [REACTIVE_UI, SPARKS].forEach((def) =>
+      expect(screen.queryByRole('switch', { name: def.label })).toBeNull()
+    );
+    [REACTIVE_STRENGTH, FILM_GRAIN].forEach((def) =>
+      expect(screen.queryByLabelText(def.label)).toBeNull()
+    );
   });
 
   it('shows peak settings with the spectrum and the zoom with the scopes', () => {
@@ -102,14 +97,12 @@ describe('StagePanel', () => {
     }
   );
 
-  it('picks a style, a channel palette and an accent', () => {
+  it('picks a style and a channel palette', () => {
     const { updateSettings } = renderPanel();
     fireEvent.click(screen.getByRole('radio', { name: 'Channel scopes' }));
     expect(updateSettings).toHaveBeenLastCalledWith({ visualizerStyle: 'scopes' });
     fireEvent.click(screen.getByRole('radio', { name: CHANNEL_PALETTES[2].label }));
     expect(updateSettings).toHaveBeenLastCalledWith({ channelPalette: CHANNEL_PALETTES[2].id });
-    fireEvent.click(screen.getByRole('radio', { name: UI_PALETTES[3].label }));
-    expect(updateSettings).toHaveBeenLastCalledWith({ uiPalette: 3 });
   });
 
   it('describes the selected style and channel palette', () => {
@@ -132,76 +125,29 @@ describe('StagePanel', () => {
   it('shows a valid selection for stale or unknown stored values', () => {
     renderPanel({
       channelPalette: 'retired-palette',
-      uiPalette: 9,
       visualizerStyle: 'milkdrop',
       peakQuantization: 3,
-      filmGrainAmount: 'garbage',
     });
     expect(checkedIn('Channel palette')).toBe('Chromatic');
-    expect(checkedIn('Accent color')).toBe(UI_PALETTES[0].label);
     expect(checkedIn('Visualizer style')).toBe('Spectrum');
-    expect((screen.getByLabelText('Peak quantization') as HTMLInputElement).value).toBe('1');
+    expect((screen.getByLabelText(PEAK_QUANTIZATION.label) as HTMLInputElement).value).toBe('1');
     expect(screen.getByText('Low')).toBeTruthy();
-    expect((screen.getByLabelText('Film grain') as HTMLInputElement).value).toBe('50');
   });
 
   it('writes slider values in the stored units', () => {
     const { updateSettings } = renderPanel();
     fireEvent.change(screen.getByLabelText('Peak decay'), { target: { value: '2' } });
     expect(updateSettings).toHaveBeenLastCalledWith({ peakDecayRate: 0.95 });
-    fireEvent.change(screen.getByLabelText('Peak quantization'), { target: { value: '3' } });
+    fireEvent.change(screen.getByLabelText(PEAK_QUANTIZATION.label), { target: { value: '3' } });
     expect(updateSettings).toHaveBeenLastCalledWith({ peakQuantization: 8 });
-    fireEvent.change(screen.getByLabelText('Film grain'), { target: { value: '0' } });
-    expect(updateSettings).toHaveBeenLastCalledWith({ filmGrainAmount: 0 });
   });
 
-  it('turns reactive UI off and sparks on', () => {
-    const { updateSettings } = renderPanel();
-    fireEvent.click(screen.getByRole('switch', { name: 'Reactive UI' }));
-    expect(updateSettings).toHaveBeenLastCalledWith({ audioReactivePulse: false });
-    fireEvent.click(screen.getByRole('switch', { name: 'Sparks' }));
-    expect(updateSettings).toHaveBeenLastCalledWith({ sliderSparksEnabled: true });
-  });
-
-  it('disables the reactive strength slider while Reactive UI is off', () => {
-    renderPanel({ audioReactivePulse: false });
-    expect((screen.getByLabelText(REACTIVE_STRENGTH.label) as HTMLInputElement).disabled).toBe(
-      true
-    );
-  });
-
-  it('leaves the reactive strength slider enabled while Reactive UI is on', () => {
-    renderPanel();
-    expect((screen.getByLabelText(REACTIVE_STRENGTH.label) as HTMLInputElement).disabled).toBe(
-      false
-    );
-  });
-
-  it('disables spark tuning while sparks are off', () => {
-    renderPanel();
-    [...SPARK_SLIDERS, ...MORE_SPARK_SLIDERS].forEach((def) =>
-      expect((screen.getByLabelText(def.label) as HTMLInputElement).disabled).toBe(true)
-    );
-    expect((screen.getByRole('switch', { name: 'Fade out' }) as HTMLInputElement).disabled).toBe(
-      true
-    );
-  });
-
-  it('enables spark tuning once sparks are on and stores the fade mode', () => {
-    const { updateSettings } = renderPanel({ sliderSparksEnabled: true });
-    [...SPARK_SLIDERS, ...MORE_SPARK_SLIDERS].forEach((def) =>
-      expect((screen.getByLabelText(def.label) as HTMLInputElement).disabled).toBe(false)
-    );
-    fireEvent.click(screen.getByRole('switch', { name: 'Fade out' }));
-    expect(updateSettings).toHaveBeenLastCalledWith({ particleFadeMode: 'instant' });
-  });
-
-  it('resets the sparks and the whole stage', () => {
-    const { updateSettings } = renderPanel({ sliderSparksEnabled: true, particleGravity: 2 });
-    fireEvent.click(screen.getByRole('button', { name: 'Reset sparks' }));
-    expect(updateSettings).toHaveBeenLastCalledWith(SPARK_DEFAULTS);
-    fireEvent.click(screen.getByRole('button', { name: 'Reset stage' }));
-    expect(updateSettings).toHaveBeenLastCalledWith(STAGE_DEFAULTS);
+  it('resets the whole visualizer without touching the interface', () => {
+    const { updateSettings } = renderPanel({ visualizerStyle: 'scopes' });
+    fireEvent.click(screen.getByRole('button', { name: 'Reset visualizer' }));
+    expect(updateSettings).toHaveBeenLastCalledWith(VISUALIZER_DEFAULTS);
+    expect(VISUALIZER_DEFAULTS).not.toHaveProperty('uiPalette');
+    expect(VISUALIZER_DEFAULTS).not.toHaveProperty('sliderSparksEnabled');
   });
 
   it('asks for a track before it can show which color is which channel', () => {

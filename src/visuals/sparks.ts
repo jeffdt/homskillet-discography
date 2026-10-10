@@ -1,4 +1,4 @@
-/** Spark tuning (the Stage panel's spark settings). */
+/** Spark tuning (the Interface panel's spark settings). */
 export interface SparkSettings {
   /** Shortest wait between sparks per spawner in ms; waits range from 1x to 3x this. */
   spawnRate: number;

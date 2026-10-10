@@ -5,7 +5,7 @@ import ChannelStrip from './ChannelStrip';
 import { CHIP_DESCRIPTIONS, groupByChip, toggleMute, toggleSolo } from './voiceMix';
 
 /** Shown instead of strips while no track is loaded (spec 3.2). */
-export const EMPTY_CHANNELS_HINT = 'Play something to see channels';
+export const EMPTY_CHANNELS_HINT = 'Play a song to see its channels.';
 
 interface ChannelStripsProps {
   onVoiceMixChange: (mix: VoiceMix) => void;

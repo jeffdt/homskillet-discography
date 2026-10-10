@@ -14,15 +14,18 @@ describe('TopBar', () => {
     expect(screen.getByRole('button', { name: 'Mixer' }).getAttribute('aria-pressed')).toBe(
       'false'
     );
-    expect(screen.getByRole('button', { name: 'Visuals' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Visualizer' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Interface' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'About' })).toBeTruthy();
   });
 
   it('toggles panels', () => {
     const onToggle = vi.fn();
     render(<TopBar panels={{ open: [] }} onToggle={onToggle} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Visuals' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Visualizer' }));
     expect(onToggle).toHaveBeenCalledWith('stage');
+    fireEvent.click(screen.getByRole('button', { name: 'Interface' }));
+    expect(onToggle).toHaveBeenCalledWith('interface');
   });
 
   it('hides the logo while the title screen shows its own', () => {
@@ -93,7 +96,7 @@ describe('TopBar pulse', () => {
     expect(logo.style.getPropertyValue('--pulse-intensity')).toBe('0');
   });
 
-  it('holds the logo still when Reactive UI is off', () => {
+  it('holds the logo still when the pulse is off', () => {
     const { data, logo, run } = renderPulsing(true);
     act(() => data.pulse.setEnabled(false));
     run();
