@@ -1,8 +1,9 @@
 // @vitest-environment node
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { analyzeTrack } from '../../analysis/analyzeTrack';
 import { loadChipCoreFromDisk, readMusicFile } from '../../analysis/nodeChipCore';
 import { renderSpectrumSheet } from '../../analysis/spectrumSheet';
+import { ChipRenderer } from '../../audio/render/ChipRenderer';
 import { ChipCore } from '../../audio/types';
 
 let core: ChipCore;
@@ -37,6 +38,21 @@ describe('analyzeTrack on real chip-core', () => {
       expect(v.rmsBySecond).toBeUndefined();
     });
   }, 30000);
+
+  it('frees the emulator after each track and sheet, so a catalog run does not grow memory', () => {
+    const unload = vi.spyOn(ChipRenderer.prototype, 'unload');
+    const path = 'SuperFORE!/parkour.nsf';
+    analyzeTrack(core, readMusicFile(path), path, { maxSeconds: 0.5 });
+    renderSpectrumSheet(core, readMusicFile(path), path, {
+      startSeconds: 0,
+      seconds: 0.2,
+      paletteId: 'chromatic',
+      gradientId: 'mw-red',
+    });
+    // load() unloads any previous track first, so each render accounts for two calls when it also frees itself.
+    expect(unload).toHaveBeenCalledTimes(4);
+    unload.mockRestore();
+  });
 
   it('records a per-second timeline on request', () => {
     const path = 'SuperFORE!/parkour.nsf';

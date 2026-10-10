@@ -172,6 +172,7 @@ export function renderSpectrumSheet(
     });
   }
   mixAnalyzer.dispose();
+  render.dispose();
 
   const percent = (count: number, total: number) =>
     total ? Math.round((1000 * count) / total) / 10 : 0;

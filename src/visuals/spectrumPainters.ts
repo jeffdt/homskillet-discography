@@ -179,7 +179,10 @@ export class AdditivePainter implements BinPainter {
         const index = voiceIndex[row + b];
         const light = channel[index] + highlight[index];
         if (light === 0) continue;
-        const weight = ADDITIVE_GAIN * light * Math.pow(index / loudest[b], ADDITIVE_DOMINANCE);
+        const ratio = index / loudest[b];
+        const ratio2 = ratio * ratio;
+        // ratio^ADDITIVE_DOMINANCE (6) without Math.pow in the hot loop.
+        const weight = ADDITIVE_GAIN * light * ratio2 * ratio2 * ratio2;
         red[b] += cr * weight;
         green[b] += cg * weight;
         blue[b] += cb * weight;

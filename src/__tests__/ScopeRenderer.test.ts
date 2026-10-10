@@ -367,6 +367,21 @@ describe('ScopeRenderer auto gain', () => {
     expect(swing(strokes(ops)[0].path!)).toBeCloseTo(0.9 * 120, 0);
   });
 
+  it('measures the gain over the triggered window it draws, so a decaying hit does not clip', () => {
+    const { renderer, ops } = setup();
+    renderer.setVoices([voice(0)]);
+    ops.length = 0;
+    // A loud wave that stops just before the newest window, which then holds a quiet negative hum:
+    // the trigger lands on the last loud rising crossing, so the drawn window still holds loud samples.
+    renderer.draw(
+      frame((_v, i) => (i < 512 ? 0.3 * Math.sin((2 * Math.PI * i) / 64) : -0.001)),
+      16
+    );
+    const peak = swing(strokes(ops)[0].path!);
+    expect(peak).toBeLessThanOrEqual(0.9 * 120 + 0.5);
+    expect(peak).toBeGreaterThan(0.85 * 120);
+  });
+
   it('uses the fixed gain when auto gain is off', () => {
     const { renderer, ops } = setup();
     renderer.setVoices([voice(0)]);

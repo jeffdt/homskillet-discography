@@ -52,7 +52,7 @@ describe('scope presets', () => {
       'xy',
       'today',
     ]);
-    expect(SCOPE_DEFAULTS).toEqual(preset('green-crt').settings);
+    expect(SCOPE_DEFAULTS).toEqual({ ...preset('green-crt').settings, scopeAutoGain: true });
     Object.entries(SCOPE_DEFAULTS).forEach(([key, value]) =>
       expect((STAGE_DEFAULTS as Record<string, unknown>)[key]).toBe(value)
     );
@@ -71,7 +71,6 @@ describe('scope presets', () => {
       scopeFill: false,
       scopeCrt: true,
       scopeSpan: 512,
-      scopeAutoGain: true,
     });
     expect(preset('halo').settings).toMatchObject({
       scopeLayout: 'rings',
@@ -95,7 +94,10 @@ describe('scope presets', () => {
 
   it('keeps every preset value inside its control range', () => {
     SCOPE_PRESETS.forEach(({ settings }) => {
-      expect(scopeSettingsOf(settings as unknown as Record<string, unknown>)).toEqual(settings);
+      expect(scopeSettingsOf(settings as unknown as Record<string, unknown>)).toEqual({
+        ...settings,
+        scopeAutoGain: true,
+      });
       expect(SCOPE_SPANS).toContain(settings.scopeSpan);
     });
   });
@@ -139,6 +141,11 @@ describe('matchingScopePreset', () => {
     expect(matchingScopePreset({})!.id).toBe('green-crt');
     expect(matchingScopePreset({ ...preset('halo').settings })!.id).toBe('halo');
     expect(matchingScopePreset({ ...preset('halo').settings, scopeGlow: 0.55 })).toBeNull();
+  });
+
+  it('leaves Auto gain out of presets, so switching it off keeps the preset', () => {
+    SCOPE_PRESETS.forEach((p) => expect('scopeAutoGain' in p.settings).toBe(false));
+    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: false })!.id).toBe('green-crt');
   });
 
   it('matches Green CRT for settings stored before auto gain existed', () => {

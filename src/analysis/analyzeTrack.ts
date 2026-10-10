@@ -66,6 +66,7 @@ export function analyzeTrack(
       stats[v].addFrame(windowRms, peak, levels[v]);
     });
   }
+  render.dispose();
   return {
     durationMs: render.info.durationMs,
     analyzedMs: Math.round(frames * ANALYSIS_FRAME_MS),

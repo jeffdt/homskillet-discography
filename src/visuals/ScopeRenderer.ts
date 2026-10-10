@@ -12,6 +12,7 @@ import {
   SCOPE_FIXED_GAIN,
   TraceBuffer,
   buildTrace,
+  findTrigger,
   createTraceBuffer,
   reactiveEnergy,
   traceCapacity,
@@ -204,11 +205,20 @@ export class ScopeRenderer {
     ctx.fillRect(0, 0, width, height);
   }
 
-  /** This frame's gain for voice index: auto gain measured over the samples the layout draws. */
+  /** This frame's gain for voice index: auto gain measured over the window the layout draws. */
   private traceGain(index: number, waveform: Float32Array, dtMs: number): number {
     if (!this.autoGain) return SCOPE_FIXED_GAIN;
-    const span = this.layout === 'phase' ? PHASE_WINDOW_SAMPLES + PHASE_DELAY_SAMPLES : this.span;
-    const peak = windowPeak(waveform, waveform.length - span, span);
+    let start: number;
+    let span: number;
+    if (this.layout === 'phase') {
+      span = PHASE_WINDOW_SAMPLES + PHASE_DELAY_SAMPLES;
+      start = waveform.length - span;
+    } else {
+      // The same window buildTrace draws, so a loud stretch just before the newest samples is counted.
+      span = this.span;
+      start = findTrigger(waveform, span);
+    }
+    const peak = windowPeak(waveform, start, span);
     const current = this.gains[index];
     const gain =
       current === 0

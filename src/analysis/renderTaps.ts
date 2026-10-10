@@ -44,6 +44,11 @@ export class TapRender {
     return fresh;
   }
 
+  /** Frees the emulator; the render cannot step after this. */
+  dispose(): void {
+    this.renderer.unload();
+  }
+
   /** Voice v's tap sample `back` samples before the newest (0 is the newest). */
   sample(voice: number, back: number): number {
     return this.taps.samples[voice * TAP_RING + ((this.taps.writeIndex - 1 - back) & RING_MASK)];
