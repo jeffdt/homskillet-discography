@@ -2,7 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   FLASH_DECAY_MS,
+  FLASH_RISE,
   FlashFollower,
+  LEVEL_FULL_RMS,
   MIN_TRAIL_FADE,
   PHASE_DELAY_SAMPLES,
   PHASE_WINDOW_SAMPLES,
@@ -151,20 +153,22 @@ describe('effect math', () => {
     expect(trailFade(0.5, 0)).toBe(MIN_TRAIL_FADE);
   });
 
-  it('turns rms into a 0..1 level and energy', () => {
-    expect(voiceLevel(0.3)).toBeCloseTo(0.5);
-    expect(voiceLevel(2)).toBe(1);
+  it('turns rms into a 0..1 level on the measured scale', () => {
+    expect(LEVEL_FULL_RMS).toBe(0.12);
+    expect(voiceLevel(0.06)).toBeCloseTo(0.5);
+    expect(voiceLevel(0.3)).toBe(1);
     expect(voiceLevel(-1)).toBe(0);
     expect(reactiveEnergy(0, 1, 1)).toBe(0);
     expect(reactiveEnergy(0.5, 1, 1)).toBeCloseTo(1.2);
   });
 
-  it('flashes on a sudden rise and decays over 120 ms', () => {
+  it('flashes on a note-sized rise and decays over 120 ms', () => {
+    expect(FLASH_RISE).toBe(0.024);
     const flash = new FlashFollower(8);
     expect(flash.update(0, 0, 16)).toBe(0);
-    expect(flash.update(0, 0.5, 16)).toBe(1);
+    expect(flash.update(0, 0.05, 16)).toBe(1);
     expect(flash.update(0, 0, FLASH_DECAY_MS)).toBeCloseTo(Math.exp(-1));
-    expect(flash.update(1, 0.05, 16)).toBe(0);
+    expect(flash.update(1, 0.01, 16)).toBe(0);
     flash.reset();
     expect(flash.update(0, 0, 16)).toBe(0);
   });

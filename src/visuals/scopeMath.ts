@@ -44,10 +44,13 @@ export const PHASE_WINDOW_SAMPLES = 420;
 export const TRAIL_REFERENCE_MS = 1000 / 60;
 /** Smallest per-frame fade, so 8-bit rounding never leaves ghosts brighter than about 3 percent. */
 export const MIN_TRAIL_FADE = 0.06;
-/** RMS that counts as full level for reactivity. */
-export const LEVEL_FULL_RMS = 0.6;
-/** A rise this far above the slow follower is a new note and flashes. */
-export const FLASH_RISE = 0.12;
+/**
+ * RMS that counts as full level for reactivity: the pulse voices' p99 smoothed level over the
+ * catalog (measured 2026-10-10; DMC goes past it and clamps). It was 0.6, five times any real voice.
+ */
+export const LEVEL_FULL_RMS = 0.12;
+/** A rise this far above the slow follower is a new note and flashes: a fifth of full level, about half a typical note. */
+export const FLASH_RISE = 0.024;
 /** Time constant of the slow rms follower. */
 export const FLASH_FOLLOW_MS = 200;
 /** Time constant of the flash decay. */
