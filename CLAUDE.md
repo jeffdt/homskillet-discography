@@ -50,6 +50,7 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 - `bun run test:run` - Run all tests once and exit
 - `bun run test:ui` - Open Vitest UI for interactive test exploration
 - `bun run coverage` - Generate test coverage report
+- `bun run analyze-tracks [track ...]` - Measure each voice's real levels (peak, RMS, p95, % silent, window peaks, smoothed level) through the app's own renderer; `--json file` writes a level profile, `--timeline` adds RMS per second, `--png dir` draws spectrum sheets per coloring with color stats
 
 **Note:** During active development, assume the dev server is already running. Do not attempt to start it automatically.
 
@@ -124,6 +125,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/config/spectrumGradients.ts** - The 23 loudness gradients for the Unified spectrum
 - **src/visuals/ScopeRenderer.ts** - The Channel scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
+- **src/analysis/** - Headless track analysis for `scripts/analyze-tracks.ts`: TapRender (ChipRenderer + TapRing one 60 fps frame at a time), analyzeTrack (per-voice level profile, schema LEVEL_PROFILE_VERSION), renderSpectrumSheet (waterfalls drawn by the real painters), encodePng
 - **src/audio/** - Audio engine (TypeScript)
   - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it
   - engine/ChipEngine.ts - The `AudioEngine` implementation (load, pause, seek, tempo, mute/solo, taps)

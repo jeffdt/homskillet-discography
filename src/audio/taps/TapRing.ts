@@ -54,6 +54,11 @@ export class TapRing {
     return Atomics.load(this.control, CONTROL_SEQUENCE);
   }
 
+  /** Absolute index one past the newest sample written (wraps like int32). */
+  get writeIndex(): number {
+    return Atomics.load(this.control, CONTROL_WRITE_INDEX);
+  }
+
   /** Marks the start of an update (sequence becomes odd). */
   beginWrite(): void {
     Atomics.add(this.control, CONTROL_SEQUENCE, 1);

@@ -79,6 +79,7 @@
     "coverage": "bun run vitest run --coverage",
     "build-chip-core:docker": "docker compose run --rm chip-core",
     "build-catalog": "bun run scripts/build-catalog.js",
+    "analyze-tracks": "bun run scripts/analyze-tracks.ts",
     "predeploy": "bun run build",
     "deploy": "bun run predeploy && bun run gh-pages -d build --nojekyll",
     "deploy-lite": "bun run build-lite && bun run gh-pages -d build --nojekyll",
