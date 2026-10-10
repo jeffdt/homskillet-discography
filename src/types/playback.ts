@@ -42,7 +42,6 @@ export interface PlaybackControls {
   /** Sets per-voice mute and solo, indexed by voice; missing entries are false. Resets on each new track. */
   setVoiceMix(mix: VoiceMix): void;
   setParam(id: string, value: any): void;
-  pinParam(persistedKey: string, currentValue: any): void;
   setVolume(volume: number): void;
   setShuffle(on: boolean): void;
   setRepeat(on: boolean): void;

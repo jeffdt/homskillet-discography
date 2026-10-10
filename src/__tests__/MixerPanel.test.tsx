@@ -45,7 +45,6 @@ function makeControls() {
   return {
     setTempo: vi.fn(),
     setParam: vi.fn(),
-    pinParam: vi.fn(),
     setVoiceMix: vi.fn(),
   } as unknown as PlaybackControls & Record<string, ReturnType<typeof vi.fn>>;
 }
@@ -100,14 +99,9 @@ describe('MixerPanel', () => {
     expect(controls.setParam).toHaveBeenCalledWith('stereoWidth', 0.25);
   });
 
-  it('pins the shown value under the old settings keys', () => {
-    const { controls } = renderPanel(PLAYING, { tempo: 1.25 });
-    const speedPin = screen.getByRole('button', { name: 'Keep Speed for every song' });
-    expect(speedPin.getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(screen.getByRole('button', { name: 'Keep Bass boost for every song' }));
-    expect(controls.pinParam).toHaveBeenCalledWith('gme.subbass', 0.5);
-    fireEvent.click(speedPin);
-    expect(controls.pinParam).toHaveBeenCalledWith('tempo', 1.25);
+  it('has no pin buttons', () => {
+    renderPanel();
+    expect(screen.queryByRole('button', { name: /every song/ })).toBeNull();
   });
 
   it('resets speed, bass, stereo, mutes and solos', () => {
@@ -119,21 +113,19 @@ describe('MixerPanel', () => {
     expect(controls.setVoiceMix).toHaveBeenCalledWith({ muted: ALL_FALSE, soloed: ALL_FALSE });
   });
 
-  it('waits for a track before the sliders work', () => {
+  it('lets the sliders and reset work before a track plays', () => {
     const { controls } = renderPanel(IDLE);
     expect(screen.getByText(EMPTY_CHANNELS_HINT)).toBeTruthy();
-    expect(screen.getByText(MIXER_COPY.noTrack)).toBeTruthy();
     MIXER_SLIDERS.forEach((def) =>
-      expect((screen.getByLabelText(def.label) as HTMLInputElement).disabled).toBe(true)
+      expect((screen.getByLabelText(def.label) as HTMLInputElement).disabled).toBe(false)
     );
-    expect(
-      (screen.getByRole('button', { name: 'Reset mixer' }) as HTMLButtonElement).disabled
-    ).toBe(true);
-    fireEvent.click(screen.getByRole('button', { name: 'Keep Stereo width for every song' }));
-    expect(controls.pinParam).toHaveBeenCalledWith('gme.stereoWidth', 1);
+    fireEvent.change(screen.getByLabelText('Stereo width'), { target: { value: '0.5' } });
+    expect(controls.setParam).toHaveBeenCalledWith('stereoWidth', 0.5);
+    fireEvent.click(screen.getByRole('button', { name: 'Reset mixer' }));
+    expect(controls.setTempo).toHaveBeenCalledWith(1);
   });
 
-  it('shows a pinned value before anything plays', () => {
+  it('shows a saved value before anything plays', () => {
     renderPanel(IDLE, { 'gme.subbass': 0.8 });
     expect(screen.getByText('80%')).toBeTruthy();
   });

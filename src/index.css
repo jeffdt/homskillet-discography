@@ -992,18 +992,6 @@ button.IconButton {
   mask-image: url(images/chip.png);
 }
 
-.icon-pin-up {
-  width: 24px;
-  mask-image: url(images/pin-up.png);
-  background-color: var(--neutral2);
-}
-
-.icon-pin-down {
-  width: 24px;
-  mask-image: url(images/pin-filled.png);
-  background-color: var(--neutral2);
-}
-
 /* Mobile tab bar - only visible on mobile/portrait */
 
 @media (orientation: portrait), (max-width: 768px) {

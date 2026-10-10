@@ -8,19 +8,8 @@ const BASS = MIXER_SLIDERS[1];
 
 function renderSlider(props: Partial<React.ComponentProps<typeof MixerSlider>> = {}) {
   const onChange = vi.fn();
-  const onTogglePin = vi.fn();
-  render(
-    <MixerSlider
-      def={BASS}
-      value={0.5}
-      pinned={false}
-      disabled={false}
-      onChange={onChange}
-      onTogglePin={onTogglePin}
-      {...props}
-    />
-  );
-  return { onChange, onTogglePin };
+  render(<MixerSlider def={BASS} value={0.5} onChange={onChange} {...props} />);
+  return { onChange };
 }
 
 describe('MixerSlider', () => {
@@ -41,18 +30,8 @@ describe('MixerSlider', () => {
     expect(onChange).toHaveBeenCalledWith(1.2);
   });
 
-  it('toggles the pin and shows whether it is on', () => {
-    const { onTogglePin } = renderSlider({ pinned: true });
-    const pin = screen.getByRole('button', { name: 'Keep Bass boost for every song' });
-    expect(pin.getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(pin);
-    expect(onTogglePin).toHaveBeenCalled();
-  });
-
-  it('disables the slider but not the pin', () => {
-    renderSlider({ disabled: true });
-    expect((screen.getByLabelText('Bass boost') as HTMLInputElement).disabled).toBe(true);
-    const pin = screen.getByRole('button', { name: 'Keep Bass boost for every song' });
-    expect((pin as HTMLButtonElement).disabled).toBe(false);
+  it('has no pin button', () => {
+    renderSlider();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

@@ -1,20 +1,15 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import {
-  MIXER_SLIDERS,
-  formatPercent,
-  isPinned,
-  sliderValue,
-} from '../../components/mixer/mixerControls';
+import { MIXER_SLIDERS, formatPercent, sliderValue } from '../../components/mixer/mixerControls';
 
 const [SPEED, BASS, STEREO] = MIXER_SLIDERS;
 const NO_TRACK = { playerKey: null, tempo: 1, paramValues: {} };
 const PLAYING = { playerKey: 'gme', tempo: 1.25, paramValues: { subbass: 0.5, stereoWidth: 0.75 } };
 
 describe('mixer controls', () => {
-  it('keeps the old ranges, defaults and pin keys', () => {
+  it('keeps the old ranges, defaults and settings keys', () => {
     expect(MIXER_SLIDERS.map((def) => def.label)).toEqual(['Speed', 'Bass boost', 'Stereo width']);
-    expect(MIXER_SLIDERS.map((def) => def.pinKey)).toEqual([
+    expect(MIXER_SLIDERS.map((def) => def.settingKey)).toEqual([
       'tempo',
       'gme.subbass',
       'gme.stereoWidth',
@@ -37,22 +32,16 @@ describe('mixer controls', () => {
     expect(sliderValue(STEREO, PLAYING, {})).toBe(0.75);
   });
 
-  it('shows the pinned value, then the default, before anything plays', () => {
+  it('shows the saved value, then the default, before anything plays', () => {
     expect(sliderValue(SPEED, NO_TRACK, { tempo: 1.5 })).toBe(1.5);
     expect(sliderValue(SPEED, NO_TRACK, {})).toBe(1);
     expect(sliderValue(STEREO, NO_TRACK, {})).toBe(1);
   });
 
-  it('reads pinned zero and string values', () => {
+  it('reads saved zero and string values', () => {
     expect(sliderValue(STEREO, NO_TRACK, { 'gme.stereoWidth': 0 })).toBe(0);
     expect(sliderValue(BASS, NO_TRACK, { 'gme.subbass': '0.5' })).toBe(0.5);
     expect(sliderValue(BASS, NO_TRACK, { 'gme.subbass': 'garbage' })).toBe(0);
-  });
-
-  it('treats only stored values as pinned', () => {
-    expect(isPinned(BASS, { 'gme.subbass': 0 })).toBe(true);
-    expect(isPinned(BASS, { 'gme.subbass': null })).toBe(false);
-    expect(isPinned(BASS, {})).toBe(false);
   });
 
   it('formats values as whole percentages', () => {
