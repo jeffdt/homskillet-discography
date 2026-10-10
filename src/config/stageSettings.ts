@@ -56,15 +56,15 @@ export interface SpectrumColoring {
 export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
   {
     id: 'additive',
-    label: 'By channel: add like light',
+    label: 'Add light',
     description:
-      'Each channel shines its own color at its own loudness, and where channels overlap their light adds up, like colored stage lights. Overlaps get brighter instead of grayer.',
+      'Each channel shines its own color at its own loudness, and where channels overlap their light adds up, like colored stage lights. Faint spill from other channels is left out, so every note keeps its own color.',
   },
   {
     id: 'average',
-    label: 'By channel: average',
+    label: 'Average',
     description:
-      'Each band takes the average color of the channels playing in it, weighted by how loud each one is. Overlapping channels blend toward gray.',
+      'Each band takes the average color of the channels playing in it, weighted toward the loudest one, and keeps their saturation, so overlaps mix like paint instead of turning gray.',
   },
   {
     id: 'unified',

@@ -1,3 +1,4 @@
+import fs from 'fs';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -33,7 +34,7 @@ function checkedIn(group: string): string {
 describe('StagePanel spectrum coloring', () => {
   it('offers the three colorings with add like light checked', () => {
     renderPanel();
-    expect(checkedIn('Spectrum coloring')).toBe('By channel: add like light');
+    expect(checkedIn('Spectrum coloring')).toBe('Add light');
     expect(screen.getByText(/their light adds up, like colored stage lights/)).toBeTruthy();
     expect(screen.queryByRole('radiogroup', { name: 'Gradient' })).toBeNull();
   });
@@ -115,5 +116,17 @@ describe('StagePanel channel colors note', () => {
     renderPanel();
     expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
     expect(STAGE_COPY.channelColors).toContain("scopes' By channel traces");
+    expect(STAGE_COPY.channelColors).toContain("spectrum's Add light and Average colorings");
+  });
+});
+
+describe('SwatchPicker labels', () => {
+  it('wrap inside their card instead of overflowing it', () => {
+    const css = fs.readFileSync('src/styles/stage.css', 'utf8');
+    const rule = /\.SwatchPicker-label\s*\{([^}]*)\}/.exec(css);
+    expect(rule).not.toBeNull();
+    expect(rule![1]).toMatch(/text-wrap:\s*balance/);
+    expect(rule![1]).toMatch(/overflow-wrap:\s*anywhere/);
+    expect(rule![1]).toMatch(/min-width:\s*0/);
   });
 });

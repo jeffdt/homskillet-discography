@@ -17,8 +17,13 @@ import {
 const preset = (id: string) => SCOPE_PRESETS.find((p) => p.id === id)!;
 
 describe('spectrum colorings', () => {
-  it('offers add like light (default), average and unified', () => {
-    expect(SPECTRUM_COLORINGS.map((c) => c.id)).toEqual(['additive', 'average', 'unified']);
+  it('offers Add light (default), Average and Unified, with short labels that fit a card', () => {
+    expect(SPECTRUM_COLORINGS.map((c) => [c.id, c.label])).toEqual([
+      ['additive', 'Add light'],
+      ['average', 'Average'],
+      ['unified', 'Unified'],
+    ]);
+    SPECTRUM_COLORINGS.forEach((c) => expect(c.label.length).toBeLessThanOrEqual(12));
     expect(STAGE_DEFAULTS.spectrumColoring).toBe('additive');
     expect(STAGE_DEFAULTS.spectrumGradient).toBe('mw-green');
     expect(spectrumColoringById('unified').label).toBe('Unified');

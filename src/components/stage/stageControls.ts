@@ -278,7 +278,7 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, SPARKS, SP
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
   channelColors:
-    "Each sound channel of the chip gets its own color: in the Mixer, in the spectrum's By channel colorings, and in the scopes' By channel traces.",
+    "Each sound channel of the chip gets its own color: in the Mixer, in the spectrum's Add light and Average colorings, and in the scopes' By channel traces.",
   accent:
     'The color of buttons, highlights and the play button glow. It leaves the channel colors alone.',
   reset: 'Puts everything in this panel back the way the site starts.',

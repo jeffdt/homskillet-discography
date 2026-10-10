@@ -125,6 +125,13 @@
   flex: 1;
 }
 
+/* Buttons do not wrap by default (index.css); card labels must, so long names never spill into the next card. */
+.App .SwatchPicker-label {
+  min-width: 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
 /* ===== Compact: 44px touch targets ===== */
 
 .App[data-layout='compact'] .SwatchPicker-card,
