@@ -84,10 +84,30 @@ describe('BinColorizer', () => {
     expect(r).toBeCloseTo(127.5, 3);
     expect(g).toBe(0);
     expect(b).toBeCloseTo(127.5, 3);
-    spectra[1][3] = 0.5; // a sixteenth of the power
+    spectra[1][3] = 0.5; // 1/256 of the weight at AVERAGE_WEIGHT_POWER 8
     [r, g, b] = rgbAt(colorizer.update(frame, 0), 3);
-    expect(r).toBeCloseTo(240, 3);
-    expect(b).toBeCloseTo(15, 3);
+    expect(r).toBeCloseTo((255 * 256) / 257, 3);
+    expect(b).toBeCloseTo(255 / 257, 3);
+  });
+
+  it("keeps the voices' saturation when their average would turn gray", () => {
+    const { colorizer, frame, spectra } = setup();
+    colorizer.setChannelColors(['#56b4e9', '#f0e442']);
+    spectra[0][3] = 1;
+    spectra[1][3] = 1;
+    const [r, g, b] = rgbAt(colorizer.update(frame, 0), 3);
+    // Plain average (163, 204, 149.5) has chroma 54.5; the voices average 160.5 (147 and 174).
+    expect(g).toBeCloseTo(204, 3);
+    expect(b).toBeCloseTo(204 - 160.5, 3);
+    expect(r).toBeCloseTo(204 - (204 - 163) * (160.5 / 54.5), 3);
+  });
+
+  it('leaves an exact gray alone (no hue to restore)', () => {
+    const { colorizer, frame, spectra } = setup();
+    colorizer.setChannelColors(['#ffff00', '#0000ff']);
+    spectra[0][3] = 1;
+    spectra[1][3] = 1;
+    expect(rgbAt(colorizer.update(frame, 0), 3)).toEqual([127.5, 127.5, 127.5]);
   });
 
   it('ignores muted and unsoloed voices and never reads their spectra', () => {

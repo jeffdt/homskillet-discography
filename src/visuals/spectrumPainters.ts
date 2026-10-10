@@ -2,7 +2,7 @@ import { VOICE_PAIRS } from '../audio/constants';
 import { SpectrumLayout, VoiceFrame, VoiceInfo } from '../audio/data/contract';
 import { SILENT_VOICE_RMS } from './BinColorizer';
 import { Rgb, buildGradientLut, packPixel, parseHexColor } from './color';
-import { aWeightingLut, buildShadeTable, valueIndex } from './spectrogramMath';
+import { SHADE_BLACK_POINT, aWeightingLut, buildShadeTable, valueIndex } from './spectrogramMath';
 
 /** The fixed colors channel colors are shaded between: silence and the loudest peaks. */
 export interface StageShades {
@@ -32,8 +32,8 @@ export interface BinColorSource {
   update(frame: VoiceFrame, dtMs: number): Float32Array;
 }
 
-/** A bin is "lit" for peak markers once one voice reaches this value index in it. */
-export const LIT_VALUE_INDEX = 24;
+/** A bin is "lit" for peak markers once a voice's value index there passes the black point. */
+export const LIT_VALUE_INDEX = SHADE_BLACK_POINT;
 
 function opaque([r, g, b]: Rgb): number {
   return packPixel(r, g, b, 255);

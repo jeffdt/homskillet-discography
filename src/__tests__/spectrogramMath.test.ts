@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SHADE_BLACK_POINT,
   SHADE_HIGHLIGHT_MAX,
   SHADE_KNEE,
   ScrollAccumulator,
@@ -49,11 +50,17 @@ describe('aWeightingLut', () => {
 });
 
 describe('buildShadeTable', () => {
-  it('runs from background to the channel color at the knee, then part way to the highlight', () => {
+  it('stays at the background up to the black point, rises linearly to the knee, then eases toward the highlight', () => {
     const { channel, highlight } = buildShadeTable();
+    expect(SHADE_BLACK_POINT).toBe(51);
+    expect(SHADE_KNEE).toBe(102);
+    expect(SHADE_HIGHLIGHT_MAX).toBe(0.35);
     expect(channel).toHaveLength(256);
-    expect(channel[0]).toBe(0);
-    expect(highlight[0]).toBe(0);
+    for (let i = 0; i <= SHADE_BLACK_POINT; i++) {
+      expect(channel[i]).toBe(0);
+      expect(highlight[i]).toBe(0);
+    }
+    expect(channel[((SHADE_BLACK_POINT + SHADE_KNEE) / 2) | 0]).toBeCloseTo(25 / 51, 6);
     expect(channel[SHADE_KNEE]).toBeCloseTo(1, 6);
     expect(highlight[SHADE_KNEE]).toBe(0);
     expect(highlight[255]).toBeCloseTo(SHADE_HIGHLIGHT_MAX, 6);
@@ -61,7 +68,9 @@ describe('buildShadeTable', () => {
     for (let i = 1; i < 256; i++) {
       expect(channel[i] + highlight[i]).toBeLessThanOrEqual(1 + 1e-6);
       expect(highlight[i]).toBeGreaterThanOrEqual(highlight[i - 1]);
-      if (i <= SHADE_KNEE) expect(channel[i]).toBeGreaterThan(channel[i - 1]);
+      if (i > SHADE_BLACK_POINT && i <= SHADE_KNEE)
+        expect(channel[i]).toBeGreaterThan(channel[i - 1]);
+      if (i > SHADE_KNEE) expect(channel[i] + highlight[i]).toBeCloseTo(1, 6);
     }
   });
 });

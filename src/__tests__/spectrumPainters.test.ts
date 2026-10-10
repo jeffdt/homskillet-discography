@@ -4,7 +4,7 @@ import { VOICE_PAIRS } from '../audio/constants';
 import { VoiceFrame, VoiceInfo } from '../audio/data/contract';
 import { createSpectrumLayout } from '../audio/data/spectrumLayout';
 import { Rgb, unpackPixel } from '../visuals/color';
-import { SHADE_KNEE, aWeightingLut } from '../visuals/spectrogramMath';
+import { SHADE_BLACK_POINT, SHADE_KNEE, aWeightingLut } from '../visuals/spectrogramMath';
 import {
   AdditivePainter,
   AveragePainter,
@@ -126,6 +126,7 @@ describe('AveragePainter', () => {
     painter.update(frame(), 16);
     expect(rgb(painter.pixel(50, SHADE_KNEE))).toEqual([86, 180, 233]);
     expect(rgb(painter.pixel(50, 0))).toEqual([16, 16, 16]);
+    expect(rgb(painter.pixel(50, SHADE_BLACK_POINT))).toEqual([16, 16, 16]);
     expect(painter.peakPixel(50, SHADE_KNEE)).toBe(painter.pixel(50, SHADE_KNEE));
     expect(painter.emptyPixel).toBe(0);
   });

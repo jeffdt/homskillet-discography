@@ -48,10 +48,16 @@ export function readCssColor(name: string, fallback: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
 }
 
-/** Value index (0..255) at which a bin shows its pure channel color. */
-export const SHADE_KNEE = 140;
-/** How far toward the highlight color the loudest values go (0..1); full would wash out the hue. */
-export const SHADE_HIGHLIGHT_MAX = 0.55;
+/**
+ * Value index at or below which a By-channel bin stays the background color. The Unified gradients'
+ * dark first segment ends at 51, and the catalog's median painted value index is 45 (measured
+ * 2026-10-10), so the quieter half of each frame stays dark, which is where Unified gets its contrast.
+ */
+export const SHADE_BLACK_POINT = 51;
+/** Value index at which a bin shows its pure channel color: the Unified gradients' full-color stop (catalog p90 is 96). */
+export const SHADE_KNEE = 102;
+/** How far toward the highlight color the loudest values go (0..1); more washes overlapping hues out to white. */
+export const SHADE_HIGHLIGHT_MAX = 0.35;
 
 /** Per value index (0..255): the weight of the channel color and of the highlight; the background gets the rest. */
 export interface ShadeTable {
@@ -59,13 +65,18 @@ export interface ShadeTable {
   readonly highlight: Float32Array;
 }
 
-/** Background to channel color up to the knee (eased so quiet bins stay dark), then toward the highlight. */
-export function buildShadeTable(knee = SHADE_KNEE, highlightMax = SHADE_HIGHLIGHT_MAX): ShadeTable {
+/** Background up to the black point, linear to the channel color at the knee, then easing toward the highlight. */
+export function buildShadeTable(
+  blackPoint = SHADE_BLACK_POINT,
+  knee = SHADE_KNEE,
+  highlightMax = SHADE_HIGHLIGHT_MAX
+): ShadeTable {
   const channel = new Float32Array(256);
   const highlight = new Float32Array(256);
   for (let i = 0; i < 256; i++) {
+    if (i <= blackPoint) continue;
     if (i <= knee) {
-      channel[i] = Math.pow(i / knee, 1.5);
+      channel[i] = (i - blackPoint) / (knee - blackPoint);
     } else {
       const u = (i - knee) / (255 - knee);
       highlight[i] = highlightMax * u * u;
