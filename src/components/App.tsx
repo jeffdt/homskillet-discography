@@ -11,7 +11,7 @@ import { VoiceMix } from '../audio/types';
 import { AudioEngine } from '../audio/engine/AudioEngine';
 import { createAudioEngine, createUnlockedAudioContext } from '../audio/engine/createAudioEngine';
 import { parseEngineOverrides } from '../audio/engine/engineKind';
-import EnginePlayer from '../players/EnginePlayer';
+import EnginePlayer, { PLAYER_KEY } from '../players/EnginePlayer';
 import { uiPaletteAt } from '../config/uiPalettes';
 import { updateAccentColors } from '../util/cssVariables';
 
@@ -31,7 +31,7 @@ const BASE_URL = publicUrl && publicUrl !== '/' ? publicUrl : document.location.
  * Owns the audio graph, chip-core, the Sequencer and playback state, and hands AppShell
  * a PlaybackState snapshot plus stable PlaybackControls.
  */
-class App extends React.Component<AppProps, AppState> {
+export class App extends React.Component<AppProps, AppState> {
   private engine: AudioEngine | null = null;
   private audioCtx: AudioContext | null = null;
   private sequencer!: Sequencer;
@@ -91,7 +91,6 @@ class App extends React.Component<AppProps, AppState> {
       setSpeedRelative: this.setSpeedRelative,
       setVoiceMix: this.handleSetVoiceMix,
       setParam: this.handleParamChange,
-      pinParam: this.handlePinParam,
       setVolume: this.handleVolumeChange,
       setShuffle: this.handleSetShuffle,
       setRepeat: this.handleSetRepeat,
@@ -371,58 +370,32 @@ class App extends React.Component<AppProps, AppState> {
     this.setState({ voiceMask: [...player.getVoiceMask()] });
   }
 
+  /** Sets the speed for this and every later song; with nothing loaded it is only saved. */
   handleTempoChange(event: any) {
-    if (!this.sequencer?.getPlayer()) return;
-
     const value = parseFloat(event.target ? event.target.value : event) || 1.0;
-    this.sequencer.getPlayer()!.setTempo(value);
-    this.setState({
-      tempo: value,
-    });
-
-    const { settings, updateSettings } = this.props.userContext;
-    const persistedKey = 'tempo';
-    if (settings[persistedKey] != null) {
-      updateSettings({ [persistedKey]: value });
+    const player = this.sequencer?.getPlayer();
+    if (player) {
+      player.setTempo(value);
+      this.setState({ tempo: value });
     }
+    this.props.userContext.updateSettings({ tempo: value });
   }
 
+  /** Sets an engine parameter (bass, stereo) for this and every later song; with nothing loaded it is only saved. */
   handleParamChange(id: string, value: any) {
-    if (!this.sequencer?.getPlayer()) return;
-    const player = this.sequencer.getPlayer()!;
-    (player as any).setParameter(id, value);
-    this.setState((prevState) => ({
-      paramValues: { ...prevState.paramValues, [id]: value },
-    }));
-
-    const { settings, updateSettings } = this.props.userContext;
-    const persistedKey = `${player.playerKey}.${id}`;
-    if (settings[persistedKey] != null) {
-      updateSettings({ [persistedKey]: value });
+    const player = this.sequencer?.getPlayer();
+    if (player) {
+      (player as any).setParameter(id, value);
+      this.setState((prevState) => ({
+        paramValues: { ...prevState.paramValues, [id]: value },
+      }));
     }
-  }
-
-  handlePinParam(persistedKey: string, currentValue: any) {
-    const { settings, replaceSettings } = this.props.userContext;
-    const newSettings = { ...settings };
-
-    if (newSettings[persistedKey] != null) {
-      delete newSettings[persistedKey];
-    } else {
-      newSettings[persistedKey] = currentValue;
-    }
-
-    replaceSettings(newSettings);
+    this.props.userContext.updateSettings({ [`${PLAYER_KEY}.${id}`]: value });
   }
 
   setSpeedRelative(delta: number) {
     if (!this.sequencer?.getPlayer()) return;
-
-    const tempo = clamp(this.state.tempo + delta, 0.1, 2);
-    this.sequencer.getPlayer()!.setTempo(tempo);
-    this.setState({
-      tempo: tempo,
-    });
+    this.handleTempoChange(clamp(this.state.tempo + delta, 0.1, 2));
   }
 
   handleVolumeChange(volume: number) {

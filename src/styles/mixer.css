@@ -189,33 +189,12 @@
   color: var(--neutral4);
 }
 
-.App .MixerSlider-pin {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  align-self: center;
-  border-radius: var(--radius);
-  background: transparent;
-  cursor: pointer;
-}
-
-.App .MixerSlider-pin[aria-pressed='true'] {
-  box-shadow: inset 0 0 0 1px var(--accent);
-}
-
 .App .MixerSlider .Mixer-explain {
   margin: 2px 0 0;
 }
 
 .App[data-layout='compact'] .MixerSlider-row input[type='range'] {
   min-height: var(--touch-target);
-}
-
-.App[data-layout='compact'] .MixerSlider-pin {
-  min-height: var(--touch-target);
-  min-width: var(--touch-target);
 }
 
 /* ===== Panel layout ===== */

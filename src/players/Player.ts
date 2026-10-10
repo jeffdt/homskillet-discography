@@ -108,7 +108,7 @@ export default abstract class Player extends EventEmitter {
     return this.paramDefs.find((p) => p.id === paramId)?.defaultValue;
   }
 
-  /** Transient value first, then the user's persisted ("pinned") value, then the default. */
+  /** Transient value first, then the user's saved value, then the default. */
   resolveParamValue(paramId: string, transientValue: any, persistedSettings: any): any {
     if (transientValue !== undefined && transientValue !== null) return transientValue;
     const persistedKey = `${this.playerKey}.${paramId}`;

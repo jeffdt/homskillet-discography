@@ -4,7 +4,7 @@ import { PlaybackState } from '../../types/playback';
 /** The Mixer's sliders: tempo plus the engine's two parameters. */
 export type MixerSliderId = 'tempo' | 'subbass' | 'stereoWidth';
 
-/** A Mixer slider: what it changes, its range, its pin key and the line that explains it. */
+/** A Mixer slider: what it changes, its range, its settings key and the line that explains it. */
 export interface MixerSliderDef {
   id: MixerSliderId;
   label: string;
@@ -13,8 +13,8 @@ export interface MixerSliderDef {
   max: number;
   step: number;
   defaultValue: number;
-  /** User-settings key that keeps the value for every song ("pins" it). */
-  pinKey: string;
+  /** User-settings key that keeps the value for every song. */
+  settingKey: string;
 }
 
 function engineSlider(
@@ -31,7 +31,7 @@ function engineSlider(
     max: def.max!,
     step: def.step!,
     defaultValue: def.defaultValue,
-    pinKey: `${PLAYER_KEY}.${id}`,
+    settingKey: `${PLAYER_KEY}.${id}`,
   };
 }
 
@@ -46,7 +46,7 @@ export const MIXER_SLIDERS: MixerSliderDef[] = [
     max: 2,
     step: 0.05,
     defaultValue: 1,
-    pinKey: 'tempo',
+    settingKey: 'tempo',
   },
   engineSlider(
     'subbass',
@@ -66,7 +66,7 @@ function toNumber(value: unknown): number | undefined {
   return Number.isFinite(number) ? number : undefined;
 }
 
-/** The value a slider shows: the playing value, else the pinned one, else the default. */
+/** The value a slider shows: the playing value, else the saved one, else the default. */
 export function sliderValue(
   def: MixerSliderDef,
   playback: Pick<PlaybackState, 'playerKey' | 'tempo' | 'paramValues'>,
@@ -78,12 +78,7 @@ export function sliderValue(
       : def.id === 'tempo'
         ? playback.tempo
         : playback.paramValues[def.id];
-  return toNumber(playing) ?? toNumber(settings[def.pinKey]) ?? def.defaultValue;
-}
-
-/** Whether the slider's value is pinned (kept for every song); matches App.handlePinParam. */
-export function isPinned(def: MixerSliderDef, settings: Record<string, any>): boolean {
-  return settings[def.pinKey] != null;
+  return toNumber(playing) ?? toNumber(settings[def.settingKey]) ?? def.defaultValue;
 }
 
 /** A slider value as the Mixer shows it: 1.25 as "125%". */
