@@ -346,9 +346,9 @@
   --reactive-glow: 0;
 }
 
-/* The logo swells and glows with the music. */
+/* The logo swells and glows with the music; the swell stops at 2x so high strengths cannot cover the top bar. */
 .App .TopBar-logo {
-  transform: scale(calc(1 + var(--pulse-intensity, 0) * 0.3 * var(--reactive)));
+  transform: scale(min(2, calc(1 + var(--pulse-intensity, 0) * 0.3 * var(--reactive))));
   transform-origin: right center;
   text-shadow: 0 0
     calc(var(--pulse-intensity, 0) * 20px * var(--reactive) * var(--reactive-glow, 1)) var(--accent);
