@@ -22,7 +22,7 @@ describe('StageSlider', () => {
   it('shows slider positions and reports stored values', () => {
     const onChange = vi.fn();
     render(<StageSlider def={PEAK_QUANTIZATION} value={4} onChange={onChange} />);
-    const input = screen.getByLabelText('Peak quantization') as HTMLInputElement;
+    const input = screen.getByLabelText('Peak steps') as HTMLInputElement;
     expect(input.value).toBe('2');
     expect(screen.getByText('Medium')).toBeTruthy();
     fireEvent.change(input, { target: { value: '3' } });

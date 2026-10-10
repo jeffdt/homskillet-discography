@@ -31,6 +31,7 @@ import { PlaybackControls, PlaybackState } from '../types/playback';
 import { channelColors } from '../visuals/channelColors';
 import AboutPanel from './AboutPanel';
 import AlbumsPanel from './AlbumsPanel';
+import InterfacePanel from './InterfacePanel';
 import Dock from './Dock';
 import FilmGrain from './FilmGrain';
 import MixerPanel from './MixerPanel';
@@ -254,6 +255,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     toggleAlbums: () => togglePanel('albums'),
     toggleMixer: () => togglePanel('mixer'),
     toggleStage: () => togglePanel('stage'),
+    toggleInterface: () => togglePanel('interface'),
     closeTopmost: () => {
       const top = topmostPanel(panels);
       if (top) {
@@ -291,6 +293,8 @@ export default function AppShell({ playback, controls }: AppShellProps) {
         return <MixerPanel playback={playback} controls={controls} settings={settings} />;
       case 'stage':
         return <StagePanel />;
+      case 'interface':
+        return <InterfacePanel />;
       case 'about':
         return <AboutPanel about={catalog ? catalog.about : null} />;
       default:

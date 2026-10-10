@@ -50,7 +50,7 @@ describe('scope presets', () => {
       'neon',
       'phosphor',
       'xy',
-      'today',
+      'plain',
     ]);
     expect(SCOPE_DEFAULTS).toEqual({ ...preset('green-crt').settings, scopeAutoGain: true });
     Object.entries(SCOPE_DEFAULTS).forEach(([key, value]) =>
@@ -81,7 +81,7 @@ describe('scope presets', () => {
       scopeReactivity: 0.55,
       scopeSpan: 768,
     });
-    expect(preset('today').settings).toMatchObject({
+    expect(preset('plain').settings).toMatchObject({
       scopeTrails: 0,
       scopeGlow: 0,
       scopeBloom: 0,

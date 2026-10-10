@@ -1,4 +1,4 @@
-export type PanelId = 'albums' | 'mixer' | 'stage' | 'about';
+export type PanelId = 'albums' | 'mixer' | 'stage' | 'interface' | 'about';
 /**
  * Wide-layout slots. Both side slots open on the left so the visualizer's right edge, where its
  * newest data appears, stays visible: `outer` sits at the screen edge, `inner` beside it.
@@ -9,13 +9,15 @@ export const PANEL_SLOTS: Record<PanelId, PanelSlot> = {
   albums: 'outer',
   mixer: 'inner',
   stage: 'inner',
+  interface: 'inner',
   about: 'center',
 };
 
 export const PANEL_TITLES: Record<PanelId, string> = {
   albums: 'Albums',
   mixer: 'Mixer',
-  stage: 'Visuals',
+  stage: 'Visualizer',
+  interface: 'Interface',
   about: 'About',
 };
 

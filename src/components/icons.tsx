@@ -35,11 +35,21 @@ export const IconMixer = () => (
   </Icon>
 );
 
-/** An eye: the Visuals panel. */
+/** An eye: the Visualizer panel. */
 export const IconStage = () => (
   <Icon>
     <path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0" />
     <circle cx="12" cy="12" r="3" />
+  </Icon>
+);
+
+/** A paint palette: the Interface panel. */
+export const IconInterface = () => (
+  <Icon>
+    <path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-2.5a1.5 1.5 0 0 0-1.1 2.5 1.5 1.5 0 0 1-1.1 2.5Z" />
+    <circle cx="7.5" cy="10.5" r="1" />
+    <circle cx="10.5" cy="6.5" r="1" />
+    <circle cx="15.5" cy="7.5" r="1" />
   </Icon>
 );
 

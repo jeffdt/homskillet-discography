@@ -5,7 +5,7 @@ import {
   scopeSpanOf,
 } from '../../config/stageSettings';
 
-/** A Stage panel slider: the setting it writes, how slider positions map to it, and its explanation. */
+/** A Visualizer or Interface panel slider: the setting it writes, how slider positions map to it, and its explanation. */
 export interface StageSliderDef {
   /** Unique; the input's DOM id is `stage-${id}`. */
   id: string;
@@ -24,7 +24,7 @@ export interface StageSliderDef {
   format(value: number): string;
 }
 
-/** A Stage panel switch: the setting it writes and its explanation. */
+/** A Visualizer or Interface panel switch: the setting it writes and its explanation. */
 export interface StageToggleDef {
   id: string;
   key: StageSettingKey;
@@ -97,7 +97,7 @@ export const PEAK_DECAY: StageSliderDef = {
 export const PEAK_QUANTIZATION: StageSliderDef = {
   id: 'peak-quantization',
   key: 'peakQuantization',
-  label: 'Peak quantization',
+  label: 'Peak steps',
   explanation:
     'Snaps the falling peak markers to coarse steps, for a chunky, pixel-art fall. Off lets them glide.',
   step: 1,
@@ -125,9 +125,9 @@ export const REACTIVE_STRENGTH_VALUES = [0, 25, 50, 75, 100, 150, 200, 300, 400,
 export const REACTIVE_STRENGTH: StageSliderDef = {
   id: 'reactive-strength',
   key: 'reactiveStrength',
-  label: 'Reactive UI strength',
+  label: 'Pulse strength',
   explanation:
-    'How big the glow on the dock and play button and the swell of the logo get when the music hits. At 100% it is easy to see; past 200% everything throbs on every hit. Turn it down for a calmer screen.',
+    'How big the glow on the player bar and play button and the swell of the logo get when the music hits. Past 200% everything throbs on every beat; turn it down for a calmer screen.',
   step: 1,
   ...stepped(REACTIVE_STRENGTH_VALUES),
   format: (value) => (value === 0 ? 'Off' : `${value}%`),
@@ -138,8 +138,7 @@ export const FILM_GRAIN: StageSliderDef = {
   id: 'film-grain',
   key: 'filmGrainAmount',
   label: 'Film grain',
-  explanation:
-    'A layer of random specks over everything, like old film. It is drawn once and only jiggles, so it costs the visualizer nothing.',
+  explanation: 'A layer of fine specks over everything, like old film.',
   step: 5,
   ...direct(0, 100, 0),
   format: (value) => (value === 0 ? 'Off' : `${value}%`),
@@ -149,7 +148,7 @@ export const FILM_GRAIN: StageSliderDef = {
 export const SPARK_SPAWN: StageSliderDef = {
   id: 'spark-spawn',
   key: 'particleSpawnRate',
-  label: 'Spawn frequency',
+  label: 'How often',
   explanation: 'How often new sparks fly off the progress bar. Higher is busier.',
   step: 1,
   ...stepped(SPAWN_VALUES),
@@ -248,8 +247,8 @@ export const ALL_STAGE_SLIDERS: readonly StageSliderDef[] = [
 export const REACTIVE_UI: StageToggleDef = {
   id: 'reactive-ui',
   key: 'audioReactivePulse',
-  label: 'Reactive UI',
-  explanation: 'The dock and play button glow and the logo swells with the music.',
+  label: 'Pulse with the music',
+  explanation: 'The player bar and play button glow and the logo swells on the beat.',
   isOn: (value) => value !== false,
   toValue: (on) => on,
 };
@@ -281,10 +280,11 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, SPARKS, SP
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
   channelColors:
-    "Each sound channel of the chip gets its own color: in the Mixer, in the spectrum's Add light and Average colorings, and in the scopes' By channel traces.",
+    'Each sound channel of the chip gets its own color, used in the Mixer and wherever the visualizer colors by channel.',
   accent:
-    'The color of buttons, highlights and the play button glow. It leaves the channel colors alone.',
-  reset: 'Puts everything in this panel back the way the site starts.',
+    'The color of buttons, highlights and the play button glow. Channel colors are set in the Visualizer panel.',
+  resetVisualizer: 'Puts every visualizer setting back the way the site starts.',
+  resetInterface: 'Puts every setting in this panel back the way the site starts.',
   noVoices: 'Play something to see which color is which channel.',
 };
 

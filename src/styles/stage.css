@@ -1,4 +1,4 @@
-/* Stage panel ("Visuals") styles. Colors come only from the palette variables in index.css. */
+/* Visualizer and Interface panel styles. Colors come only from the palette variables in index.css. */
 
 .StagePanel-section + .StagePanel-section {
   margin-top: 20px;

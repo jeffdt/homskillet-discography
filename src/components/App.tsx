@@ -126,7 +126,7 @@ class App extends React.Component<AppProps, AppState> {
       console.error('Error creating the audio engine:', e);
       this.setState({ loading: false });
       this.props.toastContext.enqueueToast(
-        'Error loading player engine. Old browser?',
+        "Couldn't start the music player. Try a recent version of Chrome, Firefox or Edge.",
         ToastLevels.ERROR
       );
       return;

@@ -42,8 +42,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'metallic-wing',
     label: 'Metallic Wing',
-    description:
-      'Every channel in Metallic Wing greens, like the original single-color visualizer.',
+    description: "Every channel in a shade of the site's signature green.",
     channels: [
       '#9bfe38',
       '#66cb01',
@@ -73,7 +72,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'game-genie',
     label: 'Game Genie',
-    description: 'Blues, purples, reds and golds from the classic visualizer gradient.',
+    description: 'Blues, purples, reds and golds, like the Game Genie gradient.',
     channels: [
       '#6a6af5',
       '#a855e8',

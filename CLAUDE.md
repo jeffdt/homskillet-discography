@@ -113,15 +113,15 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - AppShell.tsx - Layout, panels, URL sync, keyboard
   - Stage.tsx - Full-window visualizer
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
-  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visuals" panel; controls in src/components/stage/), AboutPanel
+  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
   - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
   - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
-- **src/styles/stage.css** - Visuals panel styles
-- **src/config/stageSettings.ts** - Every Visuals panel setting and default ("Reset stage" writes them); visualizer styles (Spectrum, Channel scopes); spectrum colorings (add like light, average, unified); scope layouts, trace colorings and presets (Green CRT is the default); `scopeSettingsOf` guards stored scope values
+- **src/styles/stage.css** - Visualizer and Interface panel styles
+- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, Channel scopes); spectrum colorings (Add light, Average, Unified); scope layouts, trace colorings and presets (Green CRT is the default); `scopeSettingsOf` guards stored scope values
 - **src/config/spectrumGradients.ts** - The 23 loudness gradients for the Unified spectrum
 - **src/visuals/ScopeRenderer.ts** - The Channel scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)

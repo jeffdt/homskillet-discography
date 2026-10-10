@@ -8,6 +8,7 @@ export type ShortcutAction =
   | 'closeTopmost'
   | 'toggleMixer'
   | 'toggleStage'
+  | 'toggleInterface'
   | 'toggleAlbums'
   | 'speedDown'
   | 'speedDownFine'
@@ -121,6 +122,8 @@ function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
       return 'toggleMixer';
     case 'v':
       return 'toggleStage';
+    case 'i':
+      return 'toggleInterface';
     case 'a':
       return 'toggleAlbums';
     default:

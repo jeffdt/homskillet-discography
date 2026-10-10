@@ -244,6 +244,19 @@ describe('AppShell', () => {
     expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
   });
 
+  it('opens the Interface panel with I, in the slot beside Albums', async () => {
+    renderShell();
+    await screen.findByText('or browse 2 albums');
+    fireEvent.keyDown(document.body, { key: 'a' });
+    fireEvent.keyDown(document.body, { key: 'i' });
+    expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Interface' })).toBeTruthy();
+    expect(screen.getByRole('radiogroup', { name: 'Accent color' })).toBeTruthy();
+    fireEvent.keyDown(document.body, { key: 'v' });
+    expect(screen.queryByRole('dialog', { name: 'Interface' })).toBeNull();
+    expect(screen.getByRole('dialog', { name: 'Visualizer' })).toBeTruthy();
+  });
+
   it('closes every open panel on a press outside the panels and chrome, but not inside them', async () => {
     const { container } = renderShell();
     fireEvent.click(await screen.findByText('or browse 2 albums'));
@@ -353,14 +366,14 @@ describe('AppShell', () => {
       fireEvent.keyDown(document.body, { key: 'a' });
       fireEvent.keyDown(document.body, { key: 'v' });
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
-      expect(screen.getByRole('dialog', { name: 'Visuals' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Visualizer' })).toBeTruthy();
 
       setCompact(true);
       expect(screen.queryByRole('dialog', { name: 'Albums' })).toBeNull();
-      expect(screen.getByRole('dialog', { name: 'Visuals' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Visualizer' })).toBeTruthy();
 
       fireEvent.keyDown(document.body, { key: 'Escape' });
-      expect(screen.queryByRole('dialog', { name: 'Visuals' })).toBeNull();
+      expect(screen.queryByRole('dialog', { name: 'Visualizer' })).toBeNull();
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
     });
 
@@ -373,7 +386,7 @@ describe('AppShell', () => {
       setCompact(true);
       setCompact(false);
       expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
-      expect(screen.getByRole('dialog', { name: 'Visuals' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: 'Visualizer' })).toBeTruthy();
     });
 
     it('marks only the visible panel in the top bar and raises a hidden one instead of closing it', async () => {

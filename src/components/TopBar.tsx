@@ -4,12 +4,13 @@ import { Box, LOGO_HANDOFF_MS, handoffTransform } from '../shell/logoHandoff';
 import { prefersReducedMotion } from '../shell/motion';
 import { PANEL_TITLES, PanelId, PanelState, isPanelOpen } from '../shell/panels';
 import Wordmark from './Wordmark';
-import { IconAlbums, IconInfo, IconMixer, IconStage } from './icons';
+import { IconAlbums, IconInfo, IconInterface, IconMixer, IconStage } from './icons';
 
 const BUTTONS: Array<{ id: PanelId; shortcut: string | null; Icon: () => JSX.Element }> = [
   { id: 'albums', shortcut: 'A', Icon: IconAlbums },
   { id: 'mixer', shortcut: 'M', Icon: IconMixer },
   { id: 'stage', shortcut: 'V', Icon: IconStage },
+  { id: 'interface', shortcut: 'I', Icon: IconInterface },
   { id: 'about', shortcut: null, Icon: IconInfo },
 ];
 

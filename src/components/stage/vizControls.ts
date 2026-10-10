@@ -24,7 +24,7 @@ export const SCOPE_GLOW: StageSliderDef = {
   id: 'scope-glow',
   key: 'scopeGlow',
   label: 'Glow',
-  explanation: 'A soft halo around each line, drawn as wider, fainter copies of it.',
+  explanation: 'A soft halo around each line.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -35,8 +35,7 @@ export const SCOPE_BLOOM: StageSliderDef = {
   id: 'scope-bloom',
   key: 'scopeBloom',
   label: 'Bloom',
-  explanation:
-    'Light bleeding past the lines: a small blurred copy of the picture laid over it. Off on slower devices.',
+  explanation: 'Light bleeding past the lines, like an overexposed photo. Slower devices skip it.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -97,9 +96,9 @@ export const SCOPE_FILL: StageToggleDef = {
 export const SCOPE_AUTO_GAIN: StageToggleDef = {
   id: 'scope-auto-gain',
   key: 'scopeAutoGain',
-  label: 'Auto gain',
+  label: 'Auto-size traces',
   explanation:
-    "Scales each channel's trace to fill its space, like an oscilloscope's auto-set, so quiet channels are as easy to read as loud ones. Off draws every channel at one fixed gain, so you can compare how loud they really are.",
+    "Grows each channel's trace to fill its space, so quiet channels are as easy to read as loud ones. Turn it off to draw every channel at the same scale and compare how loud they really are.",
   ...flag,
 };
 
@@ -119,16 +118,15 @@ export const MORE_SCOPE_TOGGLES: readonly StageToggleDef[] = [
   SCOPE_FILL,
 ];
 
-/** Visuals panel text for the spectrum colorings and scope presets. */
+/** Visualizer panel text for the spectrum colorings and scope presets. */
 export const VIZ_COPY = {
   scopesIgnoreChannels:
-    'The scopes are set to Accent color, so every trace takes the accent from Interface below and these colors do not show there. The Mixer still uses them.',
+    "The scopes are drawing every trace in your accent color, so these colors don't show on screen right now. The Mixer still uses them.",
   colorScopesByChannel: 'Color the scopes by channel',
   spectrumIgnoresChannels:
-    'The Unified spectrum takes its colors from its gradient, so these colors do not show there. The Mixer still uses them.',
+    "The Unified coloring takes its colors from a gradient, so these colors don't show on screen right now. The Mixer still uses them.",
   colorSpectrumByChannel: 'Color the spectrum by channel',
-  gradient:
-    'The gradients the site had before channel colors. Quiet sounds take the left color, the loudest take the right.',
+  gradient: 'Quiet sounds take the left color, the loudest take the right.',
   presets: 'Starting points. Pick one, then change anything below.',
   custom: 'Custom: your own mix of the settings below.',
 };

@@ -1,11 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { CHANNEL_PALETTES, channelPaletteById } from '../config/channelPalettes';
 import {
   SCOPE_COLORINGS,
   SCOPE_LAYOUTS,
-  SPARK_DEFAULTS,
   SPECTRUM_COLORINGS,
-  STAGE_DEFAULTS,
+  VISUALIZER_DEFAULTS,
   VISUALIZER_STYLES,
   scopeColoringById,
   scopeLayoutById,
@@ -14,29 +13,12 @@ import {
   visualizerStyleById,
 } from '../config/stageSettings';
 import { SPECTRUM_GRADIENTS, spectrumGradientById } from '../config/spectrumGradients';
-import { UI_PALETTES, uiPaletteAt } from '../config/uiPalettes';
 import ChannelColorsNotice from './stage/ChannelColorsNotice';
 import ChannelLegend from './stage/ChannelLegend';
 import ScopePresets from './stage/ScopePresets';
-import StageSlider from './stage/StageSlider';
-import StageToggle from './stage/StageToggle';
 import SwatchPicker from './stage/SwatchPicker';
-import {
-  FILM_GRAIN,
-  REACTIVE_STRENGTH,
-  MORE_SPARK_SLIDERS,
-  PEAK_SLIDERS,
-  REACTIVE_UI,
-  SCOPE_ZOOM,
-  SPARKS,
-  SPARK_FADE,
-  SPARK_SLIDERS,
-  STAGE_COPY,
-  StageSliderDef,
-  StageToggleDef,
-  sliderSetting,
-  toggleSetting,
-} from './stage/stageControls';
+import { PEAK_SLIDERS, SCOPE_ZOOM, STAGE_COPY } from './stage/stageControls';
+import { useSettingControls } from './stage/useSettingControls';
 import {
   MORE_SCOPE_SLIDERS,
   MORE_SCOPE_TOGGLES,
@@ -44,7 +26,6 @@ import {
   SCOPE_EFFECT_SLIDERS,
   VIZ_COPY,
 } from './stage/vizControls';
-import { UserContext } from './UserProvider';
 
 const STYLE_OPTIONS = VISUALIZER_STYLES.map((style) => ({ id: style.id, label: style.label }));
 const SPECTRUM_COLORING_OPTIONS = SPECTRUM_COLORINGS.map((c) => ({ id: c.id, label: c.label }));
@@ -60,44 +41,15 @@ const CHANNEL_OPTIONS = CHANNEL_PALETTES.map((palette) => ({
   label: palette.label,
   colors: palette.channels,
 }));
-const ACCENT_OPTIONS = UI_PALETTES.map((palette, i) => ({
-  id: String(i),
-  label: palette.label,
-  colors: [palette.accentDark, palette.accent],
-}));
 
-/** The Stage panel ("Visuals"): what you see, grouped by what it changes, every control explained. */
+/** The Visualizer panel: what the stage draws and how it colors the channels, every control explained. */
 export default function StagePanel() {
-  const { settings, updateSettings } = useContext(UserContext);
+  const { settings, updateSettings, slider, toggle } = useSettingControls();
   const style = visualizerStyleById(settings.visualizerStyle);
   const coloring = spectrumColoringById(settings.spectrumColoring);
   const gradient = spectrumGradientById(settings.spectrumGradient);
   const scope = scopeSettingsOf(settings);
   const palette = channelPaletteById(settings.channelPalette);
-  const accentIndex = UI_PALETTES.indexOf(uiPaletteAt(settings.uiPalette));
-  const sparksOn = toggleSetting(settings, SPARKS);
-
-  const slider = (def: StageSliderDef, disabled = false) => (
-    <StageSlider
-      key={def.id}
-      def={def}
-      value={def === SCOPE_ZOOM ? settings.scopeSpan : sliderSetting(settings, def)}
-      disabled={disabled}
-      onChange={(value) => updateSettings({ [def.key]: value })}
-    />
-  );
-
-  const toggle = (def: StageToggleDef, disabled = false) => (
-    <StageToggle
-      key={def.id}
-      id={def.id}
-      label={def.label}
-      explanation={def.explanation}
-      checked={toggleSetting(settings, def)}
-      disabled={disabled}
-      onChange={(on) => updateSettings({ [def.key]: def.toValue(on) })}
-    />
-  );
 
   return (
     <div className="StagePanel">
@@ -205,56 +157,17 @@ export default function StagePanel() {
         <ChannelLegend />
       </section>
 
-      <section className="StagePanel-section" aria-labelledby="stage-interface-heading">
-        <h3 id="stage-interface-heading" className="StagePanel-heading">
-          Interface
-        </h3>
-        <SwatchPicker
-          label="Accent color"
-          options={ACCENT_OPTIONS}
-          selectedId={String(accentIndex)}
-          onSelect={(id) => updateSettings({ uiPalette: Number(id) })}
-          describedBy="stage-accent-note"
-        />
-        <p id="stage-accent-note" className="StagePanel-note">
-          {STAGE_COPY.accent}
-        </p>
-        {toggle(REACTIVE_UI)}
-        {slider(REACTIVE_STRENGTH, !toggleSetting(settings, REACTIVE_UI))}
-        {slider(FILM_GRAIN)}
-      </section>
-
-      <section className="StagePanel-section" aria-labelledby="stage-sparks-heading">
-        <h3 id="stage-sparks-heading" className="StagePanel-heading">
-          Sparks
-        </h3>
-        {toggle(SPARKS)}
-        {SPARK_SLIDERS.map((def) => slider(def, !sparksOn))}
-        <details className="StagePanel-more">
-          <summary>More spark settings</summary>
-          {MORE_SPARK_SLIDERS.map((def) => slider(def, !sparksOn))}
-          {toggle(SPARK_FADE, !sparksOn)}
-          <button
-            type="button"
-            className="StagePanel-button"
-            onClick={() => updateSettings({ ...SPARK_DEFAULTS })}
-          >
-            Reset sparks
-          </button>
-        </details>
-      </section>
-
       <section className="StagePanel-section">
         <button
           type="button"
           className="StagePanel-button"
           aria-describedby="stage-reset-note"
-          onClick={() => updateSettings({ ...STAGE_DEFAULTS })}
+          onClick={() => updateSettings({ ...VISUALIZER_DEFAULTS })}
         >
-          Reset stage
+          Reset visualizer
         </button>
         <p id="stage-reset-note" className="StagePanel-note">
-          {STAGE_COPY.reset}
+          {STAGE_COPY.resetVisualizer}
         </p>
       </section>
     </div>

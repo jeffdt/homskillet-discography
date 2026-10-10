@@ -94,7 +94,7 @@ describe('stage defaults', () => {
 });
 
 describe('uiPaletteAt', () => {
-  it('returns the stored accent, or MW Green for anything out of range', () => {
+  it('returns the stored accent, or Green for anything out of range', () => {
     expect(uiPaletteAt(0)).toBe(UI_PALETTES[0]);
     expect(uiPaletteAt(4)).toBe(UI_PALETTES[4]);
     [9, -1, 1.5, '2', null, undefined, NaN].forEach((index) =>
