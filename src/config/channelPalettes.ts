@@ -42,7 +42,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'metallic-wing',
     label: 'Metallic Wing',
-    description: "Every channel in a shade of the site's signature green.",
+    description: 'Every channel in a shade of Metallic Wing green.',
     channels: [
       '#9bfe38',
       '#66cb01',
