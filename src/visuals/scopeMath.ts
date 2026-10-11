@@ -32,10 +32,15 @@ export function laneBox(
   return { top: lane * laneHeight, height: laneHeight };
 }
 
-/** Points around each ring. */
-export const RING_POINTS = 240;
+/** Points around each ring: enough for about 8 points per lobe of a C5 at the default zoom. */
+export const RING_POINTS = 720;
 /** Ring turn speed: about 0.12 radians a second. */
 export const RING_SPEED_RAD_PER_MS = 0.00012;
+/**
+ * A pitched ring wraps this many zoom spans of time, so lobes count pitch: at the default zoom a
+ * 65 Hz C2 draws 4, C3 8, C4 16 and C5 33, where one span gave a bass note one lopsided bulge.
+ */
+export const RING_SPAN_FACTOR = 3;
 /** Phase portraits plot each sample against the one this many samples earlier (1 ms at 24 kHz). */
 export const PHASE_DELAY_SAMPLES = 24;
 /** Newest samples a phase portrait draws. */
@@ -140,6 +145,38 @@ export function phaseWindow(
   return { delay, span, stride: Math.ceil(span / PHASE_WINDOW_SAMPLES) };
 }
 
+/** What a ring draws: `cycle` samples from `start`, repeated `cycles` times around it. */
+export interface RingWindow {
+  start: number;
+  /** Samples per repeat: one period for a pitched wave, the whole span otherwise. */
+  cycle: number;
+  /** Repeats around the ring; 1 for an unpitched wave. */
+  cycles: number;
+}
+
+/**
+ * Which samples a ring wraps. A pitched wave wraps the whole number of cycles nearest
+ * RING_SPAN_FACTOR spans, so the lobe count follows pitch and the end meets the start with no seam.
+ * That is longer than the tap buffer, so the ring repeats the newest whole cycle; a held note's
+ * cycles are alike, so the repeat shows the same shape the wave has. Unpitched waves (noise, DMC
+ * hits) wrap the span as it is.
+ */
+export function ringWindow(
+  waveform: ArrayLike<number>,
+  span: number,
+  period: number | null
+): RingWindow {
+  if (period === null || period > waveform.length) {
+    return { start: findTrigger(waveform, span), cycle: span, cycles: 1 };
+  }
+  const cycle = Math.ceil(period);
+  return {
+    start: findTrigger(waveform, cycle),
+    cycle: period,
+    cycles: Math.max(1, Math.round((RING_SPAN_FACTOR * span) / period)),
+  };
+}
+
 /** Trails are given as the share of the picture kept per frame at 60 fps. */
 export const TRAIL_REFERENCE_MS = 1000 / 60;
 /** Smallest per-frame fade, so 8-bit rounding never leaves ghosts brighter than about 3 percent. */
@@ -217,7 +254,7 @@ export interface TraceArgs {
   angle: number;
   /** Multiplies every sample before clamping to -1..1 (auto gain); 1 when omitted. */
   gain?: number;
-  /** Phase portraits: the voice's period (null for unpitched); estimated from the waveform when omitted. */
+  /** Phase portraits and rings: the voice's period (null for unpitched); estimated from the waveform when omitted. */
   period?: number | null;
 }
 
@@ -330,13 +367,16 @@ export function buildTrace(args: TraceArgs, out: TraceBuffer): void {
     out.baseline = NaN;
     return;
   }
-  const start = findTrigger(waveform, span);
   if (layout === 'rings') {
     const { radius, band } = ringRadius(lane, lanes, width, height);
     const cx = width / 2;
     const cy = height / 2;
+    const period = args.period === undefined ? estimatePeriod(waveform) : args.period;
+    const ring = ringWindow(waveform, span, period);
+    const total = ring.cycle * ring.cycles;
     for (let k = 0; k < RING_POINTS; k++) {
-      const s = unit(waveform[Math.min(last, start + Math.floor((k * span) / RING_POINTS))] * gain);
+      const offset = Math.floor(((k * total) / RING_POINTS) % ring.cycle);
+      const s = unit(waveform[Math.min(last, ring.start + offset)] * gain);
       const a = angle + (2 * Math.PI * k) / RING_POINTS;
       const r = radius + s * band * RING_SWING;
       out.xs[k] = cx + Math.cos(a) * r;
@@ -347,6 +387,7 @@ export function buildTrace(args: TraceArgs, out: TraceBuffer): void {
     out.baseline = NaN;
     return;
   }
+  const start = findTrigger(waveform, span);
   let mid: number;
   let amplitude: number;
   if (layout === 'overlaid') {

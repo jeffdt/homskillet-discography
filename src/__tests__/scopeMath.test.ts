@@ -10,6 +10,7 @@ import {
   PHASE_WINDOW_SAMPLES,
   PERIOD_HOLD_MS,
   PeriodHold,
+  RING_SPAN_FACTOR,
   RING_POINTS,
   SCOPE_AUTO_GAIN,
   SCOPE_FIXED_GAIN,
@@ -26,6 +27,7 @@ import {
   phaseWindow,
   reactiveEnergy,
   ringRadius,
+  ringWindow,
   scopeLaneAt,
   traceCapacity,
   trailFade,
@@ -116,6 +118,22 @@ describe('buildTrace', () => {
     buildTrace(args({ layout: 'rings', width: 400, height: 400, angle: Math.PI / 2 }), out);
     expect(out.xs[0]).toBeCloseTo(200);
     expect(out.ys[0]).toBeCloseTo(200 + radius);
+  });
+
+  it('wraps a pitched wave as whole repeated cycles, one lobe per cycle and no seam', () => {
+    const out = createTraceBuffer(traceCapacity(400));
+    const slow = sine(1024, 480);
+    buildTrace(
+      args({ layout: 'rings', waveform: slow, width: 400, height: 400, lanes: 4, gain: 0.5 }),
+      out
+    );
+    const { radius } = ringRadius(0, 4, 400, 400);
+    const r = (k: number) => Math.hypot(out.xs[k] - 200, out.ys[k] - 200) - radius;
+    const peaks = Array.from({ length: RING_POINTS }, (_, k) => k).filter(
+      (k) => r(k) > r((k + RING_POINTS - 1) % RING_POINTS) && r(k) >= r((k + 1) % RING_POINTS)
+    );
+    expect(peaks).toHaveLength(Math.round((RING_SPAN_FACTOR * 512) / 480));
+    expect(Math.abs(r(RING_POINTS - 1) - r(0))).toBeLessThan(0.1 * radius);
   });
 
   it('plots a pitched wave against itself a quarter cycle earlier', () => {
@@ -313,5 +331,28 @@ describe('scope gain', () => {
   it('uses the measured stage tuning', () => {
     expect(SCOPE_AUTO_GAIN).toEqual({ floorPeak: 0.05, targetPeak: 0.9, releaseMs: 500 });
     expect(SCOPE_FIXED_GAIN).toBe(3.5);
+  });
+});
+
+describe('ringWindow', () => {
+  it('wraps the whole cycles nearest RING_SPAN_FACTOR spans, so the count follows pitch', () => {
+    const wave = sine(1024, 32);
+    const ring = ringWindow(wave, 512, 32);
+    expect(ring).toMatchObject({ cycle: 32, cycles: RING_SPAN_FACTOR * 16 });
+    expect(ring.start + 32).toBeLessThanOrEqual(1024);
+    expect(wave[ring.start - 1]).toBeLessThan(0);
+    expect(wave[ring.start]).toBeGreaterThanOrEqual(0);
+    expect(ringWindow(sine(1024, 367), 512, 367).cycles).toBe(4);
+    expect(ringWindow(sine(1024, 184), 512, 184).cycles).toBe(8);
+    expect(ringWindow(sine(1024, 2000), 256, 2000).cycles).toBe(1);
+  });
+
+  it('wraps the span as it is for an unpitched wave', () => {
+    const wave = sine(1024, 100);
+    expect(ringWindow(wave, 512, null)).toEqual({
+      start: findTrigger(wave, 512),
+      cycle: 512,
+      cycles: 1,
+    });
   });
 });
