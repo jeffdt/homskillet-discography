@@ -1,0 +1,27 @@
+{
+  "albums": {
+    "UnfinishedBusiness": {
+      "tracks": [
+        {
+          "file": "aquatics.nsf"
+        },
+        {
+          "file": "evil.nsf"
+        },
+        {
+          "file": "fantasy.nsf"
+        },
+        {
+          "file": "ice.nsf"
+        },
+        {
+          "file": "rock_n_roll.nsf",
+          "title": "Rock and/or Roll"
+        },
+        {
+          "file": "sun_dried_tanuki.nsf"
+        }
+      ]
+    }
+  }
+}
