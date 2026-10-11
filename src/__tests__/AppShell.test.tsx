@@ -5,7 +5,7 @@ import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import AppShell from '../components/AppShell';
 import { UserProvider } from '../components/UserProvider';
-import { channelPaletteById } from '../config/channelPalettes';
+import { DEFAULT_CHANNEL_PALETTE_ID, channelPaletteById } from '../config/channelPalettes';
 import { COMPACT_LAYOUT_QUERY } from '../hooks/useMediaQuery';
 import { channelColors } from '../visuals/channelColors';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
@@ -490,7 +490,7 @@ describe('AppShell and the frame loop', () => {
 
 describe('AppShell channel palette', () => {
   afterEach(() => {
-    channelColors.set(channelPaletteById('chromatic').channels);
+    channelColors.set(channelPaletteById(DEFAULT_CHANNEL_PALETTE_ID).channels);
   });
 
   it('applies the persisted channel palette to the channel color variables', async () => {
@@ -502,11 +502,11 @@ describe('AppShell channel palette', () => {
     expect(document.documentElement.style.getPropertyValue('--ch-3')).toBe(nes[3]);
   });
 
-  it('falls back to Chromatic for an unknown palette id', async () => {
+  it('falls back to Metallic Wing for an unknown palette id', async () => {
     channelColors.set(channelPaletteById('vapor').channels);
     window.localStorage.setItem('settings', JSON.stringify({ channelPalette: 'retired-palette' }));
     renderShell();
     await screen.findByText('or browse 2 albums');
-    expect(channelColors.get()).toEqual(channelPaletteById('chromatic').channels);
+    expect(channelColors.get()).toEqual(channelPaletteById('metallic-wing').channels);
   });
 });

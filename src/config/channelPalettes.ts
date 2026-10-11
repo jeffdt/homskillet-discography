@@ -15,10 +15,26 @@ export interface ChannelPalette {
 }
 
 /** The palette new visitors see, and the fallback for unknown ids. */
-export const DEFAULT_CHANNEL_PALETTE_ID = 'chromatic';
+export const DEFAULT_CHANNEL_PALETTE_ID = 'metallic-wing';
 
 /** Every channel palette, default first. src/__tests__/channelPalettes.test.ts validates each one. */
 export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
+  {
+    id: 'metallic-wing',
+    label: 'Metallic Wing',
+    description:
+      'The five Metallic Wing accent colors, their darker shades and Metallic Wing white.',
+    channels: [
+      '#66caff',
+      '#efe903',
+      '#9bfe38',
+      '#fefefe',
+      '#ffaec9',
+      '#f0424a',
+      '#ffbb3e',
+      '#009ff4',
+    ],
+  },
   {
     // Okabe and Ito's color-universal palette with gray in place of black for the dark stage. The
     // 2A03 voices (Square 1, Square 2, Triangle, Noise, DMC) get blue, yellow, green, gray, pink.
@@ -68,23 +84,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
       '#ffa300',
       '#ff004d',
       '#ffccaa',
-    ],
-  },
-  {
-    // MW names Metallic Wing, the album whose game inspired these colors; keep the prefix.
-    id: 'metallic-wing',
-    label: 'MW Accents',
-    description:
-      'The five Metallic Wing accent colors, their darker shades and Metallic Wing white.',
-    channels: [
-      '#66caff',
-      '#efe903',
-      '#9bfe38',
-      '#fefefe',
-      '#ffaec9',
-      '#f0424a',
-      '#ffbb3e',
-      '#009ff4',
     ],
   },
   {

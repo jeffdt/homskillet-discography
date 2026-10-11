@@ -82,12 +82,12 @@ describe('channel palettes', () => {
     }
   );
 
-  it('defaults to Chromatic and falls back to it for unknown ids', () => {
-    expect(DEFAULT_CHANNEL_PALETTE_ID).toBe('chromatic');
-    expect(CHANNEL_PALETTES[0].id).toBe('chromatic');
-    expect(channelPaletteById(undefined).id).toBe('chromatic');
-    expect(channelPaletteById(null).id).toBe('chromatic');
-    expect(channelPaletteById('retired-palette').id).toBe('chromatic');
+  it('defaults to Metallic Wing and falls back to it for unknown ids', () => {
+    expect(DEFAULT_CHANNEL_PALETTE_ID).toBe('metallic-wing');
+    expect(CHANNEL_PALETTES[0].id).toBe('metallic-wing');
+    expect(channelPaletteById(undefined).id).toBe('metallic-wing');
+    expect(channelPaletteById(null).id).toBe('metallic-wing');
+    expect(channelPaletteById('retired-palette').id).toBe('metallic-wing');
     expect(channelPaletteById('nes').id).toBe('nes');
   });
 
@@ -97,6 +97,6 @@ describe('channel palettes', () => {
     for (const match of css.matchAll(/--ch-(\d):\s*(#[0-9a-f]{6});/g)) {
       declared[Number(match[1])] = match[2];
     }
-    expect(declared).toEqual([...channelPaletteById('chromatic').channels]);
+    expect(declared).toEqual([...channelPaletteById(DEFAULT_CHANNEL_PALETTE_ID).channels]);
   });
 });

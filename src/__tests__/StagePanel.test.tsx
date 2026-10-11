@@ -48,7 +48,7 @@ function voice(index: number, name: string, state: Partial<VoiceInfo> = {}): Voi
 
 describe('StagePanel', () => {
   it('shows every Stage control with its explanation', () => {
-    renderPanel();
+    renderPanel({ visualizerStyle: 'spectrum' });
     ['Style', 'Channel colors'].forEach((heading) =>
       expect(screen.getByRole('heading', { name: heading })).toBeTruthy()
     );
@@ -76,7 +76,7 @@ describe('StagePanel', () => {
   });
 
   it('shows peak settings with the spectrum and the zoom with the scopes', () => {
-    renderPanel();
+    renderPanel({ visualizerStyle: 'spectrum' });
     expect(screen.getByLabelText('Peak decay')).toBeTruthy();
     expect(screen.queryByLabelText(SCOPE_ZOOM.label)).toBeNull();
   });
@@ -99,23 +99,23 @@ describe('StagePanel', () => {
 
   it('picks a style and a channel palette', () => {
     const { updateSettings } = renderPanel();
-    fireEvent.click(screen.getByRole('radio', { name: 'Scopes' }));
-    expect(updateSettings).toHaveBeenLastCalledWith({ visualizerStyle: 'scopes' });
+    fireEvent.click(screen.getByRole('radio', { name: 'Spectrum' }));
+    expect(updateSettings).toHaveBeenLastCalledWith({ visualizerStyle: 'spectrum' });
     fireEvent.click(screen.getByRole('radio', { name: CHANNEL_PALETTES[2].label }));
     expect(updateSettings).toHaveBeenLastCalledWith({ channelPalette: CHANNEL_PALETTES[2].id });
   });
 
   it('describes the selected style and channel palette', () => {
-    renderPanel({ channelPalette: CHANNEL_PALETTES[1].id });
+    renderPanel({ visualizerStyle: 'spectrum', channelPalette: CHANNEL_PALETTES[1].id });
     expect(screen.getByText(CHANNEL_PALETTES[1].description)).toBeTruthy();
     expect(screen.getByText(/Pitch runs from low/)).toBeTruthy();
   });
 
   it('moves through palettes with the arrow keys', () => {
     const { updateSettings } = renderPanel();
-    const chromatic = screen.getByRole('radio', { name: CHANNEL_PALETTES[0].label });
-    chromatic.focus();
-    fireEvent.keyDown(chromatic, { key: 'ArrowRight' });
+    const first = screen.getByRole('radio', { name: CHANNEL_PALETTES[0].label });
+    first.focus();
+    fireEvent.keyDown(first, { key: 'ArrowRight' });
     expect(updateSettings).toHaveBeenLastCalledWith({ channelPalette: CHANNEL_PALETTES[1].id });
     expect(document.activeElement).toBe(
       screen.getByRole('radio', { name: CHANNEL_PALETTES[1].label })
@@ -126,16 +126,19 @@ describe('StagePanel', () => {
     renderPanel({
       channelPalette: 'retired-palette',
       visualizerStyle: 'milkdrop',
-      peakQuantization: 3,
     });
-    expect(checkedIn('Channel palette')).toBe('Chromatic');
-    expect(checkedIn('Visualizer style')).toBe('Spectrum');
+    expect(checkedIn('Channel palette')).toBe('Metallic Wing');
+    expect(checkedIn('Visualizer style')).toBe('Scopes');
+  });
+
+  it('shows a valid peak quantization for a stale stored value', () => {
+    renderPanel({ visualizerStyle: 'spectrum', peakQuantization: 3 });
     expect((screen.getByLabelText(PEAK_QUANTIZATION.label) as HTMLInputElement).value).toBe('1');
     expect(screen.getByText('Low')).toBeTruthy();
   });
 
   it('writes slider values in the stored units', () => {
-    const { updateSettings } = renderPanel();
+    const { updateSettings } = renderPanel({ visualizerStyle: 'spectrum' });
     fireEvent.change(screen.getByLabelText('Peak decay'), { target: { value: '2' } });
     expect(updateSettings).toHaveBeenLastCalledWith({ peakDecayRate: 0.95 });
     fireEvent.change(screen.getByLabelText(PEAK_QUANTIZATION.label), { target: { value: '3' } });

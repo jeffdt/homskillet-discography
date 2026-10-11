@@ -1,7 +1,7 @@
 import fs from 'fs';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import StagePanel from '../components/StagePanel';
 import { UserContext, UserSettings } from '../components/UserProvider';
 import { SCOPE_ZOOM, STAGE_COPY } from '../components/stage/stageControls';
@@ -31,21 +31,28 @@ function checkedIn(group: string): string {
 }
 
 describe('StagePanel spectrum coloring', () => {
-  it('offers the three colorings with add like light checked', () => {
-    renderPanel();
-    expect(checkedIn('Spectrum coloring')).toBe('Add light');
-    expect(screen.getByText(/their light adds up like colored stage lights/)).toBeTruthy();
-    expect(screen.queryByRole('radiogroup', { name: 'Gradient' })).toBeNull();
+  it('offers the three colorings with Unified checked', () => {
+    renderPanel({ visualizerStyle: 'spectrum' });
+    expect(checkedIn('Spectrum coloring')).toBe('Unified');
+    expect(screen.getByText(/using one gradient you pick below/)).toBeTruthy();
+    expect(screen.getByRole('radiogroup', { name: 'Gradient' })).toBeTruthy();
   });
 
-  it('stores the chosen coloring', () => {
-    const { updateSettings } = renderPanel();
+  it('stores the chosen coloring and hides the gradients outside Unified', () => {
+    const { updateSettings } = renderPanel({
+      visualizerStyle: 'spectrum',
+      spectrumColoring: 'additive',
+    });
+    expect(screen.queryByRole('radiogroup', { name: 'Gradient' })).toBeNull();
     fireEvent.click(screen.getByRole('radio', { name: 'Unified' }));
     expect(updateSettings).toHaveBeenCalledWith({ spectrumColoring: 'unified' });
   });
 
   it('shows all 23 gradients only for the unified coloring', () => {
-    const { updateSettings } = renderPanel({ spectrumColoring: 'unified' });
+    const { updateSettings } = renderPanel({
+      visualizerStyle: 'spectrum',
+      spectrumColoring: 'unified',
+    });
     const group = screen.getByRole('radiogroup', { name: 'Gradient' });
     expect(within(group).getAllByRole('radio')).toHaveLength(SPECTRUM_GRADIENTS.length);
     expect(checkedIn('Gradient')).toBe('MW Green');
@@ -55,22 +62,22 @@ describe('StagePanel spectrum coloring', () => {
   });
 
   it('hides scope controls in the spectrum style', () => {
-    renderPanel();
+    renderPanel({ visualizerStyle: 'spectrum' });
     expect(screen.queryByRole('group', { name: 'Scope presets' })).toBeNull();
     expect(screen.queryByLabelText('Trails')).toBeNull();
   });
 });
 
 describe('StagePanel channel scopes', () => {
-  it('shows presets with Cathode pressed, and every scope control explained', () => {
+  it('starts as a custom mix of raw rings, with every scope control explained', () => {
     renderPanel({ visualizerStyle: 'scopes' });
     const presets = screen.getByRole('group', { name: 'Scope presets' });
-    expect(
-      within(presets).getByRole('button', { name: 'Cathode' }).getAttribute('aria-pressed')
-    ).toBe('true');
-    expect(screen.getByText(VIZ_COPY.presets)).toBeTruthy();
-    expect(checkedIn('Scope layout')).toBe('Stacked');
-    expect(checkedIn('Trace color')).toBe('Accent color');
+    within(presets)
+      .getAllByRole('button')
+      .forEach((button) => expect(button.getAttribute('aria-pressed')).toBe('false'));
+    expect(screen.getByText(VIZ_COPY.custom)).toBeTruthy();
+    expect(checkedIn('Scope layout')).toBe('Rings');
+    expect(checkedIn('Trace color')).toBe('By channel');
     [...SCOPE_EFFECT_SLIDERS, SCOPE_ZOOM, ...MORE_SCOPE_SLIDERS].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
@@ -99,10 +106,10 @@ describe('StagePanel channel scopes', () => {
 
   it('stores the layout, trace color and slider values', () => {
     const { updateSettings } = renderPanel({ visualizerStyle: 'scopes' });
-    fireEvent.click(screen.getByRole('radio', { name: 'Rings' }));
-    expect(updateSettings).toHaveBeenCalledWith({ scopeLayout: 'rings' });
-    fireEvent.click(screen.getByRole('radio', { name: 'By channel' }));
-    expect(updateSettings).toHaveBeenCalledWith({ scopeColoring: 'channel' });
+    fireEvent.click(screen.getByRole('radio', { name: 'Stacked' }));
+    expect(updateSettings).toHaveBeenCalledWith({ scopeLayout: 'stacked' });
+    fireEvent.click(screen.getByRole('radio', { name: 'Accent color' }));
+    expect(updateSettings).toHaveBeenCalledWith({ scopeColoring: 'unified' });
     fireEvent.change(screen.getByLabelText('Glow'), { target: { value: '0.3' } });
     expect(updateSettings).toHaveBeenCalledWith({ scopeGlow: 0.3 });
   });
@@ -129,14 +136,17 @@ describe('SwatchPicker labels', () => {
 });
 
 describe('StagePanel channel colors notice', () => {
-  it('appears for the default Cathode scopes, and switching clears it', () => {
-    const { updateSettings } = renderPanel({ visualizerStyle: 'scopes' });
+  it('appears for accent-colored scopes, and switching clears it', () => {
+    const { updateSettings } = renderPanel({ visualizerStyle: 'scopes', scopeColoring: 'unified' });
     fireEvent.click(screen.getByRole('button', { name: VIZ_COPY.colorScopesByChannel }));
     expect(updateSettings).toHaveBeenCalledWith({ scopeColoring: 'channel' });
   });
 
-  it('does not appear for the default Add light spectrum', () => {
+  it('does not appear for the default channel-colored scopes or the Add light spectrum', () => {
     renderPanel();
+    expect(screen.queryByText(VIZ_COPY.scopesIgnoreChannels)).toBeNull();
+    cleanup();
+    renderPanel({ visualizerStyle: 'spectrum', spectrumColoring: 'additive' });
     expect(screen.queryByText(VIZ_COPY.spectrumIgnoresChannels)).toBeNull();
     expect(screen.queryByText(VIZ_COPY.scopesIgnoreChannels)).toBeNull();
   });

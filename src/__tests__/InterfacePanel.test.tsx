@@ -90,12 +90,12 @@ describe('InterfacePanel', () => {
     expect(updateSettings).toHaveBeenLastCalledWith({ sliderSparksEnabled: true });
   });
 
-  it('starts with the CRT screen on and turns it off', () => {
+  it('starts with the CRT screen off and turns it on', () => {
     const { updateSettings } = renderPanel();
     const crt = screen.getByRole('switch', { name: CRT_SCREEN.label });
-    expect((crt as HTMLInputElement).checked).toBe(true);
+    expect((crt as HTMLInputElement).checked).toBe(false);
     fireEvent.click(crt);
-    expect(updateSettings).toHaveBeenLastCalledWith({ crtScreen: false });
+    expect(updateSettings).toHaveBeenLastCalledWith({ crtScreen: true });
   });
 
   it('disables the pulse strength slider while the pulse is off', () => {

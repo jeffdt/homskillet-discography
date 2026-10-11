@@ -121,7 +121,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
 - **src/styles/stage.css** - Visualizer and Interface panel styles
-- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, Scopes); spectrum colorings (Add light, Average, Unified); scope layouts, trace colorings and presets (Cathode is the default); `scopeSettingsOf` guards stored scope values
+- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, Scopes); spectrum colorings (Add light, Average, Unified); scope layouts, trace colorings and presets (the default is Raw values on the Rings layout); `scopeSettingsOf` guards stored scope values
 - **src/config/spectrumGradients.ts** - The 23 loudness gradients for the Unified spectrum
 - **src/visuals/ScopeRenderer.ts** - The Scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
@@ -136,7 +136,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
 - **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), BinColorizer (per-bin channel colors), channelColors (channel color store and --ch-N variables), sparks physics, spectrumPainters (the three spectrum colorings)
-- **src/config/channelPalettes.ts** - Channel palettes: one color per voice, Chromatic by default
+- **src/config/channelPalettes.ts** - Channel palettes: one color per voice, Metallic Wing by default
 - **src/contexts/AudioDataContext.tsx** - AudioDataSource, FrameLoop and PulseChannel for React
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)
 
@@ -385,7 +385,7 @@ The project uses a custom "Metallic Wing Green" color palette defined in `src/in
 **Channel colors** (one per chip voice, set from the active channel palette):
 
 - `--ch-0` through `--ch-7` - `--ch-N` is the color of voice index N (`VoiceInfo.index`) in the visualizer, Mixer and any other per-channel display
-- Palettes live in `src/config/channelPalettes.ts` (`channelPaletteById`, persisted as `settings.channelPalette`); the `:root` defaults in `src/index.css` are the Chromatic palette
+- Palettes live in `src/config/channelPalettes.ts` (`channelPaletteById`, persisted as `settings.channelPalette`); the `:root` defaults in `src/index.css` are the Metallic Wing palette
 - Canvas and JS code read them with `useChannelColors()` (`src/hooks/useChannelColors.ts`) or `channelColors.get()` / `subscribe()` (`src/visuals/channelColors.ts`), never by polling `getComputedStyle`
 - A channel's color never changes with mute or solo; dim using `VoiceInfo.audible`
 
