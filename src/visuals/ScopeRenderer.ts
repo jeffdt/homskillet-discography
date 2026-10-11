@@ -14,6 +14,7 @@ import {
   createTraceBuffer,
   estimatePeriod,
   phaseWindow,
+  ringWindow,
   PeriodHold,
   reactiveEnergy,
   traceCapacity,
@@ -221,6 +222,10 @@ export class ScopeRenderer {
       const phase = phaseWindow(waveform, period);
       span = phase.span + phase.delay;
       start = waveform.length - span;
+    } else if (this.layout === 'rings') {
+      const ring = ringWindow(waveform, this.span, period);
+      span = Math.ceil(ring.cycle);
+      start = ring.start;
     } else {
       // The same window buildTrace draws, so a loud stretch just before the newest samples is counted.
       span = this.span;
@@ -249,7 +254,7 @@ export class ScopeRenderer {
     if (!voice || !color) return;
     const { width, height } = this.canvas;
     const period =
-      this.layout === 'phase'
+      this.layout === 'phase' || this.layout === 'rings'
         ? this.periods.update(index, estimatePeriod(voice.waveform), dtMs)
         : null;
     buildTrace(
