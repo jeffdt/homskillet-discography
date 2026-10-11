@@ -3,6 +3,7 @@ import { INTERFACE_DEFAULTS, SPARK_DEFAULTS } from '../config/stageSettings';
 import { UI_PALETTES, uiPaletteAt } from '../config/uiPalettes';
 import SwatchPicker from './stage/SwatchPicker';
 import {
+  CRT_SCREEN,
   FILM_GRAIN,
   MORE_SPARK_SLIDERS,
   REACTIVE_STRENGTH,
@@ -46,6 +47,7 @@ export default function InterfacePanel() {
         {toggle(REACTIVE_UI)}
         {slider(REACTIVE_STRENGTH, !toggleSetting(settings, REACTIVE_UI))}
         {slider(FILM_GRAIN)}
+        {toggle(CRT_SCREEN)}
       </section>
 
       <section className="StagePanel-section" aria-labelledby="interface-sparks-heading">

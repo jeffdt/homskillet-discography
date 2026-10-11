@@ -43,23 +43,23 @@ describe('scope layouts and colorings', () => {
 });
 
 describe('scope presets', () => {
-  it('lists Green CRT first and makes it the default', () => {
+  it('lists Raw first and makes Cathode the default', () => {
     expect(SCOPE_PRESETS.map((p) => p.id)).toEqual([
-      'green-crt',
+      'raw',
+      'cathode',
       'halo',
-      'neon',
+      'braid',
       'phosphor',
-      'xy',
-      'plain',
+      'live-wire',
     ]);
-    expect(SCOPE_DEFAULTS).toEqual({ ...preset('green-crt').settings, scopeAutoGain: true });
+    expect(SCOPE_DEFAULTS).toEqual({ ...preset('cathode').settings, scopeAutoGain: true });
     Object.entries(SCOPE_DEFAULTS).forEach(([key, value]) =>
       expect((STAGE_DEFAULTS as Record<string, unknown>)[key]).toBe(value)
     );
   });
 
   it('uses the owner-approved values', () => {
-    expect(preset('green-crt').settings).toEqual({
+    expect(preset('cathode').settings).toEqual({
       scopeLayout: 'stacked',
       scopeColoring: 'unified',
       scopeTrails: 0.8,
@@ -69,7 +69,6 @@ describe('scope presets', () => {
       scopeLineWidth: 1.5,
       scopeCore: true,
       scopeFill: false,
-      scopeCrt: true,
       scopeSpan: 512,
     });
     expect(preset('halo').settings).toMatchObject({
@@ -81,14 +80,25 @@ describe('scope presets', () => {
       scopeReactivity: 0.55,
       scopeSpan: 768,
     });
-    expect(preset('plain').settings).toMatchObject({
+    expect(preset('live-wire').settings).toEqual({
+      scopeLayout: 'phase',
+      scopeColoring: 'channel',
+      scopeTrails: 0.3,
+      scopeGlow: 1,
+      scopeBloom: 0,
+      scopeReactivity: 1,
+      scopeLineWidth: 2,
+      scopeCore: false,
+      scopeFill: false,
+      scopeSpan: 512,
+    });
+    expect(preset('raw').settings).toMatchObject({
       scopeTrails: 0,
       scopeGlow: 0,
       scopeBloom: 0,
       scopeReactivity: 0,
       scopeLineWidth: 2,
       scopeCore: false,
-      scopeCrt: false,
     });
   });
 
@@ -119,7 +129,6 @@ describe('scopeSettingsOf', () => {
       scopeLineWidth: 99,
       scopeCore: 'yes',
       scopeFill: 1,
-      scopeCrt: null,
       scopeSpan: 300,
       scopeAutoGain: 'no',
     });
@@ -138,19 +147,19 @@ describe('scopeSettingsOf', () => {
 
 describe('matchingScopePreset', () => {
   it('finds the preset whose values all match, else null', () => {
-    expect(matchingScopePreset({})!.id).toBe('green-crt');
+    expect(matchingScopePreset({})!.id).toBe('cathode');
     expect(matchingScopePreset({ ...preset('halo').settings })!.id).toBe('halo');
     expect(matchingScopePreset({ ...preset('halo').settings, scopeGlow: 0.55 })).toBeNull();
   });
 
   it('leaves Auto gain out of presets, so switching it off keeps the preset', () => {
     SCOPE_PRESETS.forEach((p) => expect('scopeAutoGain' in p.settings).toBe(false));
-    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: false })!.id).toBe('green-crt');
+    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: false })!.id).toBe('cathode');
   });
 
-  it('matches Green CRT for settings stored before auto gain existed', () => {
+  it('matches Cathode for settings stored before auto gain existed', () => {
     expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: undefined })!.id).toBe(
-      'green-crt'
+      'cathode'
     );
   });
 });

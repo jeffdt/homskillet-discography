@@ -99,7 +99,7 @@ describe('StagePanel', () => {
 
   it('picks a style and a channel palette', () => {
     const { updateSettings } = renderPanel();
-    fireEvent.click(screen.getByRole('radio', { name: 'Channel scopes' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Scopes' }));
     expect(updateSettings).toHaveBeenLastCalledWith({ visualizerStyle: 'scopes' });
     fireEvent.click(screen.getByRole('radio', { name: CHANNEL_PALETTES[2].label }));
     expect(updateSettings).toHaveBeenLastCalledWith({ channelPalette: CHANNEL_PALETTES[2].id });

@@ -111,19 +111,19 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/components/** - React UI components (mostly TypeScript)
   - App.tsx - Audio wiring, Sequencer, playback commands
   - AppShell.tsx - Layout, panels, URL sync, keyboard
-  - Stage.tsx - Full-window visualizer
+  - Stage.tsx - Full-window visualizer (in Scopes, click a trace to mute or unmute it, shift-click to hear only it; not in Overlaid; see the note in mixer/voiceMix.ts)
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
-  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
+  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, CRT screen, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
   - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
-  - TimeSlider.tsx, VolumeSlider.tsx - Audio controls
+  - TimeSlider.tsx, DockSlider.tsx - Audio controls (DockSlider is the player bar's speed and volume)
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
 - **src/styles/stage.css** - Visualizer and Interface panel styles
-- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, Channel scopes); spectrum colorings (Add light, Average, Unified); scope layouts, trace colorings and presets (Green CRT is the default); `scopeSettingsOf` guards stored scope values
+- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, Scopes); spectrum colorings (Add light, Average, Unified); scope layouts, trace colorings and presets (Cathode is the default); `scopeSettingsOf` guards stored scope values
 - **src/config/spectrumGradients.ts** - The 23 loudness gradients for the Unified spectrum
-- **src/visuals/ScopeRenderer.ts** - The Channel scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
+- **src/visuals/ScopeRenderer.ts** - The Scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
 - **src/analysis/** - Headless track analysis for `scripts/analyze-tracks.ts`: TapRender (ChipRenderer + TapRing one 60 fps frame at a time), analyzeTrack (per-voice level profile, schema LEVEL_PROFILE_VERSION), renderSpectrumSheet (waterfalls drawn by the real painters), encodePng
 - **src/audio/** - Audio engine (TypeScript)

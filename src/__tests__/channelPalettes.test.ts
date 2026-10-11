@@ -16,6 +16,8 @@ const BACKGROUND = '#101010';
 const MIN_CONTRAST = 3;
 /** Smallest CIEDE2000 difference allowed between two Chromatic channels, for every vision type. */
 const MIN_CHROMATIC_DELTA_E = 10;
+/** Smallest CIEDE2000 difference allowed between two channels of any palette, with normal vision. */
+const MIN_PALETTE_DELTA_E = 10;
 
 describe('colorVision helper', () => {
   it('matches published CIEDE2000 reference pairs', () => {
@@ -58,6 +60,13 @@ describe('channel palettes', () => {
     }
   );
 
+  it.each(CHANNEL_PALETTES.map((palette) => [palette.id, palette.channels] as const))(
+    '%s gives every channel its own color, not shades of one',
+    (_id, channels) => {
+      expect(minPairwiseDeltaE(channels, null)).toBeGreaterThanOrEqual(MIN_PALETTE_DELTA_E);
+    }
+  );
+
   it.each([
     ['normal', null],
     ['protanopia', 'protanopia'],
@@ -79,7 +88,7 @@ describe('channel palettes', () => {
     expect(channelPaletteById(undefined).id).toBe('chromatic');
     expect(channelPaletteById(null).id).toBe('chromatic');
     expect(channelPaletteById('retired-palette').id).toBe('chromatic');
-    expect(channelPaletteById('game-boy').id).toBe('game-boy');
+    expect(channelPaletteById('nes').id).toBe('nes');
   });
 
   it('matches the --ch-N defaults in src/index.css', () => {

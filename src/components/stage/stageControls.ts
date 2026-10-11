@@ -253,6 +253,16 @@ export const REACTIVE_UI: StageToggleDef = {
   toValue: (on) => on,
 };
 
+/** Scanlines and vignette over the visualizer. */
+export const CRT_SCREEN: StageToggleDef = {
+  id: 'crt-screen',
+  key: 'crtScreen',
+  label: 'CRT screen',
+  explanation: 'Scanlines and a dark vignette over the visualizer, like an old TV.',
+  isOn: (value) => value !== false,
+  toValue: (on) => on,
+};
+
 /** Switch for sparks on the progress bar. */
 export const SPARKS: StageToggleDef = {
   id: 'sparks',

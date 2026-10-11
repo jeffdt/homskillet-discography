@@ -43,6 +43,7 @@ import TitleScreen from './TitleScreen';
 import Toast from './Toast';
 import TopBar from './TopBar';
 import { UserContext } from './UserProvider';
+import { IconFullscreen } from './icons';
 
 export const DEFAULT_TAGLINE = 'Original NES music';
 
@@ -317,7 +318,11 @@ export default function AppShell({ playback, controls }: AppShellProps) {
         <FilmGrain amount={settings.filmGrainAmount ?? 50} />
       )}
 
-      <Stage settings={settings} renderScale={perf === 'low' ? 0.5 : 1} />
+      <Stage
+        settings={settings}
+        renderScale={perf === 'low' ? 0.5 : 1}
+        onVoiceMixChange={anyPanelOpen && !compact ? undefined : controls.setVoiceMix}
+      />
 
       {showTitle && (
         <TitleScreen
@@ -361,9 +366,20 @@ export default function AppShell({ playback, controls }: AppShellProps) {
           album={currentAlbum}
           settings={settings}
           onShowInAlbums={showInAlbums}
-          showFullscreen={showFullscreen}
+          showFullscreen={showFullscreen && compact}
           faded={idle && !compact}
         />
+      )}
+
+      {!showTitle && showFullscreen && !compact && (
+        <button
+          className="FullscreenButton Dock-button Chrome"
+          aria-label="Fullscreen"
+          title="Fullscreen (F)"
+          onClick={() => toggleFullscreen()}
+        >
+          <IconFullscreen />
+        </button>
       )}
 
       <PanelHost

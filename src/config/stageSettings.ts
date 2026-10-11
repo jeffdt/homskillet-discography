@@ -23,9 +23,9 @@ export const VISUALIZER_STYLES: readonly VisualizerStyle[] = [
   },
   {
     id: 'scopes',
-    label: 'Channel scopes',
+    label: 'Scopes',
     description:
-      'One oscilloscope per sound channel: the wave each voice of the chip is drawing right now. Square waves look square, the triangle looks like a triangle, and noise looks like noise.',
+      "One oscilloscope per sound channel: the wave each voice of the chip is drawing right now. Square waves look square, the triangle looks like a triangle, and noise looks like noise. Click a channel's trace to mute or unmute it, or shift-click it to hear only that channel.",
   },
 ];
 
@@ -105,7 +105,8 @@ export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
   {
     id: 'overlaid',
     label: 'Overlaid',
-    description: 'Every channel on one shared line. Where traces cross, their light adds up.',
+    description:
+      'Every channel on one shared line. Where traces cross, their light adds up. Mute channels from the Mixer here, since the traces overlap.',
   },
   {
     id: 'rings',
@@ -116,7 +117,7 @@ export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
     id: 'phase',
     label: 'Phase portraits',
     description:
-      'Each channel plotted against itself a millisecond earlier, like an X-Y oscilloscope. Square waves draw boxes, the triangle draws a loop, and noise draws a cloud.',
+      'Each channel plotted against itself a quarter of a cycle earlier, like an X-Y oscilloscope, so the shape shows the sound rather than the note. An even square wave draws a box, a thinner pulse draws a slanted triangle, and noise draws a tangle.',
   },
 ];
 
@@ -163,7 +164,6 @@ export interface ScopeSettings {
   scopeLineWidth: number;
   scopeCore: boolean;
   scopeFill: boolean;
-  scopeCrt: boolean;
   /** One of SCOPE_SPANS. */
   scopeSpan: number;
   /** Each trace scales to its own wave's peak (on) or one fixed gain (off). */
@@ -201,8 +201,8 @@ export interface ScopePreset {
   settings: ScopeLookSettings;
 }
 
-/** Plain lines with no effects: the base every other preset builds on. */
-const PLAIN_SCOPES: ScopeLookSettings = {
+/** Bare lines with no effects: the base every other preset builds on. */
+const RAW_SCOPES: ScopeLookSettings = {
   scopeLayout: 'stacked',
   scopeColoring: 'channel',
   scopeTrails: 0,
@@ -212,17 +212,17 @@ const PLAIN_SCOPES: ScopeLookSettings = {
   scopeLineWidth: 2,
   scopeCore: false,
   scopeFill: false,
-  scopeCrt: false,
   scopeSpan: DEFAULT_SCOPE_SPAN,
 };
 
 /** The scope presets, in panel order. Values chosen with the owner in the viz lab (spec 4.4). */
 export const SCOPE_PRESETS: readonly ScopePreset[] = [
+  { id: 'raw', label: 'Raw', settings: RAW_SCOPES },
   {
-    id: 'green-crt',
-    label: 'Green CRT',
+    id: 'cathode',
+    label: 'Cathode',
     settings: {
-      ...PLAIN_SCOPES,
+      ...RAW_SCOPES,
       scopeColoring: 'unified',
       scopeTrails: 0.8,
       scopeGlow: 0.6,
@@ -230,14 +230,13 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
       scopeReactivity: 0.25,
       scopeLineWidth: 1.5,
       scopeCore: true,
-      scopeCrt: true,
     },
   },
   {
     id: 'halo',
     label: 'Halo',
     settings: {
-      ...PLAIN_SCOPES,
+      ...RAW_SCOPES,
       scopeLayout: 'rings',
       scopeTrails: 0.6,
       scopeGlow: 0.5,
@@ -248,10 +247,10 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     },
   },
   {
-    id: 'neon',
-    label: 'Neon',
+    id: 'braid',
+    label: 'Braid',
     settings: {
-      ...PLAIN_SCOPES,
+      ...RAW_SCOPES,
       scopeLayout: 'overlaid',
       scopeTrails: 0.45,
       scopeGlow: 0.6,
@@ -265,7 +264,7 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     id: 'phosphor',
     label: 'Phosphor',
     settings: {
-      ...PLAIN_SCOPES,
+      ...RAW_SCOPES,
       scopeTrails: 0.85,
       scopeGlow: 0.5,
       scopeBloom: 0.3,
@@ -274,24 +273,23 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
     },
   },
   {
-    id: 'xy',
-    label: 'X-Y',
+    id: 'live-wire',
+    label: 'Live Wire',
     settings: {
-      ...PLAIN_SCOPES,
+      ...RAW_SCOPES,
       scopeLayout: 'phase',
-      scopeTrails: 0.88,
-      scopeGlow: 0.6,
-      scopeBloom: 0.4,
-      scopeReactivity: 0.4,
-      scopeLineWidth: 1.5,
-      scopeCore: true,
+      scopeTrails: 0.3,
+      scopeGlow: 1,
+      scopeReactivity: 1,
     },
   },
-  { id: 'plain', label: 'Plain', settings: PLAIN_SCOPES },
 ];
 
-/** What the channel scopes look like until the visitor changes them: the Green CRT preset (owner's choice). */
-export const SCOPE_DEFAULTS: ScopeSettings = { ...SCOPE_PRESETS[0].settings, scopeAutoGain: true };
+/** What the channel scopes look like until the visitor changes them: the Cathode preset (owner's choice). */
+export const SCOPE_DEFAULTS: ScopeSettings = {
+  ...(SCOPE_PRESETS.find((preset) => preset.id === 'cathode') as ScopePreset).settings,
+  scopeAutoGain: true,
+};
 
 /** The scope layout with this id, or the default layout. */
 export function scopeLayoutById(id?: unknown): ScopeLayout {
@@ -339,7 +337,6 @@ export function scopeSettingsOf(settings: Record<string, unknown>): ScopeSetting
     ),
     scopeCore: flagOf(settings.scopeCore, d.scopeCore),
     scopeFill: flagOf(settings.scopeFill, d.scopeFill),
-    scopeCrt: flagOf(settings.scopeCrt, d.scopeCrt),
     scopeSpan: scopeSpanOf(settings.scopeSpan),
     scopeAutoGain: flagOf(settings.scopeAutoGain, d.scopeAutoGain),
   };
@@ -388,6 +385,7 @@ export const INTERFACE_DEFAULTS = {
   audioReactivePulse: true,
   reactiveStrength: 100,
   filmGrainAmount: 50,
+  crtScreen: true,
   sliderSparksEnabled: false,
   ...SPARK_DEFAULTS,
 };

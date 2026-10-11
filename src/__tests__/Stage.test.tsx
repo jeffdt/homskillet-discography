@@ -1,14 +1,16 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { VoiceInfo } from '../audio/data/contract';
 import Stage from '../components/Stage';
+import { hearOnly, toggleHeard } from '../components/mixer/voiceMix';
 import { channelPaletteById } from '../config/channelPalettes';
 import { SCOPE_DEFAULTS, SCOPE_PRESETS } from '../config/stageSettings';
 import { UI_PALETTES } from '../config/uiPalettes';
 import { channelColors } from '../visuals/channelColors';
 import { spectrumGradientById } from '../config/spectrumGradients';
 import { parseHexColor, unpackPixel } from '../visuals/color';
+import { phaseLabelAnchor } from '../visuals/scopeMath';
 import { SHADE_KNEE } from '../visuals/spectrogramMath';
 import { AdditivePainter, AveragePainter, GradientPainter } from '../visuals/spectrumPainters';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
@@ -185,12 +187,12 @@ describe('Stage', () => {
     sound(data, [0]);
     data.frameLoop.setPlaying(true);
     act(() => data.scheduler.tick(0));
-    const gameBoy = channelPaletteById('game-boy').channels;
-    act(() => channelColors.set(gameBoy));
+    const nes = channelPaletteById('nes').channels;
+    act(() => channelColors.set(nes));
     act(() => {
       for (let i = 1; i <= 30; i++) data.scheduler.tick((i * 1000) / 60);
     });
-    expect(bin50(renderer)).toEqual([...parseHexColor(gameBoy[0])!]);
+    expect(bin50(renderer)).toEqual([...parseHexColor(nes[0])!]);
   });
 
   it('scales the scroll speed with the backing-store scale', () => {
@@ -285,7 +287,7 @@ describe('Stage', () => {
     expect(latestScope().renderScale).toBe(0.5);
   });
 
-  it('starts the scopes as Green CRT in the accent color', () => {
+  it('starts the scopes as Cathode in the accent color', () => {
     const { utils } = renderStage({ visualizerStyle: 'scopes' });
     const scope = latestScope();
     expect(scope.setColors).toHaveBeenLastCalledWith(new Array(8).fill(UI_PALETTES[0].accent));
@@ -318,7 +320,7 @@ describe('Stage', () => {
     );
   });
 
-  it('applies a preset\u2019s layout and effects, and drops the CRT overlay when off', () => {
+  it('applies a preset\u2019s layout and effects', () => {
     const halo = SCOPE_PRESETS.find((p) => p.id === 'halo')!.settings;
     const { utils } = renderStage({ visualizerStyle: 'scopes', ...halo });
     const scope = latestScope();
@@ -327,19 +329,23 @@ describe('Stage', () => {
     expect(scope.setColors).toHaveBeenLastCalledWith(CHROMATIC);
     const lastEffects = scope.setEffects.mock.calls[scope.setEffects.mock.calls.length - 1][0];
     expect(lastEffects).toMatchObject({ glow: 0.5, bloom: 0.4 });
-    expect(utils.container.querySelector('.Stage-crt')).toBeNull();
     const bloom = utils.container.querySelector('.Stage-scopeBloom') as HTMLCanvasElement;
     expect(bloom.style.opacity).toBe('0.4');
   });
 
-  it('hides the bloom layer in low power and the CRT overlay outside the scopes', () => {
+  it('hides the bloom layer in low power', () => {
     const low = renderStage({ visualizerStyle: 'scopes' }, 0.5);
     expect(
       (low.utils.container.querySelector('.Stage-scopeBloom') as HTMLCanvasElement).style.opacity
     ).toBe('0');
-    low.utils.unmount();
-    const spectrum = renderStage({ visualizerStyle: 'spectrum', scopeCrt: true });
-    expect(spectrum.utils.container.querySelector('.Stage-crt')).toBeNull();
+  });
+
+  it('lays the CRT screen over every style until it is turned off', () => {
+    const spectrum = renderStage({ visualizerStyle: 'spectrum' });
+    expect(spectrum.utils.container.querySelector('.Stage-crt')).not.toBeNull();
+    spectrum.utils.unmount();
+    const off = renderStage({ visualizerStyle: 'scopes', crtScreen: false });
+    expect(off.utils.container.querySelector('.Stage-crt')).toBeNull();
   });
 
   it('stops the rings turning under reduced motion', () => {
@@ -365,9 +371,117 @@ describe('Stage', () => {
     rings.utils.unmount();
     const phase = renderStage({ visualizerStyle: 'scopes', scopeLayout: 'phase' });
     act(() => phase.data.source.setVoices(voices));
-    // jsdom has no layout size, so the grid is one column: lane 2 sits in row 3 of 3.
+    // jsdom has no layout size, so every portrait anchors at the origin.
     const triangle = phase.utils.getByText('Triangle');
-    expect(triangle.style.top).toBe(`${(2 / 3) * 100}%`);
-    expect(triangle.style.right).toBe('0%');
+    const anchor = phaseLabelAnchor(2, 3, 0, 0);
+    expect(triangle.style.left).toBe(`${anchor.x}px`);
+    expect(triangle.style.top).toBe(`${anchor.y}px`);
+  });
+});
+
+describe('Stage scope clicks', () => {
+  const voices = [
+    voice(0, 'Square 1'),
+    voice(1, 'Square 2'),
+    voice(2, 'Triangle'),
+    voice(3, 'Noise'),
+  ];
+
+  const sizeSpies: Array<{ mockRestore: () => void }> = [];
+  const hadPointerEvent = 'PointerEvent' in window;
+  beforeEach(() => {
+    // jsdom has no PointerEvent, so fireEvent.pointerDown would drop clientX, button and shiftKey.
+    if (!hadPointerEvent) (window as any).PointerEvent = class extends MouseEvent {};
+    sizeSpies.push(
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800),
+      vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(400)
+    );
+  });
+  afterEach(() => {
+    sizeSpies.splice(0).forEach((spy) => spy.mockRestore());
+    if (!hadPointerEvent) delete (window as any).PointerEvent;
+  });
+
+  function renderClickable(settings: Record<string, unknown>, idle = false) {
+    const onVoiceMixChange = vi.fn();
+    const data = createTestAudioData();
+    const utils = render(
+      <div data-idle={idle ? 'true' : 'false'}>
+        {withAudioData(
+          data.value,
+          <Stage settings={settings} renderScale={1} onVoiceMixChange={onVoiceMixChange} />
+        )}
+      </div>
+    );
+    act(() => data.source.setVoices(voices));
+    const stage = utils.container.querySelector('.Stage') as HTMLElement;
+    return { stage, onVoiceMixChange };
+  }
+
+  it('mutes the stacked lane that is clicked', () => {
+    const { stage, onVoiceMixChange } = renderClickable({
+      visualizerStyle: 'scopes',
+      scopeLayout: 'stacked',
+    });
+    fireEvent.pointerDown(stage, { button: 0, clientX: 400, clientY: 250 });
+    expect(onVoiceMixChange).toHaveBeenCalledWith(toggleHeard(voices, 2));
+  });
+
+  it('plays only the shift-clicked channel', () => {
+    const { stage, onVoiceMixChange } = renderClickable({
+      visualizerStyle: 'scopes',
+      scopeLayout: 'stacked',
+    });
+    fireEvent.pointerDown(stage, { button: 0, shiftKey: true, clientX: 400, clientY: 10 });
+    expect(onVoiceMixChange).toHaveBeenCalledWith(hearOnly(voices, 0));
+  });
+
+  it('ignores clicks in the overlaid layout, the spectrum and while the controls are faded', () => {
+    const overlaid = renderClickable({ visualizerStyle: 'scopes', scopeLayout: 'overlaid' });
+    fireEvent.pointerDown(overlaid.stage, { button: 0, clientX: 400, clientY: 250 });
+    expect(overlaid.onVoiceMixChange).not.toHaveBeenCalled();
+    const spectrum = renderClickable({ visualizerStyle: 'spectrum' });
+    fireEvent.pointerDown(spectrum.stage, { button: 0, clientX: 400, clientY: 250 });
+    expect(spectrum.onVoiceMixChange).not.toHaveBeenCalled();
+    const idle = renderClickable({ visualizerStyle: 'scopes', scopeLayout: 'stacked' }, true);
+    fireEvent.pointerDown(idle.stage, { button: 0, clientX: 400, clientY: 250 });
+    expect(idle.onVoiceMixChange).not.toHaveBeenCalled();
+  });
+
+  it('mutes the channel whose label is clicked, wherever the label sits', () => {
+    const { stage, onVoiceMixChange } = renderClickable({
+      visualizerStyle: 'scopes',
+      scopeLayout: 'stacked',
+    });
+    const label = stage.querySelector('.Stage-scopeLabel[data-channel="2"]') as HTMLElement;
+    fireEvent.pointerDown(label, { button: 0, clientX: 400, clientY: 10 });
+    expect(onVoiceMixChange).toHaveBeenCalledWith(toggleHeard(voices, 2));
+  });
+
+  it('brightens the hovered channel label and clears it when the pointer leaves', () => {
+    const { stage } = renderClickable({ visualizerStyle: 'scopes', scopeLayout: 'stacked' });
+    const hovered = () =>
+      Array.from(stage.querySelectorAll<HTMLElement>('.Stage-scopeLabel'))
+        .filter((label) => label.dataset.hovered === 'true')
+        .map((label) => label.textContent);
+    fireEvent.pointerMove(stage, { clientX: 400, clientY: 350 });
+    expect(hovered()).toEqual(['Noise']);
+    fireEvent.pointerMove(stage, { clientX: 400, clientY: 10 });
+    expect(hovered()).toEqual(['Square 1']);
+    fireEvent.pointerLeave(stage);
+    expect(hovered()).toEqual([]);
+  });
+
+  it('explains the clicks in a tooltip on each label only', () => {
+    const { stage } = renderClickable({ visualizerStyle: 'scopes', scopeLayout: 'stacked' });
+    const label = stage.querySelector('.Stage-scopeLabel[data-channel="0"]') as HTMLElement;
+    expect(label.title).toBe('Square 1: click to mute, shift-click to play only this one');
+  });
+
+  it('marks the stage while the pointer is over a scope, without a tooltip', () => {
+    const { stage } = renderClickable({ visualizerStyle: 'scopes', scopeLayout: 'stacked' });
+    fireEvent.pointerMove(stage, { clientX: 400, clientY: 350 });
+    expect(stage.dataset.hover).toBe('scope');
+    expect(stage.title).toBe('');
   });
 });

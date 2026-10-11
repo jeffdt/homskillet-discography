@@ -189,6 +189,10 @@
   background: var(--background);
 }
 
+.AppShell:not([data-idle='true']) .Stage[data-hover='scope'] {
+  cursor: pointer;
+}
+
 .Stage canvas {
   position: absolute;
   top: 0;
@@ -220,6 +224,18 @@
 
 .Stage-scopeLabel.is-silent {
   opacity: 0.45;
+}
+
+/* Clickable scopes: labels take the pointer (for their tooltip), and the hovered channel's label
+   glows. Both stop while the controls are faded out. */
+.AppShell:not([data-idle='true']) .Stage[data-clickable='true'] .Stage-scopeLabel {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.AppShell:not([data-idle='true']) .Stage-scopeLabel[data-hovered='true'] {
+  filter: brightness(1.4);
+  text-shadow: 0 0 8px currentColor;
 }
 
 /* A quarter-size copy of the scopes, blurred and brightened by the compositor: the bloom. */
@@ -254,9 +270,12 @@
   color: var(--accent);
 }
 
-/* Phase labels sit at the top right of their cell; the inline right is the cell edge. */
+/* Phase labels sit centered just above their portrait; the inline left and top are its top center. */
 .App .Stage[data-scope-layout='phase'] .Stage-scopeLabel {
-  margin-right: 12px;
+  right: auto;
+  margin-top: -6px;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
 }
 
 /* Per-channel color for any element tagged data-channel="N"; --ch-N comes from the channel palette. */
@@ -320,6 +339,13 @@
   gap: 12px;
   padding: 12px var(--chrome-gap) 24px;
   background: linear-gradient(to bottom, var(--chrome-bg), transparent);
+  /* The bar spans the window; only its buttons and logo take clicks, so the top scope stays clickable. */
+  pointer-events: none;
+}
+
+/* Faded (idle) chrome takes no clicks at all. */
+.AppShell:not([data-idle='true']) .TopBar > * {
+  pointer-events: auto;
 }
 
 .App .TopBar-logo {
@@ -513,7 +539,8 @@
   bottom: 24px;
   left: 50%;
   z-index: 3;
-  width: min(900px, max(60vw, 600px), calc(100vw - 2 * var(--chrome-gap)));
+  /* Leaves room on both sides for the fullscreen button in the lower right corner. */
+  width: min(900px, max(60vw, 600px), calc(100vw - 2 * (var(--chrome-gap) + 56px)));
   display: flex;
   align-items: center;
   gap: 12px;
@@ -636,8 +663,64 @@
   margin: 0;
 }
 
-.Dock-volume {
-  width: 96px;
+/* Fullscreen sits alone in the lower right corner, level with the middle of the player bar. */
+.App .FullscreenButton {
+  position: absolute;
+  right: var(--chrome-gap);
+  bottom: 30px;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  background: var(--panel-bg);
+  -webkit-backdrop-filter: var(--panel-blur);
+  backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--hairline);
+}
+
+/* Speed above volume, each one row: name, slider, value. */
+.Dock-sliders {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 2px;
+  width: 176px;
+}
+
+.Dock-sliders .DockSlider {
+  display: grid;
+  grid-template-columns: 3.6em 1fr 3em;
+  align-items: center;
+  column-gap: 8px;
+  margin: 0;
+}
+
+.Dock-sliders .DockSlider-labels {
+  display: contents;
+  font-size: 12px;
+}
+
+.Dock-sliders .DockSlider input {
+  grid-row: 1;
+  grid-column: 2;
+  width: 100%;
+}
+
+.Dock-sliders .DockSlider-labels > :first-child {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.Dock-sliders .DockSlider-labels > :last-child {
+  grid-row: 1;
+  grid-column: 3;
+  text-align: right;
+}
+
+/* Narrow windows drop speed and volume; the Mixer still has speed. */
+@media (max-width: 600px) {
+  .Dock-sliders {
+    display: none;
+  }
 }
 
 /* Compact (portrait phone): every control gets a 44px target and the dock wraps into rows. */
@@ -675,9 +758,8 @@
     order: 5;
   }
 
-  .Dock-volume {
-    flex: 1 1 96px;
-    min-height: var(--touch-target);
+  .Dock-sliders {
+    flex: 1 1 176px;
   }
 }
 
@@ -1280,7 +1362,7 @@
   order: -1;
 }
 
-.App[data-layout='compact'] .Dock-volume {
+.App[data-layout='compact'] .Dock-sliders {
   display: none;
 }
 

@@ -896,7 +896,7 @@ button.IconButton {
 }
 
 .TimeSlider-labels,
-.VolumeSlider-labels {
+.DockSlider-labels {
   display: flex;
   justify-content: space-between;
   gap: var(--charW2);
@@ -909,26 +909,26 @@ button.IconButton {
   }
 
   .TimeSlider-labels,
-  .VolumeSlider-labels {
+  .DockSlider-labels {
     font-size: 12px;
     /* Smaller for compactness */
     line-height: 1.2;
   }
 }
 
-.VolumeSlider {
+.DockSlider {
   flex-shrink: 0;
   margin: var(--charH) 0;
 }
 
 @media (orientation: portrait), (max-width: 768px) {
-  .VolumeSlider {
+  .DockSlider {
     margin: var(--charH) 0;
   }
 }
 
 @media screen and (max-width: 600px) {
-  .VolumeSlider {
+  .DockSlider {
     display: none;
   }
 }
