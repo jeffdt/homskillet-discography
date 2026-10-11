@@ -6,14 +6,13 @@ import {
   MORE_SCOPE_TOGGLES,
   SCOPE_AUTO_GAIN,
   SCOPE_BLOOM,
-  SCOPE_CRT,
   SCOPE_EFFECT_SLIDERS,
   SCOPE_LINE_WIDTH,
   SCOPE_TRAILS,
 } from '../components/stage/vizControls';
 
 describe('scope controls', () => {
-  const all = [...SCOPE_EFFECT_SLIDERS, ...MORE_SCOPE_SLIDERS, SCOPE_CRT, ...MORE_SCOPE_TOGGLES];
+  const all = [...SCOPE_EFFECT_SLIDERS, ...MORE_SCOPE_SLIDERS, ...MORE_SCOPE_TOGGLES];
 
   it('offers Auto gain first among the extra scope switches, on by default', () => {
     expect(MORE_SCOPE_TOGGLES[0]).toBe(SCOPE_AUTO_GAIN);
@@ -43,7 +42,7 @@ describe('scope controls', () => {
   });
 
   it('stores switches as booleans', () => {
-    expect(SCOPE_CRT.toValue(true)).toBe(true);
-    expect(SCOPE_CRT.isOn(undefined)).toBe(false);
+    expect(SCOPE_AUTO_GAIN.toValue(true)).toBe(true);
+    expect(SCOPE_AUTO_GAIN.isOn(undefined)).toBe(false);
   });
 });

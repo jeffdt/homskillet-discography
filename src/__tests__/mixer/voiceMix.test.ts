@@ -4,8 +4,10 @@ import {
   CHIP_DESCRIPTIONS,
   clearedVoiceMix,
   groupByChip,
+  hearOnly,
   mixOf,
   toggleMute,
+  toggleHeard,
   toggleSolo,
 } from '../../components/mixer/voiceMix';
 import { voiceInfo } from '../helpers/voices';
@@ -70,5 +72,54 @@ describe('voice mix helpers', () => {
       expect(CHIP_DESCRIPTIONS[chip]).toBeTruthy()
     );
     expect(CHIP_DESCRIPTIONS.Expansion).toBeUndefined();
+  });
+});
+
+describe('scope click helpers (mutes only, no solo)', () => {
+  const four = (audible: boolean[], soloed: boolean[] = [false, false, false, false]) =>
+    audible.map((heard, i) =>
+      voiceInfo(i, `Voice ${i}`, {
+        audible: heard,
+        muted: !heard && !soloed.some(Boolean),
+        soloed: soloed[i],
+      })
+    );
+
+  it('mutes a heard voice and unmutes an unheard one', () => {
+    expect(toggleHeard(four([true, true, true, true]), 1).muted.slice(0, 4)).toEqual([
+      false,
+      true,
+      false,
+      false,
+    ]);
+    expect(toggleHeard(four([true, false, true, true]), 1).muted.slice(0, 4)).toEqual([
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it('turns a solo into mutes, so a click adds an unheard voice to what plays', () => {
+    const soloedFirst = four([true, false, false, false], [true, false, false, false]);
+    const mix = toggleHeard(soloedFirst, 1);
+    expect(mix.muted.slice(0, 4)).toEqual([false, false, true, true]);
+    expect(mix.soloed).toEqual(ALL_FALSE);
+  });
+
+  it('goes silent when the last heard voice is clicked', () => {
+    expect(toggleHeard(four([false, true, false, false]), 1).muted.slice(0, 4)).toEqual([
+      true,
+      true,
+      true,
+      true,
+    ]);
+  });
+
+  it('plays only the shift-clicked voice, then everything when it already plays alone', () => {
+    const only = hearOnly(four([true, true, false, true]), 2);
+    expect(only.muted.slice(0, 4)).toEqual([true, true, false, true]);
+    expect(only.soloed).toEqual(ALL_FALSE);
+    expect(hearOnly(four([false, false, true, false]), 2).muted).toEqual(ALL_FALSE);
   });
 });

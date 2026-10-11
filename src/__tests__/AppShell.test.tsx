@@ -37,7 +37,13 @@ vi.mock('../catalog/loadCatalog', async () => {
       }),
   };
 });
-vi.mock('../components/Stage', () => ({ default: () => null }));
+const stageProps = vi.hoisted(() => ({ latest: {} as Record<string, unknown> }));
+vi.mock('../components/Stage', () => ({
+  default: (props: Record<string, unknown>) => {
+    stageProps.latest = props;
+    return null;
+  },
+}));
 vi.mock('../components/TimeSlider', () => ({ default: () => null }));
 
 // jsdom has no 2D canvas and logs an error per call; FilmGrain handles the null context.
@@ -272,6 +278,33 @@ describe('AppShell', () => {
     expect(screen.queryByRole('dialog', { name: 'Mixer' })).toBeNull();
   });
 
+  it('lets the scopes mute channels only while no panel is open on wide layouts', async () => {
+    const { controls } = renderShell();
+    fireEvent.click(await screen.findByText('or browse 2 albums'));
+    expect(stageProps.latest.onVoiceMixChange).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Close Albums' }));
+    expect(stageProps.latest.onVoiceMixChange).toBe(controls.setVoiceMix);
+  });
+
+  it('puts the fullscreen button in its own corner, outside the player bar, on wide layouts', async () => {
+    Object.defineProperty(document, 'fullscreenEnabled', { value: true, configurable: true });
+    const request = vi.fn(() => Promise.resolve());
+    (document.documentElement as any).requestFullscreen = request;
+    try {
+      const { rerenderWith } = renderShell();
+      await screen.findByText('or browse 2 albums');
+      rerenderWith({ ...IDLE, ejected: false, paused: false, songUrl: '/music/Bazaar/groove.nsf' });
+      const button = screen.getByRole('button', { name: 'Fullscreen' });
+      expect(button.closest('[aria-label="Player"]')).toBeNull();
+      expect(button.classList.contains('FullscreenButton')).toBe(true);
+      fireEvent.click(button);
+      expect(request).toHaveBeenCalled();
+    } finally {
+      delete (document as any).fullscreenEnabled;
+      delete (document.documentElement as any).requestFullscreen;
+    }
+  });
+
   it('opens Albums at the playing album and plays tracks from it', async () => {
     const { controls } = renderShell({
       ...IDLE,
@@ -461,12 +494,12 @@ describe('AppShell channel palette', () => {
   });
 
   it('applies the persisted channel palette to the channel color variables', async () => {
-    window.localStorage.setItem('settings', JSON.stringify({ channelPalette: 'game-boy' }));
+    window.localStorage.setItem('settings', JSON.stringify({ channelPalette: 'nes' }));
     renderShell();
     await screen.findByText('or browse 2 albums');
-    const gameBoy = channelPaletteById('game-boy').channels;
-    expect(channelColors.get()).toEqual(gameBoy);
-    expect(document.documentElement.style.getPropertyValue('--ch-3')).toBe(gameBoy[3]);
+    const nes = channelPaletteById('nes').channels;
+    expect(channelColors.get()).toEqual(nes);
+    expect(document.documentElement.style.getPropertyValue('--ch-3')).toBe(nes[3]);
   });
 
   it('falls back to Chromatic for an unknown palette id', async () => {

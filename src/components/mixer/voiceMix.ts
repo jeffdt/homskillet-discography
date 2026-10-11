@@ -38,6 +38,38 @@ export function toggleSolo(voices: readonly VoiceInfo[], index: number): VoiceMi
   return mix;
 }
 
+/*
+ * Clicking a scope uses the two helpers below, which keep only mutes and clear every solo: a click
+ * flips whether you hear that voice, so it always does something even while voices are soloed,
+ * and clicking the last voice you hear goes silent.
+ *
+ * The alternative we weighed: keep solo. While anything is soloed a click adds or removes that
+ * voice from the solo (toggleSolo), otherwise it mutes (toggleMute); shift-click soloes only that
+ * voice. The Mixer then shows solos, and mutes set before soloing come back when the solo ends,
+ * but removing the last soloed voice suddenly plays every voice instead of going silent.
+ */
+
+/** The mix that flips whether voice index is heard, as mutes only: any solo becomes mutes. */
+export function toggleHeard(voices: readonly VoiceInfo[], index: number): VoiceMix {
+  const mix = clearedVoiceMix();
+  voices.forEach((voice) => {
+    const heard = voice.index === index ? !voice.audible : voice.audible;
+    mix.muted[voice.index] = !heard;
+  });
+  return mix;
+}
+
+/** The mix that plays only voice index, as mutes; if it already plays alone, every voice plays. */
+export function hearOnly(voices: readonly VoiceInfo[], index: number): VoiceMix {
+  const mix = clearedVoiceMix();
+  const alone = voices.every((voice) => voice.audible === (voice.index === index));
+  if (alone) return mix;
+  voices.forEach((voice) => {
+    mix.muted[voice.index] = voice.index !== index;
+  });
+  return mix;
+}
+
 /** Nothing muted, nothing soloed. */
 export function clearedVoiceMix(): VoiceMix {
   return mixOf([]);

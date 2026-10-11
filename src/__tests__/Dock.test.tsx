@@ -139,6 +139,32 @@ describe('Dock', () => {
     expect(screen.getByText('Sun Dried Tanuki')).toBeTruthy();
   });
 
+  it('changes the speed, shows it as a percent and resets it on double-click', () => {
+    const { controls } = renderDock({ tempo: 1.25 });
+    const speed = screen.getByRole('slider', { name: 'Speed' }) as HTMLInputElement;
+    expect(speed.value).toBe('1.25');
+    expect(screen.getByText('125%')).toBeTruthy();
+    fireEvent.change(speed, { target: { value: '0.5' } });
+    expect(controls.setTempo).toHaveBeenLastCalledWith(0.5);
+    fireEvent.doubleClick(speed);
+    expect(controls.setTempo).toHaveBeenLastCalledWith(1);
+  });
+
+  it('shows the saved speed before any song is loaded', () => {
+    renderDock({ playerKey: null }, { settings: { tempo: 0.75 } as any });
+    expect((screen.getByRole('slider', { name: 'Speed' }) as HTMLInputElement).value).toBe('0.75');
+  });
+
+  it('changes the volume and resets it on double-click', () => {
+    const { controls } = renderDock({ volume: 80 });
+    const volume = screen.getByRole('slider', { name: 'Volume' });
+    expect(screen.getByText('80%')).toBeTruthy();
+    fireEvent.change(volume, { target: { value: '120' } });
+    expect(controls.setVolume).toHaveBeenLastCalledWith(120);
+    fireEvent.doubleClick(volume);
+    expect(controls.setVolume).toHaveBeenLastCalledWith(100);
+  });
+
   it('shows fullscreen only when supported', () => {
     renderDock({}, { showFullscreen: true });
     expect(screen.getByRole('button', { name: 'Fullscreen' })).toBeTruthy();

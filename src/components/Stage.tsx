@@ -16,7 +16,7 @@ import { uiPaletteAt } from '../config/uiPalettes';
 import { CanvasBox, computeStageLayout } from '../shell/stageLayout';
 import { BinColorizer } from '../visuals/BinColorizer';
 import { ScopeEffects, ScopeRenderer } from '../visuals/ScopeRenderer';
-import { phaseGrid } from '../visuals/scopeMath';
+import { phaseLabelAnchor, scopeLaneAt } from '../visuals/scopeMath';
 import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor, readCssRgb } from '../visuals/spectrogramMath';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
 import {
@@ -26,11 +26,16 @@ import {
   GradientPainter,
 } from '../visuals/spectrumPainters';
 import { UserSettings } from './UserProvider';
+import { VoiceInfo } from '../audio/data/contract';
+import { VoiceMix } from '../audio/types';
+import { hearOnly, toggleHeard } from './mixer/voiceMix';
 
 interface StageProps {
   settings: UserSettings;
   /** Backing-store scale: 1 normally, 0.5 in low-power mode. */
   renderScale: number;
+  /** Mutes or unmutes (click) the scope under the pointer, or plays only it (shift-click); omit to make the scopes ignore clicks. */
+  onVoiceMixChange?: (mix: VoiceMix) => void;
 }
 
 /** Applies a computed layout box to a canvas's backing store and CSS box. */
@@ -42,8 +47,16 @@ function applyBox(canvas: HTMLCanvasElement, box: CanvasBox): void {
   canvas.style.height = `${box.height}px`;
 }
 
+/** A clickable scope label's tooltip: what a click and a shift-click would do. */
+function labelTooltip(voices: readonly VoiceInfo[], voice: VoiceInfo): string {
+  const alone = voices.every((other) => other.audible === (other === voice));
+  const click = voice.audible ? 'mute' : 'unmute';
+  const shift = alone ? 'play every channel' : 'play only this one';
+  return `${voice.name}: click to ${click}, shift-click to ${shift}`;
+}
+
 /** Full-window visualizer behind all other UI: the spectrum (colored by adding channel light, averaging channel colors, or one loudness gradient) or the channel scopes, each drawn by its own FrameLoop consumer while selected. */
-export default function Stage({ settings, renderScale }: StageProps) {
+export default function Stage({ settings, renderScale, onVoiceMixChange }: StageProps) {
   const { source } = useAudioData();
   const voices = useVoices();
   const channelColors = useChannelColors();
@@ -237,14 +250,51 @@ export default function Stage({ settings, renderScale }: StageProps) {
 
   const showLabels =
     style === 'scopes' && (scope.scopeLayout === 'stacked' || scope.scopeLayout === 'phase');
-  const grid = phaseGrid(voices.length, stageSize.width, stageSize.height);
-  const labelPosition = (lane: number): React.CSSProperties =>
-    scope.scopeLayout === 'phase'
-      ? {
-          top: `${(Math.floor(lane / grid.cols) / grid.rows) * 100}%`,
-          right: `${((grid.cols - 1 - (lane % grid.cols)) / grid.cols) * 100}%`,
-        }
-      : { top: `${(lane / voices.length) * 100}%` };
+  const labelPosition = (lane: number): React.CSSProperties => {
+    if (scope.scopeLayout !== 'phase') return { top: `${(lane / voices.length) * 100}%` };
+    const { x, y } = phaseLabelAnchor(lane, voices.length, stageSize.width, stageSize.height);
+    return { left: `${x}px`, top: `${y}px` };
+  };
+
+  const clickable = style === 'scopes' && onVoiceMixChange !== undefined;
+  /** The voice whose label or scope is under the pointer, or null. A label names its own channel. */
+  const voiceAt = (e: React.PointerEvent<HTMLDivElement>) => {
+    const label = (e.target as Element).closest<HTMLElement>('.Stage-scopeLabel');
+    if (label) return voices.find((voice) => String(voice.index) === label.dataset.channel) || null;
+    const container = e.currentTarget;
+    const rect = container.getBoundingClientRect();
+    const lane = scopeLaneAt(
+      scope.scopeLayout,
+      e.clientX - rect.left,
+      e.clientY - rect.top,
+      voices.length,
+      container.clientWidth,
+      container.clientHeight
+    );
+    return lane === null ? null : voices[lane];
+  };
+  // While the controls are faded out, a press only wakes them.
+  const isIdle = (e: React.PointerEvent<HTMLDivElement>) =>
+    e.currentTarget.closest('[data-idle="true"]') !== null;
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!clickable || e.button !== 0 || isIdle(e)) return;
+    const voice = voiceAt(e);
+    if (!voice || !onVoiceMixChange) return;
+    onVoiceMixChange(e.shiftKey ? hearOnly(voices, voice.index) : toggleHeard(voices, voice.index));
+  };
+  // Hover state is set on the elements directly so hovering never re-renders the stage.
+  const markHover = (container: HTMLElement, voice: VoiceInfo | null) => {
+    if (voice) container.dataset.hover = 'scope';
+    else delete container.dataset.hover;
+    container.querySelectorAll<HTMLElement>('.Stage-scopeLabel').forEach((label) => {
+      if (voice && label.dataset.channel === String(voice.index)) label.dataset.hovered = 'true';
+      else delete label.dataset.hovered;
+    });
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) =>
+    markHover(e.currentTarget, clickable ? voiceAt(e) : null);
+  const onPointerLeave = (e: React.PointerEvent<HTMLDivElement>) =>
+    markHover(e.currentTarget, null);
 
   return (
     <div
@@ -254,6 +304,10 @@ export default function Stage({ settings, renderScale }: StageProps) {
       data-scope-layout={scope.scopeLayout}
       data-scope-coloring={scope.scopeColoring}
       aria-hidden="true"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      data-clickable={clickable ? 'true' : undefined}
     >
       <canvas ref={specRef} className="Stage-spectrogram" />
       <canvas ref={freqRef} className="Stage-analyzer" />
@@ -263,7 +317,7 @@ export default function Stage({ settings, renderScale }: StageProps) {
         className="Stage-scopeBloom"
         style={{ opacity: lowPower ? 0 : scope.scopeBloom }}
       />
-      {style === 'scopes' && scope.scopeCrt && <div className="Stage-crt" />}
+      {settings.crtScreen !== false && <div className="Stage-crt" />}
       {showLabels &&
         voices.map((voice, lane) => (
           <span
@@ -271,6 +325,7 @@ export default function Stage({ settings, renderScale }: StageProps) {
             className={`Stage-scopeLabel${voice.audible ? '' : ' is-silent'}`}
             data-channel={voice.index}
             style={labelPosition(lane)}
+            title={clickable ? labelTooltip(voices, voice) : undefined}
           >
             {voice.name}
           </span>

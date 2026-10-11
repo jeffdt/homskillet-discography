@@ -22,7 +22,6 @@ import { useSettingControls } from './stage/useSettingControls';
 import {
   MORE_SCOPE_SLIDERS,
   MORE_SCOPE_TOGGLES,
-  SCOPE_CRT,
   SCOPE_EFFECT_SLIDERS,
   VIZ_COPY,
 } from './stage/vizControls';
@@ -122,7 +121,6 @@ export default function StagePanel() {
               {scopeColoringById(scope.scopeColoring).description}
             </p>
             {SCOPE_EFFECT_SLIDERS.map((def) => slider(def))}
-            {toggle(SCOPE_CRT)}
             <details className="StagePanel-more">
               <summary>More scope settings</summary>
               {slider(SCOPE_ZOOM)}

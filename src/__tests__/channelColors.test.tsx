@@ -6,7 +6,7 @@ import { useChannelColors } from '../hooks/useChannelColors';
 import { channelColorVar, channelColors, createChannelColorStore } from '../visuals/channelColors';
 
 const CHROMATIC = channelPaletteById('chromatic').channels;
-const GAME_BOY = channelPaletteById('game-boy').channels;
+const NES = channelPaletteById('nes').channels;
 
 function cssVar(element: HTMLElement, index: number): string {
   return element.style.getPropertyValue(channelColorVar(index));
@@ -34,9 +34,9 @@ describe('createChannelColorStore', () => {
   it('writes --ch-0 to --ch-7 on its root and returns the colors', () => {
     const root = document.createElement('div');
     const store = createChannelColorStore(root, CHROMATIC);
-    store.set(GAME_BOY);
-    expect(store.get()).toEqual(GAME_BOY);
-    for (let i = 0; i < 8; i++) expect(cssVar(root, i)).toBe(GAME_BOY[i]);
+    store.set(NES);
+    expect(store.get()).toEqual(NES);
+    for (let i = 0; i < 8; i++) expect(cssVar(root, i)).toBe(NES[i]);
   });
 
   it('cycles a shorter list, lowercases, and falls back to Chromatic for an empty one', () => {
@@ -62,7 +62,7 @@ describe('createChannelColorStore', () => {
     store.subscribe(listener);
     store.set([...CHROMATIC]);
     expect(listener).not.toHaveBeenCalled();
-    store.set(GAME_BOY);
+    store.set(NES);
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenLastCalledWith(store.get());
   });
@@ -70,7 +70,7 @@ describe('createChannelColorStore', () => {
   it('hands out a new frozen array on each change', () => {
     const store = createChannelColorStore(null, CHROMATIC);
     const before = store.get();
-    store.set(GAME_BOY);
+    store.set(NES);
     expect(store.get()).not.toBe(before);
     expect(Object.isFrozen(store.get())).toBe(true);
   });
@@ -80,7 +80,7 @@ describe('createChannelColorStore', () => {
     const listener = vi.fn();
     const unsubscribe = store.subscribe(listener);
     unsubscribe();
-    store.set(GAME_BOY);
+    store.set(NES);
     expect(listener).not.toHaveBeenCalled();
   });
 });
@@ -94,7 +94,7 @@ describe('useChannelColors', () => {
   it('re-renders with the new colors when the palette changes', () => {
     render(<FirstColor />);
     expect(screen.getByText(CHROMATIC[0])).toBeTruthy();
-    act(() => channelColors.set(GAME_BOY));
-    expect(screen.getByText(GAME_BOY[0])).toBeTruthy();
+    act(() => channelColors.set(NES));
+    expect(screen.getByText(NES[0])).toBeTruthy();
   });
 });

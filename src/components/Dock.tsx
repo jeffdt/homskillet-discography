@@ -5,7 +5,8 @@ import { usePulseTarget } from '../hooks/usePulseTarget';
 import { toggleFullscreen } from '../shell/fullscreen';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 import TimeSlider from './TimeSlider';
-import VolumeSlider from './VolumeSlider';
+import DockSlider from './DockSlider';
+import { MIXER_SLIDERS, formatPercent, sliderValue } from './mixer/mixerControls';
 import { UserSettings } from './UserProvider';
 import {
   IconFullscreen,
@@ -28,6 +29,8 @@ interface DockProps {
   /** The dock has faded out for idle; sparks stop spawning so none float over an empty screen. */
   faded?: boolean;
 }
+
+const SPEED = MIXER_SLIDERS.find((def) => def.id === 'tempo')!;
 
 /** Title for a song that is not in the catalog, derived from its URL. */
 function fallbackTitle(songUrl: string | null): string {
@@ -107,7 +110,7 @@ function ModeToggle({
   );
 }
 
-/** Floating transport bar: controls, now playing, progress, modes, volume and fullscreen. */
+/** Floating transport bar: controls, now playing, progress, modes, speed, volume and fullscreen. */
 export default function Dock({
   playback,
   controls,
@@ -189,16 +192,32 @@ export default function Dock({
         </ModeToggle>
       </div>
 
-      <div className="Dock-volume">
-        <VolumeSlider
-          value={playback.volume}
-          onChange={(e) => controls.setVolume(Number(e.target.value))}
-          handleReset={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            controls.setVolume(100);
-          }}
-        />
+      <div className="Dock-sliders">
+        <div className="Dock-speed">
+          <DockSlider
+            label={SPEED.label}
+            value={sliderValue(SPEED, playback, settings)}
+            min={SPEED.min}
+            max={SPEED.max}
+            step={SPEED.step}
+            format={formatPercent}
+            onChange={controls.setTempo}
+            resetValue={SPEED.defaultValue}
+          />
+        </div>
+
+        <div className="Dock-volume">
+          <DockSlider
+            label="Volume"
+            value={playback.volume}
+            min={0}
+            max={150}
+            step={1}
+            format={(value) => `${value}%`}
+            onChange={controls.setVolume}
+            resetValue={100}
+          />
+        </div>
       </div>
 
       {showFullscreen && (

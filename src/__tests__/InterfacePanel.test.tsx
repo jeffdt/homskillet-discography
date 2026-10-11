@@ -4,6 +4,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import InterfacePanel from '../components/InterfacePanel';
 import { UserContext, UserSettings } from '../components/UserProvider';
 import {
+  CRT_SCREEN,
   FILM_GRAIN,
   REACTIVE_STRENGTH,
   MORE_SPARK_SLIDERS,
@@ -45,7 +46,7 @@ describe('InterfacePanel', () => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
-    [REACTIVE_UI, SPARKS, SPARK_FADE].forEach((def) => {
+    [REACTIVE_UI, CRT_SCREEN, SPARKS, SPARK_FADE].forEach((def) => {
       expect(screen.getByRole('switch', { name: def.label })).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
@@ -87,6 +88,14 @@ describe('InterfacePanel', () => {
     expect(updateSettings).toHaveBeenLastCalledWith({ audioReactivePulse: false });
     fireEvent.click(screen.getByRole('switch', { name: 'Sparks' }));
     expect(updateSettings).toHaveBeenLastCalledWith({ sliderSparksEnabled: true });
+  });
+
+  it('starts with the CRT screen on and turns it off', () => {
+    const { updateSettings } = renderPanel();
+    const crt = screen.getByRole('switch', { name: CRT_SCREEN.label });
+    expect((crt as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(crt);
+    expect(updateSettings).toHaveBeenLastCalledWith({ crtScreen: false });
   });
 
   it('disables the pulse strength slider while the pulse is off', () => {

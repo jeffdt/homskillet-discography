@@ -65,15 +65,6 @@ export const SCOPE_LINE_WIDTH: StageSliderDef = {
 
 const flag = { isOn: (value: unknown) => value === true, toValue: (on: boolean) => on };
 
-/** Scanlines and vignette over the scopes. */
-export const SCOPE_CRT: StageToggleDef = {
-  id: 'scope-crt',
-  key: 'scopeCrt',
-  label: 'CRT screen',
-  explanation: 'Scanlines and a dark vignette, like an old TV.',
-  ...flag,
-};
-
 /** A white line inside each trace. */
 export const SCOPE_CORE: StageToggleDef = {
   id: 'scope-core',
@@ -102,7 +93,7 @@ export const SCOPE_AUTO_GAIN: StageToggleDef = {
   ...flag,
 };
 
-/** Always visible with the Channel scopes style, in panel order. */
+/** Always visible with the Scopes style, in panel order. */
 export const SCOPE_EFFECT_SLIDERS: readonly StageSliderDef[] = [
   SCOPE_TRAILS,
   SCOPE_GLOW,

@@ -5,8 +5,6 @@ import { nextGain, targetGain, windowPeak } from './autoGain';
 import {
   FlashFollower,
   GHOST_ALPHA,
-  PHASE_DELAY_SAMPLES,
-  PHASE_WINDOW_SAMPLES,
   RING_SPEED_RAD_PER_MS,
   SCOPE_AUTO_GAIN,
   SCOPE_FIXED_GAIN,
@@ -14,6 +12,9 @@ import {
   buildTrace,
   findTrigger,
   createTraceBuffer,
+  estimatePeriod,
+  phaseWindow,
+  PeriodHold,
   reactiveEnergy,
   traceCapacity,
   trailFade,
@@ -82,6 +83,7 @@ export class ScopeRenderer {
   private readonly lowPower: boolean;
   private readonly flash = new FlashFollower(VOICE_PAIRS);
   private trace: TraceBuffer = createTraceBuffer(0);
+  private readonly periods = new PeriodHold();
   private colors: readonly string[] = [];
   private lanes: Lane[] = [];
   private span = DEFAULT_SCOPE_SPAN;
@@ -206,12 +208,18 @@ export class ScopeRenderer {
   }
 
   /** This frame's gain for voice index: auto gain measured over the window the layout draws. */
-  private traceGain(index: number, waveform: Float32Array, dtMs: number): number {
+  private traceGain(
+    index: number,
+    waveform: Float32Array,
+    period: number | null,
+    dtMs: number
+  ): number {
     if (!this.autoGain) return SCOPE_FIXED_GAIN;
     let start: number;
     let span: number;
     if (this.layout === 'phase') {
-      span = PHASE_WINDOW_SAMPLES + PHASE_DELAY_SAMPLES;
+      const phase = phaseWindow(waveform, period);
+      span = phase.span + phase.delay;
       start = waveform.length - span;
     } else {
       // The same window buildTrace draws, so a loud stretch just before the newest samples is counted.
@@ -240,6 +248,10 @@ export class ScopeRenderer {
     const color = this.colors[index];
     if (!voice || !color) return;
     const { width, height } = this.canvas;
+    const period =
+      this.layout === 'phase'
+        ? this.periods.update(index, estimatePeriod(voice.waveform), dtMs)
+        : null;
     buildTrace(
       {
         layout: this.layout,
@@ -250,7 +262,8 @@ export class ScopeRenderer {
         width,
         height,
         angle: this.angle,
-        gain: this.traceGain(index, voice.waveform, dtMs),
+        gain: this.traceGain(index, voice.waveform, period, dtMs),
+        period,
       },
       this.trace
     );

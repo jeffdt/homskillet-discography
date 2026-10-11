@@ -8,7 +8,6 @@ import { SCOPE_ZOOM, STAGE_COPY } from '../components/stage/stageControls';
 import {
   MORE_SCOPE_SLIDERS,
   MORE_SCOPE_TOGGLES,
-  SCOPE_CRT,
   SCOPE_EFFECT_SLIDERS,
   VIZ_COPY,
 } from '../components/stage/vizControls';
@@ -63,11 +62,11 @@ describe('StagePanel spectrum coloring', () => {
 });
 
 describe('StagePanel channel scopes', () => {
-  it('shows presets with Green CRT pressed, and every scope control explained', () => {
+  it('shows presets with Cathode pressed, and every scope control explained', () => {
     renderPanel({ visualizerStyle: 'scopes' });
     const presets = screen.getByRole('group', { name: 'Scope presets' });
     expect(
-      within(presets).getByRole('button', { name: 'Green CRT' }).getAttribute('aria-pressed')
+      within(presets).getByRole('button', { name: 'Cathode' }).getAttribute('aria-pressed')
     ).toBe('true');
     expect(screen.getByText(VIZ_COPY.presets)).toBeTruthy();
     expect(checkedIn('Scope layout')).toBe('Stacked');
@@ -76,9 +75,7 @@ describe('StagePanel channel scopes', () => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
-    [SCOPE_CRT, ...MORE_SCOPE_TOGGLES].forEach((def) =>
-      expect(screen.getByText(def.explanation)).toBeTruthy()
-    );
+    MORE_SCOPE_TOGGLES.forEach((def) => expect(screen.getByText(def.explanation)).toBeTruthy());
     expect(screen.queryByRole('radiogroup', { name: 'Spectrum coloring' })).toBeNull();
   });
 
@@ -132,7 +129,7 @@ describe('SwatchPicker labels', () => {
 });
 
 describe('StagePanel channel colors notice', () => {
-  it('appears for the default Green CRT scopes, and switching clears it', () => {
+  it('appears for the default Cathode scopes, and switching clears it', () => {
     const { updateSettings } = renderPanel({ visualizerStyle: 'scopes' });
     fireEvent.click(screen.getByRole('button', { name: VIZ_COPY.colorScopesByChannel }));
     expect(updateSettings).toHaveBeenCalledWith({ scopeColoring: 'channel' });
