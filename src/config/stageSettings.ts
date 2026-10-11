@@ -16,21 +16,21 @@ export interface VisualizerStyle {
 /** Every visualizer style, default first. */
 export const VISUALIZER_STYLES: readonly VisualizerStyle[] = [
   {
-    id: 'spectrum',
-    label: 'Spectrum',
-    description:
-      'Pitch runs from low at the bottom to high at the top while time scrolls right to left. Each band takes the colors of the channels playing it.',
-  },
-  {
     id: 'scopes',
     label: 'Scopes',
     description:
       "One oscilloscope per sound channel: the wave each voice of the chip is drawing right now. Square waves look square, the triangle looks like a triangle, and noise looks like noise. Click a channel's trace to mute or unmute it, or shift-click it to hear only that channel.",
   },
+  {
+    id: 'spectrum',
+    label: 'Spectrum',
+    description:
+      'Pitch runs from low at the bottom to high at the top while time scrolls right to left. Each band takes the colors of the channels playing it.',
+  },
 ];
 
 /** The style new visitors see, and the fallback for unknown ids. */
-export const DEFAULT_VISUALIZER_STYLE: VisualizerStyleId = 'spectrum';
+export const DEFAULT_VISUALIZER_STYLE: VisualizerStyleId = 'scopes';
 
 /** The style with this id, or the spectrum when the id is missing or unknown. */
 export function visualizerStyleById(id?: string | null): VisualizerStyle {
@@ -55,6 +55,12 @@ export interface SpectrumColoring {
 /** Every spectrum coloring, default first. */
 export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
   {
+    id: 'unified',
+    label: 'Unified',
+    description:
+      'Colors come from how loud each band is, not which channel plays it, using one gradient you pick below: quiet sounds take its left end, loud ones its right.',
+  },
+  {
     id: 'additive',
     label: 'Add light',
     description:
@@ -66,16 +72,10 @@ export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
     description:
       'Each band takes a blend of the channels playing in it, leaning toward the loudest, so overlaps mix like paint.',
   },
-  {
-    id: 'unified',
-    label: 'Unified',
-    description:
-      'Colors come from how loud each band is, not which channel plays it, using one gradient you pick below: quiet sounds take its left end, loud ones its right.',
-  },
 ];
 
 /** The coloring new visitors see, and the fallback for unknown ids. */
-export const DEFAULT_SPECTRUM_COLORING: SpectrumColoringId = 'additive';
+export const DEFAULT_SPECTRUM_COLORING: SpectrumColoringId = 'unified';
 
 /** The spectrum coloring with this id, or the default. */
 export function spectrumColoringById(id?: unknown): SpectrumColoring {
@@ -285,9 +285,10 @@ export const SCOPE_PRESETS: readonly ScopePreset[] = [
   },
 ];
 
-/** What the channel scopes look like until the visitor changes them: the Cathode preset (owner's choice). */
+/** What the channel scopes look like until the visitor changes them: Raw values on Rings (owner's choice). */
 export const SCOPE_DEFAULTS: ScopeSettings = {
-  ...(SCOPE_PRESETS.find((preset) => preset.id === 'cathode') as ScopePreset).settings,
+  ...RAW_SCOPES,
+  scopeLayout: 'rings',
   scopeAutoGain: true,
 };
 
@@ -385,7 +386,7 @@ export const INTERFACE_DEFAULTS = {
   audioReactivePulse: true,
   reactiveStrength: 100,
   filmGrainAmount: 50,
-  crtScreen: true,
+  crtScreen: false,
   sliderSparksEnabled: false,
   ...SPARK_DEFAULTS,
 };

@@ -14,18 +14,18 @@ import {
 import { UI_PALETTES, uiPaletteAt } from '../config/uiPalettes';
 
 describe('visualizer styles', () => {
-  it('offer the channel spectrum first, then channel scopes, each explained', () => {
-    expect(VISUALIZER_STYLES.map((style) => style.id)).toEqual(['spectrum', 'scopes']);
+  it('offer the channel scopes first, then the spectrum, each explained', () => {
+    expect(VISUALIZER_STYLES.map((style) => style.id)).toEqual(['scopes', 'spectrum']);
     VISUALIZER_STYLES.forEach((style) => {
       expect(style.label.length).toBeGreaterThan(0);
       expect(style.description.length).toBeGreaterThan(40);
     });
   });
 
-  it('fall back to the spectrum for missing or unknown ids', () => {
-    expect(visualizerStyleById(undefined).id).toBe('spectrum');
-    expect(visualizerStyleById(null).id).toBe('spectrum');
-    expect(visualizerStyleById('milkdrop').id).toBe('spectrum');
+  it('fall back to the scopes for missing or unknown ids', () => {
+    expect(visualizerStyleById(undefined).id).toBe('scopes');
+    expect(visualizerStyleById(null).id).toBe('scopes');
+    expect(visualizerStyleById('milkdrop').id).toBe('scopes');
     expect(visualizerStyleById('scopes').id).toBe('scopes');
   });
 });
@@ -44,23 +44,23 @@ describe('scope spans', () => {
 describe('stage defaults', () => {
   it('keep the existing defaults and add the style and zoom', () => {
     expect(STAGE_DEFAULTS).toEqual({
-      visualizerStyle: 'spectrum',
-      spectrumColoring: 'additive',
+      visualizerStyle: 'scopes',
+      spectrumColoring: 'unified',
       spectrumGradient: 'mw-green',
-      scopeLayout: 'stacked',
-      scopeColoring: 'unified',
-      scopeTrails: 0.8,
-      scopeGlow: 0.6,
-      scopeBloom: 0.45,
-      scopeReactivity: 0.25,
-      scopeLineWidth: 1.5,
-      scopeCore: true,
+      scopeLayout: 'rings',
+      scopeColoring: 'channel',
+      scopeTrails: 0,
+      scopeGlow: 0,
+      scopeBloom: 0,
+      scopeReactivity: 0,
+      scopeLineWidth: 2,
+      scopeCore: false,
       scopeFill: false,
       scopeSpan: 512,
       scopeAutoGain: true,
       channelPalette: DEFAULT_CHANNEL_PALETTE_ID,
       uiPalette: 0,
-      crtScreen: true,
+      crtScreen: false,
       peakDecayRate: 0.98,
       peakQuantization: 4,
       audioReactivePulse: true,
@@ -145,7 +145,7 @@ describe('UserProvider stage defaults', () => {
     );
     expect(seen.peakDecayRate).toBe(0.935);
     expect(seen.uiPalette).toBe(3);
-    expect(seen.visualizerStyle).toBe('spectrum');
+    expect(seen.visualizerStyle).toBe('scopes');
     expect(seen.scopeSpan).toBe(512);
   });
 });

@@ -63,10 +63,14 @@ function voice(index: number, name: string, audible = true): VoiceInfo {
   return { index, name, chip: '2A03', muted: !audible, soloed: false, audible };
 }
 
-function renderStage(settings = {}, renderScale = 1) {
+/** Renders the Stage in the spectrum style unless the settings pick a style. */
+function renderStage(settings: Record<string, unknown> = {}, renderScale = 1) {
   const data = createTestAudioData();
   const utils = render(
-    withAudioData(data.value, <Stage settings={settings} renderScale={renderScale} />)
+    withAudioData(
+      data.value,
+      <Stage settings={{ visualizerStyle: 'spectrum', ...settings }} renderScale={renderScale} />
+    )
   );
   const renderer = RendererMock.mock.instances[0] as any;
   return { data, utils, renderer };
@@ -108,8 +112,15 @@ describe('Stage', () => {
     expect(renderer.layout).toBe(data.source.layout);
   });
 
-  it('colors the spectrum by adding channel light by default', () => {
+  it('colors the spectrum from the MW Green gradient by default', () => {
     const { data, renderer } = renderStage();
+    data.frameLoop.setPlaying(true);
+    act(() => data.scheduler.tick(0));
+    expect(renderer.draw.mock.calls[0][1]).toBeInstanceOf(GradientPainter);
+  });
+
+  it('colors the spectrum by adding channel light', () => {
+    const { data, renderer } = renderStage({ spectrumColoring: 'additive' });
     act(() => data.source.setVoices([voice(0, 'Square 1')]));
     sound(data, [0]);
     data.frameLoop.setPlaying(true);
@@ -144,11 +155,11 @@ describe('Stage', () => {
     expect(spectrumGradientById('midnight').stops[0]).toBe('#020024');
   });
 
-  it('falls back to adding light for an unknown coloring', () => {
+  it('falls back to Unified for an unknown coloring', () => {
     const { data, renderer } = renderStage({ spectrumColoring: 'rainbow' });
     data.frameLoop.setPlaying(true);
     act(() => data.scheduler.tick(0));
-    expect(renderer.draw.mock.calls[0][1]).toBeInstanceOf(AdditivePainter);
+    expect(renderer.draw.mock.calls[0][1]).toBeInstanceOf(GradientPainter);
   });
 
   it('applies the peak settings', () => {
@@ -239,7 +250,7 @@ describe('Stage', () => {
   });
 
   it('labels each scope lane with its channel and ghosts the silent ones', () => {
-    const { data, utils } = renderStage({ visualizerStyle: 'scopes' });
+    const { data, utils } = renderStage({ visualizerStyle: 'scopes', scopeLayout: 'stacked' });
     act(() => data.source.setVoices([voice(0, 'Square 1'), voice(2, 'Triangle', false)]));
     const square = utils.getByText('Square 1');
     const triangle = utils.getByText('Triangle');
@@ -262,12 +273,12 @@ describe('Stage', () => {
     expect(utils.container.querySelector('.Stage')!.getAttribute('data-style')).toBe('spectrum');
   });
 
-  it('falls back to the spectrum for an unknown style', () => {
+  it('falls back to the scopes for an unknown style', () => {
     const { data, utils, renderer } = renderStage({ visualizerStyle: 'milkdrop' });
     data.frameLoop.setPlaying(true);
     act(() => data.scheduler.tick(0));
-    expect(renderer.draw).toHaveBeenCalledTimes(1);
-    expect(utils.container.querySelector('.Stage')!.getAttribute('data-style')).toBe('spectrum');
+    expect(renderer.draw).not.toHaveBeenCalled();
+    expect(utils.container.querySelector('.Stage')!.getAttribute('data-style')).toBe('scopes');
   });
 
   it('clears the spectrogram when switching back to it', () => {
@@ -287,33 +298,31 @@ describe('Stage', () => {
     expect(latestScope().renderScale).toBe(0.5);
   });
 
-  it('starts the scopes as Cathode in the accent color', () => {
+  it('starts the scopes as raw rings in channel colors', () => {
     const { utils } = renderStage({ visualizerStyle: 'scopes' });
     const scope = latestScope();
-    expect(scope.setColors).toHaveBeenLastCalledWith(new Array(8).fill(UI_PALETTES[0].accent));
-    expect(scope.setLayout).toHaveBeenLastCalledWith('stacked');
+    expect(scope.setColors).toHaveBeenLastCalledWith(CHROMATIC);
+    expect(scope.setLayout).toHaveBeenLastCalledWith('rings');
     expect(scope.setEffects).toHaveBeenLastCalledWith({
       trails: SCOPE_DEFAULTS.scopeTrails,
       glow: SCOPE_DEFAULTS.scopeGlow,
       bloom: SCOPE_DEFAULTS.scopeBloom,
       reactivity: SCOPE_DEFAULTS.scopeReactivity,
       lineWidth: SCOPE_DEFAULTS.scopeLineWidth,
-      core: true,
+      core: false,
       fill: false,
     });
-    expect(utils.container.querySelector('.Stage-crt')).not.toBeNull();
+    expect(utils.container.querySelector('.Stage-crt')).toBeNull();
     expect(utils.container.querySelector('.Stage')!.getAttribute('data-scope-coloring')).toBe(
-      'unified'
+      'channel'
     );
   });
 
   it('recolors unified traces when the accent changes', () => {
-    const { data, utils } = renderStage({ visualizerStyle: 'scopes', uiPalette: 0 });
+    const unified = { visualizerStyle: 'scopes', scopeColoring: 'unified' };
+    const { data, utils } = renderStage({ ...unified, uiPalette: 0 });
     utils.rerender(
-      withAudioData(
-        data.value,
-        <Stage settings={{ visualizerStyle: 'scopes', uiPalette: 2 }} renderScale={1} />
-      )
+      withAudioData(data.value, <Stage settings={{ ...unified, uiPalette: 2 }} renderScale={1} />)
     );
     expect(latestScope().setColors).toHaveBeenLastCalledWith(
       new Array(8).fill(UI_PALETTES[2].accent)
@@ -340,12 +349,15 @@ describe('Stage', () => {
     ).toBe('0');
   });
 
-  it('lays the CRT screen over every style until it is turned off', () => {
-    const spectrum = renderStage({ visualizerStyle: 'spectrum' });
-    expect(spectrum.utils.container.querySelector('.Stage-crt')).not.toBeNull();
-    spectrum.utils.unmount();
-    const off = renderStage({ visualizerStyle: 'scopes', crtScreen: false });
+  it('lays the CRT screen over every style only once it is turned on', () => {
+    const off = renderStage({ visualizerStyle: 'scopes' });
     expect(off.utils.container.querySelector('.Stage-crt')).toBeNull();
+    off.utils.unmount();
+    const scopes = renderStage({ visualizerStyle: 'scopes', crtScreen: true });
+    expect(scopes.utils.container.querySelector('.Stage-crt')).not.toBeNull();
+    scopes.utils.unmount();
+    const spectrum = renderStage({ visualizerStyle: 'spectrum', crtScreen: true });
+    expect(spectrum.utils.container.querySelector('.Stage-crt')).not.toBeNull();
   });
 
   it('stops the rings turning under reduced motion', () => {

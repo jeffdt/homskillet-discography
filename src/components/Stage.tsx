@@ -6,6 +6,7 @@ import { useFrameLoop } from '../hooks/useFrameLoop';
 import { REDUCED_MOTION_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { useVoices } from '../hooks/useVoices';
 import {
+  INTERFACE_DEFAULTS,
   SpectrumColoringId,
   scopeSettingsOf,
   spectrumColoringById,
@@ -317,7 +318,7 @@ export default function Stage({ settings, renderScale, onVoiceMixChange }: Stage
         className="Stage-scopeBloom"
         style={{ opacity: lowPower ? 0 : scope.scopeBloom }}
       />
-      {settings.crtScreen !== false && <div className="Stage-crt" />}
+      {(settings.crtScreen ?? INTERFACE_DEFAULTS.crtScreen) && <div className="Stage-crt" />}
       {showLabels &&
         voices.map((voice, lane) => (
           <span

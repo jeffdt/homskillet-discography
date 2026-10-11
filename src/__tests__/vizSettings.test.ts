@@ -17,18 +17,18 @@ import {
 const preset = (id: string) => SCOPE_PRESETS.find((p) => p.id === id)!;
 
 describe('spectrum colorings', () => {
-  it('offers Add light (default), Average and Unified, with short labels that fit a card', () => {
+  it('offers Unified (default), Add light and Average, with short labels that fit a card', () => {
     expect(SPECTRUM_COLORINGS.map((c) => [c.id, c.label])).toEqual([
+      ['unified', 'Unified'],
       ['additive', 'Add light'],
       ['average', 'Average'],
-      ['unified', 'Unified'],
     ]);
     SPECTRUM_COLORINGS.forEach((c) => expect(c.label.length).toBeLessThanOrEqual(12));
-    expect(STAGE_DEFAULTS.spectrumColoring).toBe('additive');
+    expect(STAGE_DEFAULTS.spectrumColoring).toBe('unified');
     expect(STAGE_DEFAULTS.spectrumGradient).toBe('mw-green');
     expect(spectrumColoringById('unified').label).toBe('Unified');
-    expect(spectrumColoringById('rainbow').id).toBe('additive');
-    expect(spectrumColoringById(3).id).toBe('additive');
+    expect(spectrumColoringById('rainbow').id).toBe('unified');
+    expect(spectrumColoringById(3).id).toBe('unified');
   });
 });
 
@@ -36,14 +36,14 @@ describe('scope layouts and colorings', () => {
   it('offers four layouts and two trace colorings, with fallbacks', () => {
     expect(SCOPE_LAYOUTS.map((l) => l.id)).toEqual(['stacked', 'overlaid', 'rings', 'phase']);
     expect(SCOPE_COLORINGS.map((c) => c.id)).toEqual(['channel', 'unified']);
-    expect(scopeLayoutById('milkdrop').id).toBe('stacked');
-    expect(scopeColoringById(null).id).toBe('unified');
+    expect(scopeLayoutById('milkdrop').id).toBe('rings');
+    expect(scopeColoringById(null).id).toBe('channel');
     expect(scopeColoringById('unified').label).toBe('Accent color');
   });
 });
 
 describe('scope presets', () => {
-  it('lists Raw first and makes Cathode the default', () => {
+  it('lists Raw first and makes Raw on Rings the default', () => {
     expect(SCOPE_PRESETS.map((p) => p.id)).toEqual([
       'raw',
       'cathode',
@@ -52,7 +52,11 @@ describe('scope presets', () => {
       'phosphor',
       'live-wire',
     ]);
-    expect(SCOPE_DEFAULTS).toEqual({ ...preset('cathode').settings, scopeAutoGain: true });
+    expect(SCOPE_DEFAULTS).toEqual({
+      ...preset('raw').settings,
+      scopeLayout: 'rings',
+      scopeAutoGain: true,
+    });
     Object.entries(SCOPE_DEFAULTS).forEach(([key, value]) =>
       expect((STAGE_DEFAULTS as Record<string, unknown>)[key]).toBe(value)
     );
@@ -147,19 +151,21 @@ describe('scopeSettingsOf', () => {
 
 describe('matchingScopePreset', () => {
   it('finds the preset whose values all match, else null', () => {
-    expect(matchingScopePreset({})!.id).toBe('cathode');
+    expect(matchingScopePreset({})).toBeNull();
+    expect(matchingScopePreset({ ...preset('raw').settings })!.id).toBe('raw');
     expect(matchingScopePreset({ ...preset('halo').settings })!.id).toBe('halo');
     expect(matchingScopePreset({ ...preset('halo').settings, scopeGlow: 0.55 })).toBeNull();
   });
 
   it('leaves Auto gain out of presets, so switching it off keeps the preset', () => {
     SCOPE_PRESETS.forEach((p) => expect('scopeAutoGain' in p.settings).toBe(false));
-    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: false })!.id).toBe('cathode');
+    const cathode = { ...preset('cathode').settings };
+    expect(matchingScopePreset({ ...cathode, scopeAutoGain: false })!.id).toBe('cathode');
   });
 
   it('matches Cathode for settings stored before auto gain existed', () => {
-    expect(matchingScopePreset({ ...SCOPE_DEFAULTS, scopeAutoGain: undefined })!.id).toBe(
-      'cathode'
-    );
+    expect(
+      matchingScopePreset({ ...preset('cathode').settings, scopeAutoGain: undefined })!.id
+    ).toBe('cathode');
   });
 });
