@@ -1,0 +1,184 @@
+/* ===== Download dialog ===== */
+
+.DownloadDialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--shadow) 60%, transparent);
+}
+
+.DownloadDialog {
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--neutral1);
+  border-radius: 12px;
+  background: var(--background);
+  color: var(--neutral3);
+  font: var(--font-body);
+  outline: none;
+}
+
+.DownloadDialog-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--neutral4);
+}
+
+.DownloadDialog-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.DownloadDialog-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.DownloadDialog-label {
+  float: left;
+  width: 56px;
+  padding: 0;
+  color: var(--neutral2);
+}
+
+.DownloadDialog-segmented {
+  display: flex;
+  border: 1px solid var(--neutral1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.DownloadDialog-segmented label {
+  position: relative;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: var(--clickable);
+}
+
+.DownloadDialog-segmented label.is-on {
+  background: var(--button);
+  color: var(--accent);
+}
+
+.DownloadDialog-segmented label:focus-within {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.DownloadDialog-segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.DownloadDialog-note {
+  margin: -6px 0 0 66px;
+  font-size: 0.85rem;
+  color: var(--neutral2);
+}
+
+.DownloadDialog-length {
+  width: 72px;
+  padding: 6px 8px;
+  border: 1px solid var(--neutral1);
+  border-radius: 6px;
+  background: var(--button);
+  color: var(--neutral4);
+  font: inherit;
+}
+
+.DownloadDialog-length[aria-invalid='true'] {
+  border-color: var(--accent-dark);
+}
+
+.DownloadDialog-size {
+  font-size: 0.85rem;
+  color: var(--neutral2);
+}
+
+.DownloadDialog-error {
+  color: var(--neutral4);
+}
+
+.DownloadDialog-warning {
+  color: var(--accent);
+  animation: download-warning-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes download-warning-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .DownloadDialog-warning {
+    animation: none;
+  }
+}
+
+.DownloadDialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.DownloadDialog-progress {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.DownloadDialog-progressLabel {
+  font: var(--font-small);
+  color: var(--neutral3);
+}
+
+.DownloadDialog-progress progress {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.DownloadDialog-primary,
+.DownloadDialog-secondary {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.DownloadDialog-primary {
+  border: 0;
+  background: var(--accent);
+  color: var(--neutral0);
+}
+
+.DownloadDialog-primary:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.DownloadDialog-secondary {
+  border: 1px solid var(--neutral1);
+  background: transparent;
+  color: var(--clickable);
+}
+
+.DownloadDialog-secondary:hover,
+.DownloadDialog-segmented label:hover {
+  color: var(--accent);
+}

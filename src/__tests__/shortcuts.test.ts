@@ -12,6 +12,13 @@ const key = (k: string, extra: Partial<ShortcutKey> = {}): ShortcutKey => ({
 });
 
 describe('resolveShortcut', () => {
+  it('leaves every key to an open modal dialog', () => {
+    const inModal = { tagName: 'BUTTON', inModal: true };
+    for (const k of [' ', 'ArrowLeft', 'ArrowRight', 'Escape', '-', '=', 'm', 'a', 'f']) {
+      expect(resolveShortcut(key(k, { target: inModal }))).toBeNull();
+    }
+  });
+
   it('maps the spec table', () => {
     expect(resolveShortcut(key(' '))).toBe('togglePause');
     expect(resolveShortcut(key('ArrowLeft'))).toBe('prevTrack');

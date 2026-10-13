@@ -115,3 +115,12 @@ export const IconRepeat = () => (
     <path d="M11 10h1v4" />
   </Icon>
 );
+
+/** An arrow into a tray: download. */
+export const IconDownload = () => (
+  <Icon>
+    <path d="M12 4v11" />
+    <path d="M7 10l5 5 5-5" />
+    <path d="M5 20h14" />
+  </Icon>
+);

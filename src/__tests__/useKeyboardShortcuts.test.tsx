@@ -32,6 +32,23 @@ describe('useKeyboardShortcuts', () => {
     expect(toggleAlbums).not.toHaveBeenCalled();
   });
 
+  it('ignores keys pressed inside a modal dialog', () => {
+    const nextTrack = vi.fn();
+    const closeTopmost = vi.fn();
+    const { getByText } = render(
+      <>
+        <Harness handlers={{ nextTrack, closeTopmost }} />
+        <div role="dialog" aria-modal="true">
+          <button>Inside</button>
+        </div>
+      </>
+    );
+    fireEvent.keyDown(getByText('Inside'), { key: 'ArrowRight' });
+    fireEvent.keyDown(getByText('Inside'), { key: 'Escape' });
+    expect(nextTrack).not.toHaveBeenCalled();
+    expect(closeTopmost).not.toHaveBeenCalled();
+  });
+
   it('always calls the latest handlers', () => {
     const first = vi.fn();
     const second = vi.fn();

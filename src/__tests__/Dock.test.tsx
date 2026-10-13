@@ -40,6 +40,7 @@ const playing: PlaybackState = {
   volume: 100,
   shuffle: true,
   repeat: false,
+  stubMode: false,
 };
 
 function makeControls(): PlaybackControls {
@@ -200,5 +201,78 @@ describe('Dock', () => {
     expect(
       screen.getByRole('button', { name: 'Play' }).style.getPropertyValue('--pulse-intensity')
     ).toBe('0');
+  });
+});
+
+describe('download button', () => {
+  function dockFor(overrides: Partial<PlaybackState>, audio = createTestAudioData()) {
+    return withAudioData(
+      audio.value,
+      <Dock
+        playback={{ ...playing, ...overrides }}
+        controls={makeControls()}
+        track={overrides.songUrl === null ? null : track}
+        album={overrides.songUrl === null ? null : album}
+        settings={{}}
+        onShowInAlbums={vi.fn()}
+        showFullscreen={false}
+      />
+    );
+  }
+  function renderWithAudio(overrides: Partial<PlaybackState> = {}) {
+    const audio = createTestAudioData();
+    const utils = render(dockFor(overrides, audio));
+    return {
+      ...utils,
+      rerenderWith: (next: Partial<PlaybackState>) => utils.rerender(dockFor(next, audio)),
+    };
+  }
+  const downloadButton = () =>
+    screen.getByRole('button', { name: 'Download track' }) as HTMLButtonElement;
+
+  it('opens the download dialog for the current track', () => {
+    renderWithAudio();
+    fireEvent.click(downloadButton());
+    expect(screen.getByRole('dialog', { name: 'Download Groove' })).toBeTruthy();
+  });
+
+  it('closes the dialog from its Close button', () => {
+    renderWithAudio();
+    fireEvent.click(downloadButton());
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('returns focus to the download button on close', () => {
+    renderWithAudio();
+    fireEvent.click(downloadButton());
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(document.activeElement).toBe(downloadButton());
+  });
+
+  it('keeps the dialog on the opened track when playback ejects', () => {
+    const { rerenderWith } = renderWithAudio();
+    fireEvent.click(downloadButton());
+    rerenderWith({ ejected: true, songUrl: null });
+    expect(screen.getByRole('dialog', { name: 'Download Groove' })).toBeTruthy();
+  });
+
+  it('does not reopen the dialog by itself after it was closed', () => {
+    const { rerenderWith } = renderWithAudio();
+    fireEvent.click(downloadButton());
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    rerenderWith({ ejected: true, songUrl: null });
+    rerenderWith({});
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('is disabled in stub mode', () => {
+    renderWithAudio({ stubMode: true });
+    expect(downloadButton().disabled).toBe(true);
+  });
+
+  it('is disabled when nothing is loaded', () => {
+    renderWithAudio({ ejected: true, songUrl: null });
+    expect(downloadButton().disabled).toBe(true);
   });
 });

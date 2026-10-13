@@ -470,6 +470,7 @@ export class App extends React.Component<AppProps, AppState> {
       volume: this.state.volume,
       shuffle: this.state.shuffle === SHUFFLE_ON,
       repeat: this.state.isLocked,
+      stubMode: this.engine?.kind === 'stub',
     };
 
     return (

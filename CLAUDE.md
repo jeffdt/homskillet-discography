@@ -113,6 +113,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - AppShell.tsx - Layout, panels, URL sync, keyboard
   - Stage.tsx - Full-window visualizer (in Scopes, click a trace to mute or unmute it, shift-click to hear only it; not in Overlaid; see the note in mixer/voiceMix.ts)
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
+  - DownloadDialog.tsx - Opened by the Dock's download icon: MP3 or WAV, My mix or Original, length (m:ss); renders through src/audio/export/
   - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, CRT screen, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
   - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
   - TimeSlider.tsx, DockSlider.tsx - Audio controls (DockSlider is the player bar's speed and volume)
@@ -133,6 +134,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - worklet/chipProcessor.ts - AudioWorklet entry point
   - taps/ - Per-voice analysis taps (pooled transfer buffers, or a SharedArrayBuffer ring when crossOriginIsolated)
   - data/ - The visual data contract (contract.ts), TapAudioDataSource, FrameLoop, PulseChannel, spectra
+  - export/ - Track downloads: exportPlan (lengths, sizes, mix summary, file names), renderExport (a fresh ChipRenderer into an Encoder for an exact wall-clock length, end fade in the last 4 s at any speed), encoders (WAV, MP3 via @breezystack/lamejs, ID3), exportWorker and exportTrack (renders in a module Web Worker; only the worker imports encoders.ts, so LAME stays out of the main bundle)
 - **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
 - **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), BinColorizer (per-bin channel colors), channelColors (channel color store and --ch-N variables), sparks physics, spectrumPainters (the three spectrum colorings)

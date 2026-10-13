@@ -25,6 +25,8 @@ export interface PlaybackState {
   shuffle: boolean;
   /** Loop the current track instead of advancing (the old "lock"). */
   repeat: boolean;
+  /** The engine runs without chip-core: silent, and exports are unavailable. */
+  stubMode: boolean;
 }
 
 /** Commands the shell may issue. The object is created once, so its identity is stable. */
