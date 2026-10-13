@@ -230,12 +230,18 @@ export default function AppShell({ playback, controls }: AppShellProps) {
   const anyPanelOpen = panels.open.length > 0;
 
   // Wide layouts have no backdrop behind panels, so a press anywhere outside the panels and chrome
-  // closes them all. Compact sheets close from their own backdrop instead.
+  // closes them all. Compact sheets close from their own backdrop instead. Modal layers (the
+  // download dialog) sit above the panels and keep them open.
   useEffect(() => {
     if (!anyPanelOpen || compact) return undefined;
     const onPointerDown = (e: Event) => {
       const target = e.target as Element | null;
-      if (target && target.closest && target.closest('.Panel, .Chrome, .toast-box-outer')) return;
+      if (
+        target &&
+        target.closest &&
+        target.closest('.Panel, .Chrome, .toast-box-outer, [data-modal-layer]')
+      )
+        return;
       dispatch({ type: 'closeAll' });
     };
     document.addEventListener('pointerdown', onPointerDown);

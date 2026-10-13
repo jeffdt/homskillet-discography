@@ -27,6 +27,7 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
               type: (el as HTMLInputElement).type,
               isContentEditable: el.isContentEditable,
               role: el.getAttribute('role') ?? undefined,
+              inModal: el.closest('[aria-modal="true"]') !== null,
             }
           : null,
       });

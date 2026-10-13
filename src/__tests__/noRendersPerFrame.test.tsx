@@ -34,6 +34,7 @@ const playing: PlaybackState = {
   volume: 100,
   shuffle: false,
   repeat: false,
+  stubMode: false,
 };
 
 describe('steady-state playback', () => {

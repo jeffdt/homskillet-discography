@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Album, Track } from '../catalog/catalog';
 import { titleFromFilename } from '../catalog/titles';
 import { usePulseTarget } from '../hooks/usePulseTarget';
@@ -6,9 +7,11 @@ import { toggleFullscreen } from '../shell/fullscreen';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 import TimeSlider from './TimeSlider';
 import DockSlider from './DockSlider';
+import DownloadDialog from './DownloadDialog';
 import { MIXER_SLIDERS, formatPercent, sliderValue } from './mixer/mixerControls';
 import { UserSettings } from './UserProvider';
 import {
+  IconDownload,
   IconFullscreen,
   IconNext,
   IconPause,
@@ -125,6 +128,14 @@ export default function Dock({
   const title = track ? track.title : fallbackTitle(playback.songUrl);
   const regionRef = useRef<HTMLDivElement>(null);
   usePulseTarget(regionRef, '--pulse-intensity', !playback.paused && !disabled);
+  // The dialog keeps the track it was opened for, so an export survives playback moving on.
+  const [download, setDownload] = useState<{
+    songUrl: string;
+    title: string;
+    album: string | null;
+  } | null>(null);
+  const downloadButtonRef = useRef<HTMLButtonElement>(null);
+  const canDownload = !disabled && !playback.stubMode && !!playback.songUrl;
 
   return (
     <div ref={regionRef} className="Dock Chrome" role="region" aria-label="Player">
@@ -190,6 +201,23 @@ export default function Dock({
         >
           <IconRepeat />
         </ModeToggle>
+        <button
+          ref={downloadButtonRef}
+          className="Dock-button"
+          aria-label="Download track"
+          title={playback.stubMode ? 'Download needs the audio engine' : 'Download track'}
+          onClick={() =>
+            playback.songUrl &&
+            setDownload({
+              songUrl: playback.songUrl,
+              title,
+              album: album ? album.title : null,
+            })
+          }
+          disabled={!canDownload}
+        >
+          <IconDownload />
+        </button>
       </div>
 
       <div className="Dock-sliders">
@@ -230,6 +258,23 @@ export default function Dock({
           <IconFullscreen />
         </button>
       )}
+
+      {download &&
+        // Portaled so the dialog escapes the Dock's idle fade and layout.
+        createPortal(
+          <DownloadDialog
+            title={download.title}
+            album={download.album}
+            songUrl={download.songUrl}
+            playback={playback}
+            settings={settings}
+            onClose={() => {
+              setDownload(null);
+              downloadButtonRef.current?.focus();
+            }}
+          />,
+          document.body
+        )}
     </div>
   );
 }

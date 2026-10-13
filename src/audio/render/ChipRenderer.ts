@@ -107,7 +107,7 @@ export class ChipRenderer {
     const info = readTrackInfo(core, emu, filepath);
     this.emu = emu;
     this.settings = { ...settings };
-    this.durationMs = info.durationMs;
+    this.durationMs = settings.durationMs ?? info.durationMs;
     this.paused = false;
     this.ended = false;
     this.endFadeStarted = false;

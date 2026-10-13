@@ -27,6 +27,7 @@ const IDLE: PlaybackState = {
   volume: 100,
   shuffle: false,
   repeat: false,
+  stubMode: false,
 };
 
 const PLAYING: PlaybackState = {

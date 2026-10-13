@@ -81,6 +81,7 @@ const IDLE: PlaybackState = {
   volume: 100,
   shuffle: false,
   repeat: false,
+  stubMode: false,
 };
 
 /** Builds a PlaybackControls object whose every command is a spy. */
@@ -276,6 +277,21 @@ describe('AppShell', () => {
     fireEvent.pointerDown(container.querySelector('.AppShell') as Element);
     expect(screen.queryByRole('dialog', { name: 'Albums' })).toBeNull();
     expect(screen.queryByRole('dialog', { name: 'Mixer' })).toBeNull();
+  });
+
+  it('keeps panels open on a press inside a modal layer such as the download dialog', async () => {
+    renderShell();
+    fireEvent.click(await screen.findByText('or browse 2 albums'));
+    const layer = document.createElement('div');
+    layer.setAttribute('data-modal-layer', '');
+    const inner = document.createElement('button');
+    layer.appendChild(inner);
+    document.body.appendChild(layer);
+
+    fireEvent.pointerDown(layer);
+    fireEvent.pointerDown(inner);
+    expect(screen.getByRole('dialog', { name: 'Albums' })).toBeTruthy();
+    layer.remove();
   });
 
   it('lets the scopes mute channels only while no panel is open on wide layouts', async () => {

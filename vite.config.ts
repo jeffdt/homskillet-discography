@@ -88,7 +88,9 @@ export default defineConfig(({ command, mode }) => {
     },
 
     optimizeDeps: {
-      include: ['react', 'react-dom'],
+      // lamejs is only reached through the export worker, which Vite discovers late and then
+      // reloads the page mid-export; pre-bundling it avoids that reload in dev.
+      include: ['react', 'react-dom', '@breezystack/lamejs'],
       exclude: ['chip-core.wasm'],
     },
 

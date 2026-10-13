@@ -78,6 +78,8 @@ export interface RendererSettings {
   subBass: number;
   /** True disables the fade-out at the track's duration (the lock button). */
   loopForever: boolean;
+  /** Song-time ms at which the end fade starts, instead of the track's own duration. */
+  durationMs?: number;
 }
 
 /** Per-voice mute and solo state, indexed by voice pair. */

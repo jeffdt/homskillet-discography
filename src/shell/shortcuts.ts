@@ -20,6 +20,8 @@ export interface ShortcutTarget {
   type?: string;
   isContentEditable?: boolean;
   role?: string;
+  /** Inside an open modal dialog, which owns every key. */
+  inModal?: boolean;
 }
 
 export interface ShortcutKey {
@@ -92,6 +94,7 @@ export function resolveShortcut(e: ShortcutKey): ShortcutAction | null {
 /** Maps a key to an action ignoring repeat, composition and prior handling. */
 function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
   if (e.ctrlKey || e.metaKey || e.altKey) return null;
+  if (e.target?.inModal) return null;
   if (e.key === 'Escape') return 'closeTopmost';
   if (isTextEntry(e.target)) return null;
 
