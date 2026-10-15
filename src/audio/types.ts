@@ -82,10 +82,28 @@ export interface RendererSettings {
   durationMs?: number;
 }
 
-/** Per-voice mute and solo state, indexed by voice pair. */
+/**
+ * Per-voice mixer state, indexed by voice pair. Missing level entries take their defaults
+ * (volume 1, pan 0, reverb 0; see voiceGains.ts).
+ */
 export interface VoiceMix {
   muted: boolean[];
   soloed: boolean[];
+  /** Fader gain on top of the voice's own level: 1 is as written, 0 silent, up to VOICE_VOLUME_MAX. */
+  volume?: number[];
+  /** -1 (hard left) .. 1 (hard right); 0 leaves the emulator's own stereo placement alone. */
+  pan?: number[];
+  /** Reverb send, 0..1: how much of the voice (after its fader) feeds the shared reverb. */
+  reverb?: number[];
+}
+
+/** What the renderer applies per voice pair (VOICE_PAIRS entries each): computeVoiceLevels' output. */
+export interface VoiceLevels {
+  /** Audibility (mute/solo) times volume. */
+  gains: number[];
+  pans: number[];
+  /** Reverb send per voice, before the voice's gain. */
+  sends: number[];
 }
 
 /** Where the engine renders: AudioWorklet, main-thread ScriptProcessor, or silent stub. */

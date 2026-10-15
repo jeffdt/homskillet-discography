@@ -1,6 +1,6 @@
 import { VOICE_PAIRS } from '../constants';
 import { AudioEngine } from '../engine/AudioEngine';
-import { computeVoiceGains } from '../render/voiceGains';
+import { computeVoiceLevels } from '../render/voiceGains';
 import { LoadedTrack, VoiceMix } from '../types';
 import { audibleTime } from './alignment';
 import { AnalysisFrame } from './AnalysisFrame';
@@ -107,7 +107,7 @@ export class TapAudioDataSource implements AudioDataSource {
 
   private setMix(mix: VoiceMix): void {
     this.mix = mix;
-    computeVoiceGains(mix.muted, mix.soloed, this.gains);
+    this.gains.set(computeVoiceLevels(mix).gains);
   }
 
   private publish(): void {

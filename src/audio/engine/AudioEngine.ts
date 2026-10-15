@@ -20,7 +20,7 @@ export interface AudioEngineEvents {
   loaded: (track: LoadedTrack) => void;
   /** stop() ran, or the engine failed: no track is loaded any more. */
   unloaded: () => void;
-  /** setVoiceMix changed mute or solo; mix is a copy. */
+  /** setVoiceMix changed the per-voice mix; mix is a copy with every level filled in. */
   voiceMixChanged: (mix: VoiceMix) => void;
 }
 
@@ -59,11 +59,11 @@ export interface AudioEngine {
   setSubBass(amount: number): void;
   /** Whether the track repeats instead of ending. */
   setLoopForever(loopForever: boolean): void;
-  /** A copy of the current mute/solo state. */
+  /** A copy of the per-voice mix (mute, solo, volume, pan, reverb), every level filled in. */
   getVoiceMix(): VoiceMix;
   /** The loaded track, or null. */
   getLoadedTrack(): LoadedTrack | null;
-  /** Mute/solo state survives track changes; callers reset it if they want to. */
+  /** The per-voice mix survives track changes; callers reset it if they want to. */
   setVoiceMix(mix: VoiceMix): void;
   /** Output volume applied after outputNode; ignored (silent) in stub mode. */
   setVolume(volume: number): void;

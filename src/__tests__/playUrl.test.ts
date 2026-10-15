@@ -73,4 +73,30 @@ describe('stripPlayParams', () => {
     expect(stripPlayParams('?play=a&t=1&debug=true')).toBe('?debug=true');
     expect(stripPlayParams('?play=a')).toBe('');
   });
+
+  it("removes a share link's settings too", () => {
+    expect(
+      stripPlayParams(
+        '?play=a&speed=0.5&mute=1&vol=50&pan=0_20&verb=10&viz=e30&solo=2&bass=1&stereo=0&debug=1'
+      )
+    ).toBe('?debug=1');
+  });
+});
+
+describe('shared settings', () => {
+  it('come with a known shared track only', () => {
+    expect(
+      parseInitialLocation('/', '?play=SuperFORE!%2Fcave.nsf&speed=0.5', catalog).shared!.sliders
+    ).toEqual({
+      tempo: 0.5,
+    });
+    expect(parseInitialLocation('/', '?play=Gone%2Fx.nsf&speed=0.5', catalog).shared).toBeNull();
+    expect(parseInitialLocation('/', '?play=SuperFORE!%2Fcave.nsf', catalog).shared).toBeNull();
+  });
+
+  it('are dropped from the address bar link for the next track', () => {
+    expect(buildPlayUrl('SuperFORE!/cave.nsf', '?play=x&mute=1&viz=e30')).toBe(
+      '/?play=SuperFORE%21%2Fcave.nsf'
+    );
+  });
 });

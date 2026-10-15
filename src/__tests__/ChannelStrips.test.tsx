@@ -44,15 +44,30 @@ describe('ChannelStrips', () => {
     const { data, onVoiceMixChange } = renderStrips();
     act(() => data.source.setVoices(TRACK));
     fireEvent.click(screen.getByRole('button', { name: 'Mute Triangle' }));
-    expect(onVoiceMixChange).toHaveBeenLastCalledWith({
-      muted: [false, false, true, false, false, false, false, false],
-      soloed: [false, true, false, false, false, false, false, false],
-    });
+    expect(onVoiceMixChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        muted: [false, false, true, false, false, false, false, false],
+        soloed: [false, true, false, false, false, false, false, false],
+      })
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Solo Saw Wave' }));
-    expect(onVoiceMixChange).toHaveBeenLastCalledWith({
-      muted: [false, false, false, false, false, false, false, false],
-      soloed: [false, true, false, false, false, true, false, false],
-    });
+    expect(onVoiceMixChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        muted: [false, false, false, false, false, false, false, false],
+        soloed: [false, true, false, false, false, true, false, false],
+      })
+    );
+  });
+
+  it('sends a level change for one channel, keeping the others', () => {
+    const { data, onVoiceMixChange } = renderStrips();
+    act(() => data.source.setVoices(TRACK.map((v) => (v.index === 0 ? { ...v, reverb: 0.4 } : v))));
+    fireEvent.change(screen.getByLabelText('Triangle volume'), { target: { value: '1.5' } });
+    const mix = onVoiceMixChange.mock.lastCall![0];
+    expect(mix.volume.slice(0, 3)).toEqual([1, 1, 1.5]);
+    expect(mix.reverb[0]).toBe(0.4);
+    fireEvent.doubleClick(screen.getByLabelText('Square 1 reverb'));
+    expect(onVoiceMixChange.mock.lastCall![0].reverb[0]).toBe(0);
   });
 
   it('swaps strips when the track changes and stops drawing removed ones', () => {

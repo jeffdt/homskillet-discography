@@ -126,22 +126,55 @@ describe('mix', () => {
     expect(mixSummary({ ...ORIGINAL, tempo: 1.15, voices })).toBe('Speed 115% · All voices silent');
   });
 
-  it('builds renderer settings and gains from the mix', () => {
-    const voices = [VOICES[0], muted(1, 'Square 2')];
-    const { settings, gains } = exportSettings({
+  it('lists heard channels whose Vol, Pan or Verb moved, and counts them as a change', () => {
+    const voices = [
+      voiceInfo(0, 'Square 1', { volume: 0.5, pan: -0.4 }),
+      voiceInfo(1, 'Square 2', { reverb: 0.3 }),
+      voiceInfo(2, 'Triangle', { muted: true, audible: false, volume: 2 }),
+    ];
+    const mix = { ...ORIGINAL, voices };
+    expect(mixDiffers(mix)).toBe(true);
+    expect(mixSummary(mix)).toBe(
+      'Triangle muted · Square 1 Vol 50% · Square 1 Pan L40 · Square 2 Verb 30%'
+    );
+    expect(mixDiffers({ ...ORIGINAL, voices: [voiceInfo(2, 'Triangle', { volume: 1 })] })).toBe(
+      false
+    );
+  });
+
+  it('builds renderer settings and levels from the mix', () => {
+    const voices = [
+      voiceInfo(0, 'Square 1', { volume: 1.5, pan: 0.5, reverb: 0.25 }),
+      muted(1, 'Square 2'),
+    ];
+    const { settings, levels } = exportSettings({
       tempo: 1.5,
       subbass: 0.2,
       stereoWidth: 0.5,
       voices,
     });
     expect(settings).toEqual({ tempo: 1.5, subBass: 0.2, stereoWidth: 0.5, loopForever: false });
-    expect(gains).toEqual([1, 0, 1, 1, 1, 1, 1, 1]);
+    expect(levels).toEqual({
+      gains: [1.5, 0, 1, 1, 1, 1, 1, 1],
+      pans: [0.5, 0, 0, 0, 0, 0, 0, 0],
+      sends: [0.25, 0, 0, 0, 0, 0, 0, 0],
+    });
+  });
+
+  it('exports a soloed mix as only the soloed voices', () => {
+    const voices = [
+      voiceInfo(0, 'Square 1', { soloed: true }),
+      voiceInfo(1, 'Square 2', { audible: false }),
+    ];
+    const { levels } = exportSettings({ ...ORIGINAL, voices });
+    expect(levels.gains).toEqual([1, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it('uses defaults and all voices for the original', () => {
-    const { settings, gains } = exportSettings(null);
+    const { settings, levels } = exportSettings(null);
     expect(settings).toEqual({ tempo: 1, subBass: 0, stereoWidth: 1, loopForever: false });
-    expect(gains).toEqual([1, 1, 1, 1, 1, 1, 1, 1]);
+    expect(levels.gains).toEqual([1, 1, 1, 1, 1, 1, 1, 1]);
+    expect(levels.sends).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 });
 

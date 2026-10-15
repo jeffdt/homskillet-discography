@@ -80,6 +80,9 @@ describe('TapAudioDataSource voices', () => {
       muted: false,
       soloed: false,
       audible: true,
+      volume: 1,
+      pan: 0,
+      reverb: 0,
     });
     engine.stop();
     expect(source.getVoices()).toEqual([]);

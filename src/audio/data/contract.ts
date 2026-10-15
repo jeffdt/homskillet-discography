@@ -15,6 +15,12 @@ export interface VoiceInfo {
   soloed: boolean;
   /** True when the voice is heard: not muted, and either nothing is soloed or this voice is. */
   audible: boolean;
+  /** Mixer fader, 0..VOICE_VOLUME_MAX; 1 is the level the song wrote. */
+  volume: number;
+  /** Mixer pan, -1 (left) .. 1 (right). */
+  pan: number;
+  /** Mixer reverb send, 0..1. */
+  reverb: number;
 }
 
 /** One voice's slice of a VoiceFrame. Reused every frame. */
@@ -44,8 +50,9 @@ export interface VoiceFrame {
   /** Always VOICE_PAIRS (8) entries, indexed by VoiceInfo.index. */
   readonly voices: readonly VoiceData[];
   /**
-   * Full-mix constant-Q magnitude per SpectrumLayout bin, after mute/solo, before SubBass, fades
-   * and volume. Computed on the first read in each frame (about 0.3 ms).
+   * Full-mix constant-Q magnitude per SpectrumLayout bin, after mute/solo and channel volume,
+   * before pan, reverb, SubBass, fades and output volume. Computed on the first read in each
+   * frame (about 0.3 ms).
    */
   readonly mixSpectrum: Float32Array;
 }

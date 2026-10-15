@@ -8,6 +8,8 @@ import {
   SEEK_SPEED,
 } from '../../audio/constants';
 import { ChipRenderer, RendererEvent } from '../../audio/render/ChipRenderer';
+import { REVERB_TAIL_MS } from '../../audio/render/Reverb';
+import { computeVoiceLevels } from '../../audio/render/voiceGains';
 import { TapRing } from '../../audio/taps/TapRing';
 import { ChipCore, RendererSettings } from '../../audio/types';
 
@@ -72,12 +74,37 @@ describe('ChipRenderer (stub core)', () => {
     expect(renderer.positionMs).toBeCloseTo((2048 / RATE) * 1000, 9);
   });
 
-  it('silences all voices with gains but keeps writing taps', async () => {
+  it('silences all voices with levels but keeps writing taps', async () => {
     const { renderer, taps } = await setup();
-    renderer.setGains(new Float32Array(8));
+    renderer.setLevels(computeVoiceLevels({ muted: new Array(8).fill(true), soloed: [] }));
     renderQuanta(renderer, 1);
     expect(renderQuanta(renderer, 20)).toBe(0);
     expect(taps.samples.some((x) => x !== 0)).toBe(true);
+  });
+
+  it('rings a reverb tail after the sending voices go silent, then rests', async () => {
+    const { renderer } = await setup();
+    const muteAll = new Array(8).fill(true);
+    renderer.setLevels(computeVoiceLevels({ muted: [], soloed: [], reverb: new Array(8).fill(1) }));
+    renderQuanta(renderer, quantaFor(200));
+    renderer.setLevels(
+      computeVoiceLevels({ muted: muteAll, soloed: [], reverb: new Array(8).fill(1) })
+    );
+    renderQuanta(renderer, 2);
+    expect(renderQuanta(renderer, quantaFor(100))).toBeGreaterThan(0);
+    renderQuanta(renderer, quantaFor(REVERB_TAIL_MS));
+    expect(renderQuanta(renderer, 10)).toBe(0);
+  });
+
+  it('cuts the reverb tail on a seek', async () => {
+    const { renderer } = await setup();
+    renderer.setLevels(computeVoiceLevels({ muted: [], soloed: [], reverb: new Array(8).fill(1) }));
+    renderQuanta(renderer, quantaFor(200));
+    renderer.setLevels(computeVoiceLevels({ muted: new Array(8).fill(true), soloed: [] }));
+    renderer.seek(1000, 1);
+    renderUntil(renderer, () => !renderer.isSeeking);
+    renderQuanta(renderer, 2);
+    expect(renderQuanta(renderer, 10)).toBe(0);
   });
 
   it('fades out on pause, then stops emulating', async () => {

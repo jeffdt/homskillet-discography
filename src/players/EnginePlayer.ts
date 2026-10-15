@@ -60,6 +60,9 @@ export default class EnginePlayer extends Player {
   ): Promise<void> {
     this.resolveParamValues(persistedSettings);
     this.tempo = persistedSettings.tempo || 1;
+    // Each song starts with a fresh mix, cleared before the load so it starts with the new song's
+    // first sample and anything set after load (such as a shared link's mix) is never undone.
+    this.engine.setVoiceMix({ muted: [], soloed: [] });
     let info: TrackInfo;
     try {
       info = await this.engine.load(data, filepath, {
@@ -154,12 +157,12 @@ export default class EnginePlayer extends Player {
     });
   }
 
-  /** Sets mute and solo per voice (missing entries are false) and keeps the voice mask in step. */
+  /** Sets the per-voice mix (missing mute/solo entries are false) and keeps the voice mask in step. */
   setVoiceMix(mix: VoiceMix): void {
     const muted = Array.from({ length: VOICE_PAIRS }, (_, i) => !!mix.muted[i]);
     const soloed = Array.from({ length: VOICE_PAIRS }, (_, i) => !!mix.soloed[i]);
     this.voiceMask = Array.from({ length: this.getNumVoices() }, (_, i) => !muted[i]);
-    this.engine.setVoiceMix({ muted, soloed });
+    this.engine.setVoiceMix({ ...mix, muted, soloed });
   }
 
   getParameter(id: string): any {

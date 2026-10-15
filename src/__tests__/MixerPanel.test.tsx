@@ -82,10 +82,12 @@ describe('MixerPanel', () => {
     const { data, controls } = renderPanel();
     act(() => data.source.setVoices([voiceInfo(0, 'Square 1'), voiceInfo(2, 'Triangle')]));
     fireEvent.click(screen.getByRole('button', { name: 'Solo Square 1' }));
-    expect(controls.setVoiceMix).toHaveBeenLastCalledWith({
-      muted: ALL_FALSE,
-      soloed: [true, false, false, false, false, false, false, false],
-    });
+    expect(controls.setVoiceMix).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        muted: ALL_FALSE,
+        soloed: [true, false, false, false, false, false, false, false],
+      })
+    );
   });
 
   it('drives speed, bass and stereo', () => {
@@ -111,7 +113,13 @@ describe('MixerPanel', () => {
     expect(controls.setTempo).toHaveBeenCalledWith(1);
     expect(controls.setParam).toHaveBeenCalledWith('subbass', 0);
     expect(controls.setParam).toHaveBeenCalledWith('stereoWidth', 1);
-    expect(controls.setVoiceMix).toHaveBeenCalledWith({ muted: ALL_FALSE, soloed: ALL_FALSE });
+    expect(controls.setVoiceMix).toHaveBeenCalledWith({
+      muted: ALL_FALSE,
+      soloed: ALL_FALSE,
+      volume: new Array(8).fill(1),
+      pan: new Array(8).fill(0),
+      reverb: new Array(8).fill(0),
+    });
   });
 
   it('lets the sliders and reset work before a track plays', () => {

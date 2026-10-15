@@ -182,3 +182,47 @@
 .DownloadDialog-segmented label:hover {
   color: var(--accent);
 }
+
+/* ===== Share dialog (same modal look) ===== */
+
+.ShareDialog-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--neutral2);
+}
+
+.ShareDialog-option label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--neutral3);
+  cursor: pointer;
+}
+
+.ShareDialog-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+/* Same as the Visualizer panel's toggles: the global checkbox box fills the input. */
+.ShareDialog-option input[type='checkbox']::before {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ShareDialog-option .ShareDialog-note {
+  margin: 2px 0 0 26px;
+}
+
+.ShareDialog-url {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid var(--neutral1);
+  border-radius: 6px;
+  background: var(--button);
+  color: var(--neutral4);
+  font: var(--font-small);
+}

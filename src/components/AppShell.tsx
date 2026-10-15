@@ -3,6 +3,7 @@ import { Album, PlayPlan, albumPlan, shuffleAllPlan } from '../catalog/catalog';
 import { useCatalog } from '../catalog/useCatalog';
 import { channelPaletteById } from '../config/channelPalettes';
 import { LOW_POWER_MAX_FPS } from '../audio/data/constants';
+import { VoiceMix } from '../audio/types';
 import { REACTIVE_STRENGTH, sliderSetting } from './stage/stageControls';
 import { useAudioData } from '../contexts/AudioDataContext';
 import { COMPACT_LAYOUT_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
@@ -60,7 +61,7 @@ function topOnly(panels: PanelState): PanelState {
 
 /** The immersive stage UI: everything visual, driven by App's playback state and controls. */
 export default function AppShell({ playback, controls }: AppShellProps) {
-  const { settings } = useContext(UserContext);
+  const { settings, updateSettings } = useContext(UserContext);
   const catalog = useCatalog();
   const compact = useMediaQuery(COMPACT_LAYOUT_QUERY);
   const perf = usePerfMode(compact);
@@ -87,6 +88,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
   const [initialLocation, setInitialLocation] = useState<InitialLocation | null>(null);
   const [showFullscreen] = useState(() => isFullscreenSupported());
   const pendingSeekRef = useRef<{ trackId: string; ms: number } | null>(null);
+  const pendingMixRef = useRef<{ trackId: string; mix: VoiceMix } | null>(null);
   const wasEjectedRef = useRef(playback.ejected);
   const [hasStarted, setHasStarted] = useState(!playback.ejected);
   const logoHandoffRef = useRef<Box | null>(null);
@@ -128,7 +130,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
 
   useEffect(() => {
     if (!playback.ejected && initialLocation && initialLocation.sharedTrack) {
-      setInitialLocation({ ...initialLocation, sharedTrack: null, startMs: 0 });
+      setInitialLocation({ ...initialLocation, sharedTrack: null, startMs: 0, shared: null });
     }
   }, [playback.ejected, initialLocation]);
 
@@ -148,6 +150,13 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     }
   }, [currentTrackId, playback.ejected, controls]);
 
+  useEffect(() => {
+    const pending = pendingMixRef.current;
+    if (!pending || playback.ejected || !currentTrackId) return;
+    pendingMixRef.current = null;
+    if (currentTrackId === pending.trackId) controls.setVoiceMix(pending.mix);
+  }, [currentTrackId, playback.ejected, controls]);
+
   /** Resumes audio inside the gesture and hands a plan to the player. */
   const playPlan = useCallback(
     (plan: PlayPlan | null) => {
@@ -162,11 +171,15 @@ export default function AppShell({ playback, controls }: AppShellProps) {
   const startListening = useCallback(() => {
     if (!catalog) return;
     pendingSeekRef.current = null;
+    pendingMixRef.current = null;
     controls.setShuffle(true);
     playPlan(shuffleAllPlan(catalog));
   }, [catalog, controls, playPlan]);
 
-  /** Plays the ?play= track within its album and queues the ?t= seek. */
+  /**
+   * Plays the ?play= track within its album and queues the ?t= seek. A share link's sliders and
+   * visualizer apply now; its channel mix waits for the track, since every song starts fresh.
+   */
   const playSharedTrack = useCallback(() => {
     if (!catalog || !initialLocation || !initialLocation.sharedTrack) return;
     const track = initialLocation.sharedTrack;
@@ -174,8 +187,17 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     if (!album) return;
     if (initialLocation.startMs > 0)
       pendingSeekRef.current = { trackId: track.id, ms: initialLocation.startMs };
+    const shared = initialLocation.shared;
+    if (shared) {
+      Object.entries(shared.sliders).forEach(([id, value]) => {
+        if (id === 'tempo') controls.setTempo(value as number);
+        else controls.setParam(id, value);
+      });
+      if (Object.keys(shared.visualizer).length > 0) updateSettings(shared.visualizer);
+      pendingMixRef.current = shared.mix ? { trackId: track.id, mix: shared.mix } : null;
+    }
     playPlan(albumPlan(album, album.tracks.indexOf(track)));
-  }, [catalog, initialLocation, playPlan]);
+  }, [catalog, initialLocation, playPlan, controls, updateSettings]);
 
   /** Plays an album from the chosen track. */
   const playAlbumTrack = useCallback(
@@ -337,7 +359,11 @@ export default function AppShell({ playback, controls }: AppShellProps) {
           albumCount={catalog ? catalog.albums.length : 0}
           sharedTrack={
             sharedTrack
-              ? { title: sharedTrack.title, albumTitle: sharedAlbum ? sharedAlbum.title : '' }
+              ? {
+                  title: sharedTrack.title,
+                  albumTitle: sharedAlbum ? sharedAlbum.title : '',
+                  custom: !!initialLocation?.shared,
+                }
               : null
           }
           onStart={sharedTrack ? playSharedTrack : startListening}

@@ -20,6 +20,7 @@ import { exportTrack, saveBlob } from '../audio/export/exportTrack';
 import { useVoices } from '../hooks/useVoices';
 import { PlaybackState } from '../types/playback';
 import { MIXER_SLIDERS, MixerSliderId, sliderValue } from './mixer/mixerControls';
+import { useDialogKeys } from './dialogFocus';
 import { ToastLevels } from './Toast';
 import { ToastContext } from './ToastProvider';
 import { UserContext, UserSettings } from './UserProvider';
@@ -40,34 +41,6 @@ type Phase =
   | { kind: 'idle' }
   | { kind: 'rendering'; progress: number }
   | { kind: 'error'; message: string };
-
-const FOCUSABLE = 'button:not(:disabled), input:not(:disabled)';
-
-/** The dialog's Tab stops in order; an unchecked radio is skipped, as the browser does. */
-function tabStops(dialog: HTMLElement): HTMLElement[] {
-  return Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (el) => !(el instanceof HTMLInputElement && el.type === 'radio' && !el.checked)
-  );
-}
-
-/** Moves Tab focus around inside the dialog instead of out into the page. */
-function trapTab(dialog: HTMLElement, e: KeyboardEvent) {
-  const stops = tabStops(dialog);
-  if (stops.length === 0) return;
-  const first = stops[0];
-  const last = stops[stops.length - 1];
-  const active = document.activeElement;
-  if (!dialog.contains(active)) {
-    e.preventDefault();
-    first.focus();
-  } else if (e.shiftKey && active === first) {
-    e.preventDefault();
-    last.focus();
-  } else if (!e.shiftKey && active === last) {
-    e.preventDefault();
-    first.focus();
-  }
-}
 
 function sliderOf(id: MixerSliderId) {
   return MIXER_SLIDERS.find((def) => def.id === id)!;
@@ -154,27 +127,8 @@ export default function DownloadDialog({
     abortRef.current?.abort();
     onClose();
   };
-  const closeRef = useRef(close);
-  closeRef.current = close;
-
-  // Capture phase on document, so the dialog sees every key before the page's shortcuts, wherever
-  // focus is: Escape cancels and closes, Tab stays inside, and nothing reaches the page.
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        closeRef.current();
-      } else if (e.key === 'Tab') {
-        trapTab(dialog, e);
-      } else if (!dialog.contains(e.target as Node)) {
-        e.preventDefault();
-      }
-    };
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, []);
+  // Escape cancels a running export as well as closing.
+  useDialogKeys(dialogRef, close);
 
   useEffect(() => {
     if (phase.kind === 'rendering') cancelRef.current?.focus();
@@ -189,7 +143,7 @@ export default function DownloadDialog({
     if (lengthMs === null || error || silent) return;
     const controller = new AbortController();
     abortRef.current = controller;
-    const { settings: rendererSettings, gains } = exportSettings(customMix ? mix : null);
+    const { settings: rendererSettings, levels } = exportSettings(customMix ? mix : null);
     const fileName = exportFileName(title, customMix, format);
     setPhase({ kind: 'rendering', progress: 0 });
     try {
@@ -204,7 +158,7 @@ export default function DownloadDialog({
           format,
           lengthMs,
           settings: rendererSettings,
-          gains,
+          levels,
           tags: {
             title: customMix ? `${title} (custom mix)` : title,
             artist: EXPORT_ARTIST,

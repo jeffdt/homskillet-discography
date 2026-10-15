@@ -10,8 +10,11 @@ import { UserSettings } from './UserProvider';
 export const MIXER_COPY = {
   channels:
     'Each strip is one voice of the sound chip, drawn live. Mute silences a channel; Solo plays only the soloed ones. Channels you are not hearing stay as dim ghosts.',
+  levels:
+    'Vol, Pan and Verb shape each channel: its loudness, where it sits between the speakers, and how much of it rings in a shared reverb room. They reset with each new song; double-click one to put it back.',
   sound: 'These change how every song plays and stay set until you change them or reset the mixer.',
-  reset: 'Puts speed, bass and stereo back to normal right away and unmutes every channel.',
+  reset:
+    'Puts speed, bass and stereo back to normal right away and returns every channel to unmuted, full volume, centered and dry.',
 };
 
 interface MixerPanelProps {
@@ -20,7 +23,7 @@ interface MixerPanelProps {
   settings: UserSettings;
 }
 
-/** What you hear: live channel strips with mute and solo, speed, bass and stereo, and a reset. */
+/** What you hear: live channel strips (mute, solo, volume, pan, reverb), speed, bass and stereo, and a reset. */
 export default function MixerPanel({ playback, controls, settings }: MixerPanelProps) {
   const change = (def: MixerSliderDef, value: number) => {
     if (def.id === 'tempo') controls.setTempo(value);
@@ -37,6 +40,7 @@ export default function MixerPanel({ playback, controls, settings }: MixerPanelP
       <section className="Mixer-section" aria-labelledby="mixer-channels">
         <h3 id="mixer-channels">Channels</h3>
         <p className="Mixer-explain">{MIXER_COPY.channels}</p>
+        <p className="Mixer-explain">{MIXER_COPY.levels}</p>
         <ChannelStrips onVoiceMixChange={controls.setVoiceMix} />
       </section>
       <section className="Mixer-section" aria-labelledby="mixer-sound">

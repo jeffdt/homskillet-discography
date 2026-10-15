@@ -1,6 +1,10 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { computeVoiceGains } from '../../audio/render/voiceGains';
+import {
+  computeVoiceGains,
+  computeVoiceLevels,
+  unityVoiceLevels,
+} from '../../audio/render/voiceGains';
 
 describe('computeVoiceGains', () => {
   it('passes every voice when nothing is muted or soloed', () => {
@@ -27,5 +31,41 @@ describe('computeVoiceGains', () => {
     const out = new Float32Array(8);
     expect(computeVoiceGains([true], [], out)).toBe(out);
     expect(out[0]).toBe(0);
+  });
+});
+
+describe('computeVoiceLevels', () => {
+  it('folds volume into the audible gain and keeps pan and send per voice', () => {
+    const levels = computeVoiceLevels({
+      muted: [false, true],
+      soloed: [],
+      volume: [1.5, 2],
+      pan: [0.5],
+      reverb: [0, 0.75],
+    });
+    expect(levels.gains.slice(0, 3)).toEqual([1.5, 0, 1]);
+    expect(levels.pans.slice(0, 2)).toEqual([0.5, 0]);
+    expect(levels.sends.slice(0, 2)).toEqual([0, 0.75]);
+  });
+
+  it('clamps out-of-range and non-numeric levels, and fills gaps with defaults', () => {
+    const levels = computeVoiceLevels({
+      muted: [],
+      soloed: [],
+      volume: [-1, 5, NaN],
+      pan: [3, -3],
+      reverb: [2],
+    });
+    expect(levels.gains.slice(0, 4)).toEqual([0, 2, 1, 1]);
+    expect(levels.pans.slice(0, 2)).toEqual([1, -1]);
+    expect(levels.sends[0]).toBe(1);
+  });
+
+  it('is unity, centered and dry for the song as written', () => {
+    expect(unityVoiceLevels()).toEqual({
+      gains: [1, 1, 1, 1, 1, 1, 1, 1],
+      pans: [0, 0, 0, 0, 0, 0, 0, 0],
+      sends: [0, 0, 0, 0, 0, 0, 0, 0],
+    });
   });
 });

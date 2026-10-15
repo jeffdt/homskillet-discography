@@ -276,3 +276,41 @@ describe('download button', () => {
     expect(downloadButton().disabled).toBe(true);
   });
 });
+
+describe('share button', () => {
+  const shareButton = () =>
+    screen.getByRole('button', { name: 'Share track' }) as HTMLButtonElement;
+  const dock = (overrides: Partial<PlaybackState>, controls = makeControls()) =>
+    withAudioData(
+      createTestAudioData().value,
+      <Dock
+        playback={{ ...playing, ...overrides }}
+        controls={controls}
+        track={overrides.songUrl === null ? null : track}
+        album={overrides.songUrl === null ? null : album}
+        settings={{}}
+        onShowInAlbums={vi.fn()}
+        showFullscreen={false}
+      />
+    );
+
+  it('opens the share dialog at the current position and returns focus on close', () => {
+    const controls = makeControls();
+    (controls.getPositionMs as ReturnType<typeof vi.fn>).mockReturnValue(61000);
+    render(dock({}, controls));
+    fireEvent.click(shareButton());
+    expect(screen.getByRole('dialog', { name: 'Share Groove' })).toBeTruthy();
+    expect(screen.getByLabelText('Start at 1:01')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(shareButton());
+  });
+
+  it('works in stub mode but not with nothing loaded', () => {
+    const { unmount } = render(dock({ stubMode: true }));
+    expect(shareButton().disabled).toBe(false);
+    unmount();
+    render(dock({ ejected: true, songUrl: null }));
+    expect(shareButton().disabled).toBe(true);
+  });
+});

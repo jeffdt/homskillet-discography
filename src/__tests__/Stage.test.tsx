@@ -60,7 +60,17 @@ function latestScope(): any {
 const CHROMATIC = channelPaletteById('chromatic').channels;
 
 function voice(index: number, name: string, audible = true): VoiceInfo {
-  return { index, name, chip: '2A03', muted: !audible, soloed: false, audible };
+  return {
+    index,
+    name,
+    chip: '2A03',
+    muted: !audible,
+    soloed: false,
+    audible,
+    volume: 1,
+    pan: 0,
+    reverb: 0,
+  };
 }
 
 /** Renders the Stage in the spectrum style unless the settings pick a style. */

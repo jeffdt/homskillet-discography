@@ -67,7 +67,7 @@ describe('ChipEngine', () => {
     expect(engine.readTapHistory().writeIndex).toBe(32);
   });
 
-  it('sends a copy of the bytes, transferred, with the current gains', async () => {
+  it('sends a copy of the bytes, transferred, with the current levels', async () => {
     const { engine, link } = makeEngine();
     const data = new Uint8Array([1, 2, 3]);
     const loading = engine.load(data, '/A/t.nsf', SETTINGS);
@@ -77,7 +77,11 @@ describe('ChipEngine', () => {
     expect(new Uint8Array(command.bytes)).toEqual(data);
     expect(command.bytes).not.toBe(data.buffer);
     expect(sent.transfer).toEqual([command.bytes]);
-    expect(command.gains).toEqual([1, 1, 1, 1, 1, 1, 1, 1]);
+    expect(command.levels).toEqual({
+      gains: [1, 1, 1, 1, 1, 1, 1, 1],
+      pans: [0, 0, 0, 0, 0, 0, 0, 0],
+      sends: [0, 0, 0, 0, 0, 0, 0, 0],
+    });
     link.listener({ type: 'loaded', loadId: command.loadId, info: INFO });
     await expect(loading).resolves.toEqual(INFO);
   });
@@ -176,9 +180,9 @@ describe('ChipEngine', () => {
   it('turns mute and solo into gains', async () => {
     const { engine, link } = makeEngine();
     engine.setVoiceMix({ muted: [true], soloed: [] });
-    expect(link.last('gains')!.gains).toEqual([0, 1, 1, 1, 1, 1, 1, 1]);
+    expect(link.last('levels')!.levels.gains).toEqual([0, 1, 1, 1, 1, 1, 1, 1]);
     engine.setVoiceMix({ muted: [], soloed: [false, false, true] });
-    expect(link.last('gains')!.gains).toEqual([0, 0, 1, 0, 0, 0, 0, 0]);
+    expect(link.last('levels')!.levels.gains).toEqual([0, 0, 1, 0, 0, 0, 0, 0]);
     expect(engine.getVoiceMix().soloed).toEqual([
       false,
       false,
@@ -189,6 +193,24 @@ describe('ChipEngine', () => {
       false,
       false,
     ]);
+  });
+
+  it('folds volume into gains and passes pan and reverb, clamped, with defaults for gaps', () => {
+    const { engine, link } = makeEngine();
+    engine.setVoiceMix({
+      muted: [false, true],
+      soloed: [],
+      volume: [0.5, 2, 9],
+      pan: [-1, 0, 0.25, -4],
+      reverb: [0.3, 1, -1],
+    });
+    const { levels } = link.last('levels')!;
+    expect(levels.gains).toEqual([0.5, 0, 2, 1, 1, 1, 1, 1]);
+    expect(levels.pans).toEqual([-1, 0, 0.25, -1, 0, 0, 0, 0]);
+    expect(levels.sends).toEqual([0.3, 1, 0, 0, 0, 0, 0, 0]);
+    const mix = engine.getVoiceMix();
+    expect(mix.volume).toEqual([0.5, 2, 2, 1, 1, 1, 1, 1]);
+    expect(mix.reverb![2]).toBe(0);
   });
 
   it('forwards settings and pause', async () => {

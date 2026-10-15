@@ -30,6 +30,9 @@ const voice = (index: number, name: string): VoiceInfo => ({
   muted: false,
   soloed: false,
   audible: true,
+  volume: 1,
+  pan: 0,
+  reverb: 0,
 });
 
 describe('useFrameLoop', () => {

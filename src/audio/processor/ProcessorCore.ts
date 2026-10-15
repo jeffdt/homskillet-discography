@@ -63,8 +63,8 @@ export class ProcessorCore {
       case 'loopForever':
         renderer.setLoopForever(command.loopForever);
         break;
-      case 'gains':
-        renderer.setGains(command.gains);
+      case 'levels':
+        renderer.setLevels(command.levels);
         break;
       default:
         break;
@@ -100,7 +100,7 @@ export class ProcessorCore {
     this.loadId = command.loadId;
     ring.beginWrite();
     try {
-      this.renderer.setGains(command.gains);
+      this.renderer.setLevels(command.levels);
       const info = this.renderer.load(
         new Uint8Array(command.bytes),
         command.filepath,

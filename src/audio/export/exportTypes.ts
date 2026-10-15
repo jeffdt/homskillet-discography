@@ -1,4 +1,4 @@
-import { RendererSettings } from '../types';
+import { RendererSettings, VoiceLevels } from '../types';
 import type { Id3Tags } from './encoders';
 import { ExportFormat } from './exportPlan';
 
@@ -11,7 +11,7 @@ export interface ExportRequest {
   format: ExportFormat;
   lengthMs: number;
   settings: RendererSettings;
-  gains: number[];
+  levels: VoiceLevels;
   tags: Id3Tags;
 }
 

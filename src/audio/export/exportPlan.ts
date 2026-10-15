@@ -1,7 +1,9 @@
-import { VOICE_PAIRS } from '../constants';
 import { VoiceInfo } from '../data/contract';
-import { RendererSettings } from '../types';
+import { computeVoiceLevels, unityVoiceLevels } from '../render/voiceGains';
+import { RendererSettings, VoiceLevels } from '../types';
+import { CHANNEL_LEVELS } from '../../components/mixer/channelLevels';
 import { formatPercent, MIXER_SLIDERS } from '../../components/mixer/mixerControls';
+import { mixOf } from '../../components/mixer/voiceMix';
 
 /** File formats a track can be downloaded as. */
 export type ExportFormat = 'mp3' | 'wav';
@@ -92,9 +94,27 @@ export function mixSilent(mix: MixSnapshot): boolean {
   return mix.voices.length > 0 && !mix.voices.some((voice) => voice.audible);
 }
 
+/** Each heard voice's Vol, Pan or Verb that is off its default, as "Triangle Vol 150%". */
+function changedLevels(mix: MixSnapshot): string[] {
+  const parts: string[] = [];
+  mix.voices
+    .filter((voice) => voice.audible)
+    .forEach((voice) => {
+      CHANNEL_LEVELS.forEach((def) => {
+        if (Math.abs(voice[def.id] - def.defaultValue) > EPSILON)
+          parts.push(`${voice.name} ${def.label} ${def.format(voice[def.id])}`);
+      });
+    });
+  return parts;
+}
+
 /** True when the mix sounds different from the original song. */
 export function mixDiffers(mix: MixSnapshot): boolean {
-  return changedSliders(mix).length > 0 || mix.voices.some((voice) => !voice.audible);
+  return (
+    changedSliders(mix).length > 0 ||
+    mix.voices.some((voice) => !voice.audible) ||
+    changedLevels(mix).length > 0
+  );
 }
 
 /** One line naming what differs from the original, e.g. "Speed 110% · Triangle muted". */
@@ -108,19 +128,17 @@ export function mixSummary(mix: MixSnapshot): string {
   } else {
     mix.voices.filter((voice) => voice.muted).forEach((voice) => parts.push(`${voice.name} muted`));
   }
+  if (!mixSilent(mix)) parts.push(...changedLevels(mix));
   return parts.join(' · ');
 }
 
-/** Renderer settings and per-voice gains for an export; a null mix means the original song. */
+/** Renderer settings and per-voice levels for an export; a null mix means the original song. */
 export function exportSettings(mix: MixSnapshot | null): {
   settings: RendererSettings;
-  gains: number[];
+  levels: VoiceLevels;
 } {
   const values = mix ?? ORIGINAL_MIX_VALUES;
-  const gains = new Array<number>(VOICE_PAIRS).fill(1);
-  mix?.voices.forEach((voice) => {
-    gains[voice.index] = voice.audible ? 1 : 0;
-  });
+  const levels = mix ? computeVoiceLevels(mixOf(mix.voices)) : unityVoiceLevels();
   return {
     settings: {
       tempo: values.tempo,
@@ -128,7 +146,7 @@ export function exportSettings(mix: MixSnapshot | null): {
       stereoWidth: values.stereoWidth,
       loopForever: false,
     },
-    gains,
+    levels,
   };
 }
 

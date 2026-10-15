@@ -80,7 +80,8 @@ The audio engine lives in `src/audio/`. In production it renders in an AudioWork
 │ chipProcessor -> ProcessorCore │<───────────┤ ChipEngine (AudioEngine)     │
 │  ChipRenderer: GME multi-      │  events,   │  EnginePlayer -> Sequencer   │
 │  channel emu (8 voice pairs),  ├───────────>│  TapReader (taps + position) │
-│  mute/solo gains, SubBass,     │  taps      └──────────────────────────────┘
+│  per-voice gain/pan/reverb     │  taps      └──────────────────────────────┘
+│  send, Freeverb, SubBass,      │
 │  declick, end fade, seeks      │
 └───────────────┬────────────────┘
                 v
@@ -114,8 +115,9 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - Stage.tsx - Full-window visualizer (in Scopes, click a trace to mute or unmute it, shift-click to hear only it; not in Overlaid; see the note in mixer/voiceMix.ts)
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
   - DownloadDialog.tsx - Opened by the Dock's download icon: MP3 or WAV, My mix or Original, length (m:ss); renders through src/audio/export/
+  - ShareDialog.tsx - Opened by the Dock's share icon: a ?play= link that can carry the mix, the visualizer and a start time (format in src/shell/shareLink.ts)
   - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, CRT screen, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
-  - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
+  - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo, and Vol/Pan/Verb from channelLevels.ts, reset per song), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
   - TimeSlider.tsx, DockSlider.tsx - Audio controls (DockSlider is the player bar's speed and volume)
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
@@ -193,7 +195,7 @@ The catalog system indexes music files for browsing and playback:
 
 ### Routing
 
-No router. The app reads `?play=<album>/<file>` (and optional `t=` in ms) on load, keeps `?play=` in sync with the current track, and maps legacy `/<Album>` paths to the Albums drawer.
+No router. The app reads `?play=<album>/<file>` (and optional `t=` in ms) on load, keeps `?play=` in sync with the current track, and maps legacy `/<Album>` paths to the Albums drawer. Share links add `speed`, `bass`, `stereo`, `mute`, `solo`, `vol`, `pan`, `verb` and `viz` (src/shell/shareLink.ts); they apply when the shared track plays and are then dropped from the address bar.
 
 ## Working with GitHub Issues
 

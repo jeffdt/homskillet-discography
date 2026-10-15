@@ -15,6 +15,7 @@ import {
   STAGE_COPY,
 } from '../components/stage/stageControls';
 import { CHANNEL_PALETTES } from '../config/channelPalettes';
+import { voiceInfo } from './helpers/voices';
 import { STAGE_DEFAULTS, VISUALIZER_DEFAULTS } from '../config/stageSettings';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
@@ -43,7 +44,7 @@ function checkedIn(group: string): string {
 }
 
 function voice(index: number, name: string, state: Partial<VoiceInfo> = {}): VoiceInfo {
-  return { index, name, chip: '2A03', muted: false, soloed: false, audible: true, ...state };
+  return voiceInfo(index, name, state);
 }
 
 describe('StagePanel', () => {
