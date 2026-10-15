@@ -44,7 +44,17 @@ function makeFrame(voiceCount: number) {
 }
 
 function voice(index: number, audible = true): VoiceInfo {
-  return { index, name: `Voice ${index}`, chip: '2A03', muted: !audible, soloed: false, audible };
+  return {
+    index,
+    name: `Voice ${index}`,
+    chip: '2A03',
+    muted: !audible,
+    soloed: false,
+    audible,
+    volume: 1,
+    pan: 0,
+    reverb: 0,
+  };
 }
 
 function setup(voiceCount = 2, voices = [voice(0), voice(1)]) {

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { VoiceFrame, VoiceInfo } from '../../audio/data/contract';
 import { useFrameLoop } from '../../hooks/useFrameLoop';
+import { CHANNEL_LEVELS } from './channelLevels';
 import {
   FLAT_SCOPE_PATH,
   SCOPE_HEIGHT,
@@ -13,6 +14,7 @@ import {
   targetScopeGain,
   windowPeak,
 } from './scopeMath';
+import { VoiceLevel } from './voiceMix';
 
 /** A channel's color: the active palette's --ch-N, or the accent until a palette defines it. */
 export function channelColor(index: number): string {
@@ -23,13 +25,20 @@ interface ChannelStripProps {
   voice: VoiceInfo;
   onToggleMute: (index: number) => void;
   onToggleSolo: (index: number) => void;
+  onLevelChange: (index: number, level: VoiceLevel, value: number) => void;
 }
 
 /**
- * One voice: color swatch, name, Mute and Solo, and a live scope and level meter. The scope and
- * meter are written straight to the DOM from the frame loop, never through React state.
+ * One voice: color swatch, name, Mute and Solo, a live scope and level meter, and Volume, Pan and
+ * Reverb. The scope and meter are written straight to the DOM from the frame loop, never through
+ * React state. Double-clicking a level control puts it back to its default.
  */
-export default function ChannelStrip({ voice, onToggleMute, onToggleSolo }: ChannelStripProps) {
+export default function ChannelStrip({
+  voice,
+  onToggleMute,
+  onToggleSolo,
+  onLevelChange,
+}: ChannelStripProps) {
   const { index, name, muted, soloed, audible } = voice;
   const pathRef = useRef<SVGPathElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
@@ -94,6 +103,34 @@ export default function ChannelStrip({ voice, onToggleMute, onToggleSolo }: Chan
       <span className="ChannelStrip-meter" aria-hidden="true">
         <span ref={fillRef} className="ChannelStrip-meter-fill" />
       </span>
+      <div className="ChannelStrip-levels">
+        {CHANNEL_LEVELS.map((def) => {
+          const value = voice[def.id];
+          const inputId = `strip-${index}-${def.id}`;
+          return (
+            <div key={def.id} className="ChannelStrip-level" title={def.explanation}>
+              <label htmlFor={inputId} className="ChannelStrip-level-label">
+                {def.label}
+              </label>
+              <output htmlFor={inputId} className="ChannelStrip-level-value">
+                {def.format(value)}
+              </output>
+              <input
+                id={inputId}
+                type="range"
+                min={def.min}
+                max={def.max}
+                step={def.step}
+                value={value}
+                aria-label={`${name} ${def.id}`}
+                aria-valuetext={def.format(value)}
+                onChange={(e) => onLevelChange(index, def.id, parseFloat(e.target.value))}
+                onDoubleClick={() => onLevelChange(index, def.id, def.defaultValue)}
+              />
+            </div>
+          );
+        })}
+      </div>
     </li>
   );
 }

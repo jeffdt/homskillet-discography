@@ -8,6 +8,7 @@ import { PlaybackControls, PlaybackState } from '../types/playback';
 import TimeSlider from './TimeSlider';
 import DockSlider from './DockSlider';
 import DownloadDialog from './DownloadDialog';
+import ShareDialog from './ShareDialog';
 import { MIXER_SLIDERS, formatPercent, sliderValue } from './mixer/mixerControls';
 import { UserSettings } from './UserProvider';
 import {
@@ -18,6 +19,7 @@ import {
   IconPlay,
   IconPrev,
   IconRepeat,
+  IconShare,
   IconShuffle,
 } from './icons';
 
@@ -136,6 +138,10 @@ export default function Dock({
   } | null>(null);
   const downloadButtonRef = useRef<HTMLButtonElement>(null);
   const canDownload = !disabled && !playback.stubMode && !!playback.songUrl;
+  const [share, setShare] = useState<{ trackId: string; title: string; positionMs: number } | null>(
+    null
+  );
+  const shareButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div ref={regionRef} className="Dock Chrome" role="region" aria-label="Player">
@@ -218,6 +224,18 @@ export default function Dock({
         >
           <IconDownload />
         </button>
+        <button
+          ref={shareButtonRef}
+          className="Dock-button"
+          aria-label="Share track"
+          title="Share this song with your mix"
+          onClick={() =>
+            track && setShare({ trackId: track.id, title, positionMs: controls.getPositionMs() })
+          }
+          disabled={disabled || !track}
+        >
+          <IconShare />
+        </button>
       </div>
 
       <div className="Dock-sliders">
@@ -271,6 +289,22 @@ export default function Dock({
             onClose={() => {
               setDownload(null);
               downloadButtonRef.current?.focus();
+            }}
+          />,
+          document.body
+        )}
+
+      {share &&
+        createPortal(
+          <ShareDialog
+            title={share.title}
+            trackId={share.trackId}
+            positionMs={share.positionMs}
+            playback={playback}
+            settings={settings}
+            onClose={() => {
+              setShare(null);
+              shareButtonRef.current?.focus();
             }}
           />,
           document.body

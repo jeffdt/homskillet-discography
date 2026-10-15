@@ -262,7 +262,5 @@ export default class Sequencer extends EventEmitter {
     } catch (e: any) {
       this.handlePlayerError(`Unable to play ${filepath} (${e.message}).`);
     }
-    const numVoices = this.player!.getNumVoices();
-    this.player!.setVoiceMask([...Array(numVoices)].fill(true));
   }
 }

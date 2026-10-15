@@ -190,6 +190,29 @@ describe('AppShell', () => {
     expect(controls.seekToMs).toHaveBeenCalledWith(5000);
   });
 
+  it('applies a share link: sliders and visualizer at once, the channel mix once the track loads', async () => {
+    const viz = btoa(JSON.stringify({ scopeLayout: 'phase' })).replace(/=+$/, '');
+    window.history.replaceState(
+      null,
+      '',
+      `/?play=Bazaar%2Fmt.nsf&speed=0.5&stereo=0&mute=1&vol=100_100_150&viz=${viz}`
+    );
+    const { controls, rerenderWith } = renderShell();
+    expect(await screen.findByText('Mt · Bazaar · shared mix')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '▶ Play Mt' }));
+    expect(controls.setTempo).toHaveBeenCalledWith(0.5);
+    expect(controls.setParam).toHaveBeenCalledWith('stereoWidth', 0);
+    expect(controls.setVoiceMix).not.toHaveBeenCalled();
+    await waitFor(() => expect(stageProps.latest.settings).toMatchObject({ scopeLayout: 'phase' }));
+
+    rerenderWith({ ...IDLE, ejected: false, paused: false, songUrl: '/music/Bazaar/mt.nsf' });
+    expect(controls.setVoiceMix).toHaveBeenCalledTimes(1);
+    const mix = (controls.setVoiceMix as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(mix.muted.slice(0, 3)).toEqual([false, true, false]);
+    expect(mix.volume.slice(0, 3)).toEqual([1, 1, 1.5]);
+    expect(window.location.search).toBe('?play=Bazaar%2Fmt.nsf');
+  });
+
   it('falls back to the normal title screen for an unknown shared track and cleans the URL', async () => {
     window.history.replaceState(null, '', '/?play=Gone%2Fold.nsf&debug=true');
     const { controls } = renderShell();

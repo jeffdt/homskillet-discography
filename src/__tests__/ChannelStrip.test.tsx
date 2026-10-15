@@ -8,7 +8,7 @@ import { voiceInfo } from './helpers/voices';
 
 function renderStrip(
   voice = voiceInfo(2, 'Triangle'),
-  handlers = { mute: vi.fn(), solo: vi.fn() }
+  handlers = { mute: vi.fn(), solo: vi.fn(), level: vi.fn() }
 ) {
   const data = createTestAudioData();
   data.frameLoop.setPlaying(true);
@@ -16,7 +16,12 @@ function renderStrip(
     withAudioData(
       data.value,
       <ul>
-        <ChannelStrip voice={voice} onToggleMute={handlers.mute} onToggleSolo={handlers.solo} />
+        <ChannelStrip
+          voice={voice}
+          onToggleMute={handlers.mute}
+          onToggleSolo={handlers.solo}
+          onLevelChange={handlers.level}
+        />
       </ul>
     )
   );
@@ -46,6 +51,19 @@ describe('ChannelStrip', () => {
     fireEvent.click(solo);
     expect(handlers.mute).toHaveBeenCalledWith(2);
     expect(handlers.solo).toHaveBeenCalledWith(2);
+  });
+
+  it('shows Vol, Pan and Verb with their values and reports changes and double-click resets', () => {
+    const { handlers } = renderStrip(
+      voiceInfo(2, 'Triangle', { volume: 1.5, pan: -0.4, reverb: 0.25 })
+    );
+    expect(screen.getByText('150%')).toBeTruthy();
+    expect(screen.getByText('L40')).toBeTruthy();
+    expect(screen.getByText('25%')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Triangle pan'), { target: { value: '0.5' } });
+    expect(handlers.level).toHaveBeenLastCalledWith(2, 'pan', 0.5);
+    fireEvent.doubleClick(screen.getByLabelText('Triangle volume'));
+    expect(handlers.level).toHaveBeenLastCalledWith(2, 'volume', 1);
   });
 
   it('draws a channel that is not heard as a ghost', () => {
@@ -120,6 +138,7 @@ describe('ChannelStrip', () => {
             voice={voiceInfo(2, 'Triangle', { muted: true, audible: false })}
             onToggleMute={vi.fn()}
             onToggleSolo={vi.fn()}
+            onLevelChange={vi.fn()}
           />
         </ul>
       )

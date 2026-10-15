@@ -9,7 +9,8 @@
   grid-template-areas:
     'swatch name mute solo'
     'scope scope scope scope'
-    'meter meter meter meter';
+    'meter meter meter meter'
+    'levels levels levels levels';
   align-items: center;
   gap: 4px 8px;
   padding: 8px 0;
@@ -109,6 +110,46 @@
   background: var(--strip-color, var(--accent));
   transform: scaleX(var(--level, 0));
   transform-origin: left center;
+}
+
+/* Volume, Pan and Reverb under the meter: three equal columns of label, value and range. */
+.ChannelStrip-levels {
+  grid-area: levels;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.ChannelStrip-level {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.App .ChannelStrip-level-label {
+  font: var(--font-small);
+  color: var(--neutral2);
+}
+
+.App .ChannelStrip-level-value {
+  justify-self: end;
+  font: var(--font-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--neutral3);
+}
+
+.ChannelStrip-level input[type='range'] {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  accent-color: var(--strip-color, var(--accent));
+}
+
+.App[data-layout='compact'] .ChannelStrip-level input[type='range'] {
+  min-height: var(--touch-target);
 }
 
 /* Ghost: a channel you are not hearing (muted, or silenced by another channel's solo). */

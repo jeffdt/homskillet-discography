@@ -1,4 +1,4 @@
-import { RendererSettings, TrackInfo } from './types';
+import { RendererSettings, TrackInfo, VoiceLevels } from './types';
 
 /** Main thread to processor. */
 export type EngineCommand =
@@ -8,7 +8,7 @@ export type EngineCommand =
       bytes: ArrayBuffer;
       filepath: string;
       settings: RendererSettings;
-      gains: number[];
+      levels: VoiceLevels;
     }
   | { type: 'unload' }
   | { type: 'pause'; paused: boolean }
@@ -17,7 +17,7 @@ export type EngineCommand =
   | { type: 'stereoWidth'; stereoWidth: number }
   | { type: 'subBass'; subBass: number }
   | { type: 'loopForever'; loopForever: boolean }
-  | { type: 'gains'; gains: number[] };
+  | { type: 'levels'; levels: VoiceLevels };
 
 /** Processor to main thread. Tap snapshots travel separately as bare ArrayBuffers. */
 export type ProcessorEvent =

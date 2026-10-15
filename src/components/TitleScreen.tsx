@@ -10,7 +10,8 @@ interface TitleScreenProps {
   tagline: string;
   albumCount: number;
   /** Set when the visitor arrived via a ?play= link. */
-  sharedTrack: { title: string; albumTitle: string } | null;
+  /** custom: the link also carries a mix or visualizer, applied when it plays. */
+  sharedTrack: { title: string; albumTitle: string; custom?: boolean } | null;
   onStart: () => void;
   /** Called synchronously inside the press, so audio can resume within the user gesture. */
   onGesture?: () => void;
@@ -85,7 +86,9 @@ export default function TitleScreen({
       ? `▶ Play ${sharedTrack.title}`
       : '▶ Start listening';
   const sharedLine = sharedTrack
-    ? [sharedTrack.title, sharedTrack.albumTitle].filter(Boolean).join(' · ')
+    ? [sharedTrack.title, sharedTrack.albumTitle, sharedTrack.custom ? 'shared mix' : '']
+        .filter(Boolean)
+        .join(' · ')
     : '';
 
   return (

@@ -1,4 +1,5 @@
 import { Catalog, Track } from '../catalog/catalog';
+import { hasSharedSettings, parseSharedSettings, SHARE_PARAMS, SharedSettings } from './shareLink';
 
 export const BASE_PATH: string = import.meta.env.BASE_URL || '/';
 
@@ -7,6 +8,8 @@ export interface InitialLocation {
   sharedTrack: Track | null;
   /** ?t= in milliseconds; 0 unless sharedTrack is set. */
   startMs: number;
+  /** The share link's mix and visualizer, applied when its track plays; null unless sharedTrack is set. */
+  shared: SharedSettings | null;
   /** Album named by an old browse path such as /MetallicWing. */
   albumId: string | null;
 }
@@ -31,28 +34,35 @@ export function parseInitialLocation(
   const sharedTrack = play ? catalog.trackById.get(play.replace(/^\/+/, '')) || null : null;
   const t = Number(params.get('t'));
   const startMs = sharedTrack && Number.isFinite(t) && t > 0 ? Math.floor(t) : 0;
+  const parsedShare = sharedTrack ? parseSharedSettings(search) : null;
+  const shared = parsedShare && hasSharedSettings(parsedShare) ? parsedShare : null;
 
   const decodedPath = safeDecode(pathname.slice(BASE_PATH.length - 1));
   const albumKey = decodedPath ? decodedPath.replace(/^\/+|\/+$/g, '') : '';
   const albumId = albumKey && catalog.albumById.has(albumKey) ? albumKey : null;
 
-  return { sharedTrack, startMs, albumId };
+  return { sharedTrack, startMs, shared, albumId };
 }
 
-/** Returns the shareable address for a track, preserving unrelated query params. */
+/** Every parameter that belongs to a ?play= link: the track, its start, and a share link's settings. */
+const PLAY_PARAMS = ['play', 't', ...SHARE_PARAMS];
+
+function withoutPlayParams(search: string): URLSearchParams {
+  const params = new URLSearchParams(search);
+  PLAY_PARAMS.forEach((name) => params.delete(name));
+  return params;
+}
+
+/** Returns the address-bar link for a track, preserving unrelated query params. */
 export function buildPlayUrl(trackId: string, currentSearch: string): string {
-  const params = new URLSearchParams(currentSearch);
-  params.delete('t');
-  params.delete('play');
+  const params = withoutPlayParams(currentSearch);
   params.set('play', trackId);
   return `${BASE_PATH}?${params.toString()}`;
 }
 
-/** Removes play and t from a query string; returns '' or '?rest'. */
+/** Removes play, t and share settings from a query string; returns '' or '?rest'. */
 export function stripPlayParams(search: string): string {
-  const params = new URLSearchParams(search);
-  params.delete('play');
-  params.delete('t');
+  const params = withoutPlayParams(search);
   const rest = params.toString();
   return rest ? `?${rest}` : '';
 }

@@ -9,6 +9,7 @@ import {
   SEEK_SPEED,
 } from '../../audio/constants';
 import { ChipRenderer, RendererEvent } from '../../audio/render/ChipRenderer';
+import { computeVoiceLevels } from '../../audio/render/voiceGains';
 import { framesToReach } from '../../audio/render/seekPlan';
 import { TapRing } from '../../audio/taps/TapRing';
 import { ChipCore, RendererSettings } from '../../audio/types';
@@ -118,7 +119,9 @@ describe('ChipRenderer on real chip-core', () => {
   it('removes exactly one voice when it is muted', () => {
     const bytes = readTrack('SuperFORE!/parkour.nsf');
     const renderer = makeRenderer();
-    renderer.setGains([1, 1, 1, 1, 1, 0, 1, 1]);
+    renderer.setLevels(
+      computeVoiceLevels({ muted: [false, false, false, false, false, true], soloed: [] })
+    );
     renderer.load(bytes, '/SuperFORE!/parkour.nsf', SETTINGS);
     const reference = makeRenderer();
     reference.load(bytes, '/SuperFORE!/parkour.nsf', SETTINGS);
@@ -220,7 +223,7 @@ describe('ChipRenderer on real chip-core', () => {
     const events: RendererEvent[] = [];
     const taps = new TapRing();
     const renderer = makeRenderer(events, taps);
-    renderer.setGains(new Float32Array(8));
+    renderer.setLevels(computeVoiceLevels({ muted: new Array(8).fill(true), soloed: [] }));
     renderer.load(readTrack('SuperFORE!/parkour.nsf'), '/SuperFORE!/parkour.nsf', SETTINGS);
     let peak = 0;
     for (let s = 0; s < 20; s++) {

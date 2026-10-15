@@ -1,7 +1,7 @@
 import { MAX_POSITION_EXTRAPOLATION_S, VOICE_PAIRS } from '../constants';
 import { LoadSupersededError } from '../errors';
 import { ProcessorEvent } from '../protocol';
-import { computeVoiceGains } from '../render/voiceGains';
+import { computeVoiceLevels, voicePan, voiceReverb, voiceVolume } from '../render/voiceGains';
 import { TapHistory } from '../taps/TapHistory';
 import { TapSnapshot } from '../taps/TapSnapshot';
 import { TapReader } from '../taps/transports';
@@ -11,6 +11,7 @@ import {
   RendererSettings,
   SpectrumCore,
   TrackInfo,
+  VoiceLevels,
   VoiceMix,
 } from '../types';
 import { AudioEngine, AudioEngineEvents } from './AudioEngine';
@@ -43,6 +44,19 @@ type Listener = (...args: any[]) => void;
 const padTo = (values: readonly boolean[]) =>
   Array.from({ length: VOICE_PAIRS }, (_, i) => !!values[i]);
 
+/** A mix with every array VOICE_PAIRS long and every level filled in (clamped, defaults for gaps). */
+function fullMix(mix: VoiceMix): Required<VoiceMix> {
+  const perVoice = (level: (index: number) => number) =>
+    Array.from({ length: VOICE_PAIRS }, (_, i) => level(i));
+  return {
+    muted: padTo(mix.muted),
+    soloed: padTo(mix.soloed),
+    volume: perVoice((i) => voiceVolume(mix, i)),
+    pan: perVoice((i) => voicePan(mix, i)),
+    reverb: perVoice((i) => voiceReverb(mix, i)),
+  };
+}
+
 /** Main-thread AudioEngine over a ProcessorLink and a TapReader, for every engine kind. */
 export class ChipEngine implements AudioEngine {
   readonly kind: EngineKind;
@@ -66,7 +80,7 @@ export class ChipEngine implements AudioEngine {
   /** Where the last seek landed, used until a snapshot newer than the seek's arrives. */
   private seekLanding: { positionMs: number; staleContextTime: number; landedAt: number } | null =
     null;
-  private mix: VoiceMix = { muted: padTo([]), soloed: padTo([]) };
+  private mix: Required<VoiceMix> = fullMix({ muted: [], soloed: [] });
 
   constructor(parts: ChipEngineParts) {
     this.kind = parts.kind;
@@ -93,7 +107,7 @@ export class ChipEngine implements AudioEngine {
     return new Promise((resolve, reject) => {
       this.pendingLoad = { loadId, resolve, reject, expansion: expansionFromNsfHeader(data) };
       this.link.send(
-        { type: 'load', loadId, bytes, filepath, settings: { ...settings }, gains: this.gains() },
+        { type: 'load', loadId, bytes, filepath, settings: { ...settings }, levels: this.levels() },
         [bytes]
       );
     });
@@ -173,7 +187,14 @@ export class ChipEngine implements AudioEngine {
   }
 
   getVoiceMix(): VoiceMix {
-    return { muted: [...this.mix.muted], soloed: [...this.mix.soloed] };
+    const { muted, soloed, volume, pan, reverb } = this.mix;
+    return {
+      muted: [...muted],
+      soloed: [...soloed],
+      volume: [...volume],
+      pan: [...pan],
+      reverb: [...reverb],
+    };
   }
 
   getLoadedTrack(): LoadedTrack | null {
@@ -181,8 +202,8 @@ export class ChipEngine implements AudioEngine {
   }
 
   setVoiceMix(mix: VoiceMix): void {
-    this.mix = { muted: padTo(mix.muted), soloed: padTo(mix.soloed) };
-    this.link.send({ type: 'gains', gains: this.gains() });
+    this.mix = fullMix(mix);
+    this.link.send({ type: 'levels', levels: this.levels() });
     this.emit('voiceMixChanged', this.getVoiceMix());
   }
 
@@ -217,8 +238,8 @@ export class ChipEngine implements AudioEngine {
     this.context.close().catch(() => {});
   }
 
-  private gains(): number[] {
-    return Array.from(computeVoiceGains(this.mix.muted, this.mix.soloed));
+  private levels(): VoiceLevels {
+    return computeVoiceLevels(this.mix);
   }
 
   private emit(event: keyof AudioEngineEvents, ...args: unknown[]): void {

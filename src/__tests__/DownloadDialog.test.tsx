@@ -190,7 +190,7 @@ describe('DownloadDialog', () => {
       tags: { title: 'Groove (custom mix)', artist: 'homskillet', album: 'Bazaar' },
     });
     expect(requests[0].settings.tempo).toBe(1.5);
-    expect(requests[0].gains.slice(0, 3)).toEqual([1, 1, 1]);
+    expect(requests[0].levels.gains.slice(0, 3)).toEqual([1, 1, 1]);
     await act(async () => resolve(new Blob(['x'])));
     expect(saveBlob).toHaveBeenCalledWith(expect.any(Blob), 'homskillet - Groove (custom mix).mp3');
     expect(enqueueToast).toHaveBeenCalled();

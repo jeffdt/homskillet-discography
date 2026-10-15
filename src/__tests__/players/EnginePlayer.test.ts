@@ -119,6 +119,24 @@ describe('EnginePlayer', () => {
     expect(errors).not.toHaveBeenCalled();
   });
 
+  it('starts each song with a fresh mix, cleared before the load', async () => {
+    const { engine, player } = fakeEngine();
+    await player.loadData(new Uint8Array(4), '/A/1.nsf', {});
+    expect(engine.setVoiceMix).toHaveBeenCalledWith({ muted: [], soloed: [] });
+    expect(engine.setVoiceMix.mock.invocationCallOrder[0]).toBeLessThan(
+      engine.load.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('passes volume, pan and reverb through with the mute and solo', async () => {
+    const { engine, player } = fakeEngine();
+    await player.loadData(new Uint8Array(4), '/A/1.nsf', {});
+    player.setVoiceMix({ muted: [true], soloed: [], volume: [0.5], pan: [1], reverb: [0.2] });
+    expect(engine.setVoiceMix).toHaveBeenLastCalledWith(
+      expect.objectContaining({ volume: [0.5], pan: [1], reverb: [0.2] })
+    );
+  });
+
   it('maps the voice mask to mutes', async () => {
     const { engine, player } = fakeEngine();
     await player.loadData(new Uint8Array(4), '/A/1.nsf', {});

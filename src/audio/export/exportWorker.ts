@@ -32,7 +32,7 @@ async function run(request: ExportRequest): Promise<void> {
       path: request.path,
       lengthMs: request.lengthMs,
       settings: request.settings,
-      gains: request.gains,
+      levels: request.levels,
     },
     encoder,
     (fraction) => {

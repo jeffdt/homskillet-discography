@@ -6,13 +6,13 @@ import {
   RENDER_CHUNK_FRAMES,
   SEEK_CHUNK_FRAMES,
   SEEK_SPEED,
-  VOICE_PAIRS,
 } from '../constants';
 import { TapRing } from '../taps/TapRing';
-import { ChipCore, RendererSettings, TrackInfo } from '../types';
+import { ChipCore, RendererSettings, TrackInfo, VoiceLevels } from '../types';
 import { openMultiChannelEmu, readTrackInfo } from './emu';
 import { GainRamp } from './GainRamp';
-import { applyStereoCrossfeed, mixVoicePairs } from './mixVoicePairs';
+import { applyStereoCrossfeed, mixVoicePairs, VoiceRouting } from './mixVoicePairs';
+import { Reverb, REVERB_TAIL_MS } from './Reverb';
 import { framesToReach } from './seekPlan';
 
 /** Things the renderer reports to its host while rendering. */
@@ -21,8 +21,8 @@ export type RendererEvent =
   | { type: 'seeked'; seekId: number; positionMs: number };
 
 /**
- * Renders a GME multi-channel emulator into stereo float output: per-voice gains (mute/solo),
- * stereo crossfeed, SubBass, declick ramps for pause and seek, an end-of-track fade, and seeks
+ * Renders a GME multi-channel emulator into stereo float output: per-voice routing (mute/solo,
+ * volume, pan), a shared reverb fed by per-voice sends, stereo crossfeed, SubBass, declick ramps for pause and seek, an end-of-track fade, and seeks
  * spread across render calls. The same code runs in the AudioWorklet and in the ScriptProcessor
  * fallback.
  */
@@ -39,8 +39,13 @@ export class ChipRenderer {
   private emu = 0;
   private readonly renderBuffer: number;
   private readonly seekScratch: number;
-  private readonly currentGains = new Float32Array(VOICE_PAIRS).fill(1);
-  private readonly targetGains = new Float32Array(VOICE_PAIRS).fill(1);
+  private readonly currentRouting = new VoiceRouting();
+  private readonly targetRouting = new VoiceRouting();
+  private readonly sendBuffer = new Float32Array(RENDER_CHUNK_FRAMES);
+  private readonly reverb: Reverb;
+  private readonly reverbTailFrames: number;
+  /** Frames the reverb keeps rendering with no send; 0 means it is resting and clear. */
+  private reverbRingFrames = 0;
   private readonly declick = new GainRamp();
   private readonly endFade = new GainRamp();
   private readonly declickFrames: number;
@@ -66,6 +71,8 @@ export class ChipRenderer {
     this.declickFrames = Math.round((DECLICK_MS / 1000) * sampleRate);
     this.endFadeFrames = Math.round((END_FADE_MS / 1000) * sampleRate);
     this.subBassFilter = new SubBass(sampleRate);
+    this.reverb = new Reverb(sampleRate);
+    this.reverbTailFrames = Math.round((REVERB_TAIL_MS / 1000) * sampleRate);
   }
 
   get loaded(): boolean {
@@ -117,7 +124,8 @@ export class ChipRenderer {
     this.resetPosition();
     this.declick.reset(1);
     this.endFade.reset(1);
-    this.currentGains.set(this.targetGains);
+    this.currentRouting.copyFrom(this.targetRouting);
+    this.clearReverb();
     this.taps?.clear();
     this.subBassFilter = new SubBass(this.sampleRate);
     return info;
@@ -164,9 +172,9 @@ export class ChipRenderer {
     }
   }
 
-  /** Sets the target gain of each voice pair (length VOICE_PAIRS); changes ramp in mixVoicePairs. */
-  setGains(gains: ArrayLike<number>): void {
-    this.targetGains.set(gains);
+  /** Sets each voice pair's gain, pan and reverb send; changes ramp in mixVoicePairs. */
+  setLevels(levels: VoiceLevels): void {
+    this.targetRouting.setLevels(levels);
   }
 
   /** Starts (or retargets) a seek. The output fades out, then the seek runs across render calls. */
@@ -213,12 +221,41 @@ export class ChipRenderer {
     const heap = core.HEAP16;
     const base = this.renderBuffer >> 1;
     this.taps?.write(heap, base, frames);
-    mixVoicePairs(heap, base, frames, this.currentGains, this.targetGains, left, right, offset);
+    const reverbOn = this.reverbActive(frames);
+    mixVoicePairs(
+      heap,
+      base,
+      frames,
+      this.currentRouting,
+      this.targetRouting,
+      left,
+      right,
+      offset,
+      reverbOn ? this.sendBuffer : null
+    );
+    if (reverbOn) this.reverb.process(this.sendBuffer, left, right, offset, frames);
     applyStereoCrossfeed(left, right, offset, frames, this.settings.stereoWidth);
     if (this.settings.subBass > 0) this.applySubBass(left, right, offset, frames);
     this.declick.apply(left, right, offset, frames);
     this.endFade.apply(left, right, offset, frames);
     this.checkEnd();
+  }
+
+  /** True while any voice sends to the reverb or its tail is still ringing out. */
+  private reverbActive(frames: number): boolean {
+    if (this.targetRouting.hasSend() || this.currentRouting.hasSend()) {
+      this.reverbRingFrames = this.reverbTailFrames;
+      return true;
+    }
+    if (this.reverbRingFrames <= 0) return false;
+    this.reverbRingFrames -= frames;
+    if (this.reverbRingFrames <= 0) this.clearReverb();
+    return this.reverbRingFrames > 0;
+  }
+
+  private clearReverb(): void {
+    this.reverb.clear();
+    this.reverbRingFrames = 0;
   }
 
   private applySubBass(
@@ -288,6 +325,7 @@ export class ChipRenderer {
     this.seekFramesRemaining = null;
     this.endFadeStarted = false;
     this.endFade.reset(1);
+    this.clearReverb();
     if (!this.paused) this.declick.rampTo(1, this.declickFrames);
     this.onEvent({
       type: 'seeked',

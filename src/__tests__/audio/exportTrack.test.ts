@@ -28,7 +28,11 @@ function request(): ExportRequest {
     format: 'mp3',
     lengthMs: 5000,
     settings: { tempo: 1, stereoWidth: 1, subBass: 0, loopForever: false },
-    gains: [1, 1, 1, 1, 1, 1, 1, 1],
+    levels: {
+      gains: [1, 1, 1, 1, 1, 1, 1, 1],
+      pans: [0, 0, 0, 0, 0, 0, 0, 0],
+      sends: [0, 0, 0, 0, 0, 0, 0, 0],
+    },
     tags: { title: 'Groove', artist: 'homskillet' },
   };
 }

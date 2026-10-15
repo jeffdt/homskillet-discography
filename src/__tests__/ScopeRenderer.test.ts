@@ -93,6 +93,9 @@ const voice = (index: number, audible = true): VoiceInfo => ({
   muted: !audible,
   soloed: false,
   audible,
+  volume: 1,
+  pan: 0,
+  reverb: 0,
 });
 
 function setup(

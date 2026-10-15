@@ -1,6 +1,6 @@
 import { END_FADE_MS } from '../constants';
 import { ChipRenderer } from '../render/ChipRenderer';
-import { ChipCore, RendererSettings } from '../types';
+import { ChipCore, RendererSettings, VoiceLevels } from '../types';
 import { Encoder } from './encoders';
 import { EXPORT_SAMPLE_RATE, exportFrameCount } from './exportPlan';
 
@@ -12,7 +12,7 @@ export interface ExportJob {
   path: string;
   lengthMs: number;
   settings: RendererSettings;
-  gains: ArrayLike<number>;
+  levels: VoiceLevels;
 }
 
 /**
@@ -28,8 +28,8 @@ export function renderExport(
 ): Uint8Array[] {
   const totalFrames = exportFrameCount(job.lengthMs);
   const renderer = new ChipRenderer(core, EXPORT_SAMPLE_RATE, () => {});
-  // Gains set before load start at their targets, so muted voices never ramp in.
-  renderer.setGains(job.gains);
+  // Levels set before load start at their targets, so muted voices never ramp in.
+  renderer.setLevels(job.levels);
   renderer.load(job.bytes, job.path, {
     ...job.settings,
     loopForever: false,

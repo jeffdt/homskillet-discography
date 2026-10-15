@@ -1,4 +1,5 @@
 import { LoadedTrack, VoiceMix } from '../types';
+import { voicePan, voiceReverb, voiceVolume } from '../render/voiceGains';
 import { VoiceInfo } from './contract';
 
 /** VoiceInfo for each voice of a loaded track; audible follows the same rule as computeVoiceGains. */
@@ -15,6 +16,9 @@ export function buildVoiceInfos(track: LoadedTrack | null, mix: VoiceMix): Voice
       muted,
       soloed,
       audible: !muted && (!anySolo || soloed),
+      volume: voiceVolume(mix, voice.index),
+      pan: voicePan(mix, voice.index),
+      reverb: voiceReverb(mix, voice.index),
     };
   });
 }

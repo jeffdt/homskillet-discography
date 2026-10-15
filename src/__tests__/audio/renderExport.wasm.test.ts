@@ -41,8 +41,8 @@ function job(lengthMs: number, tempo = 1, mutedAll = false): ExportJob {
   const voices = Array.from({ length: 8 }, (_, i) =>
     voiceInfo(i, `V${i}`, mutedAll ? { muted: true, audible: false } : {})
   );
-  const { settings, gains } = exportSettings({ tempo, subbass: 0, stereoWidth: 1, voices });
-  return { bytes, path: '/' + TRACK, lengthMs, settings, gains };
+  const { settings, levels } = exportSettings({ tempo, subbass: 0, stereoWidth: 1, voices });
+  return { bytes, path: '/' + TRACK, lengthMs, settings, levels };
 }
 
 function peak(samples: number[], from: number, to: number): number {

@@ -1,5 +1,4 @@
-import React, { createContext, useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
-import { debounce } from 'lodash';
+import React, { createContext, useCallback, useEffect, useState, ReactNode } from 'react';
 import { DEFAULT_CHANNEL_PALETTE_ID } from '../config/channelPalettes';
 import { STAGE_DEFAULTS } from '../config/stageSettings';
 
@@ -62,28 +61,14 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   }, [settings]);
 
-  const saveSettings = useMemo(() => {
-    return debounce((newSettings: UserSettings) => {
-      // Settings are automatically saved via useEffect
-    }, 1000);
+  // Merges into the latest settings, so several updates in one event all land.
+  const updateSettings = useCallback((partialSettings: Partial<UserSettings>) => {
+    setSettings((current) => ({ ...current, ...partialSettings }));
   }, []);
 
-  const updateSettings = useCallback(
-    (partialSettings: Partial<UserSettings>) => {
-      const newSettings = { ...settings, ...partialSettings };
-      setSettings(newSettings);
-      saveSettings(newSettings);
-    },
-    [settings, saveSettings]
-  );
-
-  const replaceSettings = useCallback(
-    (newSettings: UserSettings) => {
-      setSettings(newSettings);
-      saveSettings(newSettings);
-    },
-    [saveSettings]
-  );
+  const replaceSettings = useCallback((newSettings: UserSettings) => {
+    setSettings(newSettings);
+  }, []);
 
   return (
     <UserContext.Provider

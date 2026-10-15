@@ -6,6 +6,7 @@ import {
   groupByChip,
   hearOnly,
   mixOf,
+  setVoiceLevel,
   toggleMute,
   toggleHeard,
   toggleSolo,
@@ -52,7 +53,13 @@ describe('voice mix helpers', () => {
   });
 
   it('clears every mute and solo', () => {
-    expect(clearedVoiceMix()).toEqual({ muted: ALL_FALSE, soloed: ALL_FALSE });
+    expect(clearedVoiceMix()).toEqual({
+      muted: ALL_FALSE,
+      soloed: ALL_FALSE,
+      volume: new Array(8).fill(1),
+      pan: new Array(8).fill(0),
+      reverb: new Array(8).fill(0),
+    });
   });
 
   it('groups voices by chip in track order', () => {
@@ -121,5 +128,32 @@ describe('scope click helpers (mutes only, no solo)', () => {
     expect(only.muted.slice(0, 4)).toEqual([true, true, false, true]);
     expect(only.soloed).toEqual(ALL_FALSE);
     expect(hearOnly(four([false, false, true, false]), 2).muted).toEqual(ALL_FALSE);
+  });
+});
+
+describe('channel levels', () => {
+  const tuned = [
+    voiceInfo(0, 'Square 1', { volume: 0.5, pan: -0.25 }),
+    voiceInfo(2, 'Triangle', { reverb: 0.6 }),
+  ];
+
+  it('sets one level of one voice and keeps everything else', () => {
+    const mix = setVoiceLevel(tuned, 2, 'volume', 1.75);
+    expect(mix.volume!.slice(0, 3)).toEqual([0.5, 1, 1.75]);
+    expect(mix.pan![0]).toBe(-0.25);
+    expect(mix.reverb![2]).toBe(0.6);
+  });
+
+  it('keeps levels through mute, solo and scope clicks', () => {
+    for (const mix of [
+      toggleMute(tuned, 2),
+      toggleSolo(tuned, 0),
+      toggleHeard(tuned, 0),
+      hearOnly(tuned, 2),
+    ]) {
+      expect(mix.volume![0]).toBe(0.5);
+      expect(mix.pan![0]).toBe(-0.25);
+      expect(mix.reverb![2]).toBe(0.6);
+    }
   });
 });
