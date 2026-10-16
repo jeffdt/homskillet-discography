@@ -1,5 +1,5 @@
 import React from 'react';
-import { INTERFACE_DEFAULTS, SPARK_DEFAULTS } from '../config/stageSettings';
+import { INTERFACE_DEFAULTS, RIPPLE_DEFAULTS, SPARK_DEFAULTS } from '../config/stageSettings';
 import { UI_PALETTES, uiPaletteAt } from '../config/uiPalettes';
 import SwatchPicker from './stage/SwatchPicker';
 import {
@@ -8,6 +8,8 @@ import {
   MORE_SPARK_SLIDERS,
   REACTIVE_STRENGTH,
   REACTIVE_UI,
+  RIPPLES,
+  RIPPLE_SLIDERS,
   SPARKS,
   SPARK_FADE,
   SPARK_SLIDERS,
@@ -26,6 +28,7 @@ const ACCENT_OPTIONS = UI_PALETTES.map((palette, i) => ({
 export default function InterfacePanel() {
   const { settings, updateSettings, slider, toggle } = useSettingControls();
   const accentIndex = UI_PALETTES.indexOf(uiPaletteAt(settings.uiPalette));
+  const ripplesOn = toggleSetting(settings, RIPPLES);
   const sparksOn = toggleSetting(settings, SPARKS);
 
   return (
@@ -48,6 +51,21 @@ export default function InterfacePanel() {
         {slider(REACTIVE_STRENGTH, !toggleSetting(settings, REACTIVE_UI))}
         {slider(FILM_GRAIN)}
         {toggle(CRT_SCREEN)}
+      </section>
+
+      <section className="StagePanel-section" aria-labelledby="interface-ripples-heading">
+        <h3 id="interface-ripples-heading" className="StagePanel-heading">
+          Time slider ripples
+        </h3>
+        {toggle(RIPPLES)}
+        {RIPPLE_SLIDERS.map((def) => slider(def, !ripplesOn))}
+        <button
+          type="button"
+          className="StagePanel-button"
+          onClick={() => updateSettings({ ...RIPPLE_DEFAULTS })}
+        >
+          Reset ripples
+        </button>
       </section>
 
       <section className="StagePanel-section" aria-labelledby="interface-sparks-heading">

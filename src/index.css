@@ -824,6 +824,21 @@ body,
   z-index: 3;
 }
 
+/* Beat ripples: drawn in place of the flat fill while any ripple is alive (SliderRipples). */
+.Slider-ripples {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% + var(--knobW));
+  height: var(--charH);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.Slider.is-rippling .Slider-fill {
+  visibility: hidden;
+}
+
 .Slider:hover .Slider-knob {
   background-color: transparent;
 }

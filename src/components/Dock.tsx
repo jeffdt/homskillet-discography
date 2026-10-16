@@ -5,6 +5,7 @@ import { titleFromFilename } from '../catalog/titles';
 import { usePulseTarget } from '../hooks/usePulseTarget';
 import { toggleFullscreen } from '../shell/fullscreen';
 import { PlaybackControls, PlaybackState } from '../types/playback';
+import { DEFAULT_RIPPLE_SETTINGS, RippleSettings } from '../visuals/ripples';
 import TimeSlider from './TimeSlider';
 import DockSlider from './DockSlider';
 import DownloadDialog from './DownloadDialog';
@@ -60,6 +61,16 @@ function sparkSettings(settings: Partial<UserSettings>, faded: boolean) {
     particleSpeedVariance: settings.particleSpeedVariance,
     particleGravity: settings.particleGravity,
     particleFadeMode: settings.particleFadeMode,
+  };
+}
+
+/** Maps user settings to the time slider's ripple settings; null while off or faded out. */
+function rippleSettings(settings: Partial<UserSettings>, faded: boolean): RippleSettings | null {
+  if (faded || settings.sliderRipplesEnabled === false) return null;
+  return {
+    heightPx: settings.rippleHeight ?? DEFAULT_RIPPLE_SETTINGS.heightPx,
+    speedPxPerSec: settings.rippleSpeed ?? DEFAULT_RIPPLE_SETTINGS.speedPxPerSec,
+    sensitivity: settings.rippleSensitivity ?? DEFAULT_RIPPLE_SETTINGS.sensitivity,
   };
 }
 
@@ -189,6 +200,7 @@ export default function Dock({
           onChange={controls.seekToFraction}
           looping={playback.repeat}
           {...sparkSettings(settings, faded)}
+          ripples={rippleSettings(settings, faded)}
         />
       </div>
 

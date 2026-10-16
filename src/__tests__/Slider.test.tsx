@@ -1,7 +1,9 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import Slider from '../components/Slider';
+import { DEFAULT_RIPPLE_SETTINGS } from '../visuals/ripples';
+import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 describe('Slider', () => {
   it('maps a click to a fraction of the rail measured in viewport coordinates', () => {
@@ -16,5 +18,30 @@ describe('Slider', () => {
     fireEvent.mouseUp(document, { clientX: 450 });
 
     expect(onChange).toHaveBeenCalledWith(0.25);
+  });
+
+  it('drops its ripples while the knob is being dragged', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    const data = createTestAudioData();
+    data.frameLoop.setPlaying(true);
+    const { container } = render(
+      withAudioData(
+        data.value,
+        <Slider
+          pos={0.5}
+          onDrag={() => {}}
+          onChange={() => {}}
+          ripples={DEFAULT_RIPPLE_SETTINGS}
+          rippling
+        />
+      )
+    );
+    const slider = container.querySelector('.Slider') as HTMLElement;
+    slider.classList.add('is-rippling');
+    fireEvent.mouseDown(slider, { clientX: 0 });
+    expect(slider.classList.contains('is-rippling')).toBe(false);
+    act(() => data.scheduler.tick(16));
+    expect(data.frameLoop.isRunning()).toBe(false);
+    vi.restoreAllMocks();
   });
 });

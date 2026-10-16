@@ -116,9 +116,10 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
   - DownloadDialog.tsx - Opened by the Dock's download icon: MP3 or WAV, My mix or Original, length (m:ss); renders through src/audio/export/
   - ShareDialog.tsx - Opened by the Dock's share icon: a ?play= link that can carry the mix, the visualizer and a start time (format in src/shell/shareLink.ts)
-  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, CRT screen, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
+  - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, CRT screen, time slider ripples, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
   - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo, and Vol/Pan/Verb from channelLevels.ts, reset per song), MixerSlider and mixerControls (speed, bass, stereo with their explanations)
   - TimeSlider.tsx, DockSlider.tsx - Audio controls (DockSlider is the player bar's speed and volume)
+  - SliderRipples.tsx - Beat ripples on the time slider: a mid-band level jump starts a wave at the playhead that travels back down the played bar (math in src/visuals/ripples.ts); drawn on a canvas only while a ripple is alive, off under reduced motion
 - **src/catalog/** - Catalog merge and metadata
 - **src/shell/** - Pure UI logic
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
