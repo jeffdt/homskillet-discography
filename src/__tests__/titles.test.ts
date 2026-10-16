@@ -3,7 +3,7 @@ import { splitCamelCase, titleFromFilename } from '../catalog/titles';
 
 describe('titleFromFilename', () => {
   it('strips the extension and title-cases snake_case words', () => {
-    expect(titleFromFilename('sun_dried_tanuki.nsf')).toBe('Sun Dried Tanuki');
+    expect(titleFromFilename('rock_n_roll.nsf')).toBe('Rock N Roll');
   });
 
   it('keeps existing capitals and digits', () => {
