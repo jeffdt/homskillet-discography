@@ -175,8 +175,8 @@ describe('Dock', () => {
   });
 
   it('falls back to a filename title for tracks outside the catalog', () => {
-    renderDock({ songUrl: '/music/Other/sun_dried_tanuki.nsf' }, { track: null, album: null });
-    expect(screen.getByText('Sun Dried Tanuki')).toBeTruthy();
+    renderDock({ songUrl: '/music/Other/ice_cold.nsf' }, { track: null, album: null });
+    expect(screen.getByText('Ice Cold')).toBeTruthy();
   });
 
   it('changes the speed, shows it as a percent and resets it on double-click', () => {

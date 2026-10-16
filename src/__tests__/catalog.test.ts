@@ -17,7 +17,7 @@ const DIRS: RawDirectories = {
     { path: '/SuperFORE!', type: 'directory' },
   ],
   '/Bazaar': [
-    { path: '/Bazaar/turban_youth.nsf', type: 'file' },
+    { path: '/Bazaar/tectonic_techniques.nsf', type: 'file' },
     { path: '/Bazaar/groove.nsf', type: 'file' },
     { path: '/Bazaar/mt.nsf', type: 'file' },
     { path: '/Bazaar/Extras', type: 'directory' },
@@ -106,7 +106,11 @@ describe('buildCatalog with metadata', () => {
 
   it('orders listed tracks first, skips missing files and duplicates, appends the rest alphabetically', () => {
     const bazaar = catalog.albumById.get('Bazaar')!;
-    expect(bazaar.tracks.map((t) => t.file)).toEqual(['mt.nsf', 'groove.nsf', 'turban_youth.nsf']);
+    expect(bazaar.tracks.map((t) => t.file)).toEqual([
+      'mt.nsf',
+      'groove.nsf',
+      'tectonic_techniques.nsf',
+    ]);
     expect(bazaar.tracks[0].title).toBe('Mount');
     expect(bazaar.tracks[0].blurb).toBe('Written on a train.');
   });

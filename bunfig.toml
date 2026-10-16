@@ -1,0 +1,3 @@
+# Fail on a missing package instead of fetching its latest version (run bun install).
+[install]
+auto = "disable"
