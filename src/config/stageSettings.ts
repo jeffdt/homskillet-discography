@@ -380,6 +380,13 @@ export const VISUALIZER_DEFAULTS = {
   peakQuantization: 4,
 };
 
+/** Time slider ripple tuning, written by "Reset ripples"; the ripples on/off switch is separate. */
+export const RIPPLE_DEFAULTS = {
+  rippleHeight: 6,
+  rippleSpeed: 120,
+  rippleSensitivity: 50,
+};
+
 /** Every Interface panel setting and its default. "Reset interface" writes exactly these. */
 export const INTERFACE_DEFAULTS = {
   uiPalette: 0,
@@ -387,6 +394,8 @@ export const INTERFACE_DEFAULTS = {
   reactiveStrength: 100,
   filmGrainAmount: 50,
   crtScreen: false,
+  sliderRipplesEnabled: true,
+  ...RIPPLE_DEFAULTS,
   sliderSparksEnabled: false,
   ...SPARK_DEFAULTS,
 };

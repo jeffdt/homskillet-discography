@@ -14,6 +14,7 @@ import {
   SPARKS,
   SPARK_FADE,
   SPARK_LIFESPAN,
+  RIPPLE_SLIDERS,
   SPARK_SLIDERS,
   SPARK_SPAWN,
   SPARK_SPEED_VARIANCE,
@@ -45,6 +46,7 @@ describe('stage controls', () => {
       SCOPE_ZOOM,
       REACTIVE_STRENGTH,
       FILM_GRAIN,
+      ...RIPPLE_SLIDERS,
       ...SPARK_SLIDERS,
       ...MORE_SPARK_SLIDERS,
     ]);
@@ -54,6 +56,9 @@ describe('stage controls', () => {
       'scopeSpan',
       'reactiveStrength',
       'filmGrainAmount',
+      'rippleHeight',
+      'rippleSpeed',
+      'rippleSensitivity',
       'particleSpawnRate',
       'particleLifespan',
       'particleBaseAngle',
@@ -64,6 +69,7 @@ describe('stage controls', () => {
     ]);
     expect(STAGE_TOGGLES.map((def) => def.key)).toEqual([
       'audioReactivePulse',
+      'sliderRipplesEnabled',
       'sliderSparksEnabled',
       'particleFadeMode',
     ]);

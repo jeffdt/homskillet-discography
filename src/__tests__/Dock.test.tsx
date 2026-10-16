@@ -5,13 +5,22 @@ import { buildCatalog } from '../catalog/catalog';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 
 import Dock from '../components/Dock';
+import { DEFAULT_RIPPLE_SETTINGS } from '../visuals/ripples';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 vi.mock('../components/TimeSlider', () => ({
-  default: ({ particleEnabled }: { particleEnabled?: boolean }) => (
-    <div data-testid="time-slider" data-sparks={String(particleEnabled)} />
+  default: ({ particleEnabled, ripples }: { particleEnabled?: boolean; ripples?: unknown }) => (
+    <div
+      data-testid="time-slider"
+      data-sparks={String(particleEnabled)}
+      data-ripples={JSON.stringify(ripples ?? null)}
+    />
   ),
 }));
+
+function rippleProp(): unknown {
+  return JSON.parse(screen.getByTestId('time-slider').getAttribute('data-ripples') || 'null');
+}
 
 const catalog = buildCatalog(
   {
@@ -94,6 +103,36 @@ describe('Dock', () => {
   it('spawns sparks when enabled and visible', () => {
     renderDock({}, { settings: { sliderSparksEnabled: true } });
     expect(screen.getByTestId('time-slider').getAttribute('data-sparks')).toBe('true');
+  });
+
+  it('passes the ripple settings in the units the slider draws in', () => {
+    renderDock(
+      {},
+      {
+        settings: {
+          sliderRipplesEnabled: true,
+          rippleHeight: 4,
+          rippleSpeed: 200,
+          rippleSensitivity: 70,
+        },
+      }
+    );
+    expect(rippleProp()).toEqual({ heightPx: 4, speedPxPerSec: 200, sensitivity: 70 });
+  });
+
+  it('falls back to the default ripple settings for missing values', () => {
+    renderDock({}, { settings: {} });
+    expect(rippleProp()).toEqual(DEFAULT_RIPPLE_SETTINGS);
+  });
+
+  it('turns ripples off when switched off', () => {
+    renderDock({}, { settings: { sliderRipplesEnabled: false } });
+    expect(rippleProp()).toBeNull();
+  });
+
+  it('turns ripples off while the dock is faded out', () => {
+    renderDock({}, { settings: { sliderRipplesEnabled: true }, faded: true });
+    expect(rippleProp()).toBeNull();
   });
 
   it('shows the title and album and opens the album on click', () => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import autoBindReact from 'auto-bind/react';
 import { AudioDataContext, AudioDataContextValue } from '../contexts/AudioDataContext';
+import { RippleSettings } from '../visuals/ripples';
 import Slider from './Slider';
 
 /** Knob and elapsed time update this often while playing (the label changes once a second). */
@@ -15,6 +16,8 @@ interface TimeSliderProps {
   onChange: (event: number) => void;
   /** Repeat is on: the track loops forever, so elapsed time runs past the nominal duration. */
   looping?: boolean;
+  /** Beat ripple tuning; null or missing turns ripples off. */
+  ripples?: RippleSettings | null;
 
   // Particle settings (optional, passed to Slider)
   particleEnabled?: boolean;
@@ -124,6 +127,8 @@ export default class TimeSlider extends React.Component<TimeSliderProps, TimeSli
           onDrag={this.handlePositionDrag}
           onChange={this.handlePositionDrop}
           shouldSpawnParticles={!this.props.paused && (this.props.particleEnabled ?? true)}
+          ripples={this.props.ripples}
+          rippling={!this.props.paused}
           particleSpawnRate={this.props.particleSpawnRate}
           particleLifespan={this.props.particleLifespan}
           particleBaseAngle={this.props.particleBaseAngle}

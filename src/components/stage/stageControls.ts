@@ -233,12 +233,53 @@ export const MORE_SPARK_SLIDERS: readonly StageSliderDef[] = [
   SPARK_SPEED_VARIANCE,
   SPARK_GRAVITY,
 ];
+/** Tallest ripple on the time slider. */
+export const RIPPLE_HEIGHT: StageSliderDef = {
+  id: 'ripple-height',
+  key: 'rippleHeight',
+  label: 'Ripple height',
+  explanation: 'How far the bar bends on the hardest hits. Softer hits make smaller ripples.',
+  step: 1,
+  ...direct(2, 8, 0),
+  format: (value) => `${value} px`,
+};
+
+/** How fast ripples travel back down the time slider. */
+export const RIPPLE_SPEED: StageSliderDef = {
+  id: 'ripple-speed',
+  key: 'rippleSpeed',
+  label: 'Ripple speed',
+  explanation: 'How fast each ripple runs back toward the start of the song.',
+  step: 20,
+  ...direct(40, 300, 0),
+  format: (value) => `${value} px/s`,
+};
+
+/** How small a jump in level starts a ripple. */
+export const RIPPLE_SENSITIVITY: StageSliderDef = {
+  id: 'ripple-sensitivity',
+  key: 'rippleSensitivity',
+  label: 'Ripple sensitivity',
+  explanation:
+    'A ripple starts when the leads and snares jump above their recent average, judged against the loudest moment of the last few seconds, so quiet songs ripple too. Higher catches softer hits.',
+  step: 5,
+  ...direct(0, 100, 0),
+  format: (value) => `${value}`,
+};
+
+export const RIPPLE_SLIDERS: readonly StageSliderDef[] = [
+  RIPPLE_HEIGHT,
+  RIPPLE_SPEED,
+  RIPPLE_SENSITIVITY,
+];
+
 /** Every Stage slider, in panel order. */
 export const ALL_STAGE_SLIDERS: readonly StageSliderDef[] = [
   ...PEAK_SLIDERS,
   SCOPE_ZOOM,
   REACTIVE_STRENGTH,
   FILM_GRAIN,
+  ...RIPPLE_SLIDERS,
   ...SPARK_SLIDERS,
   ...MORE_SPARK_SLIDERS,
 ];
@@ -274,6 +315,16 @@ export const SPARKS: StageToggleDef = {
   toValue: (on) => on,
 };
 
+/** Switch for the time slider's beat ripples. */
+export const RIPPLES: StageToggleDef = {
+  id: 'ripples',
+  key: 'sliderRipplesEnabled',
+  label: 'Ripples',
+  explanation: 'Loud hits send a ripple back down the played part of the progress bar.',
+  isOn: (value) => value !== false,
+  toValue: (on) => on,
+};
+
 /** Switch for fading sparks out as they age. */
 export const SPARK_FADE: StageToggleDef = {
   id: 'spark-fade',
@@ -285,7 +336,7 @@ export const SPARK_FADE: StageToggleDef = {
 };
 
 /** Every Stage switch, in panel order. */
-export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, SPARKS, SPARK_FADE];
+export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, RIPPLES, SPARKS, SPARK_FADE];
 
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {

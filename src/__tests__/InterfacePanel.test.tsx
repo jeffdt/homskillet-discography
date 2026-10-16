@@ -9,12 +9,19 @@ import {
   REACTIVE_STRENGTH,
   MORE_SPARK_SLIDERS,
   REACTIVE_UI,
+  RIPPLES,
+  RIPPLE_SLIDERS,
   SPARKS,
   SPARK_FADE,
   SPARK_SLIDERS,
   STAGE_COPY,
 } from '../components/stage/stageControls';
-import { INTERFACE_DEFAULTS, SPARK_DEFAULTS, STAGE_DEFAULTS } from '../config/stageSettings';
+import {
+  INTERFACE_DEFAULTS,
+  RIPPLE_DEFAULTS,
+  SPARK_DEFAULTS,
+  STAGE_DEFAULTS,
+} from '../config/stageSettings';
 import { UI_PALETTES } from '../config/uiPalettes';
 
 function renderPanel(stored: Record<string, unknown> = {}) {
@@ -39,14 +46,20 @@ function checkedIn(group: string): string {
 describe('InterfacePanel', () => {
   it('shows every interface control with its explanation', () => {
     renderPanel();
-    ['Look', 'Sparks'].forEach((heading) =>
+    ['Look', 'Time slider ripples', 'Sparks'].forEach((heading) =>
       expect(screen.getByRole('heading', { name: heading })).toBeTruthy()
     );
-    [REACTIVE_STRENGTH, FILM_GRAIN, ...SPARK_SLIDERS, ...MORE_SPARK_SLIDERS].forEach((def) => {
+    [
+      REACTIVE_STRENGTH,
+      FILM_GRAIN,
+      ...RIPPLE_SLIDERS,
+      ...SPARK_SLIDERS,
+      ...MORE_SPARK_SLIDERS,
+    ].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
-    [REACTIVE_UI, CRT_SCREEN, SPARKS, SPARK_FADE].forEach((def) => {
+    [REACTIVE_UI, CRT_SCREEN, RIPPLES, SPARKS, SPARK_FADE].forEach((def) => {
       expect(screen.getByRole('switch', { name: def.label })).toBeTruthy();
       expect(screen.getByText(def.explanation)).toBeTruthy();
     });
@@ -55,6 +68,7 @@ describe('InterfacePanel', () => {
     expect(screen.getByText(STAGE_COPY.resetInterface)).toBeTruthy();
     expect(screen.getByText('More spark settings')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reset sparks' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Reset ripples' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reset interface' })).toBeTruthy();
   });
 
@@ -139,5 +153,32 @@ describe('InterfacePanel', () => {
     expect(updateSettings).toHaveBeenLastCalledWith(INTERFACE_DEFAULTS);
     expect(INTERFACE_DEFAULTS).not.toHaveProperty('visualizerStyle');
     expect(INTERFACE_DEFAULTS).not.toHaveProperty('channelPalette');
+  });
+
+  it('starts with ripples on and turns them off', () => {
+    const { updateSettings } = renderPanel();
+    const ripples = screen.getByRole('switch', { name: RIPPLES.label });
+    expect((ripples as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(ripples);
+    expect(updateSettings).toHaveBeenLastCalledWith({ sliderRipplesEnabled: false });
+  });
+
+  it('disables ripple tuning while ripples are off', () => {
+    renderPanel({ sliderRipplesEnabled: false });
+    RIPPLE_SLIDERS.forEach((def) =>
+      expect((screen.getByLabelText(def.label) as HTMLInputElement).disabled).toBe(true)
+    );
+  });
+
+  it('writes ripple settings in px, px/s and sensitivity points, and resets them', () => {
+    const { updateSettings } = renderPanel();
+    fireEvent.change(screen.getByLabelText('Ripple height'), { target: { value: '8' } });
+    expect(updateSettings).toHaveBeenLastCalledWith({ rippleHeight: 8 });
+    fireEvent.change(screen.getByLabelText('Ripple speed'), { target: { value: '200' } });
+    expect(updateSettings).toHaveBeenLastCalledWith({ rippleSpeed: 200 });
+    fireEvent.change(screen.getByLabelText('Ripple sensitivity'), { target: { value: '75' } });
+    expect(updateSettings).toHaveBeenLastCalledWith({ rippleSensitivity: 75 });
+    fireEvent.click(screen.getByRole('button', { name: 'Reset ripples' }));
+    expect(updateSettings).toHaveBeenLastCalledWith(RIPPLE_DEFAULTS);
   });
 });

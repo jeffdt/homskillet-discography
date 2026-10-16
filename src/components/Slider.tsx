@@ -1,12 +1,18 @@
 import React, { PureComponent } from 'react';
 import autoBindReact from 'auto-bind/react';
+import { RippleSettings } from '../visuals/ripples';
 import SliderParticles from './SliderParticles';
+import SliderRipples from './SliderRipples';
 
 interface SliderProps {
   pos: number;
   onDrag: (pos: number) => void;
   onChange: (pos: number) => void;
   shouldSpawnParticles?: boolean; // Whether to spawn particles (during playback)
+  /** Beat ripple tuning; null or missing turns ripples off. */
+  ripples?: RippleSettings | null;
+  /** Music is playing, so hits can start ripples. */
+  rippling?: boolean;
 
   // Particle settings (optional, passed to SliderParticles)
   particleSpawnRate?: number;
@@ -104,6 +110,12 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
         <div className="Slider-fill" ref={this.fill} style={{ width: pos }} />
         <div className="Slider-chisel" ref={this.chisel} style={{ left: pos }} />
         <div className="Slider-knob" ref={this.knob} style={{ left: pos }} />
+        <SliderRipples
+          host={this.node}
+          fill={this.fill}
+          settings={this.props.ripples ?? null}
+          active={!!this.props.rippling && !this.state.dragging}
+        />
         <SliderParticles
           anchor={this.chisel}
           shouldSpawn={shouldSpawn}
