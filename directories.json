@@ -8,39 +8,25 @@
       "idx": 0
     },
     {
-      "path": "/UnfinishedBusiness/evil.nsf",
-      "size": 16511,
-      "type": "file",
-      "mtime": 1768678486,
-      "idx": 1
-    },
-    {
       "path": "/UnfinishedBusiness/fantasy.nsf",
       "size": 16635,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 2
+      "idx": 1
     },
     {
       "path": "/UnfinishedBusiness/ice.nsf",
       "size": 16645,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 3
+      "idx": 2
     },
     {
       "path": "/UnfinishedBusiness/rock_n_roll.nsf",
       "size": 6128,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 4
-    },
-    {
-      "path": "/UnfinishedBusiness/sun_dried_tanuki.nsf",
-      "size": 6645,
-      "type": "file",
-      "mtime": 1768678486,
-      "idx": 5
+      "idx": 3
     }
   ],
   "/Covers": [
@@ -292,10 +278,10 @@
       "idx": 2
     },
     {
-      "path": "/LilLoops/digga.nsf",
+      "path": "/LilLoops/diggin.nsf",
       "size": 16657,
       "type": "file",
-      "mtime": 1768678486,
+      "mtime": 1792166787,
       "idx": 3
     },
     {
@@ -369,53 +355,46 @@
       "idx": 13
     },
     {
-      "path": "/LilLoops/luke.nsf",
-      "size": 16925,
-      "type": "file",
-      "mtime": 1768678486,
-      "idx": 14
-    },
-    {
       "path": "/LilLoops/mushroom.nsf",
       "size": 16516,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 15
+      "idx": 14
     },
     {
       "path": "/LilLoops/selection.nsf",
       "size": 16638,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 16
+      "idx": 15
     },
     {
       "path": "/LilLoops/shanty.nsf",
       "size": 7635,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 17
+      "idx": 16
     },
     {
       "path": "/LilLoops/spokky.nsf",
       "size": 12812,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 18
+      "idx": 17
     },
     {
       "path": "/LilLoops/turbo_drive.nsf",
       "size": 16609,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 19
+      "idx": 18
     },
     {
       "path": "/LilLoops/turtles.nsf",
       "size": 16660,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 20
+      "idx": 19
     }
   ],
   "/SuperFORE!": [
@@ -739,10 +718,10 @@
       "idx": 7
     },
     {
-      "path": "/RandomJams/Loop_Poop.nsf",
+      "path": "/RandomJams/Loop_Scoop.nsf",
       "size": 15124,
       "type": "file",
-      "mtime": 1768678486,
+      "mtime": 1792166787,
       "idx": 8
     },
     {
@@ -804,50 +783,50 @@
       "idx": 1
     },
     {
+      "path": "/Bazaar/dune_bap.nsf",
+      "size": 18353,
+      "type": "file",
+      "mtime": 1792166787,
+      "idx": 2
+    },
+    {
       "path": "/Bazaar/fast_jam.nsf",
       "size": 17054,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 2
+      "idx": 3
     },
     {
       "path": "/Bazaar/groove.nsf",
       "size": 17044,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 3
+      "idx": 4
     },
     {
       "path": "/Bazaar/mt.nsf",
       "size": 21372,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 4
+      "idx": 5
     },
     {
       "path": "/Bazaar/scarab_droppings.nsf",
       "size": 19855,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 5
+      "idx": 6
     },
     {
       "path": "/Bazaar/slow_jam_2.nsf",
       "size": 18819,
       "type": "file",
       "mtime": 1768678486,
-      "idx": 6
+      "idx": 7
     },
     {
       "path": "/Bazaar/tectonic_techniques.nsf",
       "size": 18846,
-      "type": "file",
-      "mtime": 1768678486,
-      "idx": 7
-    },
-    {
-      "path": "/Bazaar/turban_youth.nsf",
-      "size": 18353,
       "type": "file",
       "mtime": 1768678486,
       "idx": 8
@@ -859,7 +838,7 @@
       "size": 165707,
       "type": "directory",
       "numChildren": 9,
-      "mtime": 1768678486
+      "mtime": 1792167526
     },
     {
       "path": "/Covers",
@@ -870,10 +849,10 @@
     },
     {
       "path": "/LilLoops",
-      "size": 320575,
+      "size": 303650,
       "type": "directory",
-      "numChildren": 21,
-      "mtime": 1768678486
+      "numChildren": 20,
+      "mtime": 1792167088
     },
     {
       "path": "/MetallicWing",
@@ -887,7 +866,7 @@
       "size": 243287,
       "type": "directory",
       "numChildren": 15,
-      "mtime": 1768678486
+      "mtime": 1792167088
     },
     {
       "path": "/SuperFORE!",
@@ -898,10 +877,10 @@
     },
     {
       "path": "/UnfinishedBusiness",
-      "size": 69664,
+      "size": 46508,
       "type": "directory",
-      "numChildren": 6,
-      "mtime": 1768678486
+      "numChildren": 4,
+      "mtime": 1792167088
     }
   ]
 }
