@@ -3,7 +3,7 @@ import { assignRidgeFamilies, RidgeFamily } from '../shell/albumRidges';
 import { pathJoin } from '../util';
 import { splitCamelCase, titleFromFilename } from './titles';
 
-/** One entry of public/directories.json. Extra fields (size, mtime, idx) are ignored. */
+/** One entry of public/directories.json. Extra fields (size, idx) are ignored. */
 export interface RawDirectoryEntry {
   path: string;
   type: 'directory' | 'file';
