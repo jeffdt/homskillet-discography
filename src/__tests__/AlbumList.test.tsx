@@ -33,6 +33,7 @@ describe('AlbumList', () => {
         playingAlbumId={null}
         onSelect={() => {}}
         onShuffleAll={() => {}}
+        onSearch={() => {}}
       />
     );
     expect(screen.getByText('2 tracks')).toBeTruthy();
@@ -49,6 +50,7 @@ describe('AlbumList', () => {
         playingAlbumId={null}
         onSelect={onSelect}
         onShuffleAll={() => {}}
+        onSearch={() => {}}
       />
     );
     const item = screen.getByText('Bazaar').closest('button')!;
@@ -75,6 +77,7 @@ describe('AlbumList', () => {
         playingAlbumId={null}
         onSelect={onSelect}
         onShuffleAll={() => {}}
+        onSearch={() => {}}
       />
     );
     fireEvent.click(screen.getByText('Bazaar').closest('button')!);
@@ -98,6 +101,7 @@ describe('AlbumList', () => {
         playingAlbumId={null}
         onSelect={onSelect}
         onShuffleAll={() => {}}
+        onSearch={() => {}}
       />
     );
     fireEvent.click(screen.getByText('Bazaar').closest('button')!);
@@ -112,10 +116,26 @@ describe('AlbumList', () => {
         playingAlbumId="Bazaar"
         onSelect={() => {}}
         onShuffleAll={onShuffleAll}
+        onSearch={() => {}}
       />
     );
     expect(screen.getByText('Bazaar').closest('button')!.getAttribute('aria-current')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: /shuffle everything/i }));
     expect(onShuffleAll).toHaveBeenCalled();
+  });
+
+  it('opens search from its button', () => {
+    const onSearch = vi.fn();
+    render(
+      <AlbumList
+        albums={catalog.albums}
+        playingAlbumId={null}
+        onSelect={() => {}}
+        onShuffleAll={() => {}}
+        onSearch={onSearch}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /search/i }));
+    expect(onSearch).toHaveBeenCalled();
   });
 });

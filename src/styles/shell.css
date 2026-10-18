@@ -994,6 +994,44 @@
   background: var(--accent-dark);
 }
 
+.AlbumList-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.App .AlbumList-actions .AlbumList-shuffle {
+  margin-bottom: 0;
+}
+
+.App .AlbumList-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--neutral1);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--clickable);
+  font: var(--font-strong);
+  cursor: pointer;
+}
+
+.App .AlbumList-search:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.AlbumList-search kbd {
+  padding: 0 5px;
+  border: 1px solid var(--neutral1);
+  border-radius: 4px;
+  color: var(--neutral2);
+  font: inherit;
+  font-size: 0.8em;
+}
+
 .AlbumList-item {
   display: flex;
   align-items: center;
@@ -1236,6 +1274,7 @@
 /* Compact: every drawer control keeps a 44px target. */
 @media (max-width: 768px) and (orientation: portrait) {
   .App .AlbumList-shuffle,
+  .App .AlbumList-search,
   .App .Tracklist-playAlbum,
   .App .Tracklist-back,
   .Tracklist-track {

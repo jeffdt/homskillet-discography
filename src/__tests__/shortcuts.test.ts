@@ -123,4 +123,16 @@ describe('resolveShortcut', () => {
     expect(resolveShortcut(key('ArrowLeft', { target: input }))).toBeNull();
     expect(resolveShortcut(key('ArrowRight', { target: { tagName: 'BUTTON' } }))).toBe('nextTrack');
   });
+
+  it('opens search with slash or Cmd/Ctrl+K, but not while typing or in a modal', () => {
+    expect(resolveShortcut(key('/'))).toBe('openSearch');
+    expect(resolveShortcut(key('k', { metaKey: true }))).toBe('openSearch');
+    expect(resolveShortcut(key('K', { ctrlKey: true }))).toBe('openSearch');
+    expect(resolveShortcut(key('k'))).toBeNull();
+    expect(resolveShortcut(key('k', { metaKey: true, shiftKey: true }))).toBeNull();
+    expect(resolveShortcut(key('/', { target: { tagName: 'INPUT', type: 'text' } }))).toBeNull();
+    expect(
+      resolveShortcut(key('k', { metaKey: true, target: { tagName: 'INPUT', inModal: true } }))
+    ).toBeNull();
+  });
 });

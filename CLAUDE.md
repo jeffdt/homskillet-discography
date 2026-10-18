@@ -115,6 +115,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - Stage.tsx - Full-window visualizer (in Scopes, click a trace to mute or unmute it, shift-click to hear only it; not in Overlaid; see the note in mixer/voiceMix.ts)
   - TitleScreen, TopBar, Dock, NowPlayingSpotlight
   - DownloadDialog.tsx - Opened by the Dock's download icon: MP3 or WAV, My mix or Original, length (m:ss); renders through src/audio/export/
+  - QuickSearch.tsx - Opened by `/`, Cmd/Ctrl+K or the Search button in the Albums drawer: type a few words, Enter plays the best match within its album (ranking in src/catalog/search.ts)
   - ShareDialog.tsx - Opened by the Dock's share icon: a ?play= link that can carry the mix, the visualizer and a start time (format in src/shell/shareLink.ts)
   - PanelHost with AlbumsPanel (AlbumList, Tracklist), MixerPanel, StagePanel (the "Visualizer" panel), InterfacePanel (accent, pulse, film grain, CRT screen, time slider ripples, sparks), AboutPanel; the two settings panels share controls in src/components/stage/
   - mixer/ - Mixer panel parts: ChannelStrips and ChannelStrip (live scope, level meter, mute, solo, and Vol/Pan/Verb from channelLevels.ts, reset per song), MixerSlider and mixerControls (speed, bass, stereo with their explanations)

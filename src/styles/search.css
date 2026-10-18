@@ -1,0 +1,76 @@
+/* ===== Quick search (wears the download dialog's modal look) ===== */
+
+.QuickSearch-backdrop {
+  align-items: flex-start;
+  padding-top: min(18vh, 140px);
+}
+
+.DownloadDialog.QuickSearch {
+  width: min(460px, 100%);
+  gap: 8px;
+  padding: 12px;
+}
+
+.QuickSearch-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--neutral1);
+  border-radius: var(--radius);
+  background: var(--button);
+  color: var(--neutral4);
+  font: var(--font-strong);
+  outline: none;
+}
+
+.QuickSearch-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.QuickSearch-input:focus {
+  border-color: var(--accent-dark);
+}
+
+.QuickSearch-results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.QuickSearch-option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  color: var(--neutral3);
+  cursor: pointer;
+}
+
+.QuickSearch-option[aria-selected='true'] {
+  background: var(--button);
+  color: var(--neutral4);
+}
+
+.QuickSearch-option[aria-current='true'] .QuickSearch-title {
+  color: var(--accent);
+}
+
+.QuickSearch-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.QuickSearch-album {
+  flex-shrink: 0;
+  color: var(--neutral2);
+  font-size: 0.85em;
+}
+
+.QuickSearch-hint {
+  margin: 4px 12px;
+  color: var(--neutral2);
+}
