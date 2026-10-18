@@ -1,5 +1,5 @@
 const fs = require('fs');
-const glob = require('glob');
+const { globSync } = require('glob');
 const directoryTree = require('directory-tree');
 const { toArabic } = require('roman-numerals');
 
@@ -66,8 +66,9 @@ if (!fs.existsSync(catalogPath)) {
   process.exit(1);
 }
 
-const files = glob
-  .sync(`${catalogPath}**/*.{${FORMATS.join(',')}}`, { nocase: true })
+// glob no longer sorts its results; this matches the order glob 7 gave.
+const files = globSync(`${catalogPath}**/*.{${FORMATS.join(',')}}`, { nocase: true, posix: true })
+  .sort((a, b) => a.localeCompare(b, 'en'))
   .map((file) => file.replace(catalogPath, ''));
 
 const data = JSON.stringify(files, null, 2);
@@ -77,7 +78,7 @@ console.log('Wrote %d entries in %s (%d bytes).', files.length, outputPath, data
 const dirDict = {};
 const dirOptions = {
   extensions: formatsRegex,
-  attributes: ['mtimeMs'],
+  attributes: ['size', 'type'],
 };
 directoryTree(catalogPath, dirOptions, null, (item) => {
   if (item.children) {
@@ -89,10 +90,7 @@ directoryTree(catalogPath, dirOptions, null, (item) => {
         child.numChildren = child.children.length;
         delete child.children;
       }
-      child.mtime = Math.floor(child.mtimeMs / 1000);
       delete child.name;
-      delete child.extension;
-      delete child.mtimeMs;
       return child;
     });
 
