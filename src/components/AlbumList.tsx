@@ -10,6 +10,7 @@ interface AlbumListProps {
   playingAlbumId: string | null;
   onSelect: (albumId: string) => void;
   onShuffleAll: () => void;
+  onSearch: () => void;
 }
 
 /** First drawer level: every album with art, title, description and track count. */
@@ -18,6 +19,7 @@ export default function AlbumList({
   playingAlbumId,
   onSelect,
   onShuffleAll,
+  onSearch,
 }: AlbumListProps) {
   const [flashingId, setFlashingId] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,9 +48,19 @@ export default function AlbumList({
 
   return (
     <div className="AlbumList">
-      <button className="AlbumList-shuffle" onClick={onShuffleAll}>
-        Shuffle everything
-      </button>
+      <div className="AlbumList-actions">
+        <button className="AlbumList-shuffle" onClick={onShuffleAll}>
+          Shuffle everything
+        </button>
+        <button
+          className="AlbumList-search"
+          aria-keyshortcuts="/"
+          title="Search tracks (/)"
+          onClick={onSearch}
+        >
+          Search <kbd>/</kbd>
+        </button>
+      </div>
       <ul className="AlbumList-items">
         {albums.map((album) => {
           const count = album.tracks.length;

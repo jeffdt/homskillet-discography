@@ -10,6 +10,7 @@ export type ShortcutAction =
   | 'toggleStage'
   | 'toggleInterface'
   | 'toggleAlbums'
+  | 'openSearch'
   | 'speedDown'
   | 'speedDownFine'
   | 'speedUp'
@@ -93,8 +94,10 @@ export function resolveShortcut(e: ShortcutKey): ShortcutAction | null {
 
 /** Maps a key to an action ignoring repeat, composition and prior handling. */
 function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
-  if (e.ctrlKey || e.metaKey || e.altKey) return null;
   if (e.target?.inModal) return null;
+  if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'k')
+    return 'openSearch';
+  if (e.ctrlKey || e.metaKey || e.altKey) return null;
   if (e.key === 'Escape') return 'closeTopmost';
   if (isTextEntry(e.target)) return null;
 
@@ -109,6 +112,8 @@ function resolveUnguarded(e: ShortcutKey): ShortcutAction | null {
       return 'speedUp';
     case '+':
       return 'speedUpFine';
+    case '/':
+      return 'openSearch';
     default:
   }
 

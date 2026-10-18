@@ -12,6 +12,7 @@ interface AlbumsPanelProps {
   paused: boolean;
   onPlayTrack: (album: Album, index: number) => void;
   onShuffleAll: () => void;
+  onSearch: () => void;
   focusTrackId: string | null;
 }
 
@@ -24,6 +25,7 @@ export default function AlbumsPanel({
   paused,
   onPlayTrack,
   onShuffleAll,
+  onSearch,
   focusTrackId,
 }: AlbumsPanelProps) {
   const album = albumId ? catalog.albumById.get(albumId) || null : null;
@@ -52,6 +54,7 @@ export default function AlbumsPanel({
             playingAlbumId={playingTrack ? playingTrack.albumId : null}
             onSelect={onSelectAlbum}
             onShuffleAll={onShuffleAll}
+            onSearch={onSearch}
           />
         </div>
       )}

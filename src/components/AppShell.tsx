@@ -38,6 +38,7 @@ import FilmGrain from './FilmGrain';
 import MixerPanel from './MixerPanel';
 import NowPlayingSpotlight from './NowPlayingSpotlight';
 import PanelHost from './PanelHost';
+import QuickSearch from './QuickSearch';
 import Stage from './Stage';
 import StagePanel from './StagePanel';
 import TitleScreen from './TitleScreen';
@@ -92,6 +93,8 @@ export default function AppShell({ playback, controls }: AppShellProps) {
   const wasEjectedRef = useRef(playback.ejected);
   const [hasStarted, setHasStarted] = useState(!playback.ejected);
   const logoHandoffRef = useRef<Box | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchQueryRef = useRef('');
 
   const currentTrack =
     (catalog && playback.songUrl && catalog.trackByHref.get(playback.songUrl)) || null;
@@ -249,6 +252,8 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     dispatch({ type: 'open', id: 'albums', compact });
   }, [compact]);
 
+  const openSearch = useCallback(() => setSearchOpen(true), []);
+
   const anyPanelOpen = panels.open.length > 0;
 
   // Wide layouts have no backdrop behind panels, so a press anywhere outside the panels and chrome
@@ -282,6 +287,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     speedUpFine: () => controls.setSpeedRelative(0.01),
     toggleFullscreen: () => toggleFullscreen(),
     toggleAlbums: () => togglePanel('albums'),
+    openSearch,
     toggleMixer: () => togglePanel('mixer'),
     toggleStage: () => togglePanel('stage'),
     toggleInterface: () => togglePanel('interface'),
@@ -313,6 +319,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
             paused={playback.paused}
             onPlayTrack={playAlbumTrack}
             onShuffleAll={startListening}
+            onSearch={openSearch}
             focusTrackId={albumsFocusTrackId}
           />
         ) : (
@@ -420,6 +427,19 @@ export default function AppShell({ playback, controls }: AppShellProps) {
         onClose={(id) => dispatch({ type: 'close', id })}
         renderPanel={renderPanel}
       />
+
+      {searchOpen && catalog && (
+        <QuickSearch
+          catalog={catalog}
+          playingTrackId={currentTrackId}
+          initialQuery={searchQueryRef.current}
+          onQueryChange={(query) => {
+            searchQueryRef.current = query;
+          }}
+          onPlayTrack={playAlbumTrack}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
 
       <Toast />
     </div>
