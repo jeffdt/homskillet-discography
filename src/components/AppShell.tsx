@@ -252,6 +252,8 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     dispatch({ type: 'open', id: 'albums', compact });
   }, [compact]);
 
+  const openSearch = useCallback(() => setSearchOpen(true), []);
+
   const anyPanelOpen = panels.open.length > 0;
 
   // Wide layouts have no backdrop behind panels, so a press anywhere outside the panels and chrome
@@ -285,7 +287,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
     speedUpFine: () => controls.setSpeedRelative(0.01),
     toggleFullscreen: () => toggleFullscreen(),
     toggleAlbums: () => togglePanel('albums'),
-    openSearch: () => setSearchOpen(true),
+    openSearch,
     toggleMixer: () => togglePanel('mixer'),
     toggleStage: () => togglePanel('stage'),
     toggleInterface: () => togglePanel('interface'),
@@ -317,7 +319,7 @@ export default function AppShell({ playback, controls }: AppShellProps) {
             paused={playback.paused}
             onPlayTrack={playAlbumTrack}
             onShuffleAll={startListening}
-            onSearch={() => setSearchOpen(true)}
+            onSearch={openSearch}
             focusTrackId={albumsFocusTrackId}
           />
         ) : (
