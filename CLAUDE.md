@@ -26,6 +26,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 4. **Document the "why" and "how"** - When exposing controls, consider adding brief explanations of what the parameter does or what technique is being demonstrated.
 
+5. **Keep help text earned** - Skip help that only repeats a control's label. Use `explanation` (always shown) for what a visitor would not guess, and `info` (behind the "i" button in `src/components/ControlHelp.tsx`) for details. Never rely on hover-only tooltips; they don't work on touch.
+
 ### Project Goals
 
 This project is being developed in three phases:
