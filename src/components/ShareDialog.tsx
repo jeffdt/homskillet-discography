@@ -127,9 +127,7 @@ export default function ShareDialog({
         <h2 id="ShareDialog-title" className="DownloadDialog-title">
           Share <em>{title}</em>
         </h2>
-        <p className="ShareDialog-note">
-          Whoever opens the link hears and sees the song the way you set it up.
-        </p>
+        <p className="ShareDialog-note">The link opens this song with the options below.</p>
 
         {hasMix && (
           <Option
@@ -155,7 +153,7 @@ export default function ShareDialog({
         {startMs > 0 && (
           <Option
             label={`Start at ${formatLength(startMs)}`}
-            note="Otherwise the song plays from the top."
+            note="Otherwise it starts from the beginning."
             checked={startHere}
             onChange={setStartHere}
           />

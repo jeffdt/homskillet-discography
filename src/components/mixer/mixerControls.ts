@@ -40,8 +40,7 @@ export const MIXER_SLIDERS: MixerSliderDef[] = [
   {
     id: 'tempo',
     label: 'Speed',
-    explanation:
-      "Runs the song's music code faster or slower. Notes keep their pitch; only the tempo changes.",
+    explanation: 'Plays the song faster or slower without changing pitch.',
     min: 0.3,
     max: 2,
     step: 0.05,
@@ -51,12 +50,12 @@ export const MIXER_SLIDERS: MixerSliderDef[] = [
   engineSlider(
     'subbass',
     'Bass boost',
-    'Follows the bass line and adds a synthesized tone one octave below it, deeper than the NES could play.'
+    'Adds a tone an octave below the bass line, deeper than the NES could play.'
   ),
   engineSlider(
     'stereoWidth',
     'Stereo width',
-    'The NES plays in mono. The emulator pans the channels apart and adds a little echo; 0% is mono.'
+    'The NES is mono. This spreads the channels apart and adds a little echo.'
   ),
 ];
 

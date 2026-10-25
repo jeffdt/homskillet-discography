@@ -9,12 +9,11 @@ import { UserSettings } from './UserProvider';
 /** The Mixer's plain-language lines; each control's own line lives in MIXER_SLIDERS. */
 export const MIXER_COPY = {
   channels:
-    'Each strip is one voice of the sound chip, drawn live. Mute silences a channel; Solo plays only the soloed ones. Channels you are not hearing stay as dim ghosts.',
+    'Each strip is one chip channel. Mute silences it; Solo plays only the soloed channels.',
   levels:
-    'Vol, Pan and Verb shape each channel: its loudness, where it sits between the speakers, and how much of it rings in a shared reverb room. They reset with each new song; double-click one to put it back.',
-  sound: 'These change how every song plays and stay set until you change them or reset the mixer.',
-  reset:
-    'Puts speed, bass and stereo back to normal right away and returns every channel to unmuted, full volume, centered and dry.',
+    "Vol, Pan and Verb set each channel's volume, position and reverb. They reset with each song; double-click one to reset it.",
+  sound: 'These apply to every song until you change them.',
+  reset: 'Resets speed, bass, stereo and every channel.',
 };
 
 interface MixerPanelProps {
