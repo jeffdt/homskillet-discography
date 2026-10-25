@@ -61,7 +61,7 @@ const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         enqueueToast,
         clearCurrentToast,
         currentToast: queue[0],
-        toastCount: queue.length
+        toastCount: queue.length,
       }}
     >
       {children}

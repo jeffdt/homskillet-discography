@@ -49,6 +49,8 @@ export default function StagePanel() {
   const gradient = spectrumGradientById(settings.spectrumGradient);
   const scope = scopeSettingsOf(settings);
   const palette = channelPaletteById(settings.channelPalette);
+  const layout = scopeLayoutById(scope.scopeLayout);
+  const traceColoring = scopeColoringById(scope.scopeColoring);
 
   return (
     <div className="StagePanel">
@@ -105,21 +107,25 @@ export default function StagePanel() {
               options={SCOPE_LAYOUT_OPTIONS}
               selectedId={scope.scopeLayout}
               onSelect={(id) => updateSettings({ scopeLayout: id })}
-              describedBy="stage-layout-description"
+              describedBy={layout.description ? 'stage-layout-description' : undefined}
             />
-            <p id="stage-layout-description" className="StagePanel-note">
-              {scopeLayoutById(scope.scopeLayout).description}
-            </p>
+            {layout.description && (
+              <p id="stage-layout-description" className="StagePanel-note">
+                {layout.description}
+              </p>
+            )}
             <SwatchPicker
               label="Trace color"
               options={SCOPE_COLORING_OPTIONS}
               selectedId={scope.scopeColoring}
               onSelect={(id) => updateSettings({ scopeColoring: id })}
-              describedBy="stage-trace-description"
+              describedBy={traceColoring.description ? 'stage-trace-description' : undefined}
             />
-            <p id="stage-trace-description" className="StagePanel-note">
-              {scopeColoringById(scope.scopeColoring).description}
-            </p>
+            {traceColoring.description && (
+              <p id="stage-trace-description" className="StagePanel-note">
+                {traceColoring.description}
+              </p>
+            )}
             {SCOPE_EFFECT_SLIDERS.map((def) => slider(def))}
             <details className="StagePanel-more">
               <summary>More scope settings</summary>
@@ -147,11 +153,13 @@ export default function StagePanel() {
           options={CHANNEL_OPTIONS}
           selectedId={palette.id}
           onSelect={(id) => updateSettings({ channelPalette: id })}
-          describedBy="stage-palette-description"
+          describedBy={palette.description ? 'stage-palette-description' : undefined}
         />
-        <p id="stage-palette-description" className="StagePanel-note">
-          {palette.description}
-        </p>
+        {palette.description && (
+          <p id="stage-palette-description" className="StagePanel-note">
+            {palette.description}
+          </p>
+        )}
         <ChannelLegend />
       </section>
 
@@ -159,14 +167,10 @@ export default function StagePanel() {
         <button
           type="button"
           className="StagePanel-button"
-          aria-describedby="stage-reset-note"
           onClick={() => updateSettings({ ...VISUALIZER_DEFAULTS })}
         >
           Reset visualizer
         </button>
-        <p id="stage-reset-note" className="StagePanel-note">
-          {STAGE_COPY.resetVisualizer}
-        </p>
       </section>
     </div>
   );

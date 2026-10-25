@@ -92,23 +92,19 @@ export interface ScopeLayout {
   /** Stable key persisted in settings.scopeLayout. Never rename or reuse one. */
   id: ScopeLayoutId;
   label: string;
-  /** Shown under the layout picker. */
-  description: string;
+  /** Shown under the layout picker, when the name needs explaining. */
+  description?: string;
 }
 
 /** Every scope layout, in panel order. */
 export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
-  { id: 'stacked', label: 'Stacked', description: 'One row per channel.' },
+  { id: 'stacked', label: 'Stacked' },
   {
     id: 'overlaid',
     label: 'Overlaid',
     description: 'All channels on one line. Mute channels from the Mixer in this layout.',
   },
-  {
-    id: 'rings',
-    label: 'Rings',
-    description: 'Each channel on its own slowly turning ring.',
-  },
+  { id: 'rings', label: 'Rings' },
   {
     id: 'phase',
     label: 'Phase portraits',
@@ -125,17 +121,13 @@ export interface ScopeColoring {
   /** Stable key persisted in settings.scopeColoring. Never rename or reuse one. */
   id: ScopeColoringId;
   label: string;
-  /** Shown under the trace color picker. */
-  description: string;
+  /** Shown under the trace color picker, when the name needs explaining. */
+  description?: string;
 }
 
 /** Every scope trace coloring, in panel order. */
 export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
-  {
-    id: 'channel',
-    label: 'By channel',
-    description: 'Each channel in its palette color.',
-  },
+  { id: 'channel', label: 'By channel' },
   {
     id: 'unified',
     label: 'Accent color',

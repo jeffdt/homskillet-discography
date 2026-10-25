@@ -30,6 +30,7 @@ export function useSettingControls() {
       id={def.id}
       label={def.label}
       explanation={def.explanation}
+      info={def.info}
       checked={toggleSetting(settings, def)}
       disabled={disabled}
       onChange={(on) => updateSettings({ [def.key]: def.toValue(on) })}

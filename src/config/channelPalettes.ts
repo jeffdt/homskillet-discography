@@ -8,8 +8,8 @@ export interface ChannelPalette {
   /** Stable key persisted in settings.channelPalette. Never rename or reuse one. */
   id: string;
   label: string;
-  /** One plain-language line shown under the palette picker. */
-  description: string;
+  /** Shown under the palette picker, when the swatches don't say it all. */
+  description?: string;
   /** Exactly CHANNEL_COUNT lowercase '#rrggbb' colors; channels[i] colors voice index i. */
   channels: readonly string[];
 }
@@ -22,8 +22,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'metallic-wing',
     label: 'Metallic Wing',
-    description:
-      'The five Metallic Wing accent colors, their darker shades and Metallic Wing white.',
     channels: [
       '#66caff',
       '#efe903',
@@ -72,7 +70,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'pico-8',
     label: 'PICO-8',
-    description: 'The bright colors of the PICO-8 fantasy console.',
     channels: [
       '#29adff',
       '#ffec27',
@@ -88,7 +85,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
     // bz names Bazaar, the album whose game inspired these colors; keep the prefix.
     id: 'bazaar',
     label: 'bz Market',
-    description: 'Teal, sand, moss, lilac and rust from the bz gradients.',
     channels: [
       '#90c8c8',
       '#f8e850',
@@ -103,7 +99,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'neon',
     label: 'Neon',
-    description: 'Bright cyan, yellow, green, magenta and orange.',
     channels: [
       '#00f0ff',
       '#fff200',
@@ -118,7 +113,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'synthwave',
     label: 'Synthwave',
-    description: 'Hot pink, purple and cyan.',
     channels: [
       '#4cc9f0',
       '#ffd166',
@@ -133,7 +127,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'pastel',
     label: 'Pastel',
-    description: 'Soft, light versions of every hue.',
     channels: [
       '#a0c4ff',
       '#fdffb6',
@@ -148,7 +141,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'ember',
     label: 'Ember',
-    description: 'Amber, orange, red and mauve, with sage and teal.',
     channels: [
       '#ffb000',
       '#ff6b35',
@@ -163,7 +155,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'reef',
     label: 'Reef',
-    description: 'Coral, sea blue, teal and sand.',
     channels: [
       '#3a86ff',
       '#ffd23f',
@@ -178,7 +169,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'game-genie',
     label: 'Game Genie',
-    description: 'Blues, purples, reds and golds.',
     channels: [
       '#6a6af5',
       '#a855e8',
@@ -193,7 +183,6 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'vapor',
     label: 'Vapor',
-    description: 'Warm oranges against cool teals and blues.',
     channels: [
       '#ff5f29',
       '#ffd69c',

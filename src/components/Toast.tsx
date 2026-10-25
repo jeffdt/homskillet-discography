@@ -41,10 +41,12 @@ const Toast: React.FC = () => {
         <div className="message">
           {level?.label}: {message}
         </div>
-        <button className="box-button message-box-button" onClick={clearCurrentToast}>Dismiss{countLabel}</button>
+        <button className="box-button message-box-button" onClick={clearCurrentToast}>
+          Dismiss{countLabel}
+        </button>
       </div>
     </div>
   );
-}
+};
 
 export default memo(Toast);

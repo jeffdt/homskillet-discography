@@ -7,6 +7,7 @@ import { MIXER_SLIDERS } from '../components/mixer/mixerControls';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 import { voiceInfo } from './helpers/voices';
+import { expectControlHelp } from './helpers/controlHelp';
 
 const ALL_FALSE = [false, false, false, false, false, false, false, false];
 
@@ -63,12 +64,12 @@ function renderPanel(playback = PLAYING, settings: Record<string, any> = {}) {
 }
 
 describe('MixerPanel', () => {
-  it('explains every section and control in visible text', () => {
+  it('explains each section and control, the details behind "i" buttons', () => {
     renderPanel();
     expect(screen.getByText(MIXER_COPY.channels)).toBeTruthy();
     expect(screen.getByText(MIXER_COPY.sound)).toBeTruthy();
-    expect(screen.getByText(MIXER_COPY.reset)).toBeTruthy();
-    MIXER_SLIDERS.forEach((def) => expect(screen.getByText(def.explanation)).toBeTruthy());
+    expectControlHelp({ label: 'Vol, Pan and Verb', info: MIXER_COPY.levels });
+    MIXER_SLIDERS.forEach((def) => expectControlHelp(def));
   });
 
   it('shows channel strips once a track is loaded', () => {

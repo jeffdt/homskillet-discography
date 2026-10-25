@@ -11,8 +11,6 @@ import { VoiceLevel } from './voiceMix';
 export interface ChannelLevelDef {
   id: VoiceLevel;
   label: string;
-  /** Tooltip: what the control does, in a sentence. */
-  explanation: string;
   min: number;
   max: number;
   step: number;
@@ -32,7 +30,6 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   {
     id: 'volume',
     label: 'Vol',
-    explanation: "This channel's volume. 100% is as written.",
     min: 0,
     max: VOICE_VOLUME_MAX,
     step: 0.05,
@@ -42,7 +39,6 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   {
     id: 'pan',
     label: 'Pan',
-    explanation: 'Moves this channel left or right. C is the original position.',
     min: -1,
     max: 1,
     step: 0.05,
@@ -52,7 +48,6 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   {
     id: 'reverb',
     label: 'Verb',
-    explanation: 'How much of this channel goes into the shared reverb.',
     min: 0,
     max: 1,
     step: 0.05,

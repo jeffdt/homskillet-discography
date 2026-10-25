@@ -8,7 +8,10 @@ export type MixerSliderId = 'tempo' | 'subbass' | 'stereoWidth';
 export interface MixerSliderDef {
   id: MixerSliderId;
   label: string;
-  explanation: string;
+  /** Help text always shown under the slider. */
+  explanation?: string;
+  /** Help text behind the label's "i" button. */
+  info?: string;
   min: number;
   max: number;
   step: number;
@@ -40,7 +43,7 @@ export const MIXER_SLIDERS: MixerSliderDef[] = [
   {
     id: 'tempo',
     label: 'Speed',
-    explanation: 'Plays the song faster or slower without changing pitch.',
+    info: 'Plays the song faster or slower without changing pitch.',
     min: 0.3,
     max: 2,
     step: 0.05,

@@ -38,14 +38,14 @@ describe('colorVision helper', () => {
 });
 
 describe('channel palettes', () => {
-  it('have unique ids, labels, descriptions and exactly CHANNEL_COUNT lowercase hex colors', () => {
+  it('have unique ids, labels and exactly CHANNEL_COUNT lowercase hex colors', () => {
     expect(CHANNEL_COUNT).toBe(8);
     const ids = CHANNEL_PALETTES.map((palette) => palette.id);
     expect(new Set(ids).size).toBe(ids.length);
     CHANNEL_PALETTES.forEach((palette) => {
       expect(palette.id).toMatch(/^[a-z0-9-]+$/);
       expect(palette.label.length).toBeGreaterThan(0);
-      expect(palette.description.length).toBeGreaterThan(0);
+      if (palette.description !== undefined) expect(palette.description.length).toBeGreaterThan(0);
       expect(palette.channels).toHaveLength(CHANNEL_COUNT);
       palette.channels.forEach((color) => expect(color).toMatch(/^#[0-9a-f]{6}$/));
     });

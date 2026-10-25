@@ -12,7 +12,7 @@ export const SCOPE_TRAILS: StageSliderDef = {
   id: 'scope-trails',
   key: 'scopeTrails',
   label: 'Trails',
-  explanation: 'How long old traces take to fade.',
+  info: 'How long old traces take to fade.',
   step: 0.05,
   ...direct(0, SCOPE_TRAILS_MAX, 2),
   format: percent,
@@ -23,7 +23,6 @@ export const SCOPE_GLOW: StageSliderDef = {
   id: 'scope-glow',
   key: 'scopeGlow',
   label: 'Glow',
-  explanation: 'A soft halo around each line.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -34,7 +33,7 @@ export const SCOPE_BLOOM: StageSliderDef = {
   id: 'scope-bloom',
   key: 'scopeBloom',
   label: 'Bloom',
-  explanation: 'Light spilling past the lines. Off on slower devices.',
+  info: 'Light spilling past the lines. Off on slower devices.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -45,7 +44,7 @@ export const SCOPE_REACTIVITY: StageSliderDef = {
   id: 'scope-reactivity',
   key: 'scopeReactivity',
   label: 'Reacts to loudness',
-  explanation: 'Louder channels draw thicker, brighter lines, and new notes flash.',
+  info: 'Louder channels draw thicker, brighter lines, and new notes flash.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -56,7 +55,6 @@ export const SCOPE_LINE_WIDTH: StageSliderDef = {
   id: 'scope-line-width',
   key: 'scopeLineWidth',
   label: 'Line width',
-  explanation: 'How thick each trace is.',
   step: 0.5,
   ...direct(SCOPE_LINE_WIDTH_MIN, SCOPE_LINE_WIDTH_MAX, 1),
   format: (value) => `${value.toFixed(1)} px`,
@@ -69,7 +67,7 @@ export const SCOPE_CORE: StageToggleDef = {
   id: 'scope-core',
   key: 'scopeCore',
   label: 'White-hot core',
-  explanation: 'A thin white line down the middle of each trace.',
+  info: 'A thin white line down the middle of each trace.',
   ...flag,
 };
 
@@ -78,7 +76,7 @@ export const SCOPE_FILL: StageToggleDef = {
   id: 'scope-fill',
   key: 'scopeFill',
   label: 'Fill under the wave',
-  explanation: 'Shades under each wave. Stacked and Overlaid only.',
+  info: 'Shades under each wave. Stacked and Overlaid only.',
   ...flag,
 };
 
@@ -117,6 +115,4 @@ export const VIZ_COPY = {
     'The Unified coloring uses a gradient, so these colors only show in the Mixer.',
   colorSpectrumByChannel: 'Color the spectrum by channel',
   gradient: 'Left is quiet, right is loud.',
-  presets: 'Pick a preset, then adjust anything below.',
-  custom: 'Custom settings.',
 };

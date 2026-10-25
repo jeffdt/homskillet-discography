@@ -1,4 +1,5 @@
 import React from 'react';
+import { useControlHelp } from '../ControlHelp';
 import { StageSliderDef, displayValue } from './stageControls';
 
 interface StageSliderProps {
@@ -9,17 +10,26 @@ interface StageSliderProps {
   onChange: (value: number) => void;
 }
 
-/** One Stage slider: label, range, live value and the line that explains it. */
+/** One Stage slider: label, range, live value and any help text. */
 export default function StageSlider({ def, value, disabled = false, onChange }: StageSliderProps) {
   const inputId = `stage-${def.id}`;
-  const explanationId = `${inputId}-explanation`;
+  const help = useControlHelp(
+    inputId,
+    def.label,
+    'StageControl-explain',
+    def.explanation,
+    def.info
+  );
   const shown = displayValue(def, value);
   return (
     <div className={`StageControl${disabled ? ' is-disabled' : ''}`}>
       <div className="StageControl-row">
-        <label htmlFor={inputId} className="StageControl-label">
-          {def.label}
-        </label>
+        <span className="StageControl-name">
+          <label htmlFor={inputId} className="StageControl-label">
+            {def.label}
+          </label>
+          {help.button}
+        </span>
         <input
           id={inputId}
           type="range"
@@ -28,7 +38,7 @@ export default function StageSlider({ def, value, disabled = false, onChange }: 
           step={def.step}
           value={def.toSlider(value)}
           disabled={disabled}
-          aria-describedby={explanationId}
+          aria-describedby={help.describedBy}
           aria-valuetext={shown}
           onChange={(e) => onChange(def.fromSlider(parseFloat(e.target.value)))}
         />
@@ -36,9 +46,7 @@ export default function StageSlider({ def, value, disabled = false, onChange }: 
           {shown}
         </output>
       </div>
-      <p id={explanationId} className="StageControl-explain">
-        {def.explanation}
-      </p>
+      {help.text}
     </div>
   );
 }

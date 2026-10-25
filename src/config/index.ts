@@ -5,22 +5,14 @@ const PUBLIC_URL: string = import.meta.env.VITE_PUBLIC_URL || '';
 // Use static files for both dev and production (no separate API/file servers needed)
 const API_BASE: string = '';
 
-const CATALOG_PREFIX: string = IS_PRODUCTION
-  ? `${PUBLIC_URL}/music`
-  : '/music';
+const CATALOG_PREFIX: string = IS_PRODUCTION ? `${PUBLIC_URL}/music` : '/music';
 
 const MAX_SAMPLE_RATE: number = 48000; // Higher rates are problematic for some players.
 const MAX_VOICES: number = 64;
 const REPLACE_STATE_ON_SEEK: boolean = false;
 
 // GME (Game Music Emu) supported formats only
-const FORMATS: string[] = [
-  'ay',
-  'gbs',
-  'nsf',
-  'nsfe',
-  'spc',
-];
+const FORMATS: string[] = ['ay', 'gbs', 'nsf', 'nsfe', 'spc'];
 
 export interface Config {
   API_BASE: string;

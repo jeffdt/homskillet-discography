@@ -13,6 +13,7 @@ import {
 } from '../components/stage/vizControls';
 import { SPECTRUM_GRADIENTS } from '../config/spectrumGradients';
 import { SCOPE_PRESETS, STAGE_DEFAULTS } from '../config/stageSettings';
+import { expectControlHelp } from './helpers/controlHelp';
 
 function renderPanel(stored: Record<string, unknown> = {}) {
   const updateSettings = vi.fn();
@@ -75,24 +76,22 @@ describe('StagePanel channel scopes', () => {
     within(presets)
       .getAllByRole('button')
       .forEach((button) => expect(button.getAttribute('aria-pressed')).toBe('false'));
-    expect(screen.getByText(VIZ_COPY.custom)).toBeTruthy();
     expect(checkedIn('Scope layout')).toBe('Rings');
     expect(checkedIn('Trace color')).toBe('By channel');
     [...SCOPE_EFFECT_SLIDERS, SCOPE_ZOOM, ...MORE_SCOPE_SLIDERS].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
-      expect(screen.getByText(def.explanation)).toBeTruthy();
+      expectControlHelp(def);
     });
-    MORE_SCOPE_TOGGLES.forEach((def) => expect(screen.getByText(def.explanation)).toBeTruthy());
+    MORE_SCOPE_TOGGLES.forEach((def) => expectControlHelp(def));
     expect(screen.queryByRole('radiogroup', { name: 'Spectrum coloring' })).toBeNull();
   });
 
-  it('says Custom when no preset matches', () => {
+  it('presses no preset when none matches', () => {
     renderPanel({ visualizerStyle: 'scopes', scopeGlow: 0.35 });
     const presets = screen.getByRole('group', { name: 'Scope presets' });
     within(presets)
       .getAllByRole('button')
       .forEach((button) => expect(button.getAttribute('aria-pressed')).toBe('false'));
-    expect(screen.getByText(VIZ_COPY.custom)).toBeTruthy();
   });
 
   it('writes every value of a preset in one update', () => {

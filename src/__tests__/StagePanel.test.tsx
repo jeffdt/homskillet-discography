@@ -18,6 +18,7 @@ import { CHANNEL_PALETTES } from '../config/channelPalettes';
 import { voiceInfo } from './helpers/voices';
 import { STAGE_DEFAULTS, VISUALIZER_DEFAULTS } from '../config/stageSettings';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
+import { expectControlHelp } from './helpers/controlHelp';
 
 function renderPanel(
   stored: Record<string, unknown> = {},
@@ -55,13 +56,12 @@ describe('StagePanel', () => {
     );
     PEAK_SLIDERS.forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
-      expect(screen.getByText(def.explanation)).toBeTruthy();
+      expectControlHelp(def);
     });
     ['Visualizer style', 'Channel palette'].forEach((group) =>
       expect(screen.getByRole('radiogroup', { name: group })).toBeTruthy()
     );
     expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
-    expect(screen.getByText(STAGE_COPY.resetVisualizer)).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reset visualizer' })).toBeTruthy();
   });
 
@@ -85,7 +85,7 @@ describe('StagePanel', () => {
   it('swaps peak settings for the zoom in the scopes style', () => {
     renderPanel({ visualizerStyle: 'scopes' });
     expect(screen.getByLabelText(SCOPE_ZOOM.label)).toBeTruthy();
-    expect(screen.getByText(SCOPE_ZOOM.explanation)).toBeTruthy();
+    expectControlHelp(SCOPE_ZOOM);
     expect(screen.queryByLabelText('Peak decay')).toBeNull();
   });
 

@@ -57,6 +57,56 @@
   color: var(--neutral2);
 }
 
+/* The label column; holds the label and its "i" button when it has one. */
+.StageControl-name {
+  flex: 0 0 118px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.App .StageControl-name .StageControl-label,
+.App .StageToggle .StageControl-label {
+  flex: 0 1 auto;
+}
+
+/* ===== Info button (shared with the Mixer) ===== */
+
+/* A small circled "i" that shows a control's help text. Its hit area reaches past the circle. */
+.App .InfoButton {
+  position: relative;
+  flex: none;
+  align-self: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--neutral2);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--neutral2);
+  font: 600 10px/14px var(--fontSans);
+  font-style: italic;
+  text-align: center;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.App .InfoButton::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.App .InfoButton:hover,
+.App .InfoButton[aria-expanded='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.App .InfoButton:active {
+  background: transparent;
+}
+
 .StageControl.is-disabled .StageControl-label,
 .StageControl.is-disabled .StageControl-value {
   color: var(--neutral2);
@@ -89,6 +139,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 8px;
+}
+
+/* Space between pickers and controls when no note sits between them. */
+.SwatchPicker + .SwatchPicker,
+.StagePresets + .SwatchPicker,
+.SwatchPicker + .StageControl,
+.SwatchPicker + .ChannelLegend {
+  margin-top: 12px;
 }
 
 .App .SwatchPicker-card {

@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import StageSlider from '../components/stage/StageSlider';
 import StageToggle from '../components/stage/StageToggle';
 import SwatchPicker from '../components/stage/SwatchPicker';
-import { PEAK_QUANTIZATION, SPARK_LIFESPAN } from '../components/stage/stageControls';
+import { PEAK_DECAY, PEAK_QUANTIZATION, SPARK_LIFESPAN } from '../components/stage/stageControls';
 
 describe('StageSlider', () => {
   it('labels the slider and shows its formatted value and explanation', () => {
@@ -15,8 +15,22 @@ describe('StageSlider', () => {
     expect([input.min, input.max, input.step]).toEqual(['200', '2400', '200']);
     expect(input.getAttribute('aria-valuetext')).toBe('0.6 s');
     expect(screen.getByText('0.6 s')).toBeTruthy();
-    const explanation = screen.getByText(SPARK_LIFESPAN.explanation);
-    expect(input.getAttribute('aria-describedby')).toBe(explanation.id);
+    expect(input.getAttribute('aria-describedby')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'About Lifespan' })).toBeNull();
+  });
+
+  it('hides its info behind an "i" button that still describes the slider', () => {
+    render(<StageSlider def={PEAK_DECAY} value={0.95} onChange={() => {}} />);
+    const input = screen.getByLabelText('Peak decay');
+    const info = screen.getByText(PEAK_DECAY.info!);
+    expect(input.getAttribute('aria-describedby')).toBe(info.id);
+    expect(info.hidden).toBe(true);
+    const button = screen.getByRole('button', { name: 'About Peak decay' });
+    expect(button.getAttribute('aria-controls')).toBe(info.id);
+    fireEvent.click(button);
+    expect(info.hidden).toBe(false);
+    fireEvent.click(button);
+    expect(info.hidden).toBe(true);
   });
 
   it('shows slider positions and reports stored values', () => {
@@ -52,6 +66,16 @@ describe('StageToggle', () => {
     expect(toggle.getAttribute('aria-describedby')).toBe(screen.getByText('Turns the demo on.').id);
     fireEvent.click(toggle);
     expect(onChange).toHaveBeenCalledWith(false);
+  });
+
+  it('can hide its info behind an "i" button', () => {
+    render(
+      <StageToggle id="demo" label="Demo" info="Turns the demo on." checked onChange={() => {}} />
+    );
+    const info = screen.getByText('Turns the demo on.');
+    expect(info.hidden).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'About Demo' }));
+    expect(info.hidden).toBe(false);
   });
 
   it('can be disabled', () => {

@@ -14,7 +14,6 @@ import {
   SPARKS,
   SPARK_FADE,
   SPARK_SLIDERS,
-  STAGE_COPY,
 } from '../components/stage/stageControls';
 import {
   INTERFACE_DEFAULTS,
@@ -23,6 +22,7 @@ import {
   STAGE_DEFAULTS,
 } from '../config/stageSettings';
 import { UI_PALETTES } from '../config/uiPalettes';
+import { expectControlHelp } from './helpers/controlHelp';
 
 function renderPanel(stored: Record<string, unknown> = {}) {
   const updateSettings = vi.fn();
@@ -57,15 +57,13 @@ describe('InterfacePanel', () => {
       ...MORE_SPARK_SLIDERS,
     ].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
-      expect(screen.getByText(def.explanation)).toBeTruthy();
+      expectControlHelp(def);
     });
     [REACTIVE_UI, CRT_SCREEN, RIPPLES, SPARKS, SPARK_FADE].forEach((def) => {
       expect(screen.getByRole('switch', { name: def.label })).toBeTruthy();
-      expect(screen.getByText(def.explanation)).toBeTruthy();
+      expectControlHelp(def);
     });
     expect(screen.getByRole('radiogroup', { name: 'Accent color' })).toBeTruthy();
-    expect(screen.getByText(STAGE_COPY.accent)).toBeTruthy();
-    expect(screen.getByText(STAGE_COPY.resetInterface)).toBeTruthy();
     expect(screen.getByText('More spark settings')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reset sparks' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reset ripples' })).toBeTruthy();
