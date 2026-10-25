@@ -19,13 +19,12 @@ export const VISUALIZER_STYLES: readonly VisualizerStyle[] = [
     id: 'scopes',
     label: 'Scopes',
     description:
-      "One oscilloscope per sound channel: the wave each voice of the chip is drawing right now. Square waves look square, the triangle looks like a triangle, and noise looks like noise. Click a channel's trace to mute or unmute it, or shift-click it to hear only that channel.",
+      'An oscilloscope for each chip channel, showing the wave it is playing. Click a trace to mute it; shift-click to solo it.',
   },
   {
     id: 'spectrum',
     label: 'Spectrum',
-    description:
-      'Pitch runs from low at the bottom to high at the top while time scrolls right to left. Each band takes the colors of the channels playing it.',
+    description: 'Pitch runs low to high from bottom to top, and time scrolls right to left.',
   },
 ];
 
@@ -57,20 +56,18 @@ export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
   {
     id: 'unified',
     label: 'Unified',
-    description:
-      'Colors come from how loud each band is, not which channel plays it, using one gradient you pick below: quiet sounds take its left end, loud ones its right.',
+    description: 'Colors by loudness, using the gradient below.',
   },
   {
     id: 'additive',
     label: 'Add light',
     description:
-      'Each channel shines its own color, as bright as it is loud. Where channels overlap, their light adds up like colored stage lights.',
+      'Each channel adds its own color, brighter when louder. Overlapping colors add up like light.',
   },
   {
     id: 'average',
     label: 'Average',
-    description:
-      'Each band takes a blend of the channels playing in it, leaning toward the loudest, so overlaps mix like paint.',
+    description: 'Each band blends the colors of the channels in it, weighted toward the loudest.',
   },
 ];
 
@@ -101,23 +98,22 @@ export interface ScopeLayout {
 
 /** Every scope layout, in panel order. */
 export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
-  { id: 'stacked', label: 'Stacked', description: 'One lane per channel, top to bottom.' },
+  { id: 'stacked', label: 'Stacked', description: 'One row per channel.' },
   {
     id: 'overlaid',
     label: 'Overlaid',
-    description:
-      'Every channel on one shared line. Where traces cross, their light adds up. Mute channels from the Mixer here, since the traces overlap.',
+    description: 'All channels on one line. Mute channels from the Mixer in this layout.',
   },
   {
     id: 'rings',
     label: 'Rings',
-    description: 'Each channel wraps around a slowly turning circle, the first channel innermost.',
+    description: 'Each channel on its own slowly turning ring.',
   },
   {
     id: 'phase',
     label: 'Phase portraits',
     description:
-      'Each channel plotted against itself a quarter of a cycle earlier, like an X-Y oscilloscope, so the shape shows the sound rather than the note. An even square wave draws a box, a thinner pulse draws a slanted triangle, and noise draws a tangle.',
+      'Plots each channel against itself a quarter cycle earlier, so the shape shows the tone, not the pitch. Square waves draw boxes and noise draws a tangle.',
   },
 ];
 
@@ -138,13 +134,12 @@ export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
   {
     id: 'channel',
     label: 'By channel',
-    description: 'Each channel in its own palette color, to tell the voices apart.',
+    description: 'Each channel in its palette color.',
   },
   {
     id: 'unified',
     label: 'Accent color',
-    description:
-      'Every trace in your accent color (set in the Interface panel), like a one-color phosphor screen.',
+    description: 'Every trace in the accent color, set in the Interface panel.',
   },
 ];
 

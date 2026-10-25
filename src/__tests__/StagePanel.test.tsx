@@ -109,7 +109,7 @@ describe('StagePanel', () => {
   it('describes the selected style and channel palette', () => {
     renderPanel({ visualizerStyle: 'spectrum', channelPalette: CHANNEL_PALETTES[1].id });
     expect(screen.getByText(CHANNEL_PALETTES[1].description)).toBeTruthy();
-    expect(screen.getByText(/Pitch runs from low/)).toBeTruthy();
+    expect(screen.getByText(/Pitch runs low to high/)).toBeTruthy();
   });
 
   it('moves through palettes with the arrow keys', () => {

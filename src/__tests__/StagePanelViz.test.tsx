@@ -34,7 +34,7 @@ describe('StagePanel spectrum coloring', () => {
   it('offers the three colorings with Unified checked', () => {
     renderPanel({ visualizerStyle: 'spectrum' });
     expect(checkedIn('Spectrum coloring')).toBe('Unified');
-    expect(screen.getByText(/using one gradient you pick below/)).toBeTruthy();
+    expect(screen.getByText(/Colors by loudness/)).toBeTruthy();
     expect(screen.getByRole('radiogroup', { name: 'Gradient' })).toBeTruthy();
   });
 
@@ -120,7 +120,7 @@ describe('StagePanel channel colors note', () => {
     renderPanel();
     expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
     expect(STAGE_COPY.channelColors).toContain('Mixer');
-    expect(STAGE_COPY.channelColors).toContain('wherever the visualizer colors by channel');
+    expect(STAGE_COPY.channelColors).toContain('used by the visualizer and the Mixer');
   });
 });
 

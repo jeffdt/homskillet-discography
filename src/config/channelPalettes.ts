@@ -42,8 +42,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
     // 11.6 deuteranopia, 10.9 tritanopia; every color at least 3.67:1 against --background.
     id: 'chromatic',
     label: 'Chromatic',
-    description:
-      'A different hue for every channel, chosen to stay tellable apart with common kinds of color blindness.',
+    description: 'A distinct hue per channel, easy to tell apart with common color blindness.',
     channels: [
       '#56b4e9',
       '#f0e442',
@@ -58,8 +57,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'nes',
     label: 'NES',
-    description:
-      "Colors from the NES console's own palette, the only ones an NES game could draw with.",
+    description: "Colors from the NES's built-in palette.",
     channels: [
       '#3cbcfc',
       '#f8b800',
@@ -105,7 +103,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'neon',
     label: 'Neon',
-    description: 'Arcade-sign cyan, yellow, green, magenta and orange at full blast.',
+    description: 'Bright cyan, yellow, green, magenta and orange.',
     channels: [
       '#00f0ff',
       '#fff200',
@@ -120,7 +118,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'synthwave',
     label: 'Synthwave',
-    description: 'Hot pink, purple and cyan from an eighties sunset.',
+    description: 'Hot pink, purple and cyan.',
     channels: [
       '#4cc9f0',
       '#ffd166',
@@ -150,8 +148,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'ember',
     label: 'Ember',
-    description:
-      'Fire and autumn colors: amber, orange, red and mauve, with sage and teal to cool them.',
+    description: 'Amber, orange, red and mauve, with sage and teal.',
     channels: [
       '#ffb000',
       '#ff6b35',
@@ -166,7 +163,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'reef',
     label: 'Reef',
-    description: 'Coral, sea blue, teal and sand, like a coral reef.',
+    description: 'Coral, sea blue, teal and sand.',
     channels: [
       '#3a86ff',
       '#ffd23f',
@@ -181,7 +178,7 @@ export const CHANNEL_PALETTES: readonly ChannelPalette[] = [
   {
     id: 'game-genie',
     label: 'Game Genie',
-    description: 'Blues, purples, reds and golds, like the Game Genie gradient.',
+    description: 'Blues, purples, reds and golds.',
     channels: [
       '#6a6af5',
       '#a855e8',

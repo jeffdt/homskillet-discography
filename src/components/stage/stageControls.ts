@@ -86,8 +86,7 @@ export const PEAK_DECAY: StageSliderDef = {
   id: 'peak-decay',
   key: 'peakDecayRate',
   label: 'Peak decay',
-  explanation:
-    'The thin markers at the tip of each bar remember recent peaks. Higher numbers let them hang longer before they fall.',
+  explanation: 'How long the peak markers hang before falling.',
   step: 1,
   ...stepped(PEAK_DECAY_VALUES),
   format: (value) => `${nearestIndex(PEAK_DECAY_VALUES, value) + 1}/${PEAK_DECAY_VALUES.length}`,
@@ -98,8 +97,7 @@ export const PEAK_QUANTIZATION: StageSliderDef = {
   id: 'peak-quantization',
   key: 'peakQuantization',
   label: 'Peak steps',
-  explanation:
-    'Snaps the falling peak markers to coarse steps, for a chunky, pixel-art fall. Off lets them glide.',
+  explanation: 'Makes the peak markers fall in chunky steps. Off is smooth.',
   step: 1,
   ...stepped(PEAK_QUANTIZATION_VALUES),
   format: (value) => PEAK_QUANTIZATION_NAMES[nearestIndex(PEAK_QUANTIZATION_VALUES, value)],
@@ -110,8 +108,7 @@ export const SCOPE_ZOOM: StageSliderDef = {
   id: 'scope-zoom',
   key: 'scopeSpan',
   label: 'Scope zoom',
-  explanation:
-    'How much time each trace shows. Zoom in to see the shape of single waves; zoom out to watch notes change. Phase portraits ignore it.',
+  explanation: 'How much time each trace shows. Not used by phase portraits.',
   step: 1,
   ...stepped(SCOPE_SPANS),
   toSlider: (value) => SCOPE_SPANS.indexOf(scopeSpanOf(value)),
@@ -340,13 +337,12 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, RIPPLES, S
 
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
-  channelColors:
-    'Each sound channel of the chip gets its own color, used in the Mixer and wherever the visualizer colors by channel.',
+  channelColors: 'Each chip channel gets a color, used by the visualizer and the Mixer.',
   accent:
     'The color of buttons, highlights and the play button glow. Channel colors are set in the Visualizer panel.',
-  resetVisualizer: 'Puts every visualizer setting back the way the site starts.',
+  resetVisualizer: 'Restores the default visualizer settings.',
   resetInterface: 'Puts every setting in this panel back the way the site starts.',
-  noVoices: 'Play something to see which color is which channel.',
+  noVoices: 'Play a song to see which color is which channel.',
 };
 
 /** A slider's stored value as a number, or its default when it is missing or not a number. */
