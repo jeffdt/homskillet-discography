@@ -27,6 +27,7 @@ import {
   toggleSetting,
 } from '../components/stage/stageControls';
 import { SCOPE_SPANS, STAGE_DEFAULTS, scopeSpanOf } from '../config/stageSettings';
+import { expectPlainHelp } from './helpers/controlHelp';
 
 const EM_DASH = new RegExp(String.fromCharCode(0x2014));
 
@@ -89,13 +90,12 @@ describe('stage controls', () => {
     expect(sliderSetting({}, REACTIVE_STRENGTH)).toBe(100);
   });
 
-  it('write only stage settings, have unique ids and explain themselves in plain lines', () => {
+  it('write only stage settings, have unique ids and keep any help text plain', () => {
     const defs = [...ALL_STAGE_SLIDERS, ...STAGE_TOGGLES];
     expect(new Set(defs.map((def) => def.id)).size).toBe(defs.length);
     defs.forEach((def) => {
       expect(Object.keys(STAGE_DEFAULTS)).toContain(def.key);
-      expect(def.explanation.length).toBeGreaterThan(20);
-      expect(def.explanation).not.toMatch(EM_DASH);
+      expectPlainHelp(def);
     });
     Object.values(STAGE_COPY).forEach((line) => expect(line).not.toMatch(EM_DASH));
   });

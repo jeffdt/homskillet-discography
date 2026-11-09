@@ -14,12 +14,9 @@ import {
 import { UI_PALETTES, uiPaletteAt } from '../config/uiPalettes';
 
 describe('visualizer styles', () => {
-  it('offer the channel scopes first, then the spectrum, each explained', () => {
+  it('offer the channel scopes first, then the spectrum', () => {
     expect(VISUALIZER_STYLES.map((style) => style.id)).toEqual(['scopes', 'spectrum']);
-    VISUALIZER_STYLES.forEach((style) => {
-      expect(style.label.length).toBeGreaterThan(0);
-      expect(style.description.length).toBeGreaterThan(40);
-    });
+    VISUALIZER_STYLES.forEach((style) => expect(style.label.length).toBeGreaterThan(0));
   });
 
   it('fall back to the scopes for missing or unknown ids', () => {
@@ -45,7 +42,6 @@ describe('stage defaults', () => {
   it('keep the existing defaults and add the style and zoom', () => {
     expect(STAGE_DEFAULTS).toEqual({
       visualizerStyle: 'scopes',
-      spectrumColoring: 'unified',
       spectrumGradient: 'mw-green',
       scopeLayout: 'rings',
       scopeColoring: 'channel',

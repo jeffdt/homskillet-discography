@@ -3,13 +3,11 @@ import { CHANNEL_PALETTES, channelPaletteById } from '../config/channelPalettes'
 import {
   SCOPE_COLORINGS,
   SCOPE_LAYOUTS,
-  SPECTRUM_COLORINGS,
   VISUALIZER_DEFAULTS,
   VISUALIZER_STYLES,
   scopeColoringById,
   scopeLayoutById,
   scopeSettingsOf,
-  spectrumColoringById,
   visualizerStyleById,
 } from '../config/stageSettings';
 import { SPECTRUM_GRADIENTS, spectrumGradientById } from '../config/spectrumGradients';
@@ -19,15 +17,9 @@ import ScopePresets from './stage/ScopePresets';
 import SwatchPicker from './stage/SwatchPicker';
 import { PEAK_SLIDERS, SCOPE_ZOOM, STAGE_COPY } from './stage/stageControls';
 import { useSettingControls } from './stage/useSettingControls';
-import {
-  MORE_SCOPE_SLIDERS,
-  MORE_SCOPE_TOGGLES,
-  SCOPE_EFFECT_SLIDERS,
-  VIZ_COPY,
-} from './stage/vizControls';
+import { MORE_SCOPE_SLIDERS, MORE_SCOPE_TOGGLES, SCOPE_EFFECT_SLIDERS } from './stage/vizControls';
 
 const STYLE_OPTIONS = VISUALIZER_STYLES.map((style) => ({ id: style.id, label: style.label }));
-const SPECTRUM_COLORING_OPTIONS = SPECTRUM_COLORINGS.map((c) => ({ id: c.id, label: c.label }));
 const GRADIENT_OPTIONS = SPECTRUM_GRADIENTS.map((g) => ({
   id: g.id,
   label: g.label,
@@ -45,10 +37,11 @@ const CHANNEL_OPTIONS = CHANNEL_PALETTES.map((palette) => ({
 export default function StagePanel() {
   const { settings, updateSettings, slider, toggle } = useSettingControls();
   const style = visualizerStyleById(settings.visualizerStyle);
-  const coloring = spectrumColoringById(settings.spectrumColoring);
   const gradient = spectrumGradientById(settings.spectrumGradient);
   const scope = scopeSettingsOf(settings);
   const palette = channelPaletteById(settings.channelPalette);
+  const layout = scopeLayoutById(scope.scopeLayout);
+  const traceColoring = scopeColoringById(scope.scopeColoring);
 
   return (
     <div className="StagePanel">
@@ -61,37 +54,21 @@ export default function StagePanel() {
           options={STYLE_OPTIONS}
           selectedId={style.id}
           onSelect={(id) => updateSettings({ visualizerStyle: id })}
-          describedBy="stage-style-description"
+          describedBy={style.description ? 'stage-style-description' : undefined}
         />
-        <p id="stage-style-description" className="StagePanel-note">
-          {style.description}
-        </p>
+        {style.description && (
+          <p id="stage-style-description" className="StagePanel-note">
+            {style.description}
+          </p>
+        )}
         {style.id === 'spectrum' ? (
           <>
             <SwatchPicker
-              label="Spectrum coloring"
-              options={SPECTRUM_COLORING_OPTIONS}
-              selectedId={coloring.id}
-              onSelect={(id) => updateSettings({ spectrumColoring: id })}
-              describedBy="stage-coloring-description"
+              label="Gradient"
+              options={GRADIENT_OPTIONS}
+              selectedId={gradient.id}
+              onSelect={(id) => updateSettings({ spectrumGradient: id })}
             />
-            <p id="stage-coloring-description" className="StagePanel-note">
-              {coloring.description}
-            </p>
-            {coloring.id === 'unified' && (
-              <>
-                <SwatchPicker
-                  label="Gradient"
-                  options={GRADIENT_OPTIONS}
-                  selectedId={gradient.id}
-                  onSelect={(id) => updateSettings({ spectrumGradient: id })}
-                  describedBy="stage-gradient-note"
-                />
-                <p id="stage-gradient-note" className="StagePanel-note">
-                  {VIZ_COPY.gradient}
-                </p>
-              </>
-            )}
             {PEAK_SLIDERS.map((def) => slider(def))}
           </>
         ) : (
@@ -105,21 +82,25 @@ export default function StagePanel() {
               options={SCOPE_LAYOUT_OPTIONS}
               selectedId={scope.scopeLayout}
               onSelect={(id) => updateSettings({ scopeLayout: id })}
-              describedBy="stage-layout-description"
+              describedBy={layout.description ? 'stage-layout-description' : undefined}
             />
-            <p id="stage-layout-description" className="StagePanel-note">
-              {scopeLayoutById(scope.scopeLayout).description}
-            </p>
+            {layout.description && (
+              <p id="stage-layout-description" className="StagePanel-note">
+                {layout.description}
+              </p>
+            )}
             <SwatchPicker
               label="Trace color"
               options={SCOPE_COLORING_OPTIONS}
               selectedId={scope.scopeColoring}
               onSelect={(id) => updateSettings({ scopeColoring: id })}
-              describedBy="stage-trace-description"
+              describedBy={traceColoring.description ? 'stage-trace-description' : undefined}
             />
-            <p id="stage-trace-description" className="StagePanel-note">
-              {scopeColoringById(scope.scopeColoring).description}
-            </p>
+            {traceColoring.description && (
+              <p id="stage-trace-description" className="StagePanel-note">
+                {traceColoring.description}
+              </p>
+            )}
             {SCOPE_EFFECT_SLIDERS.map((def) => slider(def))}
             <details className="StagePanel-more">
               <summary>More scope settings</summary>
@@ -131,42 +112,37 @@ export default function StagePanel() {
         )}
       </section>
 
-      <section className="StagePanel-section" aria-labelledby="stage-colors-heading">
-        <h3 id="stage-colors-heading" className="StagePanel-heading">
-          Channel colors
-        </h3>
-        <p className="StagePanel-note">{STAGE_COPY.channelColors}</p>
-        <ChannelColorsNotice
-          visualizerStyle={style.id}
-          spectrumColoring={coloring.id}
-          scopeColoring={scope.scopeColoring}
-          onUpdate={updateSettings}
-        />
-        <SwatchPicker
-          label="Channel palette"
-          options={CHANNEL_OPTIONS}
-          selectedId={palette.id}
-          onSelect={(id) => updateSettings({ channelPalette: id })}
-          describedBy="stage-palette-description"
-        />
-        <p id="stage-palette-description" className="StagePanel-note">
-          {palette.description}
-        </p>
-        <ChannelLegend />
-      </section>
+      {style.id === 'scopes' && (
+        <section className="StagePanel-section" aria-labelledby="stage-colors-heading">
+          <h3 id="stage-colors-heading" className="StagePanel-heading">
+            Channel colors
+          </h3>
+          <p className="StagePanel-note">{STAGE_COPY.channelColors}</p>
+          <ChannelColorsNotice scopeColoring={scope.scopeColoring} onUpdate={updateSettings} />
+          <SwatchPicker
+            label="Channel palette"
+            options={CHANNEL_OPTIONS}
+            selectedId={palette.id}
+            onSelect={(id) => updateSettings({ channelPalette: id })}
+            describedBy={palette.description ? 'stage-palette-description' : undefined}
+          />
+          {palette.description && (
+            <p id="stage-palette-description" className="StagePanel-note">
+              {palette.description}
+            </p>
+          )}
+          <ChannelLegend />
+        </section>
+      )}
 
       <section className="StagePanel-section">
         <button
           type="button"
           className="StagePanel-button"
-          aria-describedby="stage-reset-note"
           onClick={() => updateSettings({ ...VISUALIZER_DEFAULTS })}
         >
           Reset visualizer
         </button>
-        <p id="stage-reset-note" className="StagePanel-note">
-          {STAGE_COPY.resetVisualizer}
-        </p>
       </section>
     </div>
   );

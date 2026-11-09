@@ -108,7 +108,7 @@ export default function ChannelStrip({
           const value = voice[def.id];
           const inputId = `strip-${index}-${def.id}`;
           return (
-            <div key={def.id} className="ChannelStrip-level" title={def.explanation}>
+            <div key={def.id} className="ChannelStrip-level">
               <label htmlFor={inputId} className="ChannelStrip-level-label">
                 {def.label}
               </label>

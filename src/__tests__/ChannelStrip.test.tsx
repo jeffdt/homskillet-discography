@@ -53,7 +53,7 @@ describe('ChannelStrip', () => {
     expect(handlers.solo).toHaveBeenCalledWith(2);
   });
 
-  it('shows Vol, Pan and Verb with their values and reports changes and double-click resets', () => {
+  it('shows Vol, Pan and Reverb with their values and reports changes and double-click resets', () => {
     const { handlers } = renderStrip(
       voiceInfo(2, 'Triangle', { volume: 1.5, pan: -0.4, reverb: 0.25 })
     );

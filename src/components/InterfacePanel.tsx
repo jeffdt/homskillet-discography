@@ -13,7 +13,6 @@ import {
   SPARKS,
   SPARK_FADE,
   SPARK_SLIDERS,
-  STAGE_COPY,
   toggleSetting,
 } from './stage/stageControls';
 import { useSettingControls } from './stage/useSettingControls';
@@ -42,11 +41,7 @@ export default function InterfacePanel() {
           options={ACCENT_OPTIONS}
           selectedId={String(accentIndex)}
           onSelect={(id) => updateSettings({ uiPalette: Number(id) })}
-          describedBy="interface-accent-note"
         />
-        <p id="interface-accent-note" className="StagePanel-note">
-          {STAGE_COPY.accent}
-        </p>
         {toggle(REACTIVE_UI)}
         {slider(REACTIVE_STRENGTH, !toggleSetting(settings, REACTIVE_UI))}
         {slider(FILM_GRAIN)}
@@ -92,14 +87,10 @@ export default function InterfacePanel() {
         <button
           type="button"
           className="StagePanel-button"
-          aria-describedby="interface-reset-note"
           onClick={() => updateSettings({ ...INTERFACE_DEFAULTS })}
         >
           Reset interface
         </button>
-        <p id="interface-reset-note" className="StagePanel-note">
-          {STAGE_COPY.resetInterface}
-        </p>
       </section>
     </div>
   );

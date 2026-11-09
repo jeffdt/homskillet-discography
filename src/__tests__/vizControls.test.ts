@@ -10,6 +10,7 @@ import {
   SCOPE_LINE_WIDTH,
   SCOPE_TRAILS,
 } from '../components/stage/vizControls';
+import { expectPlainHelp } from './helpers/controlHelp';
 
 describe('scope controls', () => {
   const all = [...SCOPE_EFFECT_SLIDERS, ...MORE_SCOPE_SLIDERS, ...MORE_SCOPE_TOGGLES];
@@ -20,10 +21,10 @@ describe('scope controls', () => {
     expect(SCOPE_AUTO_GAIN.isOn(STAGE_DEFAULTS.scopeAutoGain)).toBe(true);
   });
 
-  it('writes settings the stage defaults know, with unique ids and explanations', () => {
+  it('writes settings the stage defaults know, with unique ids and plain help', () => {
     all.forEach((def) => {
       expect(Object.keys(STAGE_DEFAULTS)).toContain(def.key);
-      expect(def.explanation.length).toBeGreaterThan(10);
+      expectPlainHelp(def);
     });
     expect(new Set(all.map((def) => def.id)).size).toBe(all.length);
     expect(SCOPE_EFFECT_SLIDERS.map((def) => def.label)).toEqual([

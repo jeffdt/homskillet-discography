@@ -1,23 +1,38 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createSpectrumLayout } from '../audio/data/spectrumLayout';
-import { VoiceFrame } from '../audio/data/contract';
-import { Rgb, unpackPixel } from '../visuals/color';
+import { Rgb, packPixel, unpackPixel } from '../visuals/color';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
-import { AveragePainter, GradientPainter } from '../visuals/spectrumPainters';
-import {
-  SHADE_BLACK_POINT,
-  SHADE_KNEE,
-  aWeightingLut,
-  buildShadeTable,
-  peakDecayFactor,
-} from '../visuals/spectrogramMath';
+import { BinPainter, GradientPainter } from '../visuals/spectrumPainters';
+import { aWeightingLut, peakDecayFactor } from '../visuals/spectrogramMath';
 
 const BACKGROUND: Rgb = [16, 16, 16];
-const HIGHLIGHT: Rgb = [254, 254, 254];
 const BLUE: Rgb = [86, 180, 233];
 const YELLOW: Rgb = [240, 228, 66];
 const layout = createSpectrumLayout();
 const weighting = aWeightingLut(layout.frequencies);
+/** Value index at or below which BinColorPainter paints the background. */
+const BLACK_POINT = 51;
+/** A value index comfortably lit. */
+const LIT = 102;
+
+/** Paints a bin its own color once lit, so tests can tell rows apart; silent rows are transparent. */
+class BinColorPainter implements BinPainter {
+  readonly emptyPixel = 0;
+  readonly analyzerBackground = packPixel(...BACKGROUND, 255);
+
+  constructor(private readonly binColors: Float32Array) {}
+
+  pixel(bin: number, index: number): number {
+    if (index <= BLACK_POINT) return this.analyzerBackground;
+    const o = bin * 3;
+    const c = this.binColors;
+    return packPixel(c[o], c[o + 1], c[o + 2], 255);
+  }
+
+  peakPixel(bin: number, index: number): number {
+    return this.pixel(bin, index);
+  }
+}
 
 interface FakeImage {
   width: number;
@@ -52,12 +67,7 @@ function setup(height = 448) {
   );
   const binColors = new Float32Array(layout.bins * 3).fill(195);
   // The painter keeps a reference to binColors, so tests can recolor bins after this.
-  const painter = new AveragePainter(
-    { update: () => binColors },
-    { background: BACKGROUND, highlight: HIGHLIGHT },
-    layout.bins
-  );
-  painter.update(null as unknown as VoiceFrame, 0);
+  const painter = new BinColorPainter(binColors);
   return { renderer, analyzer, spectrogram, scratch, binColors, painter };
 }
 
@@ -119,15 +129,15 @@ describe('SpectrogramRenderer', () => {
     expect(spectrogram.ctx.putImageData).not.toHaveBeenCalled();
   });
 
-  it('colors each row with its bin color at the knee, in the bars and the waterfall', () => {
+  it('colors each row with its painter pixel, in the bars and the waterfall', () => {
     const { renderer, analyzer, spectrogram, binColors, painter } = setup();
     const spectrum = new Float32Array(layout.bins);
-    spectrum[100] = valueFor(SHADE_KNEE, 100);
+    spectrum[100] = valueFor(LIT, 100);
     setColor(binColors, 100, BLUE);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
     const row = 447 - 100;
     const bars = lastImage(analyzer.ctx);
-    const barWidth = Math.floor((SHADE_KNEE * 64) / 256);
+    const barWidth = Math.floor((LIT * 64) / 256);
     expect(pixelAt(bars, 0, row)).toEqual([...BLUE, 255]);
     expect(pixelAt(bars, barWidth - 1, row)).toEqual([...BLUE, 255]);
     expect(pixelAt(bars, barWidth, row)).toEqual(BG_PIXEL);
@@ -138,26 +148,11 @@ describe('SpectrogramRenderer', () => {
     expect(pixelAt(column, 0, row - 1)[3]).toBe(0);
   });
 
-  it('shades the loudest values toward the highlight', () => {
-    const { renderer, analyzer, binColors, painter } = setup();
-    const spectrum = new Float32Array(layout.bins);
-    spectrum[100] = 10;
-    setColor(binColors, 100, BLUE);
-    renderer.draw(spectrum, painter, 1000 / 60, 120);
-    const { channel, highlight } = buildShadeTable();
-    const c = channel[255];
-    const h = highlight[255];
-    const expected = [0, 1, 2].map(
-      (i) => (BACKGROUND[i] * (1 - c - h) + BLUE[i] * c + HIGHLIGHT[i] * h + 0.5) | 0
-    );
-    expect(pixelAt(lastImage(analyzer.ctx), 0, 447 - 100)).toEqual([...expected, 255]);
-  });
-
   it('takes the loudest bin when rows are fewer than bins', () => {
     const { renderer, analyzer, binColors, painter } = setup(224);
     const spectrum = new Float32Array(layout.bins);
     spectrum[100] = valueFor(60, 100);
-    spectrum[101] = valueFor(SHADE_KNEE, 101);
+    spectrum[101] = valueFor(LIT, 101);
     setColor(binColors, 100, BLUE);
     setColor(binColors, 101, YELLOW);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
@@ -169,11 +164,11 @@ describe('SpectrogramRenderer', () => {
     const { renderer, analyzer, binColors, painter } = setup();
     const spectrum = new Float32Array(layout.bins);
     setColor(binColors, 100, BLUE);
-    spectrum[100] = valueFor(SHADE_KNEE, 100);
+    spectrum[100] = valueFor(LIT, 100);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
-    spectrum[100] = valueFor(SHADE_BLACK_POINT + 8, 100);
+    spectrum[100] = valueFor(BLACK_POINT + 8, 100);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
-    const peak = SHADE_KNEE * peakDecayFactor(0.98, 1000 / 60);
+    const peak = LIT * peakDecayFactor(0.98, 1000 / 60);
     const peakWidth = Math.floor(Math.floor((peak * 64) / 256) / 4) * 4;
     const bars = lastImage(analyzer.ctx);
     const row = 447 - 100;
@@ -259,7 +254,7 @@ describe('SpectrogramRenderer', () => {
     (spectrogram.canvas as { height: number }).height = 224;
     renderer.resize();
     const spectrum = new Float32Array(layout.bins);
-    spectrum[101] = valueFor(SHADE_KNEE, 101);
+    spectrum[101] = valueFor(LIT, 101);
     setColor(binColors, 101, YELLOW);
     renderer.draw(spectrum, painter, 1000 / 60, 120);
     const bars = lastImage(analyzer.ctx);
@@ -274,11 +269,7 @@ describe('SpectrogramRenderer', () => {
       layout,
       () => none
     );
-    const painter = new AveragePainter(
-      { update: () => new Float32Array(layout.bins * 3) },
-      { background: BACKGROUND, highlight: HIGHLIGHT },
-      layout.bins
-    );
+    const painter = new BinColorPainter(new Float32Array(layout.bins * 3));
     expect(() => renderer.draw(new Float32Array(448).fill(1), painter, 16, 120)).not.toThrow();
   });
 });

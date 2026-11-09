@@ -5,30 +5,18 @@ import {
   SCOPE_LAYOUTS,
   SCOPE_PRESETS,
   SCOPE_SPANS,
-  SPECTRUM_COLORINGS,
   STAGE_DEFAULTS,
   matchingScopePreset,
   scopeColoringById,
   scopeLayoutById,
   scopeSettingsOf,
-  spectrumColoringById,
 } from '../config/stageSettings';
 
 const preset = (id: string) => SCOPE_PRESETS.find((p) => p.id === id)!;
 
-describe('spectrum colorings', () => {
-  it('offers Unified (default), Add light and Average, with short labels that fit a card', () => {
-    expect(SPECTRUM_COLORINGS.map((c) => [c.id, c.label])).toEqual([
-      ['unified', 'Unified'],
-      ['additive', 'Add light'],
-      ['average', 'Average'],
-    ]);
-    SPECTRUM_COLORINGS.forEach((c) => expect(c.label.length).toBeLessThanOrEqual(12));
-    expect(STAGE_DEFAULTS.spectrumColoring).toBe('unified');
+describe('spectrum gradient', () => {
+  it('defaults to MW Green', () => {
     expect(STAGE_DEFAULTS.spectrumGradient).toBe('mw-green');
-    expect(spectrumColoringById('unified').label).toBe('Unified');
-    expect(spectrumColoringById('rainbow').id).toBe('unified');
-    expect(spectrumColoringById(3).id).toBe('unified');
   });
 });
 

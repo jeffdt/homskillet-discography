@@ -20,7 +20,7 @@ describe('MixerSlider', () => {
     expect(input.value).toBe('0.5');
     expect([input.min, input.max, input.step]).toEqual(['0', '2', '0.01']);
     expect(screen.getByText('50%')).toBeTruthy();
-    const explanation = screen.getByText(BASS.explanation);
+    const explanation = screen.getByText(BASS.explanation!);
     expect(input.getAttribute('aria-describedby')).toBe(explanation.id);
   });
 

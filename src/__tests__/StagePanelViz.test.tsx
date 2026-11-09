@@ -1,7 +1,7 @@
 import fs from 'fs';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import StagePanel from '../components/StagePanel';
 import { UserContext, UserSettings } from '../components/UserProvider';
 import { SCOPE_ZOOM, STAGE_COPY } from '../components/stage/stageControls';
@@ -13,6 +13,7 @@ import {
 } from '../components/stage/vizControls';
 import { SPECTRUM_GRADIENTS } from '../config/spectrumGradients';
 import { SCOPE_PRESETS, STAGE_DEFAULTS } from '../config/stageSettings';
+import { expectControlHelp } from './helpers/controlHelp';
 
 function renderPanel(stored: Record<string, unknown> = {}) {
   const updateSettings = vi.fn();
@@ -30,33 +31,15 @@ function checkedIn(group: string): string {
   return radios.find((radio) => radio.getAttribute('aria-checked') === 'true')?.textContent || '';
 }
 
-describe('StagePanel spectrum coloring', () => {
-  it('offers the three colorings with Unified checked', () => {
-    renderPanel({ visualizerStyle: 'spectrum' });
-    expect(checkedIn('Spectrum coloring')).toBe('Unified');
-    expect(screen.getByText(/using one gradient you pick below/)).toBeTruthy();
-    expect(screen.getByRole('radiogroup', { name: 'Gradient' })).toBeTruthy();
-  });
-
-  it('stores the chosen coloring and hides the gradients outside Unified', () => {
-    const { updateSettings } = renderPanel({
-      visualizerStyle: 'spectrum',
-      spectrumColoring: 'additive',
-    });
-    expect(screen.queryByRole('radiogroup', { name: 'Gradient' })).toBeNull();
-    fireEvent.click(screen.getByRole('radio', { name: 'Unified' }));
-    expect(updateSettings).toHaveBeenCalledWith({ spectrumColoring: 'unified' });
-  });
-
-  it('shows all 23 gradients only for the unified coloring', () => {
-    const { updateSettings } = renderPanel({
-      visualizerStyle: 'spectrum',
-      spectrumColoring: 'unified',
-    });
+describe('StagePanel spectrum', () => {
+  it('offers all 23 gradients with no coloring choice and no channel colors', () => {
+    const { updateSettings } = renderPanel({ visualizerStyle: 'spectrum' });
+    expect(screen.queryByRole('radiogroup', { name: 'Spectrum coloring' })).toBeNull();
+    expect(screen.queryByRole('radiogroup', { name: 'Channel palette' })).toBeNull();
+    expect(screen.queryByText(STAGE_COPY.channelColors)).toBeNull();
     const group = screen.getByRole('radiogroup', { name: 'Gradient' });
     expect(within(group).getAllByRole('radio')).toHaveLength(SPECTRUM_GRADIENTS.length);
     expect(checkedIn('Gradient')).toBe('MW Green');
-    expect(screen.getByText(VIZ_COPY.gradient)).toBeTruthy();
     fireEvent.click(within(group).getByRole('radio', { name: 'bz Inferno' }));
     expect(updateSettings).toHaveBeenCalledWith({ spectrumGradient: 'bz-inferno' });
   });
@@ -75,24 +58,22 @@ describe('StagePanel channel scopes', () => {
     within(presets)
       .getAllByRole('button')
       .forEach((button) => expect(button.getAttribute('aria-pressed')).toBe('false'));
-    expect(screen.getByText(VIZ_COPY.custom)).toBeTruthy();
     expect(checkedIn('Scope layout')).toBe('Rings');
     expect(checkedIn('Trace color')).toBe('By channel');
     [...SCOPE_EFFECT_SLIDERS, SCOPE_ZOOM, ...MORE_SCOPE_SLIDERS].forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
-      expect(screen.getByText(def.explanation)).toBeTruthy();
+      expectControlHelp(def);
     });
-    MORE_SCOPE_TOGGLES.forEach((def) => expect(screen.getByText(def.explanation)).toBeTruthy());
+    MORE_SCOPE_TOGGLES.forEach((def) => expectControlHelp(def));
     expect(screen.queryByRole('radiogroup', { name: 'Spectrum coloring' })).toBeNull();
   });
 
-  it('says Custom when no preset matches', () => {
+  it('presses no preset when none matches', () => {
     renderPanel({ visualizerStyle: 'scopes', scopeGlow: 0.35 });
     const presets = screen.getByRole('group', { name: 'Scope presets' });
     within(presets)
       .getAllByRole('button')
       .forEach((button) => expect(button.getAttribute('aria-pressed')).toBe('false'));
-    expect(screen.getByText(VIZ_COPY.custom)).toBeTruthy();
   });
 
   it('writes every value of a preset in one update', () => {
@@ -116,11 +97,11 @@ describe('StagePanel channel scopes', () => {
 });
 
 describe('StagePanel channel colors note', () => {
-  it('says where channel colors show', () => {
+  it('says where channel colors show, under the scopes', () => {
     renderPanel();
     expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
-    expect(STAGE_COPY.channelColors).toContain('Mixer');
-    expect(STAGE_COPY.channelColors).toContain('wherever the visualizer colors by channel');
+    expect(screen.getByRole('radiogroup', { name: 'Channel palette' })).toBeTruthy();
+    expect(STAGE_COPY.channelColors).toContain('used by the scopes and the Mixer');
   });
 });
 
@@ -142,12 +123,8 @@ describe('StagePanel channel colors notice', () => {
     expect(updateSettings).toHaveBeenCalledWith({ scopeColoring: 'channel' });
   });
 
-  it('does not appear for the default channel-colored scopes or the Add light spectrum', () => {
+  it('does not appear for the default channel-colored scopes', () => {
     renderPanel();
-    expect(screen.queryByText(VIZ_COPY.scopesIgnoreChannels)).toBeNull();
-    cleanup();
-    renderPanel({ visualizerStyle: 'spectrum', spectrumColoring: 'additive' });
-    expect(screen.queryByText(VIZ_COPY.spectrumIgnoresChannels)).toBeNull();
     expect(screen.queryByText(VIZ_COPY.scopesIgnoreChannels)).toBeNull();
   });
 });

@@ -11,8 +11,10 @@ export interface StageSliderDef {
   id: string;
   key: StageSettingKey;
   label: string;
-  /** One plain-language line, always visible under the slider. */
-  explanation: string;
+  /** Help text always shown under the slider. Only for what a visitor would not guess. */
+  explanation?: string;
+  /** Help text behind the label's "i" button. */
+  info?: string;
   min: number;
   max: number;
   step: number;
@@ -29,7 +31,10 @@ export interface StageToggleDef {
   id: string;
   key: StageSettingKey;
   label: string;
-  explanation: string;
+  /** Help text always shown under the switch. */
+  explanation?: string;
+  /** Help text behind the label's "i" button. */
+  info?: string;
   /** Whether a stored value means on. */
   isOn(value: unknown): boolean;
   /** The value to store for on or off. */
@@ -86,8 +91,7 @@ export const PEAK_DECAY: StageSliderDef = {
   id: 'peak-decay',
   key: 'peakDecayRate',
   label: 'Peak decay',
-  explanation:
-    'The thin markers at the tip of each bar remember recent peaks. Higher numbers let them hang longer before they fall.',
+  info: 'How long the peak markers hang before falling.',
   step: 1,
   ...stepped(PEAK_DECAY_VALUES),
   format: (value) => `${nearestIndex(PEAK_DECAY_VALUES, value) + 1}/${PEAK_DECAY_VALUES.length}`,
@@ -98,8 +102,7 @@ export const PEAK_QUANTIZATION: StageSliderDef = {
   id: 'peak-quantization',
   key: 'peakQuantization',
   label: 'Peak steps',
-  explanation:
-    'Snaps the falling peak markers to coarse steps, for a chunky, pixel-art fall. Off lets them glide.',
+  info: 'Makes the peak markers fall in chunky steps. Off is smooth.',
   step: 1,
   ...stepped(PEAK_QUANTIZATION_VALUES),
   format: (value) => PEAK_QUANTIZATION_NAMES[nearestIndex(PEAK_QUANTIZATION_VALUES, value)],
@@ -110,8 +113,7 @@ export const SCOPE_ZOOM: StageSliderDef = {
   id: 'scope-zoom',
   key: 'scopeSpan',
   label: 'Scope zoom',
-  explanation:
-    'How much time each trace shows. Zoom in to see the shape of single waves; zoom out to watch notes change. Phase portraits ignore it.',
+  info: 'How much time each trace shows. Not used by phase portraits.',
   step: 1,
   ...stepped(SCOPE_SPANS),
   toSlider: (value) => SCOPE_SPANS.indexOf(scopeSpanOf(value)),
@@ -126,8 +128,7 @@ export const REACTIVE_STRENGTH: StageSliderDef = {
   id: 'reactive-strength',
   key: 'reactiveStrength',
   label: 'Pulse strength',
-  explanation:
-    'How big the glow on the player bar and play button and the swell of the logo get when the music hits. Past 200% everything throbs on every beat; turn it down for a calmer screen.',
+  info: 'How strongly the player bar, play button and logo react to the beat.',
   step: 1,
   ...stepped(REACTIVE_STRENGTH_VALUES),
   format: (value) => (value === 0 ? 'Off' : `${value}%`),
@@ -138,7 +139,6 @@ export const FILM_GRAIN: StageSliderDef = {
   id: 'film-grain',
   key: 'filmGrainAmount',
   label: 'Film grain',
-  explanation: 'A layer of fine specks over everything, like old film.',
   step: 5,
   ...direct(0, 100, 0),
   format: (value) => (value === 0 ? 'Off' : `${value}%`),
@@ -149,7 +149,6 @@ export const SPARK_SPAWN: StageSliderDef = {
   id: 'spark-spawn',
   key: 'particleSpawnRate',
   label: 'How often',
-  explanation: 'How often new sparks fly off the progress bar. Higher is busier.',
   step: 1,
   ...stepped(SPAWN_VALUES),
   format: (value) => `${nearestIndex(SPAWN_VALUES, value) + 1}`,
@@ -160,7 +159,6 @@ export const SPARK_LIFESPAN: StageSliderDef = {
   id: 'spark-lifespan',
   key: 'particleLifespan',
   label: 'Lifespan',
-  explanation: 'How long each spark lives before it disappears.',
   step: 200,
   ...direct(200, 2400, 0),
   format: (value) => `${(value / 1000).toFixed(1)} s`,
@@ -171,7 +169,7 @@ export const SPARK_ANGLE: StageSliderDef = {
   id: 'spark-angle',
   key: 'particleBaseAngle',
   label: 'Spray angle',
-  explanation: 'The direction sparks fly: 0° is right, 90° down, 180° left and 270° up.',
+  info: 'Which way sparks fly: 0° right, 90° down, 180° left, 270° up.',
   step: 15,
   ...direct(0, 360, 0),
   format: (value) => `${value}°`,
@@ -182,7 +180,7 @@ export const SPARK_CONE: StageSliderDef = {
   id: 'spark-cone',
   key: 'particleAngleSpread',
   label: 'Spray cone',
-  explanation: 'How far each spark may stray from the spray angle, either way.',
+  info: 'How far sparks can stray from the spray angle.',
   step: 1,
   ...direct(0, 90, 0),
   format: (value) => `±${value}°`,
@@ -193,7 +191,6 @@ export const SPARK_SPEED: StageSliderDef = {
   id: 'spark-speed',
   key: 'particleSpeed',
   label: 'Speed',
-  explanation: 'How fast sparks leave the bar.',
   step: 0.1,
   ...direct(0.5, 3, 1),
   format: (value) => `${value.toFixed(1)}×`,
@@ -204,7 +201,6 @@ export const SPARK_SPEED_VARIANCE: StageSliderDef = {
   id: 'spark-speed-variance',
   key: 'particleSpeedVariance',
   label: 'Speed variance',
-  explanation: "How much each spark's speed differs from the others.",
   step: 1,
   ...stepped(SPEED_VARIANCE_VALUES),
   format: (value) => `${SPEED_VARIANCE_VALUES[nearestIndex(SPEED_VARIANCE_VALUES, value)]}%`,
@@ -215,7 +211,6 @@ export const SPARK_GRAVITY: StageSliderDef = {
   id: 'spark-gravity',
   key: 'particleGravity',
   label: 'Gravity',
-  explanation: 'Pulls sparks downward as they fly. At 0 they fly straight.',
   step: 0.1,
   ...direct(0, 2, 1),
   format: (value) => `${value.toFixed(1)}×`,
@@ -238,7 +233,6 @@ export const RIPPLE_HEIGHT: StageSliderDef = {
   id: 'ripple-height',
   key: 'rippleHeight',
   label: 'Ripple height',
-  explanation: 'How far the bar bends on the hardest hits. Softer hits make smaller ripples.',
   step: 1,
   ...direct(2, 8, 0),
   format: (value) => `${value} px`,
@@ -249,7 +243,6 @@ export const RIPPLE_SPEED: StageSliderDef = {
   id: 'ripple-speed',
   key: 'rippleSpeed',
   label: 'Ripple speed',
-  explanation: 'How fast each ripple runs back toward the start of the song.',
   step: 20,
   ...direct(40, 300, 0),
   format: (value) => `${value} px/s`,
@@ -260,8 +253,7 @@ export const RIPPLE_SENSITIVITY: StageSliderDef = {
   id: 'ripple-sensitivity',
   key: 'rippleSensitivity',
   label: 'Ripple sensitivity',
-  explanation:
-    'A ripple starts when the leads and snares jump above their recent average, judged against the loudest moment of the last few seconds, so quiet songs ripple too. Higher catches softer hits.',
+  info: 'Higher values let softer hits start ripples.',
   step: 5,
   ...direct(0, 100, 0),
   format: (value) => `${value}`,
@@ -289,7 +281,6 @@ export const REACTIVE_UI: StageToggleDef = {
   id: 'reactive-ui',
   key: 'audioReactivePulse',
   label: 'Pulse with the music',
-  explanation: 'The player bar and play button glow and the logo swells on the beat.',
   isOn: (value) => value !== false,
   toValue: (on) => on,
 };
@@ -299,7 +290,7 @@ export const CRT_SCREEN: StageToggleDef = {
   id: 'crt-screen',
   key: 'crtScreen',
   label: 'CRT screen',
-  explanation: 'Scanlines and a dark vignette over the visualizer, like an old TV.',
+  info: 'Scanlines and dark edges over the visualizer, like an old TV.',
   isOn: (value) => value !== false,
   toValue: (on) => on,
 };
@@ -309,8 +300,6 @@ export const SPARKS: StageToggleDef = {
   id: 'sparks',
   key: 'sliderSparksEnabled',
   label: 'Sparks',
-  explanation:
-    'Sparks fly off the progress bar while music plays. Just for fun; slow devices may prefer them off.',
   isOn: (value) => value === true,
   toValue: (on) => on,
 };
@@ -320,7 +309,7 @@ export const RIPPLES: StageToggleDef = {
   id: 'ripples',
   key: 'sliderRipplesEnabled',
   label: 'Ripples',
-  explanation: 'Loud hits send a ripple back down the played part of the progress bar.',
+  info: 'Loud hits send a ripple back along the progress bar.',
   isOn: (value) => value !== false,
   toValue: (on) => on,
 };
@@ -330,7 +319,6 @@ export const SPARK_FADE: StageToggleDef = {
   id: 'spark-fade',
   key: 'particleFadeMode',
   label: 'Fade out',
-  explanation: 'Sparks fade away as they age instead of vanishing all at once.',
   isOn: (value) => value !== 'instant',
   toValue: (on) => (on ? 'fade' : 'instant'),
 };
@@ -340,13 +328,8 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, RIPPLES, S
 
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
-  channelColors:
-    'Each sound channel of the chip gets its own color, used in the Mixer and wherever the visualizer colors by channel.',
-  accent:
-    'The color of buttons, highlights and the play button glow. Channel colors are set in the Visualizer panel.',
-  resetVisualizer: 'Puts every visualizer setting back the way the site starts.',
-  resetInterface: 'Puts every setting in this panel back the way the site starts.',
-  noVoices: 'Play something to see which color is which channel.',
+  channelColors: 'Each chip channel gets a color, used by the scopes and the Mixer.',
+  noVoices: 'Play a song to see which color is which channel.',
 };
 
 /** A slider's stored value as a number, or its default when it is missing or not a number. */

@@ -240,7 +240,7 @@ export default function Dock({
           ref={shareButtonRef}
           className="Dock-button"
           aria-label="Share track"
-          title="Share this song with your mix"
+          title="Share track"
           onClick={() =>
             track && setShare({ trackId: track.id, title, positionMs: controls.getPositionMs() })
           }

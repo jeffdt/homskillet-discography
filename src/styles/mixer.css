@@ -211,8 +211,16 @@
   gap: 8px;
 }
 
-.App .MixerSlider-label {
+.MixerSlider-name {
   flex: 0 0 96px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.App .MixerSlider-label {
+  flex: 0 1 auto;
   font: var(--font-strong);
   color: var(--neutral3);
 }

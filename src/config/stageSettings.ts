@@ -10,7 +10,7 @@ export interface VisualizerStyle {
   id: VisualizerStyleId;
   label: string;
   /** Shown under the style picker: what you are looking at. */
-  description: string;
+  description?: string;
 }
 
 /** Every visualizer style, default first. */
@@ -19,13 +19,11 @@ export const VISUALIZER_STYLES: readonly VisualizerStyle[] = [
     id: 'scopes',
     label: 'Scopes',
     description:
-      "One oscilloscope per sound channel: the wave each voice of the chip is drawing right now. Square waves look square, the triangle looks like a triangle, and noise looks like noise. Click a channel's trace to mute or unmute it, or shift-click it to hear only that channel.",
+      'An oscilloscope for each chip channel, showing the wave it is playing. Click a trace to mute it; shift-click to solo it.',
   },
   {
     id: 'spectrum',
     label: 'Spectrum',
-    description:
-      'Pitch runs from low at the bottom to high at the top while time scrolls right to left. Each band takes the colors of the channels playing it.',
   },
 ];
 
@@ -40,53 +38,6 @@ export function visualizerStyleById(id?: string | null): VisualizerStyle {
   );
 }
 
-/** How the Spectrum style colors its bands. */
-export type SpectrumColoringId = 'additive' | 'average' | 'unified';
-
-/** A spectrum coloring the Visualizer panel offers. */
-export interface SpectrumColoring {
-  /** Stable key persisted in settings.spectrumColoring. Never rename or reuse one. */
-  id: SpectrumColoringId;
-  label: string;
-  /** Shown under the coloring picker. */
-  description: string;
-}
-
-/** Every spectrum coloring, default first. */
-export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
-  {
-    id: 'unified',
-    label: 'Unified',
-    description:
-      'Colors come from how loud each band is, not which channel plays it, using one gradient you pick below: quiet sounds take its left end, loud ones its right.',
-  },
-  {
-    id: 'additive',
-    label: 'Add light',
-    description:
-      'Each channel shines its own color, as bright as it is loud. Where channels overlap, their light adds up like colored stage lights.',
-  },
-  {
-    id: 'average',
-    label: 'Average',
-    description:
-      'Each band takes a blend of the channels playing in it, leaning toward the loudest, so overlaps mix like paint.',
-  },
-];
-
-/** The coloring new visitors see, and the fallback for unknown ids. */
-export const DEFAULT_SPECTRUM_COLORING: SpectrumColoringId = 'unified';
-
-/** The spectrum coloring with this id, or the default. */
-export function spectrumColoringById(id?: unknown): SpectrumColoring {
-  return (
-    SPECTRUM_COLORINGS.find((coloring) => coloring.id === id) ||
-    (SPECTRUM_COLORINGS.find(
-      (coloring) => coloring.id === DEFAULT_SPECTRUM_COLORING
-    ) as SpectrumColoring)
-  );
-}
-
 /** Where the channel scopes put each voice's trace. */
 export type ScopeLayoutId = 'stacked' | 'overlaid' | 'rings' | 'phase';
 
@@ -95,29 +46,24 @@ export interface ScopeLayout {
   /** Stable key persisted in settings.scopeLayout. Never rename or reuse one. */
   id: ScopeLayoutId;
   label: string;
-  /** Shown under the layout picker. */
-  description: string;
+  /** Shown under the layout picker, when the name needs explaining. */
+  description?: string;
 }
 
 /** Every scope layout, in panel order. */
 export const SCOPE_LAYOUTS: readonly ScopeLayout[] = [
-  { id: 'stacked', label: 'Stacked', description: 'One lane per channel, top to bottom.' },
+  { id: 'stacked', label: 'Stacked' },
   {
     id: 'overlaid',
     label: 'Overlaid',
-    description:
-      'Every channel on one shared line. Where traces cross, their light adds up. Mute channels from the Mixer here, since the traces overlap.',
+    description: 'All channels on one line. Mute channels from the Mixer in this layout.',
   },
-  {
-    id: 'rings',
-    label: 'Rings',
-    description: 'Each channel wraps around a slowly turning circle, the first channel innermost.',
-  },
+  { id: 'rings', label: 'Rings' },
   {
     id: 'phase',
     label: 'Phase portraits',
     description:
-      'Each channel plotted against itself a quarter of a cycle earlier, like an X-Y oscilloscope, so the shape shows the sound rather than the note. An even square wave draws a box, a thinner pulse draws a slanted triangle, and noise draws a tangle.',
+      'Plots each channel against itself a quarter cycle earlier, so the shape shows the tone, not the pitch. Square waves draw boxes and noise draws a tangle.',
   },
 ];
 
@@ -129,22 +75,17 @@ export interface ScopeColoring {
   /** Stable key persisted in settings.scopeColoring. Never rename or reuse one. */
   id: ScopeColoringId;
   label: string;
-  /** Shown under the trace color picker. */
-  description: string;
+  /** Shown under the trace color picker, when the name needs explaining. */
+  description?: string;
 }
 
 /** Every scope trace coloring, in panel order. */
 export const SCOPE_COLORINGS: readonly ScopeColoring[] = [
-  {
-    id: 'channel',
-    label: 'By channel',
-    description: 'Each channel in its own palette color, to tell the voices apart.',
-  },
+  { id: 'channel', label: 'By channel' },
   {
     id: 'unified',
     label: 'Accent color',
-    description:
-      'Every trace in your accent color (set in the Interface panel), like a one-color phosphor screen.',
+    description: 'Every trace in the accent color, set in the Interface panel.',
   },
 ];
 
@@ -372,7 +313,6 @@ export const SPARK_DEFAULTS = {
 /** Every Visualizer panel setting and its default. "Reset visualizer" writes exactly these. */
 export const VISUALIZER_DEFAULTS = {
   visualizerStyle: DEFAULT_VISUALIZER_STYLE as string,
-  spectrumColoring: DEFAULT_SPECTRUM_COLORING as string,
   spectrumGradient: DEFAULT_SPECTRUM_GRADIENT_ID as string,
   ...SCOPE_DEFAULTS,
   channelPalette: DEFAULT_CHANNEL_PALETTE_ID,

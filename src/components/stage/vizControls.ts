@@ -12,8 +12,7 @@ export const SCOPE_TRAILS: StageSliderDef = {
   id: 'scope-trails',
   key: 'scopeTrails',
   label: 'Trails',
-  explanation:
-    'How long the old trace lingers before it fades, like the phosphor on a real oscilloscope screen.',
+  info: 'How long old traces take to fade.',
   step: 0.05,
   ...direct(0, SCOPE_TRAILS_MAX, 2),
   format: percent,
@@ -24,7 +23,6 @@ export const SCOPE_GLOW: StageSliderDef = {
   id: 'scope-glow',
   key: 'scopeGlow',
   label: 'Glow',
-  explanation: 'A soft halo around each line.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -35,7 +33,7 @@ export const SCOPE_BLOOM: StageSliderDef = {
   id: 'scope-bloom',
   key: 'scopeBloom',
   label: 'Bloom',
-  explanation: 'Light bleeding past the lines, like an overexposed photo. Slower devices skip it.',
+  info: 'Light spilling past the lines. Off on slower devices.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -46,7 +44,7 @@ export const SCOPE_REACTIVITY: StageSliderDef = {
   id: 'scope-reactivity',
   key: 'scopeReactivity',
   label: 'Reacts to loudness',
-  explanation: 'Loud channels draw thicker, brighter lines, and every new note flashes.',
+  info: 'Louder channels draw thicker, brighter lines, and new notes flash.',
   step: 0.05,
   ...direct(0, 1, 2),
   format: percent,
@@ -57,7 +55,6 @@ export const SCOPE_LINE_WIDTH: StageSliderDef = {
   id: 'scope-line-width',
   key: 'scopeLineWidth',
   label: 'Line width',
-  explanation: 'How thick each trace is.',
   step: 0.5,
   ...direct(SCOPE_LINE_WIDTH_MIN, SCOPE_LINE_WIDTH_MAX, 1),
   format: (value) => `${value.toFixed(1)} px`,
@@ -70,7 +67,7 @@ export const SCOPE_CORE: StageToggleDef = {
   id: 'scope-core',
   key: 'scopeCore',
   label: 'White-hot core',
-  explanation: 'A thin white line inside each trace, the way the brightest phosphor looks.',
+  info: 'A thin white line down the middle of each trace.',
   ...flag,
 };
 
@@ -79,7 +76,7 @@ export const SCOPE_FILL: StageToggleDef = {
   id: 'scope-fill',
   key: 'scopeFill',
   label: 'Fill under the wave',
-  explanation: 'Shades the area between each wave and its center line. Stacked and Overlaid only.',
+  info: 'Shades under each wave. Stacked and Overlaid only.',
   ...flag,
 };
 
@@ -89,7 +86,7 @@ export const SCOPE_AUTO_GAIN: StageToggleDef = {
   key: 'scopeAutoGain',
   label: 'Auto-size traces',
   explanation:
-    "Grows each channel's trace to fill its space, so quiet channels are as easy to read as loud ones. Turn it off to draw every channel at the same scale and compare how loud they really are.",
+    'Scales each trace to fill its space. Turn off to compare how loud the channels are.',
   ...flag,
 };
 
@@ -109,15 +106,9 @@ export const MORE_SCOPE_TOGGLES: readonly StageToggleDef[] = [
   SCOPE_FILL,
 ];
 
-/** Visualizer panel text for the spectrum colorings and scope presets. */
+/** Visualizer panel text for the scope trace colors. */
 export const VIZ_COPY = {
   scopesIgnoreChannels:
-    "The scopes are drawing every trace in your accent color, so these colors don't show on screen right now. The Mixer still uses them.",
+    'The scopes are using the accent color, so these colors only show in the Mixer.',
   colorScopesByChannel: 'Color the scopes by channel',
-  spectrumIgnoresChannels:
-    "The Unified coloring takes its colors from a gradient, so these colors don't show on screen right now. The Mixer still uses them.",
-  colorSpectrumByChannel: 'Color the spectrum by channel',
-  gradient: 'Quiet sounds take the left color, the loudest take the right.',
-  presets: 'Starting points. Pick one, then change anything below.',
-  custom: 'Custom: your own mix of the settings below.',
 };

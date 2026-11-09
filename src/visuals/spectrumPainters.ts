@@ -1,22 +1,10 @@
-import { VOICE_PAIRS } from '../audio/constants';
-import { SpectrumLayout, VoiceFrame, VoiceInfo } from '../audio/data/contract';
-import { SILENT_VOICE_RMS } from './BinColorizer';
-import { Rgb, buildGradientLut, packPixel, parseHexColor } from './color';
-import { SHADE_BLACK_POINT, aWeightingLut, buildShadeTable, valueIndex } from './spectrogramMath';
-
-/** The fixed colors channel colors are shaded between: silence and the loudest peaks. */
-export interface StageShades {
-  background: Rgb;
-  highlight: Rgb;
-}
+import { buildGradientLut } from './color';
 
 /**
  * Decides spectrum pixel colors (spec 3.2); SpectrogramRenderer decides geometry and loudness.
  * Pixels are packed with packPixel.
  */
 export interface BinPainter {
-  /** Called once per frame before any pixel call. */
-  update(frame: VoiceFrame, dtMs: number): void;
   /** Opaque pixel for a row whose loudest bin is `bin` at value index 0..255. */
   pixel(bin: number, valueIndex: number): number;
   /** Pixel for a falling peak marker. */
@@ -27,200 +15,7 @@ export interface BinPainter {
   readonly analyzerBackground: number;
 }
 
-/** Anything that turns a frame into r, g, b per bin (BinColorizer). */
-export interface BinColorSource {
-  update(frame: VoiceFrame, dtMs: number): Float32Array;
-}
-
-/** A bin is "lit" for peak markers once a voice's value index there passes the black point. */
-export const LIT_VALUE_INDEX = SHADE_BLACK_POINT;
-
-function opaque([r, g, b]: Rgb): number {
-  return packPixel(r, g, b, 255);
-}
-
-/** By channel, average: BinColorizer's power-weighted average color, shaded by loudness (today's look). */
-export class AveragePainter implements BinPainter {
-  readonly emptyPixel = 0;
-  readonly analyzerBackground: number;
-  private readonly shade = buildShadeTable();
-  private colors: Float32Array;
-
-  constructor(
-    private readonly source: BinColorSource,
-    private readonly shades: StageShades,
-    bins: number
-  ) {
-    this.analyzerBackground = opaque(shades.background);
-    this.colors = new Float32Array(bins * 3);
-  }
-
-  update(frame: VoiceFrame, dtMs: number): void {
-    this.colors = this.source.update(frame, dtMs);
-  }
-
-  pixel(bin: number, index: number): number {
-    const c = this.shade.channel[index];
-    const h = this.shade.highlight[index];
-    const k = 1 - c - h;
-    const o = bin * 3;
-    const { background, highlight } = this.shades;
-    const colors = this.colors;
-    return packPixel(
-      (background[0] * k + colors[o] * c + highlight[0] * h + 0.5) | 0,
-      (background[1] * k + colors[o + 1] * c + highlight[1] * h + 0.5) | 0,
-      (background[2] * k + colors[o + 2] * c + highlight[2] * h + 0.5) | 0,
-      255
-    );
-  }
-
-  peakPixel(bin: number, index: number): number {
-    return this.pixel(bin, index);
-  }
-}
-
-/** Share of its own color one voice lights at full loudness, so two equal voices do not blow out (measured 2026-10-10). */
-export const ADDITIVE_GAIN = 0.85;
-/**
- * A voice adds light times (its value index / the loudest voice's)^6 in each bin: an equal voice adds
- * all of it, one at 0.9 adds about half, and FFT spill at 0.7 adds a tenth, so each note keeps its hue.
- */
-export const ADDITIVE_DOMINANCE = 6;
-
-/**
- * By channel, add like light: each audible voice lights its own color by its own loudness in the
- * bin, weighted by how close it is to the loudest voice there; the light adds up over the
- * background, scaled down as a whole when it passes 255, then mixes toward the highlight once by
- * the loudest voice.
- */
-export class AdditivePainter implements BinPainter {
-  readonly emptyPixel = 0;
-  readonly analyzerBackground: number;
-  private readonly shade = buildShadeTable();
-  private readonly weighting: Float32Array;
-  private readonly channelRgb = new Float32Array(VOICE_PAIRS * 3);
-  private readonly audible = new Uint8Array(VOICE_PAIRS);
-  private readonly red: Float32Array;
-  private readonly green: Float32Array;
-  private readonly blue: Float32Array;
-  private readonly loudest: Uint8Array;
-  private readonly binPixels: Uint32Array;
-  private readonly litPixels: Uint32Array;
-  private readonly voiceIndex: Uint8Array;
-  private readonly activeVoices = new Int32Array(VOICE_PAIRS);
-
-  constructor(
-    layout: SpectrumLayout,
-    private readonly shades: StageShades,
-    private readonly fallback: Rgb
-  ) {
-    const bins = layout.bins;
-    this.weighting = aWeightingLut(layout.frequencies);
-    this.red = new Float32Array(bins);
-    this.green = new Float32Array(bins);
-    this.blue = new Float32Array(bins);
-    this.loudest = new Uint8Array(bins);
-    this.voiceIndex = new Uint8Array(VOICE_PAIRS * bins);
-    this.analyzerBackground = opaque(shades.background);
-    this.binPixels = new Uint32Array(bins).fill(this.analyzerBackground);
-    this.litPixels = new Uint32Array(bins).fill(opaque(fallback));
-    for (let v = 0; v < VOICE_PAIRS; v++) this.channelRgb.set(fallback, v * 3);
-  }
-
-  /** Channel colors as '#rrggbb', indexed by voice; unparsable entries use the fallback. */
-  setChannelColors(colors: readonly string[]): void {
-    for (let v = 0; v < VOICE_PAIRS; v++) {
-      const rgb = (colors.length && parseHexColor(colors[v % colors.length])) || this.fallback;
-      this.channelRgb.set(rgb, v * 3);
-    }
-  }
-
-  /** Which voices are heard (VoiceInfo.audible); voices not listed are not. */
-  setVoices(voices: readonly VoiceInfo[]): void {
-    this.audible.fill(0);
-    voices.forEach((voice) => {
-      if (voice.index >= 0 && voice.index < VOICE_PAIRS)
-        this.audible[voice.index] = voice.audible ? 1 : 0;
-    });
-  }
-
-  update(frame: VoiceFrame, _dtMs?: number): void {
-    const [br, bg, bb] = this.shades.background;
-    const [hr, hg, hb] = this.shades.highlight;
-    const { red, green, blue, loudest, weighting, voiceIndex } = this;
-    const bins = weighting.length;
-    red.fill(0);
-    green.fill(0);
-    blue.fill(0);
-    loudest.fill(0);
-    let active = 0;
-    const voiceCount = Math.min(frame.voiceCount, VOICE_PAIRS);
-    for (let v = 0; v < voiceCount; v++) {
-      if (!this.audible[v]) continue;
-      const voice = frame.voices[v];
-      if (!(voice.rms >= SILENT_VOICE_RMS)) continue;
-      const spectrum = voice.spectrum;
-      const row = active * bins;
-      for (let b = 0; b < bins; b++) {
-        const index = valueIndex(255 * weighting[b] * spectrum[b]);
-        voiceIndex[row + b] = index;
-        if (index > loudest[b]) loudest[b] = index;
-      }
-      this.activeVoices[active++] = v;
-    }
-    const { channel, highlight } = this.shade;
-    for (let k = 0; k < active; k++) {
-      const o = this.activeVoices[k] * 3;
-      const cr = this.channelRgb[o];
-      const cg = this.channelRgb[o + 1];
-      const cb = this.channelRgb[o + 2];
-      const row = k * bins;
-      for (let b = 0; b < bins; b++) {
-        const index = voiceIndex[row + b];
-        const light = channel[index] + highlight[index];
-        if (light === 0) continue;
-        const ratio = index / loudest[b];
-        const ratio2 = ratio * ratio;
-        // ratio^ADDITIVE_DOMINANCE (6) without Math.pow in the hot loop.
-        const weight = ADDITIVE_GAIN * light * ratio2 * ratio2 * ratio2;
-        red[b] += cr * weight;
-        green[b] += cg * weight;
-        blue[b] += cb * weight;
-      }
-    }
-    for (let b = 0; b < bins; b++) {
-      let r = red[b];
-      let g = green[b];
-      let bl = blue[b];
-      const brightest = Math.max(r, g, bl);
-      if (brightest > 255) {
-        const scale = 255 / brightest;
-        r *= scale;
-        g *= scale;
-        bl *= scale;
-      }
-      const h = highlight[loudest[b]];
-      const pixel = packPixel(
-        (Math.min(255, br + r) * (1 - h) + hr * h + 0.5) | 0,
-        (Math.min(255, bg + g) * (1 - h) + hg * h + 0.5) | 0,
-        (Math.min(255, bb + bl) * (1 - h) + hb * h + 0.5) | 0,
-        255
-      );
-      this.binPixels[b] = pixel;
-      if (loudest[b] > LIT_VALUE_INDEX) this.litPixels[b] = pixel;
-    }
-  }
-
-  pixel(bin: number, _valueIndex?: number): number {
-    return this.binPixels[bin];
-  }
-
-  peakPixel(bin: number, _valueIndex?: number): number {
-    return this.litPixels[bin];
-  }
-}
-
-/** Unified: the old visualizer's look, one gradient indexed by loudness, channels ignored. */
+/** The old visualizer's look: one gradient indexed by loudness, channels ignored. */
 export class GradientPainter implements BinPainter {
   private lut: Uint32Array;
 
@@ -240,8 +35,6 @@ export class GradientPainter implements BinPainter {
   get analyzerBackground(): number {
     return this.lut[0];
   }
-
-  update(_frame?: VoiceFrame, _dtMs?: number): void {}
 
   pixel(_bin: number, index: number): number {
     return this.lut[index];

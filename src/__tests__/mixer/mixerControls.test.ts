@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { MIXER_SLIDERS, formatPercent, sliderValue } from '../../components/mixer/mixerControls';
+import { expectPlainHelp } from '../helpers/controlHelp';
 
 const [SPEED, BASS, STEREO] = MIXER_SLIDERS;
 const NO_TRACK = { playerKey: null, tempo: 1, paramValues: {} };
@@ -19,11 +20,8 @@ describe('mixer controls', () => {
     expect([STEREO.min, STEREO.max, STEREO.step, STEREO.defaultValue]).toEqual([0, 1, 0.01, 1]);
   });
 
-  it('explains every control in one plain line', () => {
-    MIXER_SLIDERS.forEach((def) => {
-      expect(def.explanation.length).toBeGreaterThan(20);
-      expect(def.explanation).not.toMatch(new RegExp(String.fromCharCode(0x2014)));
-    });
+  it('keeps any help text plain', () => {
+    MIXER_SLIDERS.forEach((def) => expectPlainHelp(def));
   });
 
   it('shows the playing value first', () => {

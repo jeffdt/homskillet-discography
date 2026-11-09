@@ -107,8 +107,7 @@ export class SpectrogramRenderer {
   }
 
   /**
-   * Draws one frame from the mix spectrum, colored by the painter (already updated for this
-   * frame); the waterfall moves pxPerSecond * dtMs / 1000 backing pixels.
+   * Draws one frame from the mix spectrum, colored by the painter; the waterfall moves pxPerSecond * dtMs / 1000 backing pixels.
    */
   draw(spectrum: Float32Array, painter: BinPainter, dtMs: number, pxPerSecond: number): void {
     const analyzerCtx = this.analyzerCtx;

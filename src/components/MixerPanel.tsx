@@ -1,4 +1,5 @@
 import React from 'react';
+import { InfoButton } from './ControlHelp';
 import { PlaybackControls, PlaybackState } from '../types/playback';
 import ChannelStrips from './mixer/ChannelStrips';
 import MixerSlider from './mixer/MixerSlider';
@@ -8,13 +9,10 @@ import { UserSettings } from './UserProvider';
 
 /** The Mixer's plain-language lines; each control's own line lives in MIXER_SLIDERS. */
 export const MIXER_COPY = {
-  channels:
-    'Each strip is one voice of the sound chip, drawn live. Mute silences a channel; Solo plays only the soloed ones. Channels you are not hearing stay as dim ghosts.',
+  channels: 'Each strip is one channel of the NES sound chip.',
   levels:
-    'Vol, Pan and Verb shape each channel: its loudness, where it sits between the speakers, and how much of it rings in a shared reverb room. They reset with each new song; double-click one to put it back.',
-  sound: 'These change how every song plays and stay set until you change them or reset the mixer.',
-  reset:
-    'Puts speed, bass and stereo back to normal right away and returns every channel to unmuted, full volume, centered and dry.',
+    "Vol sets a channel's volume, Pan moves it left or right, and Reverb sends it into a shared reverb. They reset with each new song; double-click one to reset it.",
+  sound: 'These apply to every song until you change them.',
 };
 
 interface MixerPanelProps {
@@ -25,6 +23,7 @@ interface MixerPanelProps {
 
 /** What you hear: live channel strips (mute, solo, volume, pan, reverb), speed, bass and stereo, and a reset. */
 export default function MixerPanel({ playback, controls, settings }: MixerPanelProps) {
+  const [levelsOpen, setLevelsOpen] = React.useState(false);
   const change = (def: MixerSliderDef, value: number) => {
     if (def.id === 'tempo') controls.setTempo(value);
     else controls.setParam(def.id, value);
@@ -39,8 +38,18 @@ export default function MixerPanel({ playback, controls, settings }: MixerPanelP
     <div className="Mixer">
       <section className="Mixer-section" aria-labelledby="mixer-channels">
         <h3 id="mixer-channels">Channels</h3>
-        <p className="Mixer-explain">{MIXER_COPY.channels}</p>
-        <p className="Mixer-explain">{MIXER_COPY.levels}</p>
+        <p className="Mixer-explain">
+          {MIXER_COPY.channels}{' '}
+          <InfoButton
+            label="Vol, Pan and Reverb"
+            controls="mixer-levels-info"
+            open={levelsOpen}
+            onToggle={() => setLevelsOpen((was) => !was)}
+          />
+        </p>
+        <p id="mixer-levels-info" className="Mixer-explain" hidden={!levelsOpen}>
+          {MIXER_COPY.levels}
+        </p>
         <ChannelStrips onVoiceMixChange={controls.setVoiceMix} />
       </section>
       <section className="Mixer-section" aria-labelledby="mixer-sound">
@@ -59,7 +68,6 @@ export default function MixerPanel({ playback, controls, settings }: MixerPanelP
         <button type="button" className="Mixer-reset" onClick={reset}>
           Reset mixer
         </button>
-        <p className="Mixer-explain">{MIXER_COPY.reset}</p>
       </section>
     </div>
   );

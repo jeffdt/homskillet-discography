@@ -87,7 +87,7 @@ describe('ShareDialog', () => {
       voices: [voiceInfo(0, 'Square 1', { reverb: 0.4 }), ...PLAIN.slice(1)],
       settings: { scopeLayout: 'phase' },
     });
-    expect(screen.getByText('Speed 50% · Square 1 Verb 40%')).toBeTruthy();
+    expect(screen.getByText('Speed 50% · Square 1 Reverb 40%')).toBeTruthy();
     expect(screen.getByText('1 visualizer setting changed from the defaults')).toBeTruthy();
     expect(link()).toMatch(
       /^https:\/\/music\.example\/\?play=Bazaar\/groove\.nsf&speed=0\.5&verb=40&viz=/

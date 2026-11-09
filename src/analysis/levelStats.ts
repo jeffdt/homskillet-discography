@@ -1,4 +1,5 @@
-import { SILENT_VOICE_RMS } from '../visuals/BinColorizer';
+/** A voice whose window RMS (VoiceData.rms scale) is under this counts as silent. */
+export const SILENT_VOICE_RMS = 0.001;
 
 /** Buckets of the |sample| histogram behind p95Abs: a resolution of 0.0005 of full scale. */
 export const ABS_HISTOGRAM_BINS = 2000;

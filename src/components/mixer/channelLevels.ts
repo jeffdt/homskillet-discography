@@ -11,8 +11,6 @@ import { VoiceLevel } from './voiceMix';
 export interface ChannelLevelDef {
   id: VoiceLevel;
   label: string;
-  /** Tooltip: what the control does, in a sentence. */
-  explanation: string;
   min: number;
   max: number;
   step: number;
@@ -32,8 +30,6 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   {
     id: 'volume',
     label: 'Vol',
-    explanation:
-      'Scales this channel on top of its own level in the song: 100% is as written, 200% twice as loud.',
     min: 0,
     max: VOICE_VOLUME_MAX,
     step: 0.05,
@@ -43,8 +39,6 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   {
     id: 'pan',
     label: 'Pan',
-    explanation:
-      'Moves this channel left or right. C keeps where the emulator put it; R100 sends all of it to the right speaker.',
     min: -1,
     max: 1,
     step: 0.05,
@@ -53,9 +47,7 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   },
   {
     id: 'reverb',
-    label: 'Verb',
-    explanation:
-      'Sends this channel into a shared reverb, a simulated room built from echoing delay lines (Freeverb). More send, more room.',
+    label: 'Reverb',
     min: 0,
     max: 1,
     step: 0.05,

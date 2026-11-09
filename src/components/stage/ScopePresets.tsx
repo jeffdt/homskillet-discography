@@ -1,6 +1,5 @@
 import React from 'react';
 import { SCOPE_PRESETS, ScopePreset, matchingScopePreset } from '../../config/stageSettings';
-import { VIZ_COPY } from './vizControls';
 
 interface ScopePresetsProps {
   settings: Record<string, unknown>;
@@ -11,12 +10,7 @@ interface ScopePresetsProps {
 export default function ScopePresets({ settings, onApply }: ScopePresetsProps) {
   const match = matchingScopePreset(settings);
   return (
-    <div
-      className="StagePresets"
-      role="group"
-      aria-label="Scope presets"
-      aria-describedby="stage-presets-note"
-    >
+    <div className="StagePresets" role="group" aria-label="Scope presets">
       <div className="StagePresets-row">
         {SCOPE_PRESETS.map((preset) => (
           <button
@@ -30,9 +24,6 @@ export default function ScopePresets({ settings, onApply }: ScopePresetsProps) {
           </button>
         ))}
       </div>
-      <p id="stage-presets-note" className="StagePanel-note">
-        {match ? VIZ_COPY.presets : VIZ_COPY.custom}
-      </p>
     </div>
   );
 }
