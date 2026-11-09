@@ -84,11 +84,16 @@
   border-radius: 50%;
   background: transparent;
   color: var(--neutral2);
-  font: 600 10px/14px var(--fontSans);
-  font-style: italic;
-  text-align: center;
+  display: grid;
+  place-items: center;
+  padding: 0;
   cursor: pointer;
   vertical-align: middle;
+}
+
+.App .InfoButton svg {
+  width: 100%;
+  height: 100%;
 }
 
 .App .InfoButton::after {

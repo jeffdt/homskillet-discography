@@ -52,7 +52,7 @@ The application uses C/C++ audio libraries (game-music-emu) compiled to WebAssem
 - `bun run test:run` - Run all tests once and exit
 - `bun run test:ui` - Open Vitest UI for interactive test exploration
 - `bun run coverage` - Generate test coverage report
-- `bun run analyze-tracks [track ...]` - Measure each voice's real levels (peak, RMS, p95, % silent, window peaks, smoothed level) through the app's own renderer; `--json file` writes a level profile, `--timeline` adds RMS per second, `--png dir` draws spectrum sheets per coloring with color stats
+- `bun run analyze-tracks [track ...]` - Measure each voice's real levels (peak, RMS, p95, % silent, window peaks, smoothed level) through the app's own renderer; `--json file` writes a level profile, `--timeline` adds RMS per second, `--png dir` draws the spectrum waterfall with color stats
 
 **Note:** During active development, assume the dev server is already running. Do not attempt to start it automatically.
 
@@ -128,11 +128,11 @@ Players follow a state machine pattern with 3 states and 5 transitions:
 - **src/hooks/** - `useIdleFade`, `useKeyboardShortcuts`, `useMediaQuery`, `usePerfMode`, `useFrameLoop`, `useVoices`, `usePulseTarget`, `useChannelColors`
 - **src/styles/shell.css** - Stage shell styles
 - **src/styles/stage.css** - Visualizer and Interface panel styles
-- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, Scopes); spectrum colorings (Add light, Average, Unified); scope layouts, trace colorings and presets (the default is Raw values on the Rings layout); `scopeSettingsOf` guards stored scope values
-- **src/config/spectrumGradients.ts** - The 23 loudness gradients for the Unified spectrum
+- **src/config/stageSettings.ts** - Every Visualizer and Interface panel setting and default (`VISUALIZER_DEFAULTS` and `INTERFACE_DEFAULTS`, written by each panel's reset); visualizer styles (Spectrum, colored by a loudness gradient; Scopes, in channel colors); scope layouts, trace colorings and presets (the default is Raw values on the Rings layout); `scopeSettingsOf` guards stored scope values
+- **src/config/spectrumGradients.ts** - The 23 loudness gradients for the spectrum
 - **src/visuals/ScopeRenderer.ts** - The Scopes style: stacked, overlaid, ring or phase-portrait traces drawn in glow, line and core passes, with trails and a CSS-blurred bloom copy; geometry and effect math in scopeMath.ts
 - **src/styles/mixer.css** - Mixer panel styles (channel colors come from `--ch-N` with an accent fallback)
-- **src/analysis/** - Headless track analysis for `scripts/analyze-tracks.ts`: TapRender (ChipRenderer + TapRing one 60 fps frame at a time), analyzeTrack (per-voice level profile, schema LEVEL_PROFILE_VERSION), renderSpectrumSheet (waterfalls drawn by the real painters), encodePng
+- **src/analysis/** - Headless track analysis for `scripts/analyze-tracks.ts`: TapRender (ChipRenderer + TapRing one 60 fps frame at a time), analyzeTrack (per-voice level profile, schema LEVEL_PROFILE_VERSION), renderSpectrumSheet (the waterfall drawn by the real painter), encodePng
 - **src/audio/** - Audio engine (TypeScript)
   - engine/createAudioEngine.ts - Picks AudioWorklet, ScriptProcessor or stub; `?engine=worklet|script|stub` and `?taps=pooled|shared` override it
   - engine/ChipEngine.ts - The `AudioEngine` implementation (load, pause, seek, tempo, mute/solo, taps)
@@ -143,7 +143,7 @@ Players follow a state machine pattern with 3 states and 5 transitions:
   - export/ - Track downloads: exportPlan (lengths, sizes, mix summary, file names), renderExport (a fresh ChipRenderer into an Encoder for an exact wall-clock length, end fade in the last 4 s at any speed), encoders (WAV, MP3 via @breezystack/lamejs, ID3), exportWorker and exportTrack (renders in a module Web Worker; only the worker imports encoders.ts, so LAME stays out of the main bundle)
 - **src/players/** - Player.ts (state machine base class) and EnginePlayer.ts (drives the AudioEngine)
 - **src/Sequencer.ts** - Playlist management, shuffle/repeat modes
-- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), BinColorizer (per-bin channel colors), channelColors (channel color store and --ch-N variables), sparks physics, spectrumPainters (the three spectrum colorings)
+- **src/visuals/** - SpectrogramRenderer (stage analyzer and waterfall), channelColors (channel color store and --ch-N variables), sparks physics, spectrumPainters (the gradient painter)
 - **src/config/channelPalettes.ts** - Channel palettes: one color per voice, Metallic Wing by default
 - **src/contexts/AudioDataContext.tsx** - AudioDataSource, FrameLoop and PulseChannel for React
 - **src/chip-core.js** - JavaScript interface to Emscripten-compiled WebAssembly module (auto-generated)

@@ -47,7 +47,7 @@ export const CHANNEL_LEVELS: ChannelLevelDef[] = [
   },
   {
     id: 'reverb',
-    label: 'Verb',
+    label: 'Reverb',
     min: 0,
     max: 1,
     step: 0.05,

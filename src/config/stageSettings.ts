@@ -10,7 +10,7 @@ export interface VisualizerStyle {
   id: VisualizerStyleId;
   label: string;
   /** Shown under the style picker: what you are looking at. */
-  description: string;
+  description?: string;
 }
 
 /** Every visualizer style, default first. */
@@ -24,7 +24,6 @@ export const VISUALIZER_STYLES: readonly VisualizerStyle[] = [
   {
     id: 'spectrum',
     label: 'Spectrum',
-    description: 'Pitch runs low to high from bottom to top, and time scrolls right to left.',
   },
 ];
 
@@ -36,51 +35,6 @@ export function visualizerStyleById(id?: string | null): VisualizerStyle {
   return (
     VISUALIZER_STYLES.find((style) => style.id === id) ||
     (VISUALIZER_STYLES.find((style) => style.id === DEFAULT_VISUALIZER_STYLE) as VisualizerStyle)
-  );
-}
-
-/** How the Spectrum style colors its bands. */
-export type SpectrumColoringId = 'additive' | 'average' | 'unified';
-
-/** A spectrum coloring the Visualizer panel offers. */
-export interface SpectrumColoring {
-  /** Stable key persisted in settings.spectrumColoring. Never rename or reuse one. */
-  id: SpectrumColoringId;
-  label: string;
-  /** Shown under the coloring picker. */
-  description: string;
-}
-
-/** Every spectrum coloring, default first. */
-export const SPECTRUM_COLORINGS: readonly SpectrumColoring[] = [
-  {
-    id: 'unified',
-    label: 'Unified',
-    description: 'Colors by loudness, using the gradient below.',
-  },
-  {
-    id: 'additive',
-    label: 'Add light',
-    description:
-      'Each channel adds its own color, brighter when louder. Overlapping colors add up like light.',
-  },
-  {
-    id: 'average',
-    label: 'Average',
-    description: 'Each band blends the colors of the channels in it, weighted toward the loudest.',
-  },
-];
-
-/** The coloring new visitors see, and the fallback for unknown ids. */
-export const DEFAULT_SPECTRUM_COLORING: SpectrumColoringId = 'unified';
-
-/** The spectrum coloring with this id, or the default. */
-export function spectrumColoringById(id?: unknown): SpectrumColoring {
-  return (
-    SPECTRUM_COLORINGS.find((coloring) => coloring.id === id) ||
-    (SPECTRUM_COLORINGS.find(
-      (coloring) => coloring.id === DEFAULT_SPECTRUM_COLORING
-    ) as SpectrumColoring)
   );
 }
 
@@ -359,7 +313,6 @@ export const SPARK_DEFAULTS = {
 /** Every Visualizer panel setting and its default. "Reset visualizer" writes exactly these. */
 export const VISUALIZER_DEFAULTS = {
   visualizerStyle: DEFAULT_VISUALIZER_STYLE as string,
-  spectrumColoring: DEFAULT_SPECTRUM_COLORING as string,
   spectrumGradient: DEFAULT_SPECTRUM_GRADIENT_ID as string,
   ...SCOPE_DEFAULTS,
   channelPalette: DEFAULT_CHANNEL_PALETTE_ID,

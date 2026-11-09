@@ -9,10 +9,9 @@ import { SCOPE_DEFAULTS, SCOPE_PRESETS } from '../config/stageSettings';
 import { UI_PALETTES } from '../config/uiPalettes';
 import { channelColors } from '../visuals/channelColors';
 import { spectrumGradientById } from '../config/spectrumGradients';
-import { parseHexColor, unpackPixel } from '../visuals/color';
+import { unpackPixel } from '../visuals/color';
 import { phaseLabelAnchor } from '../visuals/scopeMath';
-import { SHADE_KNEE } from '../visuals/spectrogramMath';
-import { AdditivePainter, AveragePainter, GradientPainter } from '../visuals/spectrumPainters';
+import { GradientPainter } from '../visuals/spectrumPainters';
 import { createTestAudioData, withAudioData } from './helpers/audioDataHarness';
 
 const { RendererMock, ScopeRendererMock } = vi.hoisted(() => {
@@ -86,24 +85,6 @@ function renderStage(settings: Record<string, unknown> = {}, renderScale = 1) {
   return { data, utils, renderer };
 }
 
-/** Gives the listed voices equal energy at bin 50. */
-function sound(data: ReturnType<typeof createTestAudioData>, voices: number[]): void {
-  const frame = data.source.frame;
-  frame.voiceCount = Math.max(...voices) + 1;
-  voices.forEach((v) => {
-    frame.voices[v].rms = 0.5;
-    frame.voices[v].spectrum[50] = 1;
-  });
-  frame.mixSpectrum[50] = 1;
-}
-
-/** Bin 50's pure channel color (value index at the shade knee) from the last draw's painter. */
-function bin50(renderer: any): number[] {
-  const calls = renderer.draw.mock.calls;
-  const painter = calls[calls.length - 1][1];
-  return unpackPixel(painter.pixel(50, SHADE_KNEE)).slice(0, 3);
-}
-
 describe('Stage', () => {
   beforeEach(() => {
     RendererMock.mockClear();
@@ -129,20 +110,8 @@ describe('Stage', () => {
     expect(renderer.draw.mock.calls[0][1]).toBeInstanceOf(GradientPainter);
   });
 
-  it('colors the spectrum by adding channel light', () => {
-    const { data, renderer } = renderStage({ spectrumColoring: 'additive' });
-    act(() => data.source.setVoices([voice(0, 'Square 1')]));
-    sound(data, [0]);
-    data.frameLoop.setPlaying(true);
-    act(() => data.scheduler.tick(0));
-    const painter = renderer.draw.mock.calls[0][1];
-    expect(painter).toBeInstanceOf(AdditivePainter);
-    expect(unpackPixel(painter.pixel(50, 0)).slice(0, 3)).not.toEqual([16, 16, 16]);
-  });
-
-  it('colors the spectrum from the chosen gradient in the unified coloring', () => {
+  it('colors the spectrum from the chosen gradient', () => {
     const { data, renderer, utils } = renderStage({
-      spectrumColoring: 'unified',
       spectrumGradient: 'bz-negative',
     });
     data.frameLoop.setPlaying(true);
@@ -153,10 +122,7 @@ describe('Stage', () => {
     utils.rerender(
       withAudioData(
         data.value,
-        <Stage
-          settings={{ spectrumColoring: 'unified', spectrumGradient: 'midnight' }}
-          renderScale={1}
-        />
+        <Stage settings={{ spectrumGradient: 'midnight' }} renderScale={1} />
       )
     );
     act(() => data.scheduler.tick(1000 / 60));
@@ -165,55 +131,22 @@ describe('Stage', () => {
     expect(spectrumGradientById('midnight').stops[0]).toBe('#020024');
   });
 
-  it('falls back to Unified for an unknown coloring', () => {
-    const { data, renderer } = renderStage({ spectrumColoring: 'rainbow' });
-    data.frameLoop.setPlaying(true);
-    act(() => data.scheduler.tick(0));
-    expect(renderer.draw.mock.calls[0][1]).toBeInstanceOf(GradientPainter);
-  });
-
   it('applies the peak settings', () => {
     const { renderer } = renderStage({ peakDecayRate: 0.95, peakQuantization: 8 });
     expect(renderer.setPeakDecayRate).toHaveBeenLastCalledWith(0.95);
     expect(renderer.setPeakQuantization).toHaveBeenLastCalledWith(8);
   });
 
-  it('draws the mix spectrum with per-bin channel colors while playing', () => {
-    const { data, renderer } = renderStage({ spectrumColoring: 'average' });
-    act(() => data.source.setVoices([voice(0, 'Square 1'), voice(1, 'Square 2')]));
-    sound(data, [0]);
+  it('draws the mix spectrum while playing', () => {
+    const { data, renderer } = renderStage();
     data.frameLoop.setPlaying(true);
     act(() => data.scheduler.tick(0));
     expect(renderer.draw).toHaveBeenCalledTimes(1);
     const [spectrum, painter, dtMs, speed] = renderer.draw.mock.calls[0];
     expect(spectrum).toBe(data.source.frame.mixSpectrum);
-    expect(painter).toBeInstanceOf(AveragePainter);
+    expect(painter).toBeInstanceOf(GradientPainter);
     expect(dtMs).toBe(0);
     expect(speed).toBe(120);
-    expect(bin50(renderer)).toEqual([...parseHexColor(CHROMATIC[0])!]);
-  });
-
-  it("drops a muted voice's color from the bins it shares", () => {
-    const { data, renderer } = renderStage({ spectrumColoring: 'average' });
-    act(() => data.source.setVoices([voice(0, 'Square 1', false), voice(1, 'Square 2')]));
-    sound(data, [0, 1]);
-    data.frameLoop.setPlaying(true);
-    act(() => data.scheduler.tick(0));
-    expect(bin50(renderer)).toEqual([...parseHexColor(CHROMATIC[1])!]);
-  });
-
-  it('moves to a new palette while playing', () => {
-    const { data, renderer } = renderStage({ spectrumColoring: 'average' });
-    act(() => data.source.setVoices([voice(0, 'Square 1')]));
-    sound(data, [0]);
-    data.frameLoop.setPlaying(true);
-    act(() => data.scheduler.tick(0));
-    const nes = channelPaletteById('nes').channels;
-    act(() => channelColors.set(nes));
-    act(() => {
-      for (let i = 1; i <= 30; i++) data.scheduler.tick((i * 1000) / 60);
-    });
-    expect(bin50(renderer)).toEqual([...parseHexColor(nes[0])!]);
   });
 
   it('scales the scroll speed with the backing-store scale', () => {

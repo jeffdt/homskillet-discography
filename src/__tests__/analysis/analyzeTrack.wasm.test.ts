@@ -46,7 +46,6 @@ describe('analyzeTrack on real chip-core', () => {
     renderSpectrumSheet(core, readMusicFile(path), path, {
       startSeconds: 0,
       seconds: 0.2,
-      paletteId: 'chromatic',
       gradientId: 'mw-red',
     });
     // load() unloads any previous track first, so each render accounts for two calls when it also frees itself.
@@ -63,18 +62,16 @@ describe('analyzeTrack on real chip-core', () => {
     profile.voices.forEach((v) => expect(v.rmsBySecond).toHaveLength(2));
   });
 
-  it('draws a sheet with one panel per coloring and their color statistics', () => {
+  it('draws the waterfall one column per frame with its color statistics', () => {
     const path = 'SuperFORE!/parkour.nsf';
     const sheet = renderSpectrumSheet(core, readMusicFile(path), path, {
       startSeconds: 2,
       seconds: 1,
-      paletteId: 'chromatic',
       gradientId: 'mw-red',
     });
     expect(sheet.height).toBe(448);
-    expect(sheet.width).toBe(60 * 3 + 6 * 2);
+    expect(sheet.width).toBe(60);
     expect(sheet.rgb).toHaveLength(sheet.width * 448 * 3);
-    expect(sheet.panels.map((p) => p.id)).toEqual(['additive', 'average', 'unified']);
-    sheet.panels.forEach((p) => expect(p.stats.chromaP90).toBeGreaterThan(0));
+    expect(sheet.stats.chromaP90).toBeGreaterThan(0);
   }, 30000);
 });

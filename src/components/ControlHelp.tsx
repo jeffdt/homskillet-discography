@@ -20,7 +20,10 @@ export function InfoButton({ label, controls, open, onToggle }: InfoButtonProps)
       aria-controls={controls}
       onClick={onToggle}
     >
-      i
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <circle cx="8" cy="4.75" r="1.1" fill="currentColor" />
+        <rect x="7.1" y="6.75" width="1.8" height="5" rx="0.9" fill="currentColor" />
+      </svg>
     </button>
   );
 }

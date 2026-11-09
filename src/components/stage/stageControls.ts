@@ -328,7 +328,7 @@ export const STAGE_TOGGLES: readonly StageToggleDef[] = [REACTIVE_UI, RIPPLES, S
 
 /** Panel text that is not tied to one control. */
 export const STAGE_COPY = {
-  channelColors: 'Each chip channel gets a color, used by the visualizer and the Mixer.',
+  channelColors: 'Each chip channel gets a color, used by the scopes and the Mixer.',
   noVoices: 'Play a song to see which color is which channel.',
 };
 

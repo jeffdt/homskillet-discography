@@ -5,27 +5,15 @@ import { useChannelColors } from '../hooks/useChannelColors';
 import { useFrameLoop } from '../hooks/useFrameLoop';
 import { REDUCED_MOTION_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { useVoices } from '../hooks/useVoices';
-import {
-  INTERFACE_DEFAULTS,
-  SpectrumColoringId,
-  scopeSettingsOf,
-  spectrumColoringById,
-  visualizerStyleById,
-} from '../config/stageSettings';
+import { INTERFACE_DEFAULTS, scopeSettingsOf, visualizerStyleById } from '../config/stageSettings';
 import { spectrumGradientById } from '../config/spectrumGradients';
 import { uiPaletteAt } from '../config/uiPalettes';
 import { CanvasBox, computeStageLayout } from '../shell/stageLayout';
-import { BinColorizer } from '../visuals/BinColorizer';
 import { ScopeEffects, ScopeRenderer } from '../visuals/ScopeRenderer';
 import { phaseLabelAnchor, scopeLaneAt } from '../visuals/scopeMath';
-import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor, readCssRgb } from '../visuals/spectrogramMath';
+import { SPECTROGRAM_SCROLL_PX_PER_S, readCssColor } from '../visuals/spectrogramMath';
 import { SpectrogramRenderer } from '../visuals/SpectrogramRenderer';
-import {
-  AdditivePainter,
-  AveragePainter,
-  BinPainter,
-  GradientPainter,
-} from '../visuals/spectrumPainters';
+import { GradientPainter } from '../visuals/spectrumPainters';
 import { UserSettings } from './UserProvider';
 import { VoiceInfo } from '../audio/data/contract';
 import { VoiceMix } from '../audio/types';
@@ -56,7 +44,7 @@ function labelTooltip(voices: readonly VoiceInfo[], voice: VoiceInfo): string {
   return `${voice.name}: click to ${click}, shift-click to ${shift}`;
 }
 
-/** Full-window visualizer behind all other UI: the spectrum (colored by adding channel light, averaging channel colors, or one loudness gradient) or the channel scopes, each drawn by its own FrameLoop consumer while selected. */
+/** Full-window visualizer behind all other UI: the spectrum (colored by a loudness gradient) or the channel scopes, each drawn by its own FrameLoop consumer while selected. */
 export default function Stage({ settings, renderScale, onVoiceMixChange }: StageProps) {
   const { source } = useAudioData();
   const voices = useVoices();
@@ -93,7 +81,6 @@ export default function Stage({ settings, renderScale, onVoiceMixChange }: Stage
       scope.scopeFill,
     ]
   );
-  const spectrumColoring = spectrumColoringById(settings.spectrumColoring).id;
   const gradientStops = spectrumGradientById(settings.spectrumGradient).stops;
   const containerRef = useRef<HTMLDivElement>(null);
   const specRef = useRef<HTMLCanvasElement>(null);
@@ -101,31 +88,15 @@ export default function Stage({ settings, renderScale, onVoiceMixChange }: Stage
   const scopesRef = useRef<HTMLCanvasElement>(null);
   const scopeRendererRef = useRef<ScopeRenderer | null>(null);
   const rendererRef = useRef<SpectrogramRenderer | null>(null);
-  const colorizerRef = useRef<BinColorizer | null>(null);
-  const paintersRef = useRef<Record<SpectrumColoringId, BinPainter> | null>(null);
-  const additiveRef = useRef<AdditivePainter | null>(null);
   const gradientRef = useRef<GradientPainter | null>(null);
 
   useEffect(() => {
     if (!freqRef.current || !specRef.current) return;
-    const layout = source.getSpectrumLayout();
-    const shades = {
-      background: readCssRgb('--neutral0', '#101010'),
-      highlight: readCssRgb('--neutral4', '#fefefe'),
-    };
-    const fallback = readCssRgb('--neutral3', '#c3c3c3');
     rendererRef.current = new SpectrogramRenderer(
       { analyzer: freqRef.current, spectrogram: specRef.current },
-      layout
+      source.getSpectrumLayout()
     );
-    colorizerRef.current = new BinColorizer(layout.bins, fallback);
-    additiveRef.current = new AdditivePainter(layout, shades, fallback);
     gradientRef.current = new GradientPainter(spectrumGradientById(undefined).stops);
-    paintersRef.current = {
-      additive: additiveRef.current,
-      average: new AveragePainter(colorizerRef.current, shades, layout.bins),
-      unified: gradientRef.current,
-    };
   }, [source]);
 
   useEffect(() => {
@@ -210,16 +181,6 @@ export default function Stage({ settings, renderScale, onVoiceMixChange }: Stage
   }, [style, applyLayout]);
 
   useEffect(() => {
-    colorizerRef.current?.setChannelColors(channelColors);
-    additiveRef.current?.setChannelColors(channelColors);
-  }, [source, channelColors]);
-
-  useEffect(() => {
-    colorizerRef.current?.setVoices(voices);
-    additiveRef.current?.setVoices(voices);
-  }, [source, voices]);
-
-  useEffect(() => {
     gradientRef.current?.setStops(gradientStops);
   }, [source, gradientStops]);
 
@@ -236,9 +197,8 @@ export default function Stage({ settings, renderScale, onVoiceMixChange }: Stage
     'stage-spectrogram',
     (frame, dtMs) => {
       const renderer = rendererRef.current;
-      const painter = paintersRef.current?.[spectrumColoring];
+      const painter = gradientRef.current;
       if (!renderer || !painter) return;
-      painter.update(frame, dtMs);
       // The speed is in CSS pixels; the canvas backing store is renderScale times that.
       renderer.draw(frame.mixSpectrum, painter, dtMs, SPECTROGRAM_SCROLL_PX_PER_S * renderScale);
     },

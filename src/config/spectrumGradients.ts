@@ -1,4 +1,4 @@
-/** A loudness gradient for the Unified spectrum: quiet values take the first stop, the loudest the last. */
+/** A loudness gradient for the spectrum: quiet values take the first stop, the loudest the last. */
 export interface SpectrumGradient {
   /** Stable key persisted in settings.spectrumGradient. Never rename or reuse one. */
   id: string;
@@ -129,7 +129,7 @@ export const SPECTRUM_GRADIENTS: readonly SpectrumGradient[] = [
   },
 ];
 
-/** The gradient the Unified spectrum starts with, and the fallback for unknown ids. */
+/** The gradient the spectrum starts with, and the fallback for unknown ids. */
 export const DEFAULT_SPECTRUM_GRADIENT_ID = 'mw-green';
 
 /** The gradient with this id, or MW Green when the id is missing or unknown. */

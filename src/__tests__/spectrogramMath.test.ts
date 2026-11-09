@@ -1,13 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  SHADE_BLACK_POINT,
-  SHADE_HIGHLIGHT_MAX,
-  SHADE_KNEE,
   ScrollAccumulator,
   aWeightingLut,
-  buildShadeTable,
   peakDecayFactor,
-  readCssRgb,
   rowBinRanges,
 } from '../visuals/spectrogramMath';
 
@@ -49,32 +44,6 @@ describe('aWeightingLut', () => {
   });
 });
 
-describe('buildShadeTable', () => {
-  it('stays at the background up to the black point, rises linearly to the knee, then eases toward the highlight', () => {
-    const { channel, highlight } = buildShadeTable();
-    expect(SHADE_BLACK_POINT).toBe(51);
-    expect(SHADE_KNEE).toBe(102);
-    expect(SHADE_HIGHLIGHT_MAX).toBe(0.35);
-    expect(channel).toHaveLength(256);
-    for (let i = 0; i <= SHADE_BLACK_POINT; i++) {
-      expect(channel[i]).toBe(0);
-      expect(highlight[i]).toBe(0);
-    }
-    expect(channel[((SHADE_BLACK_POINT + SHADE_KNEE) / 2) | 0]).toBeCloseTo(25 / 51, 6);
-    expect(channel[SHADE_KNEE]).toBeCloseTo(1, 6);
-    expect(highlight[SHADE_KNEE]).toBe(0);
-    expect(highlight[255]).toBeCloseTo(SHADE_HIGHLIGHT_MAX, 6);
-    expect(channel[255]).toBeCloseTo(1 - SHADE_HIGHLIGHT_MAX, 6);
-    for (let i = 1; i < 256; i++) {
-      expect(channel[i] + highlight[i]).toBeLessThanOrEqual(1 + 1e-6);
-      expect(highlight[i]).toBeGreaterThanOrEqual(highlight[i - 1]);
-      if (i > SHADE_BLACK_POINT && i <= SHADE_KNEE)
-        expect(channel[i]).toBeGreaterThan(channel[i - 1]);
-      if (i > SHADE_KNEE) expect(channel[i] + highlight[i]).toBeCloseTo(1, 6);
-    }
-  });
-});
-
 describe('rowBinRanges', () => {
   it('gives each row one bin, low frequencies at the bottom, when rows equal bins', () => {
     const { start, end } = rowBinRanges(448, 448);
@@ -100,11 +69,5 @@ describe('rowBinRanges', () => {
     expect(start[895]).toBe(0);
     expect(start[894]).toBe(0);
     expect(start[0]).toBe(447);
-  });
-});
-
-describe('readCssRgb', () => {
-  it('falls back to the given hex when the variable is not set', () => {
-    expect(readCssRgb('--not-a-variable', '#101010')).toEqual([16, 16, 16]);
   });
 });

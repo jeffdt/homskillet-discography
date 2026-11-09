@@ -1,9 +1,9 @@
 /**
  * Measures how loud each voice of each catalog track really is, through the app's own renderer and
- * taps, and optionally draws spectrum sheets per coloring. Objective numbers for tuning visuals.
+ * taps, and optionally draws the spectrum waterfall. Objective numbers for tuning visuals.
  *
  * bun run analyze-tracks [track ...] [--match text] [--seconds N] [--timeline] [--json file]
- *                        [--png dir] [--start S] [--png-seconds N] [--palette id] [--gradient id]
+ *                        [--png dir] [--start S] [--png-seconds N] [--gradient id]
  *
  * Tracks are paths under public/music (default: the whole catalog). Samples are taps: 1 is a voice
  * at int16 full scale on both stereo outputs.
@@ -31,7 +31,6 @@ interface Args {
   png?: string;
   start: number;
   pngSeconds: number;
-  palette: string;
   gradient: string;
 }
 
@@ -41,7 +40,6 @@ function parseArgs(argv: string[]): Args {
     timeline: false,
     start: 20,
     pngSeconds: 8,
-    palette: 'chromatic',
     gradient: 'mw-red',
   };
   for (let i = 0; i < argv.length; i++) {
@@ -58,7 +56,6 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--png') args.png = next();
     else if (arg === '--start') args.start = Number(next());
     else if (arg === '--png-seconds') args.pngSeconds = Number(next());
-    else if (arg === '--palette') args.palette = next();
     else if (arg === '--gradient') args.gradient = next();
     else if (arg.startsWith('--')) throw new Error(`unknown option ${arg}`);
     else args.tracks.push(arg);
@@ -143,20 +140,17 @@ async function main(): Promise<void> {
       const sheet = renderSpectrumSheet(core, bytes, track, {
         startSeconds: args.start,
         seconds: args.pngSeconds,
-        paletteId: args.palette,
         gradientId: args.gradient,
       });
       fs.mkdirSync(args.png, { recursive: true });
       const file = path.join(args.png, track.replace(/[/\\]/g, '-').replace(/\.\w+$/, '.png'));
       fs.writeFileSync(file, encodePng(sheet.width, sheet.height, sheet.rgb));
-      console.log(`  sheet ${file} (left to right: ${sheet.panels.map((p) => p.id).join(', ')})`);
-      for (const { id, stats } of sheet.panels) {
-        console.log(
-          `  ${id.padEnd(9)} chroma p50/p90 ${stats.chromaP50}/${stats.chromaP90}`,
-          `value p50/p90 ${stats.valueP50}/${stats.valueP90}`,
-          `pastel ${stats.pastelPct}% dark ${stats.darkPct}%`
-        );
-      }
+      const { stats } = sheet;
+      console.log(
+        `  sheet ${file} chroma p50/p90 ${stats.chromaP50}/${stats.chromaP90}`,
+        `value p50/p90 ${stats.valueP50}/${stats.valueP90}`,
+        `pastel ${stats.pastelPct}% dark ${stats.darkPct}%`
+      );
     }
   }
   if (tracks.length > 1) printSummary(profiles);

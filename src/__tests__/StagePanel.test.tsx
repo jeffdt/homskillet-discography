@@ -51,18 +51,22 @@ function voice(index: number, name: string, state: Partial<VoiceInfo> = {}): Voi
 describe('StagePanel', () => {
   it('shows every Stage control with its explanation', () => {
     renderPanel({ visualizerStyle: 'spectrum' });
-    ['Style', 'Channel colors'].forEach((heading) =>
-      expect(screen.getByRole('heading', { name: heading })).toBeTruthy()
-    );
+    expect(screen.getByRole('heading', { name: 'Style' })).toBeTruthy();
     PEAK_SLIDERS.forEach((def) => {
       expect(screen.getByLabelText(def.label)).toBeTruthy();
       expectControlHelp(def);
     });
-    ['Visualizer style', 'Channel palette'].forEach((group) =>
+    ['Visualizer style', 'Gradient'].forEach((group) =>
       expect(screen.getByRole('radiogroup', { name: group })).toBeTruthy()
     );
-    expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reset visualizer' })).toBeTruthy();
+  });
+
+  it('shows the channel colors only with the scopes', () => {
+    renderPanel({ visualizerStyle: 'scopes' });
+    expect(screen.getByRole('heading', { name: 'Channel colors' })).toBeTruthy();
+    expect(screen.getByRole('radiogroup', { name: 'Channel palette' })).toBeTruthy();
+    expect(screen.getByText(STAGE_COPY.channelColors)).toBeTruthy();
   });
 
   it('leaves the interface controls to the Interface panel', () => {
@@ -107,9 +111,9 @@ describe('StagePanel', () => {
   });
 
   it('describes the selected style and channel palette', () => {
-    renderPanel({ visualizerStyle: 'spectrum', channelPalette: CHANNEL_PALETTES[1].id });
+    renderPanel({ visualizerStyle: 'scopes', channelPalette: CHANNEL_PALETTES[1].id });
     expect(screen.getByText(CHANNEL_PALETTES[1].description!)).toBeTruthy();
-    expect(screen.getByText(/Pitch runs low to high/)).toBeTruthy();
+    expect(screen.getByText(/An oscilloscope for each chip channel/)).toBeTruthy();
   });
 
   it('moves through palettes with the arrow keys', () => {

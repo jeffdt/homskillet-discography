@@ -94,7 +94,7 @@ export function mixSilent(mix: MixSnapshot): boolean {
   return mix.voices.length > 0 && !mix.voices.some((voice) => voice.audible);
 }
 
-/** Each heard voice's Vol, Pan or Verb that is off its default, as "Triangle Vol 150%". */
+/** Each heard voice's Vol, Pan or Reverb that is off its default, as "Triangle Vol 150%". */
 function changedLevels(mix: MixSnapshot): string[] {
   const parts: string[] = [];
   mix.voices

@@ -68,7 +68,7 @@ describe('MixerPanel', () => {
     renderPanel();
     expect(screen.getByText(MIXER_COPY.channels)).toBeTruthy();
     expect(screen.getByText(MIXER_COPY.sound)).toBeTruthy();
-    expectControlHelp({ label: 'Vol, Pan and Verb', info: MIXER_COPY.levels });
+    expectControlHelp({ label: 'Vol, Pan and Reverb', info: MIXER_COPY.levels });
     MIXER_SLIDERS.forEach((def) => expectControlHelp(def));
   });
 

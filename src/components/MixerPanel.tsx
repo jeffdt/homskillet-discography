@@ -11,7 +11,7 @@ import { UserSettings } from './UserProvider';
 export const MIXER_COPY = {
   channels: 'Each strip is one channel of the NES sound chip.',
   levels:
-    "Vol sets a channel's volume, Pan moves it left or right, and Verb sends it into a shared reverb. They reset with each new song; double-click one to reset it.",
+    "Vol sets a channel's volume, Pan moves it left or right, and Reverb sends it into a shared reverb. They reset with each new song; double-click one to reset it.",
   sound: 'These apply to every song until you change them.',
 };
 
@@ -41,7 +41,7 @@ export default function MixerPanel({ playback, controls, settings }: MixerPanelP
         <p className="Mixer-explain">
           {MIXER_COPY.channels}{' '}
           <InfoButton
-            label="Vol, Pan and Verb"
+            label="Vol, Pan and Reverb"
             controls="mixer-levels-info"
             open={levelsOpen}
             onToggle={() => setLevelsOpen((was) => !was)}

@@ -106,13 +106,9 @@ export const MORE_SCOPE_TOGGLES: readonly StageToggleDef[] = [
   SCOPE_FILL,
 ];
 
-/** Visualizer panel text for the spectrum colorings and scope presets. */
+/** Visualizer panel text for the scope trace colors. */
 export const VIZ_COPY = {
   scopesIgnoreChannels:
     'The scopes are using the accent color, so these colors only show in the Mixer.',
   colorScopesByChannel: 'Color the scopes by channel',
-  spectrumIgnoresChannels:
-    'The Unified coloring uses a gradient, so these colors only show in the Mixer.',
-  colorSpectrumByChannel: 'Color the spectrum by channel',
-  gradient: 'Left is quiet, right is loud.',
 };

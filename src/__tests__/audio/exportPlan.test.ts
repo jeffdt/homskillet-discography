@@ -126,7 +126,7 @@ describe('mix', () => {
     expect(mixSummary({ ...ORIGINAL, tempo: 1.15, voices })).toBe('Speed 115% · All voices silent');
   });
 
-  it('lists heard channels whose Vol, Pan or Verb moved, and counts them as a change', () => {
+  it('lists heard channels whose Vol, Pan or Reverb moved, and counts them as a change', () => {
     const voices = [
       voiceInfo(0, 'Square 1', { volume: 0.5, pan: -0.4 }),
       voiceInfo(1, 'Square 2', { reverb: 0.3 }),
@@ -135,7 +135,7 @@ describe('mix', () => {
     const mix = { ...ORIGINAL, voices };
     expect(mixDiffers(mix)).toBe(true);
     expect(mixSummary(mix)).toBe(
-      'Triangle muted · Square 1 Vol 50% · Square 1 Pan L40 · Square 2 Verb 30%'
+      'Triangle muted · Square 1 Vol 50% · Square 1 Pan L40 · Square 2 Reverb 30%'
     );
     expect(mixDiffers({ ...ORIGINAL, voices: [voiceInfo(2, 'Triangle', { volume: 1 })] })).toBe(
       false
